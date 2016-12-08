@@ -1,0 +1,48 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.2.0'
+    }
+}
+
+apply plugin: 'biz.aQute.bnd.builder'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'junit:junit:4.12'
+    testCompile 'junit:junit:4.12'
+}
+
+// Configure sensible layout
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+            srcDir 'resources'
+        }
+    }
+
+    test {
+        java {
+            srcDir 'test'
+        }
+        resources {
+            srcDir 'resources'
+        }
+    }
+}
+
+jar {
+    
+    into('META-INF') {
+        from 'resources/META-INF'
+    }
+    
+}
