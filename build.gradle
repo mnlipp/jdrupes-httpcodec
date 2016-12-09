@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.2.0'
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.3.0'
     }
 }
 
@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile 'junit:junit:4.12'
+    compile 'junit:junit:4.12','biz.aQute.bnd:annotation:2.4.0'
     testCompile 'junit:junit:4.12'
 }
 

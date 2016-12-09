@@ -19,4 +19,7 @@
  * @author Michael N. Lipp
  *
  */
+@Version("${api_version}")
 package org.jdrupes.httpcodec.protocols.http;
+
+import aQute.bnd.annotation.Version;
