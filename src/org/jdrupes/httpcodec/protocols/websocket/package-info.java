@@ -19,7 +19,5 @@
  * @author Michael N. Lipp
  *
  */
-@Version("${api_version}")
+@org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec.protocols.websocket;
-
-import aQute.bnd.annotation.Version;
