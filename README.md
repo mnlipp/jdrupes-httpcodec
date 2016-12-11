@@ -4,7 +4,6 @@ JDrupes non-blocking HTTP Codec
 [![Build Status](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec.svg?branch=master)](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec) 
 [![Release](https://jitpack.io/v/mnlipp/org.jdrupes.httpcodec.svg)](https://jitpack.io/mnlipp/org.jdrupes.httpcodec)
 
-
 The goal of this package is to provide easy to use HTTP 
 encoders and decoders for non-blocking I/O
 that use Java `Buffer`s for handling the data.
@@ -15,7 +14,7 @@ implementations such as the
 or the 
 [Netty Codes](http://netty.io/4.0/api/io/netty/handler/codec/http/package-summary.html)).
 However, I found all of them to be too closely integrated with their respective
-frameworks, which didn't go well with my intention to write my own  
+frameworks, which didn't go well with my intention to write my own
 [event driven framework](http://mnlipp.github.io/jgrapes/). 
 An implementation that comes very close to what I needed is 
 [HTTP Kit](https://github.com/http-kit/http-kit), which has, however,
