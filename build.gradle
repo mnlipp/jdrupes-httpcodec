@@ -62,6 +62,13 @@ jar {
     
 }
 
+task javadocs(type: Javadoc) {
+    classpath = project.sourceSets.main.compileClasspath
+    source = sourceSets.main.allJava
+    destinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
+    options.addStringOption("bottom", file("misc/javadoc.bottom.txt").text)
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
