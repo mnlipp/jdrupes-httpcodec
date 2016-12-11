@@ -1,3 +1,5 @@
+import aQute.bnd.osgi.Processor
+
 buildscript {
     repositories {
         jcenter()
@@ -7,14 +9,27 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.jfrog.bintray" version "1.7"    
+}
+
 apply plugin: 'biz.aQute.bnd.builder'
+apply plugin: 'maven-publish'
+
+// The builder plugin doesn't provide access to the bnd properties.
+// Provide workaround as bnd.getProperty(...)
+ext.set("bnd", new Processor());
+bnd.setProperties(project.file('bnd.bnd'))
+
+group = 'jdrupes'
+version = bnd.getProperty("base_version") + "-SNAPSHOT"
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    compile 'junit:junit:4.12','biz.aQute.bnd:annotation:2.4.0'
+    compileOnly 'org.osgi:org.osgi.annotation:6.0.0'
     testCompile 'junit:junit:4.12'
 }
 
@@ -46,3 +61,49 @@ jar {
     }
     
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom.withXml {
+                asNode().appendNode('name', bnd.getProperty('Bundle-Name'))
+            }
+            from components.java
+        }
+    }
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayApiKey
+    publications = ['mavenJava']
+    pkg {
+        repo = project.group
+        name = project.name
+        version {
+            name = project.version
+        }
+    }
+}
+
+//// Publish to local maven repository using bnd
+//import aQute.bnd.repository.maven.provider.MavenBndRepository
+//import aQute.bnd.service.RepositoryPlugin.PutOptions
+//
+//task('release') {
+//    description 'Release the project to the release repository.'
+//    dependsOn assemble
+//    group 'release'
+//
+//    doLast {        
+//        new Processor().withCloseable { processor ->
+//            processor.setProperties(project.file('bnd.bnd'))
+//            def repo = processor.getPlugin(MavenBndRepository.class);
+//            def opts = new PutOptions()
+//            opts.context = processor
+//            project.jar.archivePath.withInputStream { stream ->
+//                println repo.put(stream, opts).artifact
+//            }
+//        }
+//    }
+//}

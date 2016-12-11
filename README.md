@@ -1,7 +1,9 @@
 JDrupes non-blocking HTTP Codec
 ===============================
 
-[![Build Status](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec.svg?branch=master)](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec)
+[![Build Status](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec.svg?branch=master)](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec) 
+[![Release](https://jitpack.io/v/mnlipp/org.jdrupes.httpcodec.svg)](https://jitpack.io/mnlipp/org.jdrupes.httpcodec)
+
 
 The goal of this package is to provide easy to use HTTP 
 encoders and decoders for non-blocking I/O
