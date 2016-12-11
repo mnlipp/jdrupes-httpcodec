@@ -22,9 +22,14 @@ An implementation that comes very close to what I needed is
 dependencies on Clojure, that prohibit its usage for my purpose.
 
 This library can be used with Java 8 SE. It has no further dependencies.
+Binaries can be accessed using [JitPack](https://jitpack.io/). User is
+`com.github.mnlipp`, Repo is `org.jdrupes.httpcodec` and currently the only 
+supported Tag is `master-SNAPSHOT`.
 
 I plan to improve documentation over time. For now, the best starting
-point is to have a look at the source code in the `demo` folder.
+point is to have a look at the 
+[JavaDoc](https://mnlipp.github.io/org.jdrupes.httpcodec/javadoc/index.html) 
+and at the source code in the `demo` folder.
 
 Contributions and bug reports are welcome. Please provide them as
 GitHub issues.
