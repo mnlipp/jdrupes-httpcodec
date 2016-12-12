@@ -1,14 +1,13 @@
 Bundle-Name: JDrupes HTTP Codec
 Bundle-SymbolicName: org.jdrupes.httpcodec
-base_version = 0.9.0
-bundle_version = ${base_version}.${tstamp}
-api_version = 0.1.0.${tstamp}
-Bundle-Version: ${bundle_version}
+Bundle-Version: 0.9.0.${tstamp}
 Bundle-Copyright: Michael N. Lipp (c) 2016
 Bundle-License: http://www.gnu.org/licenses/lgpl-3.0.txt
--exportcontents: org.jdrupes.*
 
-## Publish to local maven repository using bnd
-#-pom: true
-#-plugin.1.Local: \
-#  aQute.bnd.repository.maven.provider.MavenBndRepository; name = Local
+base_version = ${versionmask;===;${Bundle-Version}}
+# This is used as the general API version for all packages.
+# This being a library, individual API versions for packages don't 
+# really make sense.
+api_version = 0.1.0.${tstamp}
+
+-exportcontents: org.jdrupes.*

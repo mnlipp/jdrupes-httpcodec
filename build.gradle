@@ -10,19 +10,21 @@ buildscript {
 }
 
 plugins {
-    id "com.jfrog.bintray" version "1.7"    
+    id "com.jfrog.bintray" version "1.7"
 }
 
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'maven-publish'
 
 // The builder plugin doesn't provide access to the bnd properties.
-// Provide workaround as bnd.getProperty(...)
-ext.set("bnd", new Processor());
-bnd.setProperties(project.file('bnd.bnd'))
+// Provide workaround as properties in extra bnd
+new Processor().withCloseable { processor ->
+    processor.setProperties(project.file('bnd.bnd'))
+    ext.set("bnd", processor.getFlattenedProperties());
+}
 
 group = 'jdrupes'
-version = bnd.getProperty("base_version") + "-SNAPSHOT"
+version = bnd.base_version + "-SNAPSHOT"
 
 repositories {
     jcenter()
@@ -93,24 +95,3 @@ bintray {
     }
 }
 
-//// Publish to local maven repository using bnd
-//import aQute.bnd.repository.maven.provider.MavenBndRepository
-//import aQute.bnd.service.RepositoryPlugin.PutOptions
-//
-//task('release') {
-//    description 'Release the project to the release repository.'
-//    dependsOn assemble
-//    group 'release'
-//
-//    doLast {        
-//        new Processor().withCloseable { processor ->
-//            processor.setProperties(project.file('bnd.bnd'))
-//            def repo = processor.getPlugin(MavenBndRepository.class);
-//            def opts = new PutOptions()
-//            opts.context = processor
-//            project.jar.archivePath.withInputStream { stream ->
-//                println repo.put(stream, opts).artifact
-//            }
-//        }
-//    }
-//}
