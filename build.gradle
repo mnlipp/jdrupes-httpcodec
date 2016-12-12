@@ -69,6 +69,7 @@ task javadocs(type: Javadoc) {
     source = sourceSets.main.allJava
     destinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
     options.addStringOption("bottom", file("misc/javadoc.bottom.txt").text)
+    options.addStringOption("link", "http://docs.oracle.com/javase/8/docs/api/")
 }
 
 publishing {
