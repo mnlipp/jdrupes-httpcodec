@@ -27,7 +27,10 @@ public class WsMessageHeader extends WsFrameHeader {
 	private boolean hasPayload;
 
 	/**
-	 * @param textMode indicates whether the data is sent as text  
+	 * Creates a new message header.
+	 * 
+	 * @param textMode indicates whether the data is sent as text
+	 * @param hasPayload indicates that the message has a payload
 	 */
 	public WsMessageHeader(boolean textMode, boolean hasPayload) {
 		super();
