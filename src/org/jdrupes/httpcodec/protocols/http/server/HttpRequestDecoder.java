@@ -133,11 +133,10 @@ public class HttpRequestDecoder
 		Optional<HttpStringField> host = message.getField
 				(HttpStringField.class, HttpField.HOST);
 		if (host.isPresent()) {
-			String[] hostPort = host.get().getValue().split(":");
 			try {
-				message.setHostAndPort(hostPort[0], 
-						Integer.parseInt(hostPort[1]));
-			} catch (NumberFormatException e) {
+				URI parsed = new URI("http://" + host.get().getValue());
+				message.setHostAndPort(parsed.getHost(), parsed.getPort());
+			} catch (URISyntaxException e) {
 				throw new HttpProtocolException(protocolVersion,
 				        HttpStatus.BAD_REQUEST.getStatusCode(),
 				        "Invalid Host port.");
