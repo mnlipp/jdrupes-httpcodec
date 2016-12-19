@@ -382,4 +382,28 @@ public class RequestDecoderTests {
 				(h -> h.getField(HttpStringField.class, "X-Summary-Field"));
 		assertEquals("Good", testField.get().getValue());
 	}
+
+	/**
+	 * Simple GET request.
+	 */
+	@Test
+	public void testUrlDecoding()
+	        throws UnsupportedEncodingException {
+		String reqText 
+			= "GET /test%20this HTTP/1.1\r\n"
+			+ "Host: localhost:8888\r\n"
+			+ "\r\n";
+		ByteBuffer buffer = ByteBuffer.wrap(reqText.getBytes("ascii"));
+		HttpRequestDecoder decoder = new HttpRequestDecoder();
+		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
+		assertTrue(result.isHeaderCompleted());
+		assertFalse(result.hasResponse());
+		assertFalse(decoder.getHeader().get().messageHasBody());
+		assertEquals("GET", decoder.getHeader().get().getMethod());
+		assertEquals("/test%20this",
+		        decoder.getHeader().get().getRequestUri().getRawPath());
+		assertEquals("/test this",
+		        decoder.getHeader().get().getRequestUri().getPath());
+	}
+
 }
