@@ -1,7 +1,7 @@
 <!-- Piwik -->
 <script type="text/javascript">
   var _paq = _paq || [];
-  _paq.push(["setDomains", ["*.mnlipp.github.io"]]);
+  _paq.push(["setDomains", ["*.jdrupes.org","*.github.com/mnlipp/jdrupes","*.mnlipp.github.io","*.mnlipp.github.com"]]);
   _paq.push(["trackPageView"]);
   _paq.push(["enableLinkTracking"]);
   (function() {
