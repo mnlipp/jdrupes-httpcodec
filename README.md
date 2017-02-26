@@ -1,8 +1,8 @@
 JDrupes non-blocking HTTP Codec
 ===============================
 
-[![Build Status](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec.svg?branch=master)](https://travis-ci.org/mnlipp/org.jdrupes.httpcodec) 
-[![Release](https://jitpack.io/v/mnlipp/org.jdrupes.httpcodec.svg)](https://jitpack.io/mnlipp/org.jdrupes.httpcodec)
+[![Build Status](https://travis-ci.org/mnlipp/jdrupes-httpcodec.svg?branch=master)](https://travis-ci.org/mnlipp/jdrupes-httpcodec) 
+[![Release](https://jitpack.io/v/mnlipp/jdrupes-httpcodec.svg)](https://jitpack.io/mnlipp/jdrupes-httpcodec)
 
 The goal of this package is to provide easy to use HTTP 
 encoders and decoders for non-blocking I/O
@@ -22,7 +22,7 @@ dependencies on Clojure, that prohibit its usage for my purpose.
 
 This library can be used with Java 8 SE. It has no further dependencies.
 Binaries can be accessed using [JitPack](https://jitpack.io/). User is
-`com.github.mnlipp`, Repo is `org.jdrupes.httpcodec` and currently the only 
+`com.github.mnlipp`, Repo is `jdrupes-httpcodec` and currently the only 
 supported Tag is `master-SNAPSHOT`.
 
 I plan to improve documentation over time. For now, the best starting
