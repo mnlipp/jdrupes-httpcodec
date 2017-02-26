@@ -28,7 +28,8 @@ supported Tag is `master-SNAPSHOT`.
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
 [JavaDoc](https://mnlipp.github.io/jdrupes-httpcodec/javadoc/index.html) 
-and at the source code in the `demo` folder.
+and at the source code in the 
+[`demo`](https://github.com/mnlipp/jdrupes-httpcodec/tree/master/demo/org/jdrupes/httpcodec/demo) folder.
 
 Contributions and bug reports are welcome. Please provide them as
 GitHub issues.
