@@ -27,7 +27,7 @@ supported Tag is `master-SNAPSHOT`.
 
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
-[JavaDoc](https://mnlipp.github.io/org.jdrupes.httpcodec/javadoc/index.html) 
+[JavaDoc](https://mnlipp.github.io/jdrupes-httpcodec/javadoc/index.html) 
 and at the source code in the `demo` folder.
 
 Contributions and bug reports are welcome. Please provide them as
