@@ -25,6 +25,16 @@ Binaries can be accessed using [JitPack](https://jitpack.io/). User is
 `com.github.mnlipp`, Repo is `jdrupes-httpcodec` and currently the only 
 supported Tag is `master-SNAPSHOT`.
 
+```gradle
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'com.github.mnlipp:jdrupes-httpcodec:master-SNAPSHOT'
+}
+```
+
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
 [JavaDoc](https://mnlipp.github.io/jdrupes-httpcodec/javadoc/index.html) 
