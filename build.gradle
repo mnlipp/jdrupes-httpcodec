@@ -8,17 +8,20 @@ buildscript {
     }
     dependencies {
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.3.0'
-        classpath 'org.jdrupes:mdoclet-gradle-plugin:1.0.0'
+        classpath 'org.jdrupes.mdoclet:gradle-plugin:1.0.1'
     }
 }
 
 plugins {
     id "com.jfrog.bintray" version "1.7"
 }
-
 apply plugin: 'biz.aQute.bnd.builder'
+apply plugin: 'signing'
 apply plugin: 'maven-publish'
+apply plugin: 'maven'
 apply plugin: 'org.jdrupes.mdoclet'
+// Makes Eclipse-groovy handle *.gradle file properly
+apply plugin:'groovy'
 
 // The builder plugin doesn't provide access to the bnd properties.
 // Provide workaround as properties in extra bnd
@@ -27,11 +30,16 @@ new Processor().withCloseable { processor ->
     ext.set("bnd", processor.getFlattenedProperties());
 }
 
-group = 'jdrupes'
+group = 'org.jdrupes.httpcodec'
 version = bnd.base_version + "-SNAPSHOT"
+description = "HTTP coders and decoders for non-blocking I/O"
+
+archivesBaseName = 'httpcodec'
 
 repositories {
     jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 configurations {
@@ -65,15 +73,13 @@ sourceSets {
 }
 
 jar {
-    
     into('META-INF') {
         from 'resources/META-INF'
     }
-    
 }
 
 dependencies {
-    javadocTaglets "org.jdrupes:plantuml-taglet:1.0.0"
+    javadocTaglets "org.jdrupes.taglets:plantuml-taglet:1.0.1"
 }
 
 javadoc {
@@ -87,27 +93,106 @@ javadoc {
     options.addStringOption("link", "http://docs.oracle.com/javase/8/docs/api/")
 }
 
+task sourcesJar(type: Jar) {
+	from sourceSets.main.allJava
+	classifier "sources"
+}
+
+task javadocJar(type: Jar) {
+	from javadoc.destinationDir
+	classifier "javadoc"
+}
+
+// Allow build without signing information (e.g. travis)
+if (project.hasProperty('signing.keyId')) {
+	signing {
+		sign configurations.archives
+	}
+}
+
+// MavenPublishing (new), incomplete, works only for local. 
+
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            pom.withXml {
-                asNode().appendNode('name', bnd.getProperty('Bundle-Name'))
-            }
-            from components.java
-        }
-    }
+	
+	publications {
+		mavenJava(MavenPublication) {
+			artifactId = archivesBaseName
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+		}
+	}
+}
+
+// MavenPublishing (original), still needed for remote 
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+ 
+			pom.project {
+			
+				name project.name
+				artifactId project.archivesBaseName
+				packaging 'pom'
+				description project.description
+				url 'https://github.com/mnlipp/jdrupes-httpcodec'
+ 
+				scm {
+					url 'scm:git@github.com:mnlipp/jdrupes-httpcodec.git'
+					connection 'scm:git@github.com:mnlipp/jdrupes-httpcodec.git'
+					developerConnection 'git@github.com:mnlipp/jdrupes-httpcodec.git'
+				}
+ 
+				licenses {
+					license {
+						name 'GPL 3.0'
+						url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+						distribution 'repo'
+					}
+				}
+ 
+				developers {
+					developer {
+						id 'mnlipp'
+						name 'Michael N. Lipp'
+					}
+				}
+			}
+			
+			artifacts {
+				archives jar
+				archives sourcesJar
+				archives javadocJar
+			}
+
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+				authentication(userName: project.properties['sonatypeUsername'] ?: "nouser", 
+					password: project.properties['sonatypePassword'] ?: "nopass")
+			}
+			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+				authentication(userName: project.properties['sonatypeUsername'] ?: "nouser", 
+					password: project.properties['sonatypePassword'] ?: "nopass")
+			}
+
+		}
+	}
 }
 
 bintray {
-    user = project.properties['bintrayUser'] ?: "nouser"
-    key = project.properties['bintrayApiKey'] ?: "nokey"
-    publications = ['mavenJava']
-    pkg {
-        repo = project.group
-        name = project.name
-        version {
-            name = project.version
-        }
-    }
-}
-
+	user = project.properties['bintrayUser'] ?: "nouser"
+	key = project.properties['bintrayApiKey'] ?: "nokey"
+	publications = ['mavenJava']
+	publish = true
+	pkg {
+		repo = "org.jdrupes"
+		name = "httpcodec"
+		version {
+			 name = project.version
+			 gpg {
+				 sign = true
+			 }
+		}
+	}
+ }
