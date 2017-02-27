@@ -20,18 +20,16 @@ An implementation that comes very close to what I needed is
 [HTTP Kit](https://github.com/http-kit/http-kit), which has, however,
 dependencies on Clojure, that prohibit its usage for my purpose.
 
-This library can be used with Java 8 SE. It has no further dependencies.
-Binaries can be accessed using [JitPack](https://jitpack.io/). User is
-`com.github.mnlipp`, Repo is `jdrupes-httpcodec` and currently the only 
-supported Tag is `master-SNAPSHOT`.
+This library can be used with Java 8 SE. Binaries are currently made
+available as snapshots.
 
 ```gradle
 repositories {
-    maven { url 'https://jitpack.io' }
+	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
-    compile 'com.github.mnlipp:jdrupes-httpcodec:master-SNAPSHOT'
+	compile 'org.jdrupes.httpcodec:httpcodec:0.9.0-SNAPSHOT'
 }
 ```
 
