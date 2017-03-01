@@ -79,8 +79,9 @@ public class Connection extends Thread {
 				while (in.hasRemaining()) {
 					Decoder.Result<?> decoderResult 
 						= engine.decode(in, null, false);
-					if (decoderResult.hasResponse()) {
-						sendResponseWithoutBody(decoderResult.getResponse());
+					if (decoderResult.getResponse().isPresent()) {
+						sendResponseWithoutBody
+							(decoderResult.getResponse().get());
 						if (decoderResult.isResponseOnly()) {
 							break;
 						}

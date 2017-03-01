@@ -190,7 +190,7 @@ public class SpecExamplesTests {
 				.decode(pingHdr.getApplicationData());
 		assertEquals("Hello", txt.toString());
 		assertNotNull(result.getResponse());
-		WsPongFrame pongHdr = (WsPongFrame)result.getResponse();
+		WsPongFrame pongHdr = (WsPongFrame)result.getResponse().get();
 		txt = Charset.forName("utf-8")
 				.decode(pongHdr.getApplicationData());
 		assertEquals("Hello", txt.toString());

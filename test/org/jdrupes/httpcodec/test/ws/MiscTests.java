@@ -74,7 +74,7 @@ public class MiscTests {
 				.decode(pingHdr.getApplicationData());
 		assertEquals("Hello", pingData.toString());
 		assertNotNull(result.getResponse());
-		WsPongFrame pongHdr = (WsPongFrame)result.getResponse();
+		WsPongFrame pongHdr = (WsPongFrame)result.getResponse().get();
 		CharBuffer pongData = Charset.forName("utf-8")
 				.decode(pongHdr.getApplicationData());
 		assertEquals("Hello", pongData.toString());

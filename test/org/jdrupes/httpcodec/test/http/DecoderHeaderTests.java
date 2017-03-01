@@ -42,7 +42,7 @@ public class DecoderHeaderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("localhost", decoder.getHeader().get().getHost());
@@ -66,7 +66,7 @@ public class DecoderHeaderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		// Continue header
 		reqText 
 			= "host:8888\r\n"
@@ -74,7 +74,7 @@ public class DecoderHeaderTests {
 		buffer = ByteBuffer.wrap(reqText.getBytes("ascii"));
 		result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("localhost", decoder.getHeader().get().getHost());
@@ -94,7 +94,7 @@ public class DecoderHeaderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("localhost", decoder.getHeader().get().getHost());

@@ -59,7 +59,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("/test",
@@ -88,7 +88,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		// Continue header
 		reqText 
 			= "host:8888\r\n"
@@ -96,7 +96,7 @@ public class RequestDecoderTests {
 		buffer = ByteBuffer.wrap(reqText.getBytes("ascii"));
 		result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("localhost", decoder.getHeader().get().getHost());
@@ -129,7 +129,7 @@ public class RequestDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertTrue(decoder.getHeader().get().messageHasBody());
 		assertEquals("POST", decoder.getHeader().get().getMethod());
 		assertEquals("/form",
@@ -166,7 +166,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertTrue(decoder.getHeader().get().messageHasBody());
 		assertEquals("POST", decoder.getHeader().get().getMethod());
 		assertEquals("/form",
@@ -177,7 +177,7 @@ public class RequestDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		result = decoder.decode(buffer, body, false);
 		assertFalse(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertTrue(!buffer.hasRemaining());
@@ -211,7 +211,7 @@ public class RequestDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(20);
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertTrue(decoder.getHeader().get().messageHasBody());
 		assertEquals("POST", decoder.getHeader().get().getMethod());
 		assertEquals("/form",
@@ -227,7 +227,7 @@ public class RequestDecoderTests {
 		body.clear();
 		result = decoder.decode(buffer, body, false);
 		assertFalse(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(buffer.hasRemaining());
@@ -261,7 +261,7 @@ public class RequestDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertTrue(decoder.getHeader().get().messageHasBody());
 		assertEquals("POST", decoder.getHeader().get().getMethod());
 		assertEquals("/form",
@@ -273,7 +273,7 @@ public class RequestDecoderTests {
 		buffer = ByteBuffer.wrap("e=Grapes".getBytes("ascii"));
 		result = decoder.decode(buffer, body, false);
 		assertFalse(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertTrue(!buffer.hasRemaining());
@@ -312,7 +312,7 @@ public class RequestDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertTrue(decoder.getHeader().get().messageHasBody());
 		assertEquals("POST", decoder.getHeader().get().getMethod());
 		assertEquals("/form",
@@ -355,7 +355,7 @@ public class RequestDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertTrue(decoder.getHeader().get().messageHasBody());
 		assertEquals("POST", decoder.getHeader().get().getMethod());
 		assertEquals("/form",
@@ -397,7 +397,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("/test%20this",

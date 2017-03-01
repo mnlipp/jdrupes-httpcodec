@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,10 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 /**
- * @author Michael N. Lipp
- *
+ * The entry point interfaces and classes.
  */
 @org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec;

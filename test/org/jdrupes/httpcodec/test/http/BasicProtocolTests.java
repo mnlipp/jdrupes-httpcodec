@@ -50,7 +50,7 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.hasResponse());
+		assertFalse(result.getResponse().isPresent());
 		assertFalse(decoder.getHeader().get().messageHasBody());
 		assertEquals("GET", decoder.getHeader().get().getMethod());
 		assertEquals("localhost", decoder.getHeader().get().getHost());
@@ -67,8 +67,8 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(result.hasResponse());
-		assertEquals(505, result.getResponse().getStatusCode());
+		assertTrue(result.getResponse().isPresent());
+		assertEquals(505, result.getResponse().get().getStatusCode());
 	}
 
 	/**
@@ -87,8 +87,8 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(result.hasResponse());
-		assertEquals(400, result.getResponse().getStatusCode());
+		assertTrue(result.getResponse().isPresent());
+		assertEquals(400, result.getResponse().get().getStatusCode());
 	}
 
 	/**
@@ -107,8 +107,8 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(result.hasResponse());
-		assertEquals(400, result.getResponse().getStatusCode());
+		assertTrue(result.getResponse().isPresent());
+		assertEquals(400, result.getResponse().get().getStatusCode());
 	}
 
 

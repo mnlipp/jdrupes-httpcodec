@@ -35,7 +35,13 @@ public interface Decoder<T extends MessageHeader,
 	R extends MessageHeader> extends Codec {
 
 	/**
-	 * Decodes the next chunk of data.
+	 * Decodes the next chunk of data. This method will never leave
+	 * remaining data in the `in` buffer unless a header has been
+	 * decoded completely and/or the `out` buffer is full. In either case, 
+	 * decoding will therefore continue when the method is invoked again
+	 * with the same `in` buffer and another (or emptied) `out` buffer.
+	 * It is never necessary (though possible) to add data to an existing 
+	 * `in` buffer.
 	 * 
 	 * @param in
 	 *            holds the data to be decoded
@@ -53,8 +59,14 @@ public interface Decoder<T extends MessageHeader,
 	        throws ProtocolException;
 	
 	/**
-	 * Returns the last message (header) received completely 
-	 * if it exists.
+	 * Returns the last message (header) received. 
+	 * If a header is completed during a 
+	 * {@link #decode(ByteBuffer, Buffer, boolean)} invocation,
+	 * the result's {@link Result#isHeaderCompleted()} is `true`
+	 * and the header can be retrieved using this method.
+	 * It remains available until `decode` is invoked for a new message
+	 * (i.e. is invoked again after returning a result with
+	 * {@link Codec.Result#isUnderflow()} being `false`.
 	 * 
 	 * @return the result
 	 */
@@ -119,7 +131,7 @@ public interface Decoder<T extends MessageHeader,
 		extends Codec.Result {
 
 		private boolean headerCompleted;
-		private R response;
+		private Optional<R> response;
 		private boolean responseOnly;
 
 		/**
@@ -140,14 +152,16 @@ public interface Decoder<T extends MessageHeader,
 				R response, boolean responseOnly) {
 			super(overflow, underflow, closeConnection);
 			this.headerCompleted =  headerCompleted;
-			this.response = response;
+			this.response = Optional.ofNullable(response);
 			this.responseOnly = responseOnly;
 		}
 
 		/**
 		 * Returns {@code true} if the message header has been decoded 
 		 * completely during the decoder invocation that returned this 
-		 * result and is now available. 
+		 * result and is now available. Note that not only the header may
+		 * heve been decoded, but that the output buffer may also
+		 * already contain decoded data.
 		 * 
 		 * @return the result
 		 */
@@ -156,29 +170,19 @@ public interface Decoder<T extends MessageHeader,
 		}
 
 		/**
-		 * Returns {@code true} if the result includes a response
-		 * (see {@link #getResponse()}).
-		 * 
-		 * @return the result
-		 */
-		public boolean hasResponse() {
-			return response != null;
-		}
-		
-		/**
 		 * Returns the response if a response exists. A response in
 		 * the decoder result indicates that some information
 		 * must be signaled back to the sender.
 		 * 
 		 * @return the response
 		 */
-		public R getResponse() {
+		public Optional<R> getResponse() {
 			return response;
 		}
 
 		/**
-		 * If the result includes a response ({@link #hasResponse()} returns
-		 * {@code true}) and this method returns {@code true} then no
+		 * If the result includes a response (see {@link #getResponse()})
+		 * and this method returns {@code true} then no
 		 * further processing of the received data is required. After sending
 		 * the response data, the decode method should be invoked 
 		 * again with the same parameters. 
