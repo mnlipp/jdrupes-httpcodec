@@ -4,22 +4,22 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+//		maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+		maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.3.0'
-        classpath 'org.jdrupes.mdoclet:gradle-plugin:1.0.1'
     }
 }
 
 plugins {
     id "com.jfrog.bintray" version "1.7"
+	id "org.jdrupes.mdoclet" version "1.0.2"
 }
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
 apply plugin: 'maven'
-apply plugin: 'org.jdrupes.mdoclet'
 // Makes Eclipse-groovy handle *.gradle file properly
 apply plugin:'groovy'
 
@@ -39,7 +39,8 @@ archivesBaseName = 'httpcodec'
 repositories {
     jcenter()
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+//	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+//	maven { url 'https://jitpack.io' }
 }
 
 configurations {
@@ -79,7 +80,8 @@ jar {
 }
 
 dependencies {
-    javadocTaglets "org.jdrupes.taglets:plantuml-taglet:1.0.1"
+	javadocTaglets "org.jdrupes.taglets:plantuml-taglet:1.0.2"
+	// javadocTaglets 'com.github.mnlipp:jdrupes-taglets:1.0.2'
 }
 
 javadoc {
@@ -88,9 +90,12 @@ javadoc {
 
     classpath = project.sourceSets.main.compileClasspath
     source = sourceSets.main.allJava
-    destinationDir = file("../jdrupes-httpcodec.gh-pages/javadoc")
+	options.addStringOption("overview", "overview.md")
+	inputs.file "overview.md"
+	options.addBooleanOption("linksource", true)
     options.addStringOption("bottom", file("misc/javadoc.bottom.txt").text)
     options.addStringOption("link", "http://docs.oracle.com/javase/8/docs/api/")
+    destinationDir = file("../jdrupes-httpcodec.gh-pages/javadoc")
 }
 
 task sourcesJar(type: Jar) {
