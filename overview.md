@@ -34,16 +34,23 @@ process.
 
 ![Decoder result](decoder-result.svg)
 
+<img align="right" src="handle-decode-result.svg">
+
 The basic information provided by the decoding process (defined in 
 {@link org.jdrupes.httpcodec.Codec.Result}) is
 known from the Charset codecs. "Underflow" indicates that more input
-data is needed in order to complete the decoding. "Overflow" indicates that
-the output buffer is full. In addition,
+data is needed in order to complete the decoding of the message.
+"Overflow" indicates that the output buffer is full. In addition,
 {@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection} may indicate
-that the connection, from which the data is obtained, should be closed.
-This indication is needed because closing the connection 
-is sometimes required by HTTP. As a codec cannot close the connection 
+that the connection, from which the data is obtained, should be closed
+after handling the received message[^closing]. This indication is needed 
+because closing the connection is sometimes required by HTTP to
+complete a message exchange. As a codec cannot close the connection 
 itself, this must be done by the invoker (the supplier of the data stream).
+
+[^closing]: If the decoded message is a request, the connection must 
+be closed after sending the response. If the decoded message is
+a response, no more data must be sent before closing the connection. 
 
 Besides streams with body data, decoders such as an HTTP decoder
 provide the headers that precede this (payload) data. The successful decoding 
@@ -52,20 +59,15 @@ of a header is indicated in the result by
 decoded header can be retrieved with
 {@link org.jdrupes.httpcodec.Decoder#getHeader}.
 
-Due to the details of the HTTP, it may be necessary to include
-certain information in a response to a given (decoded) request. Of course,
-the user of the HTTP codecs should not have to know about these details. 
-A decoder that decodes a request may therefore prepare a header that is
-to be used for the response. This header can be obtained from
-{@link org.jdrupes.httpcodec.Decoder.Result#getResponse}.
+Sometimes, HTTP requires a provisional feedback to be sent after receiving
+the message header. Because the decoder cannot send this feedback
+itself, it provides the message to be sent in such cases
+with {@link org.jdrupes.httpcodec.Decoder.Result#getResponse}.
 
-In the special case that a request violates the protocol, a response is
-prepared that signals back the error. In such a case (indicated by
-{@link org.jdrupes.httpcodec.Decoder.Result#isResponseOnly}) the
-header should immediately be passed to the corresponding encoder and
-sent back to the requester. Note that not every exceptional situation
-requires the connection to be closed. It is possible that
-`isResponseOnly` returns `true` and `getCloseConnection` returns `false`.
+If a received message violates the protocol or represents
+some kind of "ping" message, sending back the prepared response message 
+may be all that has to be done. These cases are indicated by
+{@link org.jdrupes.httpcodec.Decoder.Result#isResponseOnly}).
 
 A sample usage of the decoder can be found in the 
 [demo code](https://github.com/mnlipp/jdrupes-httpcodec/blob/master/demo/org/jdrupes/httpcodec/demo/Connection.java).
@@ -89,10 +91,13 @@ can be called.
 The result of the encode method is simply a `Codec.Result` that indicates
 whether the output buffer is full and/or further body data is required.
 
+Why Generics?
+-------------
 
 
 
 @startuml decoder.svg
+' ========== Decoder Hierarchy =========
 interface Decoder<T extends MessageHeader, R extends MessageHeader> {
     Result<R> decode(ByteBuffer in, Buffer out, boolean endOfInput)
     Optional<T> getHeader()
@@ -103,6 +108,7 @@ Codec <|-- Decoder
 @enduml
 
 @startuml decoder-result.svg
+' ========== Result Hierarchy =========
 class Codec::Result {
     +isOverflow(): boolean
     +isUnderflow(): boolean
@@ -119,6 +125,7 @@ Codec::Result <|-- Decoder::Result
 @enduml
 
 @startuml encoder.svg
+' ========== Encoder Hierarchy =========
 interface Encoder {
     void encode(T messageHeader)
     Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
@@ -127,4 +134,46 @@ interface Encoder {
 interface Codec {
 }
 Codec <|-- Encoder
+@enduml
+
+@startuml receive-loop.svg
+' ========== Receive loop =========
+skinparam conditionStyle diamond
+title Receive Loop
+start
+while ( ) is ([connection open])
+  :Receive data;
+  while ( ) is ([data in receive buffer])
+    :Invoke decode;
+    :Handle decoder result;
+  endwhile ([else])
+endwhile ([else])
+end
+@enduml
+
+@startuml handle-decode-result.svg
+' ========== Receive loop =========
+skinparam conditionStyle diamond
+title Handle Decoder Result
+start
+if () then ([result has message])
+  :Send response message;
+else ([else])
+endif
+if () then ([not response only 
+&& header complete])
+  :Handle message;
+  note
+  Includes decoding 
+  any remaining body 
+  data
+  end note
+else ([else])
+endif
+if () then ([close connection])
+  :Close connection;
+else ([else])
+endif
+end
+
 @enduml
