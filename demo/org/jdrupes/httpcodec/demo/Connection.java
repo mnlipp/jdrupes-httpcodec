@@ -82,17 +82,15 @@ public class Connection extends Thread {
 					if (decoderResult.getResponse().isPresent()) {
 						sendResponseWithoutBody
 							(decoderResult.getResponse().get());
-						if (decoderResult.isResponseOnly()) {
-							break;
-						}
 					}
-					if (decoderResult.isHeaderCompleted()) {
+					if (!decoderResult.isResponseOnly()
+					        && decoderResult.isHeaderCompleted()) {
 						MessageHeader hdr = engine.currentRequest().get();
 						if (hdr instanceof HttpRequest) {
 							handleHttpRequest((HttpRequest) hdr);
 						}
 						if (hdr instanceof WsFrameHeader) {
-							handleWsFrame((WsFrameHeader)hdr);
+							handleWsFrame((WsFrameHeader) hdr);
 						}
 					}
 					if (decoderResult.getCloseConnection()) {
