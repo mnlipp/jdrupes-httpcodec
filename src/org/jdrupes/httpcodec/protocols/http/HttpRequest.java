@@ -23,6 +23,8 @@ import java.util.Optional;
 
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 /**
  * Represents an HTTP request header.
  * 

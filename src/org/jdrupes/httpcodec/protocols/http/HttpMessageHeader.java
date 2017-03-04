@@ -31,13 +31,14 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpIntListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 /**
  * Represents an HTTP message header (either request or response).
  * 
  * @author Michael N. Lipp
  */
-public abstract class HttpMessageHeader 
-	implements MessageHeader, HttpConstants {
+public abstract class HttpMessageHeader implements MessageHeader {
 
 	private HttpProtocol httpProtocol;
 	private Map<String,HttpField<?>> headers 

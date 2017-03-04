@@ -40,6 +40,8 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 /**
  * Implements an encoder for HTTP. The class can be used as base class for both
  * a request and a response encoder.

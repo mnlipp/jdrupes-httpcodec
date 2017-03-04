@@ -24,6 +24,8 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 /**
  * Represents an HTTP response header.
  * 

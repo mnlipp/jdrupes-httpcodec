@@ -26,7 +26,7 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
  *
  */
 public abstract class HttpCodec<T extends HttpMessageHeader>
-	implements Codec, HttpConstants {
+	implements Codec {
 
 	protected T messageHeader = null;
 	

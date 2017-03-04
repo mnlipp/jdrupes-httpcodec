@@ -19,6 +19,8 @@ package org.jdrupes.httpcodec.protocols.http;
 
 import org.jdrupes.httpcodec.ProtocolException;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 /**
  * Represents a violation of the HTTP protocol. This kind of exception
  * is thrown by the HTTP codecs when a problem is detected while encoding
@@ -26,8 +28,7 @@ import org.jdrupes.httpcodec.ProtocolException;
  * 
  * @author Michael N. Lipp
  */
-public class HttpProtocolException extends ProtocolException 
-	implements HttpConstants {
+public class HttpProtocolException extends ProtocolException {
 
 	private static final long serialVersionUID = 1L;
 

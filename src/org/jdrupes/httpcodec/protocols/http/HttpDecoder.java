@@ -38,6 +38,8 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.DynamicByteArray;
 import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 /**
  * Implements a decoder for HTTP. The class can be used as base class for both
  * a request and a response decoder.
