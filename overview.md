@@ -94,6 +94,56 @@ whether the output buffer is full and/or further body data is required.
 Why Generics?
 -------------
 
+While the previous text explains the interfaces and classes with
+reference to HTTP, you won't find "HTTP" in the names or methods
+of the types presented. The reason is that the API presented above
+can be used to handle any "HTTP like" protocol (header with payload).
+We need such a general interface because modern HTTP provides the 
+upgrade mechanism that allows the client or server to switch to another
+protocol. This is currently mostly used for the web socket protocol.
+More about that later.
+
+HTTP Codecs
+-----------
+
+An HTTP decoder is a special decoder that returns 
+{@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}s
+in its {@link org.jdrupes.httpcodec.protocols.http.HttpDecoder#getHeader()} 
+method (type parameter `T`). Of course, if
+the result of the `decode` method  includes a response,
+it s also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
+(type parameter `R`).  
+
+![HTTP Decoder](http-decoder.svg)
+
+In addition, it is possible to specify a maximum header length to
+avoid that a malicious request fills all your memory. And you can
+{@linkplain org.jdrupes.httpcodec.protocols.http.HttpDecoder#isClosed() query}
+if the decoder has reached the closed state, i.e. assumes
+the connection, for which it was created, to be closed.
+
+The HTTP encoder is derived in a similar way.
+
+![HTTP Decoder](http-encoder.svg)
+
+The the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#getPendingLimit 
+getter description} for the meaning of "pending limit". 
+
+As you can see, we still have'nt reached the goal yet to get concrete
+HTTP codecs. This is because there is a difference between HTTP request
+messages and HTTP response messages.
+
+![HTTP request and response meaasges](http-messages.svg)
+
+Now we have all the pieces together. In order to write an HTTP server
+you need an `HTTPDecoder` parameterized with `HTTPRequest` as type of the 
+decoded message and `HTTPResponse` as type of any preliminary
+feedback (optionally provided by the `Decoder.Result`). This is
+what makes up an 
+{@link org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder}.
+And you need an `HttpEncoder` parameterized with `HTTPRequest` as type
+of the messages to be encode, in short an
+{@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}.
 
 
 @startuml decoder.svg
@@ -175,5 +225,88 @@ if () then ([close connection])
 else ([else])
 endif
 end
+
+@enduml
+
+
+@startuml http-decoder.svg
+' ========== HTTP decoder =========
+interface Codec {
+}
+
+abstract class HttpCodec<T> {
+}
+
+interface Decoder<T, R> {
+}
+
+abstract class HttpDecoder<T extends HttpMessageHeader, R extends HttpMessageHeader> {
+    +HttpDecoder()
+    +Decoder.Result<R> decode(ByteBuffer in, Buffer out, boolean endOfInput)
+    +Optional<T> getHeader()
+    +void setMaxHeaderLength(long maxHeaderLength)
+    +long getMaxHeaderLength()
+    +boolean isClosed()
+}
+
+Codec <|.. HttpCodec
+
+Codec <|-- Decoder
+
+HttpCodec <|-- HttpDecoder
+
+Decoder <|.. HttpDecoder
+@enduml
+
+
+@startuml http-encoder.svg
+' ========== HTTP encoder =========
+interface Codec {
+}
+
+abstract class HttpCodec<T> {
+}
+
+interface Encoder<T> {
+}
+
+abstract class HttpEncoder<T extends HttpMessageHeader> {
+    +HttpEncoder()
+    +void encode(T messageHeader)
+    +Encoder.Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
+    +int getPendingLimit()
+    +void setPendingLimit(int pendingLimit)
+    +boolean isClosed()
+}
+
+Codec <|.. HttpCodec
+
+Codec <|-- Encoder
+
+HttpCodec <|-- HttpEncoder
+
+Encoder <|.. HttpEncoder
+@enduml
+
+
+@startuml http-messages.svg
+' ========== HTTP messages =========
+
+abstract class HttpMessageHeader {
+}
+
+interface MessageHeader {
+}
+
+class HttpRequest {
+}
+
+class HttpResponse {
+}
+HttpMessageHeader <|-- HttpResponse
+
+HttpMessageHeader <|-- HttpRequest
+
+MessageHeader <|.. HttpMessageHeader
 
 @enduml
