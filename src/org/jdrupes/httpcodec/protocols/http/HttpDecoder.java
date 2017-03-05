@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.io.UnsupportedEncodingException;
@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdrupes.httpcodec.Decoder;
+import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpListField;
@@ -93,6 +94,13 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	}
 
 	/**
+	 * Returns the result factory for this codec.
+	 * 
+	 * @return the factory
+	 */
+	protected abstract Result.Factory<R> resultFactory();
+	
+	/**
 	 * Sets the maximum size for the complete header. If the size is exceeded, a
 	 * {@link HttpProtocolException} will be thrown. The default size is 4MB
 	 * (4194304 Byte).
@@ -154,15 +162,6 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	protected abstract BodyMode headerReceived(T message) 
 			throws HttpProtocolException;
 
-	private Decoder.Result<R> createResult(boolean overflow,
-	        boolean underflow, boolean closeConnection) {
-		if (messageHeader != null && building != null) {
-			building = null;
-			return newResult(overflow, underflow, true);
-		}
-		return newResult(overflow, underflow, false);
-	}
-
 	/**
 	 * Decodes the next chunk of data.
 	 * 
@@ -197,7 +196,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			// Waiting for CR (start of end of line)
 			case RECEIVE_LINE: {
 				if (!in.hasRemaining()) {
-					return createResult(false, true, false);
+					return resultFactory().newResult(false, true);
 				}
 				byte ch = in.get();
 				if (ch == '\r') {
@@ -217,7 +216,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			// Waiting for LF (confirmation of end of line)
 			case AWAIT_LINE_END: {
 				if (!in.hasRemaining()) {
-					return createResult(false, true, false);
+					return resultFactory().newResult(false, true);
 				}
 				char ch = (char) in.get();
 				if (ch == '\n') {
@@ -267,15 +266,16 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				}
 				if (receivedLine.isEmpty()) {
 					// Body starts
-					messageHeader = building;
 					BodyMode bm = headerReceived(building);
 					adjustToBodyMode(bm);
+					messageHeader = building;
+					building = null;
 					if (bm == BodyMode.NO_BODY) {
 						adjustToEndOfMessage();
-						return createResult(false, false, false);
+						return resultFactory().newResult(false, false);
 					}
 					if (out == null) {
-						return createResult(true, false, false);
+						return resultFactory().newResult(true, false);
 					}
 					break;
 				}
@@ -288,7 +288,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				// if we had a content length field
 				states.pop();
 				adjustToEndOfMessage();
-				return createResult(false, false, false);
+				return resultFactory().newResult(false, false);
 
 			case CHUNK_START_RECEIVED:
 				// We "drop" to this state when a line has been read
@@ -332,11 +332,11 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				}
 				// All chunked data received
 				adjustToEndOfMessage();
-				return createResult(false, false, false);
+				return resultFactory().newResult(false, false);
 
 			case COPY_SPECIFIED:
 				if (out == null) {
-					return createResult(true, false, false);
+					return resultFactory().newResult(true, false);
 				}
 				int initiallyRemaining = in.remaining();
 				CoderResult decRes;
@@ -355,15 +355,16 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					}
 					break;
 				}
-				return createResult((!out.hasRemaining() && in.hasRemaining())
+				return resultFactory().newResult
+						((!out.hasRemaining() && in.hasRemaining())
 						|| (decRes != null && decRes.isOverflow()),
 				        !in.hasRemaining() 
-				        || (decRes != null && decRes.isUnderflow()), false);
+				        || (decRes != null && decRes.isUnderflow()));
 
 			case FINISH_CHARDECODER:
 				if (charDecoder.decode(EMPTY_IN, (CharBuffer) out, true)
 				        .isOverflow()) {
-					return createResult(true, false, false);
+					return resultFactory().newResult(true, false);
 				}
 				states.pop();
 				states.push(State.FLUSH_CHARDECODER);
@@ -371,23 +372,23 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				
 			case FLUSH_CHARDECODER:
 				if (charDecoder.flush((CharBuffer)out).isOverflow()) {
-					return createResult(true, false, false);
+					return resultFactory().newResult(true, false);
 				}
 				states.pop();
 				break;
 
 			case COPY_UNTIL_CLOSED:
 				if (out == null) {
-					return createResult(true, false, false);
+					return resultFactory().newResult(true, false);
 				}
 				decRes = copyBodyData(out, in, in.remaining(), endOfInput);
 				boolean overflow = (!out.hasRemaining() && in.hasRemaining())
 						|| (decRes != null && decRes.isOverflow());
 				if (overflow) {
-					return createResult(true, false, false);
+					return resultFactory().newResult(true, false);
 				}
 				if (!endOfInput) {
-					return createResult(false, true, false);
+					return resultFactory().newResult(false, true);
 				}
 				// Final input successfully processed.
 				states.pop();
@@ -400,7 +401,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 
 			case CLOSED:
 				in.position(in.limit());
-				return createResult(false, false, true);
+				return resultFactory().newResult(false, false);
 			}
 		}
 	}
@@ -443,7 +444,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		if (field == null) {
 			return;
 		}
-		addHeaderField(field);
+		addHeaderField(building, field);
 	}
 
 	private void newTrailerLine() throws HttpProtocolException, ParseException {
@@ -459,19 +460,19 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		String fieldValue = m.group(2).trim();
 		HttpField<?> field = HttpField.fromString(fieldName, fieldValue);
 		// RFC 7230 4.4
-		HttpStringListField trailerField = building
+		HttpStringListField trailerField = messageHeader
 		        .computeIfAbsent(HttpStringListField.class, HttpField.TRAILER,
 		        		n -> new HttpStringListField(n));
 		if (!trailerField.containsIgnoreCase(field.getName())) {
 			trailerField.add(field.getName());
 		}
-		addHeaderField(field);
+		addHeaderField(messageHeader, field);
 	}
 
-	private void addHeaderField(HttpField<?> field)
+	private void addHeaderField(T header, HttpField<?> field)
 	        throws HttpProtocolException, ParseException {
 		// RFC 7230 3.2.2
-		HttpField<?> existing = building.fields().get(field.getName());
+		HttpField<?> existing = header.fields().get(field.getName());
 		if (existing != null) {
 			if (!(existing instanceof HttpListField<?>)
 			        || !(field instanceof HttpListField<?>)
@@ -482,7 +483,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			}
 			((HttpListField<?>) existing).combine((HttpListField<?>) field);
 		} else {
-			building.setField(field);
+			header.setField(field);
 		}
 	}
 
@@ -553,5 +554,44 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			return;
 		}
 		states.push(State.CLOSED);
+	}
+	
+	/**
+	 * Results from {@link HttpDecoder} add no additional
+	 * information to {@link org.jdrupes.httpcodec.Decoder.Result}. This
+	 * class provides only a factory for creating 
+	 * the results as required by {@link HttpDecoder}.
+	 */
+	public static class Result<R extends MessageHeader>
+		extends Decoder.Result<R> {
+
+		public Result(boolean overflow, boolean underflow,
+		        boolean closeConnection, boolean headerCompleted, R response,
+		        boolean responseOnly) {
+			super(overflow, underflow, closeConnection, headerCompleted, response,
+			        responseOnly);
+		}
+
+		/**
+		 * A factory for creating new Results.
+		 */
+		protected abstract static class Factory<R extends MessageHeader> 
+			extends Decoder.Result.Factory<R> {
+			
+			/**
+			 * Create a new result. Implementing classes can
+			 * obtain the value for 
+			 * {@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection()}
+			 * from {@link HttpDecoder#isClosed()}.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @return the result
+			 */
+			protected abstract Result<R> newResult 
+				(boolean overflow, boolean underflow);
+		}		
 	}
 }

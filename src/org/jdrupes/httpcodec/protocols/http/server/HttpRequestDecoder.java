@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
@@ -49,12 +48,23 @@ public class HttpRequestDecoder
 	private final static Pattern requestLinePatter = Pattern
 	        .compile("^(" + TOKEN + ")" + SP + "([^ \\t]+)" + SP + "("
 	                + HTTP_VERSION + ")$");
+	private final Result.Factory resultFactory	= new Result.Factory(this);
+	
+	private boolean reportHeaderReceived = false;
 
 	/**
 	 * Creates a new encoder that belongs to the given HTTP engine.
 	 */
 	public HttpRequestDecoder() {
 		super();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder#resultFactory()
+	 */
+	@Override
+	protected Result.Factory resultFactory() {
+		return resultFactory;
 	}
 
 	/* (non-Javadoc)
@@ -69,7 +79,7 @@ public class HttpRequestDecoder
 					e.getStatusCode(), e.getReasonPhrase(), false);
 			response.setField(
 			        new HttpStringListField(HttpField.CONNECTION, "close"));
-			return newResult(false, false, false, response, true);
+			return resultFactory().newResult(false, false, false, response, true);
 		}
 	}
 
@@ -131,6 +141,7 @@ public class HttpRequestDecoder
 	@Override
 	protected BodyMode headerReceived(HttpRequest message) 
 			throws HttpProtocolException {
+		reportHeaderReceived = true;
 		// Handle field of special interest
 		Optional<HttpStringField> host = message.getField
 				(HttpStringField.class, HttpField.HOST);
@@ -190,59 +201,18 @@ public class HttpRequestDecoder
 	}
 
 	/**
-	 * Overrides the base interface's factory method in order to make
-	 * it return the extended return type. As the {@link HttpRequestDecoder}
-	 * does not know about a response, this implementation always
-	 * returns a result without one.
+	 * Results from {@link HttpRequestDecoder} add no additional
+	 * information to 
+	 * {@link org.jdrupes.httpcodec.protocols.http.HttpDecoder.Result}. This
+	 * class just provides a factory for creating concrete results.
 	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param headerCompleted
-	 *            indicates that the message header has been completed and
-	 *            the message (without body) is available
-	 */
-	@Override
-	public Result newResult(boolean overflow, boolean underflow,
-	        boolean headerCompleted) {
-		return newResult(overflow, underflow, headerCompleted, null, false);
-	}
-
-	/**
-	 * Factory method for result.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param headerCompleted {@code true} if the header has completely
-	 * been decoded
-	 * @param response a response to send due to an error
-	 * @param responseOnly if the result includes a response 
-	 * this flag indicates that no further processing besides 
-	 * sending the response is required
-	 * @return the result
-	 */
-	public Result newResult (boolean overflow, boolean underflow, 
-			boolean headerCompleted, HttpResponse response, 
-			boolean responseOnly) {
-		return new Result(overflow, underflow, 
-				headerCompleted, response, responseOnly) {
-		};
-	}
-
-	/**
-	 * Short for {@code RequestDecoder.Result<HttpResponse>}, provided
-	 * for convenience.
-	 * <P>
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
 	 * 
 	 * @author Michael N. Lipp
 	 */
 	public static abstract class Result 
-		extends Decoder.Result<HttpResponse> {
+		extends HttpDecoder.Result<HttpResponse> {
 
 		/**
 		 * Creates a new result.
@@ -264,6 +234,69 @@ public class HttpRequestDecoder
 		        boolean responseOnly) {
 			super(overflow, underflow, false, headerCompleted, response,
 					responseOnly);
+		}
+		
+		protected static class Factory 
+			extends HttpDecoder.Result.Factory<HttpResponse> {
+			
+			private HttpRequestDecoder decoder;
+
+			/**
+			 * Creates a new factory for the given decoder. 
+			 * 
+			 * @param decoder the decoder
+			 */
+			protected Factory(HttpRequestDecoder decoder) {
+				super();
+				this.decoder = decoder;
+			}
+			
+			/**
+			 * Create a new result.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @param headerCompleted
+			 *            {@code true} if the header has completely been decoded
+			 * @param response
+			 *            a response to send due to an error
+			 * @param responseOnly
+			 *            if the result includes a response this flag indicates
+			 *            that no further processing besides sending the
+			 *            response is required
+			 * @return the result
+			 */
+			public Result newResult (boolean overflow, boolean underflow, 
+					boolean headerCompleted, HttpResponse response, 
+					boolean responseOnly) {
+				return new Result(overflow, underflow, 
+						headerCompleted, response, responseOnly) {
+				};
+			}
+
+			/**
+			 * Overrides the base interface's factory method in order to make
+			 * it return the extended return type. As the {@link HttpRequestDecoder}
+			 * does not know about a response, this implementation always
+			 * returns a result without one. This may be a preliminary result
+			 * and replaced in {@link HttpRequestDecoder#decode(ByteBuffer, Buffer, boolean)}.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 */
+			@Override
+			protected Result newResult(
+			        boolean overflow, boolean underflow) {
+				Result result = new Result(overflow, underflow, 
+						decoder.reportHeaderReceived, null, false) {
+				};
+				decoder.reportHeaderReceived = false;
+				return result;
+			}
 		}
 	}
 }

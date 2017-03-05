@@ -20,8 +20,7 @@ package org.jdrupes.httpcodec;
 import java.nio.ByteBuffer;
 
 /**
- * @author Michael N. Lipp
- *
+ * The base interface for all coders and decoders.
  */
 public interface Codec {
 
@@ -30,33 +29,17 @@ public interface Codec {
 	 * when the (expected) body data is not yet available.
 	 */
 	public final static ByteBuffer EMPTY_IN = ByteBuffer.allocate(0);
-	
-	/**
-	 * Factory method for results. 
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 * @return the result
-	 */
-	default Result newResult (boolean overflow, boolean underflow,
-			boolean closeConnection) {
-		return new Result(overflow, underflow, closeConnection) {
-		};
-	}
-	
+
 	/**
 	 * The common properties of the result types returned by the various codecs.
-	 * <P>
+	 * Derived classes add their respective additional values.
+	 * 
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
 	 * 
 	 * @author Michael N. Lipp
 	 */
-	public static abstract class Result {
+	public abstract static class Result {
 
 		private boolean overflow;
 		private boolean underflow;
@@ -127,7 +110,7 @@ public interface Codec {
 		public boolean getCloseConnection() {
 			return closeConnection;
 		}
-
+		
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */
@@ -176,6 +159,19 @@ public interface Codec {
 			builder.append(closeConnection);
 			builder.append("]");
 			return builder.toString();
+		}
+
+		/**
+		 * A base class for a factory that creates results. Factories
+		 * are only used internally by the codec implementation
+		 * and therefore defined as protected inner classes
+		 * so that they don't appear as part of the public API.
+		 * 
+		 * Factories are refined whenever the {@link Result} type
+		 * is refined. Factories define methods only if they are 
+		 * actually needed by the codec in which they are defined.
+		 */
+		protected static class Factory {
 		}
 	}
 

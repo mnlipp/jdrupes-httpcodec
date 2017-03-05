@@ -52,6 +52,8 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			throw new IllegalArgumentException();
 		}
 	}
+	private static Result.Factory resultFactory = new Result.Factory();
+	
 	private State state = State.READING_HEADER;
 	private long bytesExpected = 2;
 	private boolean dataMessageFinished = true;
@@ -65,6 +67,15 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	private WsFrameHeader reportedHeader = null;
 	private ByteBuffer controlData = null;
 	private CharBuffer controlChars = null;
+	
+	/**
+	 * Returns the result factory for this codec.
+	 * 
+	 * @return the factory
+	 */
+	protected Result.Factory resultFactory() {
+		return resultFactory;
+	}
 	
 	private Decoder.Result<WsFrameHeader> frameFinished() {
 		state = State.READING_HEADER;
@@ -88,38 +99,38 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return Optional.ofNullable(receivedHeader);
 	}
 
-	/**
-	 * Overrides the base interface's factory method in order to make
-	 * it return the extended return type.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 */
-	@Override
-	public Result<WsFrameHeader> newResult
-		(boolean overflow, boolean underflow, boolean closeConnection) {
-		return new Result<WsFrameHeader>(overflow, underflow, closeConnection,
-				false, null, false) {
-		};
-	}
+//	/**
+//	 * Overrides the base interface's factory method in order to make
+//	 * it return the extended return type.
+//	 * 
+//	 * @param overflow
+//	 *            {@code true} if the data didn't fit in the out buffer
+//	 * @param underflow
+//	 *            {@code true} if more data is expected
+//	 * @param closeConnection
+//	 *            {@code true} if the connection should be closed
+//	 */
+//	@Override
+//	public Result newResult
+//		(boolean overflow, boolean underflow, boolean closeConnection) {
+//		return new Result<WsFrameHeader>(overflow, underflow, closeConnection,
+//				false, null, false) {
+//		};
+//	}
 	
-	private Result<WsFrameHeader> createResult
+	private Result createResult
 		(boolean overflow, boolean underflow, 
 				WsFrameHeader response, boolean responseOnly) {
 		if (receivedHeader != null && receivedHeader != reportedHeader) {
 			reportedHeader = receivedHeader;
-			return newResult(overflow, underflow, false, true, 
+			return resultFactory().newResult(overflow, underflow, false, true, 
 					response, responseOnly);
 		}
-		return newResult(overflow, underflow, false, false, 
+		return resultFactory().newResult(overflow, underflow, false, false, 
 				response, responseOnly);
 	}
 
-	private Result<WsFrameHeader> createResult
+	private Result createResult
 		(boolean overflow, boolean underflow) {
 		return createResult(overflow, underflow, null, false);
 	}
@@ -244,7 +255,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 					receivedHeader = new WsCloseFrame(status, controlChars);
 					controlChars = null;
 					controlData = null;
-					return newResult(false, false, true, 
+					return resultFactory().newResult(false, false, true, 
 							true, receivedHeader, false);
 				}
 				return createResult(false, true);
@@ -297,7 +308,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		case CON_CLOSE:
 			if (bytesExpected == 0) {
 				receivedHeader = new WsCloseFrame(null, null);
-				return newResult(false, false, true, 
+				return resultFactory().newResult(false, false, true, 
 						true, receivedHeader, false);
 			}
 			controlData = ByteBuffer.allocate(2);
@@ -370,4 +381,53 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		}
 	}
 
+	/**
+	 * Results from {@link WsDecoder} add no additional
+	 * information to {@link org.jdrupes.httpcodec.Decoder.Result}. This
+	 * class just provides a factory for creating concrete results.
+	 * 
+	 * The class is declared abstract to promote the usage of the factory
+	 * method.
+	 */
+	public static abstract class Result
+		extends Decoder.Result<WsFrameHeader> {
+
+		protected Result(boolean overflow, boolean underflow,
+		        boolean closeConnection, boolean headerCompleted,
+		        WsFrameHeader response, boolean responseOnly) {
+			super(overflow, underflow, closeConnection, headerCompleted, response,
+			        responseOnly);
+		}
+
+		protected static class Factory 
+			extends Decoder.Result.Factory<WsFrameHeader> {
+			
+			/**
+			 * Create a new result.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @param closeConnection
+			 *            {@code true} if the connection should be closed
+			 * @param headerCompleted
+			 *            {@code true} if the header has completely been decoded
+			 * @param response
+			 *            a response to send due to an error
+			 * @param responseOnly
+			 *            if the result includes a response this flag indicates
+			 *            that no further processing besides sending the
+			 *            response is required
+			 * @return the result
+			 */
+			public Result newResult (boolean overflow, boolean underflow, 
+					boolean closeConnection, boolean headerCompleted, 
+					WsFrameHeader response, boolean responseOnly) {
+				return new Result(overflow, underflow, closeConnection,
+						headerCompleted, response, responseOnly) {
+				};
+			}
+		}
+	}
 }

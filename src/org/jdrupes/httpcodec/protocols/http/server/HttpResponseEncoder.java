@@ -45,6 +45,9 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 
 	private static ServiceLoader<ProtocolProvider> pluginLoader 
 		= ServiceLoader.load(ProtocolProvider.class);
+	private static Result.Factory resultFactory = new Result.Factory() {
+	};
+	
 	private Map<String,ProtocolProvider> plugins = new HashMap<>();
 	private String switchingTo;
 	private ProtocolProvider protocolPlugin;
@@ -54,6 +57,14 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	 */
 	public HttpResponseEncoder() {
 		super();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
+	 */
+	@Override
+	protected Result.Factory resultFactory() {
+		return resultFactory;
 	}
 
 	/* (non-Javadoc)
@@ -111,7 +122,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		if (switchingTo != null && endOfInput 
 				&& !result.isUnderflow() && !result.isOverflow()) {
 			// Last invocation of encode
-			result = newResult(false, false, 
+			return resultFactory().newResult(false, false, 
 					result.getCloseConnection(), switchingTo, 
 					protocolPlugin.createRequestDecoder(switchingTo), 
 					protocolPlugin.createResponseEncoder(switchingTo));
@@ -134,56 +145,14 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	}
 
 	/**
-	 * Overrides the base interface's factory method in order to make
-	 * it return the extended return type.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 */
-	@Override
-	public Result newResult
-		(boolean overflow, boolean underflow, boolean closeConnection) {
-		// Cannot add the information about the protocol switch here
-		// because we cannot know if this is the last invocation of encode
-		// (and therefore newResult).
-		return newResult(overflow, underflow, isClosed(), null, null, null);
-	}
-
-	/**
-	 * Factory method for result.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 * @param newProtocol the name of the new protocol if a switch occurred
-	 * @param newDecoder the new decoder if a switch occurred
-	 * @param newEncoder the new decoder if a switch occurred
-	 * @return the result
-	 */
-	public Result newResult (boolean overflow, boolean underflow,
-	        boolean closeConnection, String newProtocol,
-	        Decoder<?, ?> newDecoder, Encoder<?> newEncoder) {
-		return new Result (overflow, underflow, closeConnection,
-				newProtocol, newDecoder, newEncoder) {
-		};
-	}
-	
-	/**
 	 * The result from encoding a response. In addition to the usual
-	 * codec result, a result encoder may signal to the invoker that the
+	 * codec result, a response encoder may signal to the invoker that the
 	 * connection to the requester must be closed and that the protocol has
 	 * been switched.
 	 * 
 	 * @author Michael N. Lipp
 	 */
-	public abstract static class Result extends Codec.Result
+	public abstract static class Result extends HttpEncoder.Result
 		implements Codec.ProtocolSwitchResult {
 
 		private String newProtocol;
@@ -304,6 +273,56 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			return builder.toString();
 		}
 
+		/**
+		 * A factory for creating new Results.
+		 */
+		protected static class Factory extends HttpEncoder.Result.Factory {
+			
+			/**
+			 * Create a new result.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @param closeConnection
+			 *            {@code true} if the connection should be closed
+			 * @param newProtocol the name of the new protocol if a switch occurred
+			 * @param newDecoder the new decoder if a switch occurred
+			 * @param newEncoder the new decoder if a switch occurred
+			 * @return the result
+			 */
+			public Result newResult (boolean overflow, boolean underflow,
+			        boolean closeConnection, String newProtocol,
+			        Decoder<?, ?> newDecoder, Encoder<?> newEncoder) {
+				return new Result (overflow, underflow, closeConnection,
+						newProtocol, newDecoder, newEncoder) {
+				};
+			}
+
+			/**
+			 * Create a new (preliminary) result. This is invoked by the
+			 * base class. We cannot supply the missing information yet.
+			 * If necessary the result will be modified in 
+			 * {@link HttpResponseEncoder#encode(Buffer, ByteBuffer, boolean)}.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @param closeConnection
+			 *            {@code true} if the connection should be closed
+			 * @return the result
+			 */
+			@Override
+			public Result newResult(
+			        boolean overflow, boolean underflow,
+			        boolean closeConnection) {
+				return newResult(overflow, underflow, closeConnection,
+						null, null, null);
+			}
+			
+		}		
 
 	}
 }

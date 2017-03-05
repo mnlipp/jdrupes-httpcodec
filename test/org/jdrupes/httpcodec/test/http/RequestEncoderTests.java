@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
+import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.client.HttpRequestEncoder;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class RequestEncoderTests {
 		HttpRequestEncoder encoder = new HttpRequestEncoder(null);
 		encoder.encode(request);
 		ByteBuffer out = ByteBuffer.allocate(1024*1024);
-		HttpRequestEncoder.Result result = encoder.encode(out);
+		Codec.Result result = encoder.encode(out);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		String encoded = new String(out.array(), 0, out.position());

@@ -73,53 +73,13 @@ public interface Decoder<T extends MessageHeader,
 	public Optional<T> getHeader();
 	
 	/**
-	 * Factory method for result.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 * @param headerCompleted {@code true} if the header has completely
-	 * been decoded
-	 * @param response a response to send due to an error
-	 * @param responseOnly if the result includes a response 
-	 * this flag indicates that no further processing besides 
-	 * sending the response is required
-	 * @return the result
-	 */
-	default Result<R> newResult (boolean overflow, boolean underflow, 
-			boolean closeConnection, boolean headerCompleted, 
-			R response, boolean responseOnly) {
-		return new Result<R>(overflow, underflow, closeConnection,
-				headerCompleted, response, responseOnly) {
-		};
-	}
-
-	/**
-	 * Overrides the base interface's factory method in order to make
-	 * it return the extended return type.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param headerCompleted
-	 *            indicates that the message header has been completed and
-	 *            the message (without body) is available
-	 */
-	Result<R> newResult (boolean overflow, boolean underflow, 
-			boolean headerCompleted);
-	
-	/**
 	 * The result from decoding. In addition to the common codec result, this
 	 * includes the information wheteher a complete message header has been
 	 * received and it can include a response that is to be sent back to the
 	 * sender in order to fulfill the requirements of the protocol. As the
 	 * decoder can (obviously) not sent back this response by itself, it is
 	 * included in the result.
-	 * <P>
+	 *
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
 	 *
@@ -201,9 +161,9 @@ public interface Decoder<T extends MessageHeader,
 			final int prime = 31;
 			int result = super.hashCode();
 			result = prime * result + (headerCompleted ? 1231 : 1237);
-			result = prime * result + (responseOnly ? 1231 : 1237);
 			result = prime * result
 			        + ((response == null) ? 0 : response.hashCode());
+			result = prime * result + (responseOnly ? 1231 : 1237);
 			return result;
 		}
 
@@ -218,15 +178,16 @@ public interface Decoder<T extends MessageHeader,
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Result<?> other = (Result<?>) obj;
+			@SuppressWarnings("rawtypes")
+			Result other = (Result) obj;
 			if (headerCompleted != other.headerCompleted)
-				return false;
-			if (responseOnly != other.responseOnly)
 				return false;
 			if (response == null) {
 				if (other.response != null)
 					return false;
 			} else if (!response.equals(other.response))
+				return false;
+			if (responseOnly != other.responseOnly)
 				return false;
 			return true;
 		}
@@ -251,12 +212,19 @@ public interface Decoder<T extends MessageHeader,
 				builder.append(response);
 				builder.append(", ");
 			}
-			builder.append("requestComleted=");
+			builder.append("responseOnly=");
 			builder.append(responseOnly);
 			builder.append("]");
 			return builder.toString();
 		}
 
+
+		/**
+		 * The Factory for (extended) results.
+		 */
+		protected abstract static class Factory<R extends MessageHeader> 
+			extends Codec.Result.Factory {
+		}
 	}
 	
 }

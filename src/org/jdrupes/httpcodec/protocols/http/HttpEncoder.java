@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.io.IOException;
@@ -30,6 +30,7 @@ import java.nio.charset.CoderResult;
 import java.util.Iterator;
 import java.util.Stack;
 
+import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateField;
@@ -84,6 +85,13 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		states.push(State.INITIAL);
 	}
 
+	/**
+	 * Returns the result factory for this codec.
+	 * 
+	 * @return the factory
+	 */
+	protected abstract Result.Factory resultFactory();
+	
 	/**
 	 * Returns the limit for pending body bytes. If the protocol is HTTP/1.0 and
 	 * the message has a body but no "Content-Length" header, the only
@@ -141,19 +149,6 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	protected abstract void startMessage(T messageHeader, Writer writer) 
 			throws IOException;
 
-//	/**
-//	 * Factory method to be implemented by derived classes that returns an
-//	 * encoder result as appropriate for the encoder.
-//	 * 
-//	 * @param overflow
-//	 *            {@code true} if the data didn't fit in the out buffer
-//	 * @param underflow
-//	 *            {@code true} if more data is expected
-//	 * @return the result
-//	 */
-//	abstract RT newResult(boolean overflow,
-//	        boolean underflow);
-
 	/**
 	 * Set a new HTTP message that is to be encoded.
 	 * 
@@ -185,9 +180,9 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	public Encoder.Result encode(Buffer in, ByteBuffer out,
 	        boolean endOfInput) {
 		outStream.assignBuffer(out);
-		Encoder.Result result = newResult(false, false, false);
+		Encoder.Result result = resultFactory().newResult(false, false, false);
 		if (out.remaining() == 0) {
-			return newResult(true, false, false);
+			return resultFactory().newResult(true, false, false);
 		}
 		while (true) {
 			if (result.isOverflow() || result.isUnderflow()) {
@@ -212,7 +207,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				if (in.remaining() == 0 && !endOfInput) {
 					// Has probably been invoked with a dummy buffer,
 					// cannot be used to create pending body buffer.
-					return newResult(false, true, false);
+					return resultFactory().newResult(false, true, false);
 				}
 				collectedBodyData = new ByteBufferOutputStream(
 				        Math.min(pendingLimit, 
@@ -252,7 +247,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			case FLUSH_ENCODER:
 				CoderResult flushResult = charEncoder.flush(out);
 				if (flushResult.isOverflow()) {
-					return newResult(true, false, false);
+					return resultFactory().newResult(true, false, false);
 				}
 				states.pop();
 				break;
@@ -266,7 +261,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				// Stream, i.e. simply copy from source to destination
 				if (!ByteBufferUtils.putAsMuchAsPossible(out, chunkData)) {
 					// Not enough space in out buffer
-					return newResult(true, false, false);
+					return resultFactory().newResult(true, false, false);
 				}
 				// everything from in written
 				states.pop();
@@ -294,7 +289,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				// Everything is written
 				if (!endOfInput) {
 					if (in.remaining() == 0) {
-						return newResult(false, true, false);
+						return resultFactory().newResult(false, true, false);
 					}
 					throw new IllegalStateException("Unexpected input.");
 				}
@@ -304,7 +299,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				} else {
 					states.push(State.INITIAL);
 				}
-				return newResult(false, false, false);
+				return resultFactory().newResult(false, false, isClosed());
 
 			default:
 				throw new IllegalStateException();
@@ -312,7 +307,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			// Using "continue" above avoids this check. Use it only
 			// if the state has changed and no addition output is expected. 
 			if (out.remaining() == 0) {
-				return newResult(true, false, false);
+				return resultFactory().newResult(true, false, false);
 			}
 		}
 	}
@@ -455,7 +450,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			}
 			CoderResult result = charEncoder.encode((CharBuffer) in, out,
 			        endOfInput);
-			return newResult(result.isOverflow(), 
+			return resultFactory().newResult(result.isOverflow(), 
 					!endOfInput && result.isUnderflow(), false);
 		}
 		if (out.remaining() <= leftToStream) {
@@ -464,7 +459,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) in,
 			        (int) leftToStream);
 		}
-		return newResult(out.remaining() == 0, 
+		return resultFactory().newResult(out.remaining() == 0, 
 				!endOfInput && in.remaining() == 0, false);
 	}
 
@@ -484,7 +479,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			states.push(State.STREAM_BODY);
 			states.push(State.STREAM_COLLECTED);
 			states.push(State.HEADERS);
-			return newResult(false, false, false);
+			return resultFactory().newResult(false, false, false);
 		}
 		// Space left, collect
 		if (in instanceof ByteBuffer) {
@@ -519,10 +514,10 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			states.pop();
 			states.push(State.STREAM_COLLECTED);
 			states.push(State.HEADERS);
-			return newResult(false, false, false);
+			return resultFactory().newResult(false, false, false);
 		}
 		// Get more input
-		return newResult(false, true, false);
+		return resultFactory().newResult(false, true, false);
 	}
 
 	/**
@@ -555,12 +550,50 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				outStream.write("\r\n".getBytes("ascii"));
 				states.push(State.FINISH_CHUNK);
 				states.push(State.STREAM_CHUNK);
-				return newResult(outStream.remaining() <= 0, false, false);
+				return resultFactory().newResult
+						(outStream.remaining() <= 0, false, false);
 			}
 		} catch (IOException e) {
 			// Formally thrown by outStream, cannot happen.
 		}
-		return newResult(outStream.remaining() < 0, 
+		return resultFactory().newResult(outStream.remaining() < 0, 
 				in.remaining() == 0 && !endOfInput, false);
+	}
+	
+	/**
+	 * Results from {@link HttpEncoder} provide no additional
+	 * information compared to {@link org.jdrupes.httpcodec.Codec.Result}. 
+	 * This class only provides a factory for creating concrete results.
+	 */
+	public static class Result extends Codec.Result {
+	
+		protected Result(boolean overflow, boolean underflow,
+		        boolean closeConnection) {
+			super(overflow, underflow, closeConnection);
+		}
+
+		/**
+		 * A factory for creating new Results.
+		 */
+		protected abstract static class Factory 
+			extends Codec.Result.Factory {
+
+			/**
+			 * Create new result.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @param closeConnection
+			 *            {@code true} if the connection should be closed
+			 * @return the result
+			 */
+			public Result newResult(boolean overflow, boolean underflow,
+			        boolean closeConnection) {
+				return new Result(overflow, underflow, closeConnection) {
+				};
+			}
+		}
 	}
 }

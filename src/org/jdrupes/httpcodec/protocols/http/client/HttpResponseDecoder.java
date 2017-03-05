@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package org.jdrupes.httpcodec.protocols.http.client;
 
 import java.nio.Buffer;
@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Engine;
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.Encoder;
@@ -51,8 +50,18 @@ public class HttpResponseDecoder
 	        .compile("^(" + HTTP_VERSION + ")" + SP + "([1-9][0-9][0-9])"
 	                + SP + "(.*)$");
 
+	private final Result.Factory resultFactory	= new Result.Factory(this);
 	private String requestMethod = "";
+	private boolean reportHeaderReceived = false;
 	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder#resultFactory()
+	 */
+	@Override
+	protected Result.Factory resultFactory() {
+		return resultFactory;
+	}
+
 	/**
 	 * Creates a new decoder that belongs to the given HTTP engine.
 	 * 
@@ -60,27 +69,6 @@ public class HttpResponseDecoder
 	 */
 	public HttpResponseDecoder(Engine engine) {
 		super();
-	}
-
-	/**
-	 * Overrides the base interface's factory method in order to make
-	 * it return the extended return type. The value for 
-	 * {@code closeConnection} is taken from {@link #isClosed()}.
-	 * a protocol change is never reported by the base class.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param headerCompleted
-	 *            indicates that the message header has been completed and
-	 *            the message (without body) is available
-	 */
-	@Override
-	public Result newResult(boolean overflow,
-	        boolean underflow, boolean headerCompleted) {
-		return newResult (overflow, underflow, isClosed(), headerCompleted,
-				 null, null, null);
 	}
 
 	/**
@@ -152,6 +140,7 @@ public class HttpResponseDecoder
 	@Override
 	protected BodyMode headerReceived(HttpResponse message)
 	        throws HttpProtocolException {
+		reportHeaderReceived = true;
 		// RFC 7230 3.3.3 (1. & 2.)
 		int statusCode = message.getStatusCode();
 		if (requestMethod.equalsIgnoreCase("HEAD")
@@ -183,66 +172,16 @@ public class HttpResponseDecoder
 	}
 
 	/**
-	 * Factory method for result.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 * @param headerCompleted {@code true} if the header has completely
-	 * been decoded
-	 * @param newProtocol the name of the new protocol if a switch occurred
-	 * @param newDecoder the new decoder if a switch occurred
-	 * @param newEncoder the new decoder if a switch occurred
-	 * @return the result
-	 */
-	public Result newResult (boolean overflow, boolean underflow, 
-			boolean closeConnection, boolean headerCompleted,
-	        String newProtocol, ResponseDecoder<?,?> newDecoder, 
-	        Encoder<?> newEncoder) {
-		return new Result(overflow, underflow, closeConnection,
-				headerCompleted, newProtocol, newDecoder, newEncoder) {
-		};
-	}
-
-	/**
-	 * Overrides the base interface's factory method in order to make
-	 * it return the extended return type.
-	 * 
-	 * @param overflow
-	 *            {@code true} if the data didn't fit in the out buffer
-	 * @param underflow
-	 *            {@code true} if more data is expected
-	 * @param closeConnection
-	 *            {@code true} if the connection should be closed
-	 * @param headerCompleted {@code true} if the header has completely
-	 * been decoded
-	 * @param response a response to send due to an error
-	 * @param responseOnly if the result includes a response 
-	 * 	this flag indicates that no further processing besides 
-	 * 	sending the response is required
-	 * @return the result
-	 */
-	public Result newResult (boolean overflow, boolean underflow, 
-			boolean closeConnection, boolean headerCompleted, 
-			HttpRequest response, boolean responseOnly) {
-		return newResult(overflow, underflow, closeConnection,
-				headerCompleted, null, null, null);
-	}
-	
-	/**
 	 * The result from encoding a response. In addition to the usual
 	 * codec result, a result decoder may signal to the invoker that the
 	 * connection to the responder must be closed.
-	 * <P>
+	 * 
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
 	 * 
 	 * @author Michael N. Lipp
 	 */
-	public abstract class Result extends Decoder.Result<HttpRequest>
+	public abstract static class Result extends HttpDecoder.Result<HttpRequest>
 		implements Codec.ProtocolSwitchResult {
 
 		private String newProtocol;
@@ -298,7 +237,6 @@ public class HttpResponseDecoder
 		public int hashCode() {
 			final int prime = 31;
 			int result = super.hashCode();
-			result = prime * result + getOuterType().hashCode();
 			result = prime * result
 			        + ((newDecoder == null) ? 0 : newDecoder.hashCode());
 			result = prime * result
@@ -320,8 +258,6 @@ public class HttpResponseDecoder
 			if (getClass() != obj.getClass())
 				return false;
 			Result other = (Result) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
 			if (newDecoder == null) {
 				if (other.newDecoder != null)
 					return false;
@@ -338,10 +274,6 @@ public class HttpResponseDecoder
 			} else if (!newProtocol.equals(other.newProtocol))
 				return false;
 			return true;
-		}
-
-		private HttpResponseDecoder getOuterType() {
-			return HttpResponseDecoder.this;
 		}
 
 		/* (non-Javadoc)
@@ -385,5 +317,37 @@ public class HttpResponseDecoder
 			return builder.toString();
 		}
 		
+		/**
+		 * The Factory for (extended) results.
+		 */
+		protected static class Factory
+			extends HttpDecoder.Result.Factory<HttpRequest> {
+
+			private HttpResponseDecoder decoder;
+
+			/**
+			 * Creates a new factory for the given decoder. 
+			 * 
+			 * @param decoder the decoder
+			 */
+			protected Factory(HttpResponseDecoder decoder) {
+				super();
+				this.decoder = decoder;
+			}
+
+			/* (non-Javadoc)
+			 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder.Result.Factory#newResult(boolean, boolean, boolean)
+			 */
+			@Override
+			protected Result newResult(
+			        boolean overflow, boolean underflow) {
+				Result result = new Result(overflow, underflow, decoder.isClosed(),
+						decoder.reportHeaderReceived, null, null, null) {
+				};
+				decoder.reportHeaderReceived = false;
+				return result;
+			}
+		}
 	}
+	
 }

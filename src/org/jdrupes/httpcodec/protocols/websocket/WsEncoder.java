@@ -26,7 +26,9 @@ import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Stack;
 
+import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Encoder;
+import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 
@@ -38,7 +40,9 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	private static enum State { STARTING_FRAME, WRITING_HEADER,  
 		WRITING_LENGTH, WRITING_MASK, WRITING_PAYLOAD };
 	private static float bytesPerCharUtf8		
-		= Charset.forName("utf-8").newEncoder().averageBytesPerChar();		
+		= Charset.forName("utf-8").newEncoder().averageBytesPerChar();
+	private static final Result.Factory resultFactory = new Result.Factory();
+	
 	private SecureRandom randoms = new SecureRandom();
 	private State state = State.STARTING_FRAME;
 	private boolean continuationFrame;
@@ -62,7 +66,16 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		this.doMask = mask;
 	}
 
-	private Encoder.Result frameFinished(boolean endOfInput) {
+	/**
+	 * Returns the result factory for this codec.
+	 * 
+	 * @return the factory
+	 */
+	protected Result.Factory resultFactory() {
+		return resultFactory;
+	}
+	
+	private Result frameFinished(boolean endOfInput) {
 		boolean close = (messageHeaders.peek() instanceof WsCloseFrame);
 		if (!(messageHeaders.peek() instanceof WsMessageHeader) 
 				|| endOfInput) {
@@ -70,7 +83,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		}
 		state = State.STARTING_FRAME;
 		bytesToSend = 2;
-		return newResult(false, 
+		return resultFactory().newResult(false, 
 				!endOfInput || !messageHeaders.isEmpty(), close);
 	}
 	
@@ -156,7 +169,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 					convData.clear();
 					return frameFinished(endOfInput);
 				}
-				return newResult(!out.hasRemaining(),
+				return resultFactory().newResult(!out.hasRemaining(),
 						(messageHeaders.peek() instanceof WsMessageHeader) 
 							&& !in.hasRemaining(), false);
 			}
@@ -164,7 +177,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 				return result;
 			}
 		}
-		return newResult(true, false, false);
+		return resultFactory().newResult(true, false, false);
 	}
 
 	private void prepareHeaderHead(Buffer in, boolean endOfInput) {
@@ -302,4 +315,39 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		}
 	}
 
+	/**
+	 * Results from {@link HttpEncoder} provide no additional
+	 * information compared to {@link org.jdrupes.httpcodec.Codec.Result}. This
+	 * class only provides a factory for creating concrete results.
+	 */
+	public static class Result extends Codec.Result {
+	
+		protected Result(boolean overflow, boolean underflow,
+		        boolean closeConnection) {
+			super(overflow, underflow, closeConnection);
+		}
+
+		/**
+		 * A factory for creating new Results.
+		 */
+		protected static class Factory extends Codec.Result.Factory {
+
+			/**
+			 * Create new result.
+			 * 
+			 * @param overflow
+			 *            {@code true} if the data didn't fit in the out buffer
+			 * @param underflow
+			 *            {@code true} if more data is expected
+			 * @param closeConnection
+			 *            {@code true} if the connection should be closed
+			 * @return the result
+			 */
+			public Result newResult(boolean overflow, boolean underflow,
+			        boolean closeConnection) {
+				return new Result(overflow, underflow, closeConnection) {
+				};
+			}
+		}
+	}
 }

@@ -30,6 +30,9 @@ import org.jdrupes.httpcodec.protocols.http.HttpRequest;
  */
 public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 
+	private static Result.Factory resultFactory = new Result.Factory() {
+	};
+	
 	/**
 	 * Creates a new encoder that belongs to the given HTTP engine.
 	 * 
@@ -37,6 +40,14 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 	 */
 	public HttpRequestEncoder(Engine engine) {
 		super();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
+	 */
+	@Override
+	protected Result.Factory resultFactory() {
+		return resultFactory;
 	}
 
 	/* (non-Javadoc)
@@ -52,5 +63,24 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 		writer.write(messageHeader.getProtocol().toString());
 		writer.write("\r\n");
 	}
+	
+	/**
+	 * Results from {@link HttpRequestEncoder} add no additional
+	 * information to 
+	 * {@link org.jdrupes.httpcodec.protocols.http.HttpEncoder.Result}. This
+	 * class just provides a factory for creating concrete results.
+	 */
+	public static class Result extends HttpEncoder.Result {
 
+		protected Result(boolean overflow, boolean underflow,
+		        boolean closeConnection) {
+			super(overflow, underflow, closeConnection);
+		}
+	
+		/**
+		 * A concrete factory for creating new Results.
+		 */
+		protected static class Factory extends HttpEncoder.Result.Factory {
+		}		
+	}
 }
