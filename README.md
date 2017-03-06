@@ -33,7 +33,7 @@ dependencies {
 }
 ```
 
-(You can lookup the latest minor version [here](https://oss.sonatype.org/content/repositories/snapshots/org/jdrupes/httpcodec/httpcodec/). 
+(You can lookup the latest minor version [here](https://oss.sonatype.org/content/repositories/snapshots/org/jdrupes/httpcodec/httpcodec/)). 
 
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
