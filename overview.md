@@ -8,10 +8,10 @@ JDrupes HTTP Codecs
 The HTTP codecs are modeled after the Java 
 {@link java.nio.charset.CharsetDecoder} and 
 {@link java.nio.charset.CharsetEncoder}.
-A decoder is an engine that transforms a sequence
-of bytes into a sequence of (initially) HTTP requests or responses.
-An encoder transforms an HTTP request or
-response (including the payload data) into a sequence of bytes. 
+An HTTP decoder is an engine that transforms a sequence
+of bytes into a sequence of HTTP requests or responses (and streams
+their body data). An HTTP encoder transforms an HTTP request or
+response (including streamed body data) into a sequence of bytes. 
 
 The main difference between the Charset codecs and the HTTP codecs API
 is due to the type of the decoded data. For Charset codecs this is a 
@@ -68,9 +68,6 @@ If a received message violates the protocol or represents
 some kind of "ping" message, sending back the prepared response message 
 may be all that has to be done. These cases are indicated by
 {@link org.jdrupes.httpcodec.Decoder.Result#isResponseOnly}).
-
-A sample usage of the decoder can be found in the 
-[demo code](https://github.com/mnlipp/jdrupes-httpcodec/blob/master/demo/org/jdrupes/httpcodec/demo/Connection.java).
 
 Encoders
 --------
@@ -148,6 +145,81 @@ of the messages to be encode, in short an
 
 For implementing an HTTP client, you need an {@link org.jdrupes.httpcodec.protocols.http.client.HttpRequestEncoder}
 and an {@link org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder}.
+
+Protocol switching
+------------------
+
+HTTP supports a client initiated upgrade from the HTTP protocol to some
+other protocol on the same connection. If the upgrade request is confirmed
+by the server, subsequent messages from the client are sent using the new
+protocol. This, of course, requires using different codecs.
+
+Those codecs, or at least a subset of their functionality, is actually 
+already required when the confirmation response is encoded. HTTP allows 
+the confirmation response to contain information that is related 
+to the new protocol. Obviously, this information cannot be provided by 
+the HTTP encoder, because it knows nothing about the new protocol.
+
+The HTTP encoder therefore takes the following approach. When the header
+to be encoded contains the confirmation of a protocol switch, it
+uses the {@link java.util.ServiceLoader} to find an appropriate
+protocol provider. Protocol providers must be derived from 
+{@link org.jdrupes.httpcodec.plugin.ProtocolProvider}. Whether a 
+protocol provider supports a given protocol can be checked with the
+method {@link org.jdrupes.httpcodec.plugin.ProtocolProvider#supportsProtocol}.
+The library contains by default the
+{@link org.jdrupes.httpcodec.protocols.websocket.WsProtocolProvider},
+the probably best known use case for an HTTP protocol upgrade.
+  
+If the {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}
+cannot find a suitable protocol provider, it modifies the response 
+to deny the protocol switch. Else, it asks the provider to 
+{@link org.jdrupes.httpcodec.plugin.ProtocolProvider#augmentInitialResponse
+apply any require changes} to the confirming response.
+
+The {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}
+returns an extended result type that implements the
+{@link org.jdrupes.httpcodec.Codec.ProtocolSwitchResult} interface.
+
+![ProtocolSwitchResult](responseencoderresult.svg)
+
+When the encoder finishes the encoding of an upgrade confirmation,
+{@link org.jdrupes.httpcodec.Codec.ProtocolSwitchResult#newProtocol}
+returns the name of the new protocol (in all other cases it returns
+`null`). In addition, the result also provides new codecs obtained
+from the plugin provider. These codecs must be used for all subsequent
+requests and responses.
+
+Engines
+-------
+
+The codecs provided here are deliberatly restricted to using
+{@link java.nio.Buffer}s at their interface. They cannot acquire or
+send such buffers, as this would tie this library with stream
+mechanisms beyond the passing of `Buffer`s. It is therefore not 
+possible to provide autonomous engine functionality 
+such as automatically sending a preliminary response (see described above).
+
+Nevertheless, the package includes a 
+{@link org.jdrupes.httpcodec.ClientEngine} and a
+{@link org.jdrupes.httpcodec.ServerEngine}. Both simply group
+together a decoder and an encoder as required for client-side
+or server-side operation. To support the implementation of
+a server, the {@link org.jdrupes.httpcodec.ServerEngine}
+automatically adapts the engine to any protocol change, i.e.
+it replaces the engine's codecs if the encoder result includes
+new ones.
+
+Integration
+-----------
+
+The [demo server code](https://github.com/mnlipp/jdrupes-httpcodec/blob/master/demo/org/jdrupes/httpcodec/demo/Connection.java) demonstrates how the HTTP codecs can be used
+to implement a single threaded, blocking HTTP server. Of course, this
+is not what this library is intended for. It should, however, give you
+an idea how to integrate the HTTP codecs in your streaming environment.
+
+An example of integrating this library in an event driven framework
+can be found in the [JGrapes project](http://mnlipp.github.io/jgrapes/).
 
 
 @startuml decoder.svg
@@ -312,5 +384,23 @@ HttpMessageHeader <|-- HttpResponse
 HttpMessageHeader <|-- HttpRequest
 
 MessageHeader <|.. HttpMessageHeader
+
+@enduml
+
+@startuml responseencoderresult.svg
+
+class HttpResponseEncoder::Result
+
+class HttpEncoder::Result
+
+interface Codec::ProtocolSwitchResult {
+    newProtocol() : String
+    newEncoder() : Encoder<?>        
+    newDecoder() : Decoder<?, ?>
+}
+
+HttpEncoder::Result <|-- HttpResponseEncoder::Result
+
+Codec::ProtocolSwitchResult <|.. HttpResponseEncoder::Result
 
 @enduml

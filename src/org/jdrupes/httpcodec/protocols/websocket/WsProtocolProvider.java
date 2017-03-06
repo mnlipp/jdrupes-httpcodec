@@ -34,8 +34,29 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpUnquotedStringField;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 
 /**
- * @author Michael N. Lipp
- *
+ * A protocol provider for the WebSocket protocol.
+ * 
+ * ![WsProtocolProvider](WsProtocolProvider.svg)
+ * 
+ * 
+ * 
+ * @startuml WsProtocolProvider.svg
+ * 
+ * class ProtocolProvider
+ * 
+ * class WsProtocolProvider {
+ * 	+boolean supportsProtocol(String protocol)
+ * 	+void augmentInitialResponse(HttpResponse response)
+ * 	+Encoder<?> createRequestEncoder(String protocol)
+ * 	+Decoder<?,?> createRequestDecoder(String protocol)
+ * 	+Encoder<?> createResponseEncoder(String protocol)
+ * 	+ResponseDecoder<?,?> createResponseDecoder(String protocol)
+ * }
+ * 
+ * ProtocolProvider <|-- WsProtocolProvider
+ * 
+ * @enduml
+ * 
  */
 public class WsProtocolProvider extends ProtocolProvider {
 
