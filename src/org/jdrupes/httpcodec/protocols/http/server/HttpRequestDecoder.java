@@ -44,7 +44,6 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
  * 
  * @startuml httprequestdecoder.svg
  * class HttpRequestDecoder {
- * 	+HttpRequestDecoder()
  * 	+Result decode(ByteBuffer in, Buffer out, boolean endOfInput)
  * }
  * 
