@@ -29,9 +29,11 @@ repositories {
 }
 
 dependencies {
-	compile 'org.jdrupes.httpcodec:httpcodec:0.9.0-SNAPSHOT'
+	compile 'org.jdrupes.httpcodec:httpcodec:0.9.X-SNAPSHOT'
 }
 ```
+
+(You can lookup the latest minor version [here](https://oss.sonatype.org/content/repositories/snapshots/org/jdrupes/httpcodec/httpcodec/). 
 
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
