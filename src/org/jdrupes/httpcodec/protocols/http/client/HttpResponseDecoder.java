@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.Engine;
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
@@ -73,15 +72,6 @@ public class HttpResponseDecoder
 	@Override
 	protected Result.Factory resultFactory() {
 		return resultFactory;
-	}
-
-	/**
-	 * Creates a new decoder that belongs to the given HTTP engine.
-	 * 
-	 * @param engine the engine
-	 */
-	public HttpResponseDecoder(Engine engine) {
-		super();
 	}
 
 	/**

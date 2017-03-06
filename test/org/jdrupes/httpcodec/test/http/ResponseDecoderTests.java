@@ -58,7 +58,7 @@ public class ResponseDecoderTests {
 				+ "\r\n"
 				+ "Hello World!";
 		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		ResponseDecoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());

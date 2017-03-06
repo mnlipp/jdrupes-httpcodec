@@ -254,7 +254,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				
 			case CHUNK_BODY:
 				// Send in data as chunk
-				result = startChunk(in, out, endOfInput);
+				result = startChunk(in, endOfInput);
 				continue; // remaining check already done 
 
 			case STREAM_CHUNK:
@@ -356,6 +356,10 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			states.push(State.HEADERS);
 			return;
 		}
+		configureBodyHandling();
+	}
+
+	private void configureBodyHandling() {
 		// Message has a body, find out how to handle it
 		HttpIntField cl = messageHeader.getField(HttpIntField.class,
 		        HttpField.CONTENT_LENGTH).orElse(null);
@@ -523,11 +527,10 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	/**
 	 * Handle the input as appropriate for the chunked-body mode.
 	 * 
-	 * @param in
-	 * @return
+	 * @param in the data
+	 * @return the result
 	 */
-	private Encoder.Result startChunk
-		(Buffer in, ByteBuffer out, boolean endOfInput) {
+	private Encoder.Result startChunk (Buffer in, boolean endOfInput) {
 		if (endOfInput) {
 			states.pop();
 			states.push(State.FINISH_CHUNKED);

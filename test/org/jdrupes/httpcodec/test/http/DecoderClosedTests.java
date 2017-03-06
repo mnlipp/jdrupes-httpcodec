@@ -58,7 +58,7 @@ public class DecoderClosedTests {
 				+ "\r\n"
 				+ "Hello World!";
 		ByteBuffer buffer = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(buffer, body, true);
 		assertTrue(result.isHeaderCompleted());
@@ -92,7 +92,7 @@ public class DecoderClosedTests {
 				+ "\r\n"
 				+ "Hello World!";
 		ByteBuffer buffer = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
@@ -136,7 +136,7 @@ public class DecoderClosedTests {
 				+ "\r\n"
 				+ "Hello World!";
 		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer out = ByteBuffer.allocate(1024);
 		Common.tinyDecodeLoop(decoder, in, out);
 		Decoder.Result<?> result = decoder.decode(in, out, true);
@@ -170,7 +170,7 @@ public class DecoderClosedTests {
 				+ "\r\n"
 				+ "ÄÖÜaöüß€.";
 		ByteBuffer buffer = ByteBuffer.wrap(reqText.getBytes("utf-8"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		CharBuffer body = CharBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(buffer, body, true);
 		assertTrue(result.isHeaderCompleted());
@@ -201,7 +201,7 @@ public class DecoderClosedTests {
 				+ "\r\n"
 				+ "ÄÖÜaöüß€.";
 		ByteBuffer buffer = ByteBuffer.wrap(reqText.getBytes("utf-8"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		CharBuffer body = CharBuffer.allocate(1);
 		Decoder.Result<?> result = decoder.decode(buffer, body, true);
 		assertTrue(result.isHeaderCompleted());
@@ -243,7 +243,7 @@ public class DecoderClosedTests {
 				+ "\r\n"
 				+ "ÄÖÜaöüß€.";
 		InputStream is = new ByteArrayInputStream(reqText.getBytes("utf-8"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		CharBuffer body = CharBuffer.allocate(1024);
 		byte[] ba = new byte[1];
 		Decoder.Result<?> result;

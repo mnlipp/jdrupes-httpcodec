@@ -54,7 +54,7 @@ public class DecoderChunkedTests {
 				+ "0\r\n"
 				+ "\r\n";
 		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());
@@ -94,7 +94,7 @@ public class DecoderChunkedTests {
 				+ "0\r\n"
 				+ "\r\n";
 		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		Decoder.Result<?> result = decoder.decode(in, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertTrue(decoder.getHeader().get().messageHasBody());
@@ -144,7 +144,7 @@ public class DecoderChunkedTests {
 				+ "0\r\n"
 				+ "\r\n";
 		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
-		HttpResponseDecoder decoder = new HttpResponseDecoder(null);
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = Common.tinyDecodeLoop(decoder, in, body);
 		assertTrue(decoder.getHeader().get().messageHasBody());
