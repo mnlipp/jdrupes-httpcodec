@@ -65,13 +65,6 @@ public class HttpRequestDecoder
 	
 	private boolean reportHeaderReceived = false;
 
-	/**
-	 * Creates a new encoder.
-	 */
-	public HttpRequestDecoder() {
-		super();
-	}
-
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder#resultFactory()
 	 */
