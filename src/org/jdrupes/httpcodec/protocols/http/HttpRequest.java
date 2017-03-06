@@ -34,6 +34,19 @@ public class HttpRequest extends HttpMessageHeader {
 
 	public static final URI ASTERISK_REQUEST 
 		= createUri("http://127.0.0.1/");
+	
+	private String method;
+	private URI requestUri;
+	private String host;
+	private int port;
+	private HttpResponse response;
+
+	/**
+	 * Helper for initialization.
+	 * 
+	 * @param uri as string
+	 * @return the URI
+	 */
 	private static URI createUri(String uri) {
 		try {
 			return new URI(uri);
@@ -41,12 +54,6 @@ public class HttpRequest extends HttpMessageHeader {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
-	private String method;
-	private URI requestUri;
-	private String host;
-	private int port;
-	private HttpResponse response;
 	
 	/**
 	 * Creates a new request with basic data. 

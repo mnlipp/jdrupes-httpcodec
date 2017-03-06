@@ -131,7 +131,7 @@ public class HttpRequestDecoder
 			        HttpStatus.HTTP_VERSION_NOT_SUPPORTED);
 		}
 		URI uri = null;
-		if (uriGroup.equals("*")) {
+		if ("*".equals(uriGroup)) {
 			uri = HttpRequest.ASTERISK_REQUEST;
 		} else {
 			try {

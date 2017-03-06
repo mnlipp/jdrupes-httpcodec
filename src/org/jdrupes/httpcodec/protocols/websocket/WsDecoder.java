@@ -61,7 +61,6 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	private byte[] maskingKey = new byte[4];
 	private int maskIndex;
 	private long payloadLength = 0;
-	private Opcode opcode;
 	private OptimizedCharsetDecoder charDecoder = null;
 	private WsFrameHeader receivedHeader = null;
 	private WsFrameHeader reportedHeader = null;
@@ -269,7 +268,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	}
 
 	private Decoder.Result<WsFrameHeader> headerComplete() {
-		opcode = Opcode.fromInt(curHeaderHead >> 8 & 0xf);
+		Opcode opcode = Opcode.fromInt(curHeaderHead >> 8 & 0xf);
 		receivedHeader = null;
 		reportedHeader = null;
 		if ((curHeaderHead >> 8 & 0x8) == 0) {

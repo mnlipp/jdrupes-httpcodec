@@ -70,13 +70,6 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	private String switchingTo;
 	private ProtocolProvider protocolPlugin;
 
-	/**
-	 * Creates a new encoder that belongs to the given HTTP engine.
-	 */
-	public HttpResponseEncoder() {
-		super();
-	}
-
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
 	 */
