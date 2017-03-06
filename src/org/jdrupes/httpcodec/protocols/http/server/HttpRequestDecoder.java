@@ -37,9 +37,22 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * A decoder for HTTP requests that accepts data from a sequence of
- * {@link ByteBuffer}s.
+ * {@link ByteBuffer}s and decodes them into {@link HttpRequest}s
+ * and their (optional) payload.
  * 
- * @author Michael N. Lipp
+ * ![HttpRequestDecoder](httprequestdecoder.svg)
+ * 
+ * @startuml httprequestdecoder.svg
+ * class HttpRequestDecoder {
+ * 	+HttpRequestDecoder()
+ * 	+Result decode(ByteBuffer in, Buffer out, boolean endOfInput)
+ * }
+ * 
+ * class HttpDecoder<T extends HttpMessageHeader, R extends HttpMessageHeader> {
+ * }
+ * 
+ * HttpDecoder <|-- HttpRequestDecoder: <<bind>> <T -> HttpRequest, R -> HttpResponse>  
+ * @enduml
  */
 public class HttpRequestDecoder 
 	extends HttpDecoder<HttpRequest, HttpResponse> {
@@ -53,7 +66,7 @@ public class HttpRequestDecoder
 	private boolean reportHeaderReceived = false;
 
 	/**
-	 * Creates a new encoder that belongs to the given HTTP engine.
+	 * Creates a new encoder.
 	 */
 	public HttpRequestDecoder() {
 		super();

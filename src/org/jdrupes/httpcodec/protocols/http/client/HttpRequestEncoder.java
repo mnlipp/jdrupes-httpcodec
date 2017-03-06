@@ -19,13 +19,28 @@ package org.jdrupes.httpcodec.protocols.http.client;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.Buffer;
 
 import org.jdrupes.httpcodec.Engine;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 
 /**
- * @author Michael N. Lipp
+ * An encoder for HTTP requests that accepts a header and optional
+ * payload data end encodes it into a sequence of
+ * {@link Buffer}s.
+ * 
+ * ![HttpRequestEncoder](httprequestencoder.svg)
+ * 
+ * @startuml httprequestencoder.svg
+ * class HttpRequestEncoder {
+ * 	+HttpRequestEncoder(Engine engine)
+ * }
+ * 
+ * class HttpEncoder<T extends HttpMessageHeader> {
+ * }
+ * 
+ * HttpEncoder <|-- HttpRequestEncoder : <<bind>> <T -> HttpRequest>
  *
  */
 public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {

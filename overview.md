@@ -111,7 +111,7 @@ An HTTP decoder is a special decoder that returns
 in its {@link org.jdrupes.httpcodec.protocols.http.HttpDecoder#getHeader()} 
 method (type parameter `T`). Of course, if
 the result of the `decode` method  includes a response,
-it s also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
+it's also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
 (type parameter `R`).  
 
 ![HTTP Decoder](http-decoder.svg)
@@ -119,14 +119,15 @@ it s also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
 In addition, it is possible to specify a maximum header length to
 avoid that a malicious request fills all your memory. And you can
 {@linkplain org.jdrupes.httpcodec.protocols.http.HttpDecoder#isClosed() query}
-if the decoder has reached the closed state, i.e. assumes
-the connection, for which it was created, to be closed.
+if the decoder has reached the closed state, i.e. won't decode more messages,
+because the connection should be closed (if indicated by the result) or
+will be closed at the other end after sending a final response.
 
 The HTTP encoder is derived in a similar way.
 
 ![HTTP Decoder](http-encoder.svg)
 
-The the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#getPendingLimit 
+See the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#getPendingLimit 
 getter description} for the meaning of "pending limit". 
 
 As you can see, we still have'nt reached the goal yet to get concrete
@@ -144,6 +145,9 @@ what makes up an
 And you need an `HttpEncoder` parameterized with `HTTPRequest` as type
 of the messages to be encode, in short an
 {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}.
+
+For implementing an HTTP client, you need an {@link org.jdrupes.httpcodec.protocols.http.client.HttpRequestEncoder}
+and an {@link org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder}.
 
 
 @startuml decoder.svg

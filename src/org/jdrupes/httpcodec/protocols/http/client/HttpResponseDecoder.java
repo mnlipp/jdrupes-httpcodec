@@ -36,10 +36,23 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
- * A decoder for HTTP responses that accepts data from a sequence of
- * {@link ByteBuffer}s.
+ * A decoder for HTTP reponses that accepts data from a sequence of
+ * {@link ByteBuffer}s and decodes them into {@link HttpResponse}s
+ * and their (optional) payload.
  * 
- * @author Michael N. Lipp
+ * ![HttpResponseDecoder](httpresponsedecoder.svg)
+ * 
+ * @startuml httpresponsedecoder.svg
+ * class HttpResponseDecoder {
+ * 	+HttpRequestDecoder()
+ * 	+Result decode(ByteBuffer in, Buffer out, boolean endOfInput)
+ * }
+ * 
+ * class HttpDecoder<T extends HttpMessageHeader, R extends HttpMessageHeader> {
+ * }
+ * 
+ * HttpDecoder <|-- HttpResponseDecoder: <<bind>> <T -> HttpResponse, R -> HttpRequest>  
+ * @enduml
  */
 public class HttpResponseDecoder 
 	extends HttpDecoder<HttpResponse, HttpRequest>

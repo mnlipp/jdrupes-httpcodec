@@ -39,7 +39,25 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
- * @author Michael N. Lipp
+ * An encoder for HTTP responses that accepts a header and optional
+ * payload data end encodes it into a sequence of
+ * {@link Buffer}s.
+ * 
+ * ![HttpResponseEncoder](httpresponseencoder.svg)
+ * 
+ * @startuml httpresponseencoder.svg
+ * class HttpResponseEncoder {
+ * 	+HttpResponseEncoder()
+ * 	+void encode(HttpResponse messageHeader)
+ * +Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
+ * }
+ * 
+ * class HttpEncoder<T extends HttpMessageHeader> {
+ * }
+ * 
+ * HttpEncoder <|-- HttpResponseEncoder : <<bind>> <T -> HttpResponse>
+ * 
+ * @enduml
  */
 public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 
