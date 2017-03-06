@@ -48,15 +48,6 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 	private static Result.Factory resultFactory = new Result.Factory() {
 	};
 	
-	/**
-	 * Creates a new encoder that belongs to the given HTTP engine.
-	 * 
-	 * @param engine the engine
-	 */
-	public HttpRequestEncoder(Engine engine) {
-		super();
-	}
-
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
 	 */

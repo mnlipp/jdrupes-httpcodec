@@ -40,7 +40,7 @@ public class RequestEncoderTests {
 	public void testSimpleRequest() throws URISyntaxException {
 		HttpRequest request = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		HttpRequestEncoder encoder = new HttpRequestEncoder(null);
+		HttpRequestEncoder encoder = new HttpRequestEncoder();
 		encoder.encode(request);
 		ByteBuffer out = ByteBuffer.allocate(1024*1024);
 		Codec.Result result = encoder.encode(out);
