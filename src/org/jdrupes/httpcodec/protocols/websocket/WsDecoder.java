@@ -98,25 +98,6 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return Optional.ofNullable(receivedHeader);
 	}
 
-//	/**
-//	 * Overrides the base interface's factory method in order to make
-//	 * it return the extended return type.
-//	 * 
-//	 * @param overflow
-//	 *            {@code true} if the data didn't fit in the out buffer
-//	 * @param underflow
-//	 *            {@code true} if more data is expected
-//	 * @param closeConnection
-//	 *            {@code true} if the connection should be closed
-//	 */
-//	@Override
-//	public Result newResult
-//		(boolean overflow, boolean underflow, boolean closeConnection) {
-//		return new Result<WsFrameHeader>(overflow, underflow, closeConnection,
-//				false, null, false) {
-//		};
-//	}
-	
 	private Result createResult
 		(boolean overflow, boolean underflow, 
 				WsFrameHeader response, boolean responseOnly) {
