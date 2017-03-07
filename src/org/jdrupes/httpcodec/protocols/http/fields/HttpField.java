@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
@@ -30,21 +31,22 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants;
  */
 public abstract class HttpField<T> implements Cloneable {
 
-	final public static String COOKIE = "Cookie";
-	final public static String CONNECTION = "Connection";
-	final public static String CONTENT_LENGTH = "Content-Length";
-	final public static String CONTENT_TYPE = "Content-Type";
-	final public static String DATE = "Date";
-	final public static String HOST = "Host";
-	final public static String SET_COOKIE = "Set-Cookie";
-	final public static String TE = "TE";
-	final public static String TRAILER = "Trailer";
-	final public static String TRANSFER_ENCODING = "Transfer-Encoding";
-	final public static String UPGRADE = "Upgrade";
-	final public static String VIA = "Via";
+	public static final String COOKIE = "Cookie";
+	public static final String CONNECTION = "Connection";
+	public static final String CONTENT_LENGTH = "Content-Length";
+	public static final String CONTENT_TYPE = "Content-Type";
+	public static final String DATE = "Date";
+	public static final String HOST = "Host";
+	public static final String SET_COOKIE = "Set-Cookie";
+	public static final String TE = "TE";
+	public static final String TRAILER = "Trailer";
+	public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+	public static final String UPGRADE = "Upgrade";
+	public static final String VIA = "Via";
 	
 	private static Map<String, String> fieldNameMap = new TreeMap<>(
 	        String.CASE_INSENSITIVE_ORDER);
+	
 	static {
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
@@ -104,7 +106,7 @@ public abstract class HttpField<T> implements Cloneable {
 		}
 	}
 	
-	final private String name;
+	private final String name;
 	
 	/**
 	 * Creates a new representation of a header field value. For fields with
@@ -168,12 +170,12 @@ public abstract class HttpField<T> implements Cloneable {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder();
-		s.append(getClass().getSimpleName());
-		s.append(" [");
-		s.append(asHeaderField().replace("\r\n", " CRLF "));
-		s.append("]");
-		return s.toString();
+		StringBuilder result = new StringBuilder();
+		result.append(getClass().getSimpleName());
+		result.append(" [");
+		result.append(asHeaderField().replace("\r\n", " CRLF "));
+		result.append("]");
+		return result.toString();
 	}
 
 	/**
@@ -240,6 +242,7 @@ public abstract class HttpField<T> implements Cloneable {
 			case '"':
 			case '\\':
 				result.append('\\');
+				// fall through
 			default:
 				result.append(ch);
 			}

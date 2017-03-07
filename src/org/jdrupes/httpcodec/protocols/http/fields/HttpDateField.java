@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.lang.reflect.InvocationTargetException;
@@ -53,15 +54,15 @@ public class HttpDateField extends HttpField<Instant> {
 	}
 
 	protected static <T extends HttpDateField> T fromString(Class<T> type,
-	        String name, String s) throws ParseException {
+	        String name, String text) throws ParseException {
 		try {
 			T result = type.getConstructor(String.class, Instant.class)
 			        .newInstance(name, Instant.EPOCH);
 			try {
 				((HttpDateField) result).value = Instant
-				        .from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(s));
+				        .from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(text));
 			} catch (DateTimeParseException e) {
-				throw new ParseException(s, 0);
+				throw new ParseException(text, 0);
 			}
 			return result;
 		} catch (InstantiationException | IllegalAccessException
@@ -76,14 +77,14 @@ public class HttpDateField extends HttpField<Instant> {
 	 * 
 	 * @param name
 	 *            the field name
-	 * @param s
+	 * @param text
 	 *            the string to parse
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpDateField fromString(String name, String s)
+	public static HttpDateField fromString(String name, String text)
 	        throws ParseException {
-		return fromString(HttpDateField.class, name, s);
+		return fromString(HttpDateField.class, name, text);
 	}
 
 	/**
@@ -103,8 +104,8 @@ public class HttpDateField extends HttpField<Instant> {
 	 */
 	@Override
 	public String asFieldValue() {
-		return DateTimeFormatter.RFC_1123_DATE_TIME.format
-				(value.atZone(ZoneId.of("GMT")));	
+		return DateTimeFormatter.RFC_1123_DATE_TIME.format(
+				value.atZone(ZoneId.of("GMT")));	
 	}
 
 }

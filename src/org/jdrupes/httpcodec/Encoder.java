@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec;
 
 import java.nio.Buffer;
@@ -66,7 +67,7 @@ public interface Encoder<T extends MessageHeader> extends Codec {
 	 *            the buffer to which data is written
 	 * @return the result
 	 */
-	default public Result encode(ByteBuffer out) {
+	public default Result encode(ByteBuffer out) {
 		return encode(EMPTY_IN, out, true);
 	}
 

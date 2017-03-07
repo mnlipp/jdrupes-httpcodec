@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.net.HttpCookie;
@@ -41,18 +42,18 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 	/**
 	 * Adds a new cookie obtained by parsing the given String.
 	 * 
-	 * @param s
+	 * @param text
 	 *            the string to parse
 	 * @return this object for easy chaining
 	 * @throws ParseException
 	 *             if the input violates the field format
 	 */
-	public HttpSetCookieListField addFromString(String s)
+	public HttpSetCookieListField addFromString(String text)
 	        throws ParseException {
 		try {
-			addAll(HttpCookie.parse(s));
+			addAll(HttpCookie.parse(text));
 		} catch (IllegalArgumentException e) {
-			throw new ParseException(s, 0);
+			throw new ParseException(text, 0);
 		}
 		return this;
 	}
@@ -61,16 +62,16 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 	 * Creates a new object and adds the set-cookie obtained by parsing the
 	 * given String.
 	 * 
-	 * @param s
+	 * @param text
 	 *            the string to parse
 	 * @return this object for easy chaining
 	 * @throws ParseException
 	 *             if the input violates the field format
 	 */
-	public static HttpSetCookieListField fromString(String s)
+	public static HttpSetCookieListField fromString(String text)
 	        throws ParseException {
 		HttpSetCookieListField result = new HttpSetCookieListField();
-		result.addFromString(s);
+		result.addFromString(text);
 		return result;
 	}
 

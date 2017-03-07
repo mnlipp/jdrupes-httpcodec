@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
@@ -40,17 +41,17 @@ public class HttpContentLengthField extends HttpIntField {
 	 * Creates a new object with a value obtained by parsing the given
 	 * String.
 	 * 
-	 * @param s the string to parse
+	 * @param text the string to parse
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpContentLengthField fromString(String s)
+	public static HttpContentLengthField fromString(String text)
 			throws ParseException {
 		long value;
 		try {
-			value = Long.parseLong(unquote(s));
+			value = Long.parseLong(unquote(text));
 		} catch (NumberFormatException e) {
-			throw new ParseException(s, 0);
+			throw new ParseException(text, 0);
 		}
 		return new HttpContentLengthField(value);
 	}

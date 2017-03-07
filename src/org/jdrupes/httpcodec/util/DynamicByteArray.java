@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.util;
 
 /**
@@ -43,31 +44,31 @@ public class DynamicByteArray {
 	/**
 	 * Appends the given byte, growing the array if necessary.
 	 * 
-	 * @param b the byte to append
+	 * @param data the byte to append
 	 */
-	public void append(byte b) {
+	public void append(byte data) {
 		if (position >= bytes.length) {
 			byte[] newBytes = new byte[(int)(bytes.length * 1.3)];
 			System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
 			bytes = newBytes;
 		}
-		bytes[position++] = b;
+		bytes[position++] = data;
 	}
 
 	/**
 	 * Appends the given bytes, growing the array if necessary.
 	 * 
-	 * @param b an array of bytes
+	 * @param data an array of bytes
 	 * @param offset the first byte to append
 	 * @param length the number of bytes to append
 	 */
-	public void append(byte[] b, int offset, int length) {
+	public void append(byte[] data, int offset, int length) {
 		if (bytes.length - position < length) {
 			byte[] newBytes = new byte[(int)((bytes.length + length) * 1.3)];
 			System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
 			bytes = newBytes;
 		}
-		System.arraycopy(b, offset, bytes, position, length);
+		System.arraycopy(data, offset, bytes, position, length);
 	}
 
 	/**

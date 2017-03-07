@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.client;
 
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.internal.Encoder#startMessage(org.jdrupes.httpcodec.internal.MessageHeader, java.io.Writer)
+	 * @see Encoder#startMessage(MessageHeader, java.io.Writer)
 	 */
 	@Override
 	protected void startMessage(HttpRequest messageHeader, Writer writer)

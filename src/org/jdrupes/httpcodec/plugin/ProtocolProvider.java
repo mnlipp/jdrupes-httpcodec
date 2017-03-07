@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.plugin;
 
 import org.jdrupes.httpcodec.Decoder;
@@ -34,7 +35,7 @@ public abstract class ProtocolProvider {
 	 * @param protocol the protocol in question
 	 * @return the result
 	 */
-	abstract public boolean supportsProtocol(String protocol);
+	public abstract boolean supportsProtocol(String protocol);
 
 	/**
 	 * Add any required information to the "switching protocols" response
@@ -43,7 +44,7 @@ public abstract class ProtocolProvider {
 	 * 
 	 * @param response the response
 	 */
-	abstract public void augmentInitialResponse(HttpResponse response);
+	public abstract void augmentInitialResponse(HttpResponse response);
 	
 	/**
 	 * Creates a new request encoder for the protocol.
@@ -51,7 +52,7 @@ public abstract class ProtocolProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the request encoder
 	 */
-	abstract public Encoder<?>	createRequestEncoder(String protocol);
+	public abstract Encoder<?>	createRequestEncoder(String protocol);
 	
 	/**
 	 * Creates a new request decoder for the protocol.
@@ -59,7 +60,7 @@ public abstract class ProtocolProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the request decoder
 	 */
-	abstract public Decoder<?, ?> createRequestDecoder(String protocol);
+	public abstract Decoder<?, ?> createRequestDecoder(String protocol);
 	
 	/**
 	 * Creates a new response encoder for the protocol.
@@ -67,7 +68,7 @@ public abstract class ProtocolProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the response encoder
 	 */
-	abstract public Encoder<? extends MessageHeader>
+	public abstract Encoder<? extends MessageHeader>
 		createResponseEncoder(String protocol);
 	
 	/**
@@ -76,7 +77,7 @@ public abstract class ProtocolProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the response decoder
 	 */
-	abstract public ResponseDecoder<?, ?>
+	public abstract ResponseDecoder<?, ?>
 		createResponseDecoder(String protocol);
 	
 	

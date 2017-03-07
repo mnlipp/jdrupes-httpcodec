@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.util;
 
 import java.io.IOException;
@@ -139,11 +140,11 @@ public class ByteBufferOutputStream extends OutputStream {
 	 * @see java.io.OutputStream#write(int)
 	 */
 	@Override
-	public void write(int b) throws IOException {
+	public void write(int data) throws IOException {
 		if (current == null || current.remaining() == 0) {
 			allocateOverflowBuffer();
 		}
-		current.put((byte) b);
+		current.put((byte) data);
 		bytesWritten += 1;
 	}
 
@@ -153,19 +154,20 @@ public class ByteBufferOutputStream extends OutputStream {
 	 * @see java.io.OutputStream#write(byte[], int, int)
 	 */
 	@Override
-	public void write(byte[] b, int offset, int length) throws IOException {
+	public void write(byte[] data, int offset, int length)
+			throws IOException {
 		if (current == null) {
 			allocateOverflowBuffer();
 		}
 		bytesWritten += length;
 		while (true) {
 			if (current.remaining() >= length) {
-				current.put(b, offset, length);
+				current.put(data, offset, length);
 				return;
 			}
 			if (current.remaining() > 0) {
 				int processed = current.remaining();
-				current.put(b, offset, processed);
+				current.put(data, offset, processed);
 				offset += processed;
 				length -= processed;
 			}
@@ -176,15 +178,15 @@ public class ByteBufferOutputStream extends OutputStream {
 	/**
 	 * Copies the data from the given buffer to this output stream.
 	 * 
-	 * @param b the buffer
+	 * @param data the buffer
 	 */
-	public void write(ByteBuffer b) {
+	public void write(ByteBuffer data) {
 		if (current == null) {
 			allocateOverflowBuffer();
 		}
-		bytesWritten += b.remaining();
+		bytesWritten += data.remaining();
 		while (true) {
-			if (ByteBufferUtils.putAsMuchAsPossible(current, b)) {
+			if (ByteBufferUtils.putAsMuchAsPossible(current, data)) {
 				return;
 			}
 			allocateOverflowBuffer();
@@ -194,18 +196,18 @@ public class ByteBufferOutputStream extends OutputStream {
 	/**
 	 * Copies length bytes from the given buffer to this output stream.
 	 * 
-	 * @param b the buffer
+	 * @param data the buffer
 	 * @param length the number of bytes to copy
 	 */
-	public void write(ByteBuffer b, int length) {
-		if (b.remaining() <= length) {
-			write(b);
+	public void write(ByteBuffer data, int length) {
+		if (data.remaining() <= length) {
+			write(data);
 			return;
 		}
-		int savedLimit = b.limit();
-		b.limit(b.position() + length);
-		write(b);
-		b.limit(savedLimit);
+		int savedLimit = data.limit();
+		data.limit(data.position() + length);
+		write(data);
+		data.limit(savedLimit);
 	}
 
 	/**

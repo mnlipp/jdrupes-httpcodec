@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec;
 
 import java.nio.Buffer;
@@ -44,8 +45,8 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 * @param requestDecoder the decoder for the request
 	 * @param responseEncoder the encoder for the response
 	 */
-	public ServerEngine	
-		(Decoder<Q, R> requestDecoder, Encoder<R> responseEncoder) {
+	public ServerEngine(
+			Decoder<Q, R> requestDecoder, Encoder<R> responseEncoder) {
 		this.requestDecoder = requestDecoder;
 		this.responseEncoder = responseEncoder;
 	}
@@ -80,8 +81,8 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 * @throws ProtocolException if the input violates the protocol
 	 */
 	@SuppressWarnings("unchecked")
-	public Decoder.Result<R> decode
-		(ByteBuffer in, Buffer out, boolean endOfInput)
+	public Decoder.Result<R> decode(
+		ByteBuffer in, Buffer out, boolean endOfInput)
 			throws ProtocolException {
 		return (Decoder.Result<R>)requestDecoder.decode(in, out, endOfInput);
 	}

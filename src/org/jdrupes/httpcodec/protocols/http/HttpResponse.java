@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,17 +14,18 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.text.ParseException;
 import java.util.Optional;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
-
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * Represents an HTTP response header.
@@ -51,7 +52,7 @@ public class HttpResponse extends HttpMessageHeader {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setField(org.jdrupes.httpcodec.fields.HttpField)
+	 * @see HttpMessageHeader#setField(org.jdrupes.httpcodec.fields.HttpField)
 	 */
 	@Override
 	public HttpResponse setField(HttpField<?> value) {
@@ -123,8 +124,8 @@ public class HttpResponse extends HttpMessageHeader {
 	 */
 	public HttpResponse setContentType(String type, String subtype) 
 			throws ParseException {
-		return setField(new HttpMediaTypeField
-				(HttpField.CONTENT_TYPE, type, subtype));
+		return setField(new HttpMediaTypeField(
+				HttpField.CONTENT_TYPE, type, subtype));
 	}
 
 	/**

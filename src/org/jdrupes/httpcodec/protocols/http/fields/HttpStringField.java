@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
@@ -45,13 +46,13 @@ public class HttpStringField extends HttpField<String> {
 	 * if it is quoted.
 	 * 
 	 * @param name the field name
-	 * @param s the string to parse
+	 * @param text the string to parse
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpStringField fromString(String name, String s)
+	public static HttpStringField fromString(String name, String text)
 			throws ParseException {
-		return new HttpStringField(name, unquote(s.trim()));
+		return new HttpStringField(name, unquote(text.trim()));
 	}
 
 	/* (non-Javadoc)

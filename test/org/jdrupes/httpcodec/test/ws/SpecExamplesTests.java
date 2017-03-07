@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,10 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.ws;
+ */
 
-import static org.junit.Assert.*;
+package org.jdrupes.httpcodec.test.ws;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -32,6 +31,8 @@ import org.jdrupes.httpcodec.protocols.websocket.WsEncoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
 import org.jdrupes.httpcodec.protocols.websocket.WsPingFrame;
 import org.jdrupes.httpcodec.protocols.websocket.WsPongFrame;
+
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class SpecExamplesTests {
@@ -61,7 +62,7 @@ public class SpecExamplesTests {
 	
 	@Test
 	public void testEncodeSingleUnmaskedText() throws ProtocolException {
-		byte[] expectedBytes = new byte[] 
+		final byte[] expectedBytes = new byte[] 
 				{(byte)0x81, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f};
 		WsEncoder encoder = new WsEncoder(false);
 		CharBuffer txt = CharBuffer.allocate(20);
@@ -106,8 +107,9 @@ public class SpecExamplesTests {
 	
 	@Test
 	public void testDecodeFragmentedUnmaskedText() throws ProtocolException {
-		byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
-		byte[] msgBytes2 = new byte[] {(byte)0x80, 0x02, 0x6c, 0x6f};
+		final byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
+		final byte[] msgBytes2 = new byte[] {(byte)0x80, 0x02, 0x6c, 0x6f};
+		
 		ByteBuffer msg = ByteBuffer.allocate(40);
 		msg.put(msgBytes1);
 		msg.flip();
@@ -136,8 +138,8 @@ public class SpecExamplesTests {
 	
 	@Test
 	public void testEncodeFragmentedUnmaskedText() throws ProtocolException {
-		byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
-		byte[] msgBytes2 = new byte[] {(byte)0x80, 0x02, 0x6c, 0x6f};
+		final byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
+		final byte[] msgBytes2 = new byte[] {(byte)0x80, 0x02, 0x6c, 0x6f};
 		WsEncoder encoder = new WsEncoder(false);
 		CharBuffer txt = CharBuffer.allocate(20);
 		txt.put("Hel");
@@ -199,7 +201,7 @@ public class SpecExamplesTests {
 	@Test
 	public void testEncodeUnmaskedPing() 
 			throws ProtocolException, UnsupportedEncodingException {
-		byte[] pingBytes = new byte[] 
+		final byte[] pingBytes = new byte[] 
 				{(byte)0x89, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f};
 		WsEncoder encoder = new WsEncoder(false);
 		ByteBuffer appData = ByteBuffer.allocate(20);

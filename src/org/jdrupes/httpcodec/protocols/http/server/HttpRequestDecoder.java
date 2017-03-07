@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.server;
 
 import java.net.URI;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
@@ -32,8 +34,6 @@ import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
-
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * A decoder for HTTP requests that accepts data from a sequence of
@@ -57,7 +57,7 @@ public class HttpRequestDecoder
 	extends HttpDecoder<HttpRequest, HttpResponse> {
 
 	// RFC 7230 3.1.1
-	private final static Pattern requestLinePatter = Pattern
+	private static final Pattern requestLinePatter = Pattern
 	        .compile("^(" + TOKEN + ")" + SP + "([^ \\t]+)" + SP + "("
 	                + HTTP_VERSION + ")$");
 	private final Result.Factory resultFactory	= new Result.Factory(this);
@@ -76,7 +76,7 @@ public class HttpRequestDecoder
 	 * @see org.jdrupes.httpcodec.HttpDecoder#decode(java.nio.ByteBuffer)
 	 */
 	@Override
-	public Result decode (ByteBuffer in, Buffer out, boolean endOfInput) {
+	public Result decode(ByteBuffer in, Buffer out, boolean endOfInput) {
 		try {
 			return (Result)super.decode(in, out, endOfInput);
 		} catch (HttpProtocolException e) {
@@ -108,8 +108,6 @@ public class HttpRequestDecoder
 			        HttpStatus.BAD_REQUEST.getStatusCode(),
 			        "Illegal request line");
 		}
-		String method = requestMatcher.group(1);
-		String uriGroup = requestMatcher.group(2);
 		String httpVersion = requestMatcher.group(3);
 		boolean found = false;
 		for (HttpProtocol v : HttpProtocol.values()) {
@@ -122,6 +120,8 @@ public class HttpRequestDecoder
 			throw new HttpProtocolException(HttpProtocol.HTTP_1_1,
 			        HttpStatus.HTTP_VERSION_NOT_SUPPORTED);
 		}
+		String method = requestMatcher.group(1);
+		String uriGroup = requestMatcher.group(2);
 		URI uri = null;
 		if ("*".equals(uriGroup)) {
 			uri = HttpRequest.ASTERISK_REQUEST;
@@ -133,8 +133,8 @@ public class HttpRequestDecoder
 				        HttpStatus.BAD_REQUEST.getStatusCode(), e.getMessage());
 			}
 		}
-		HttpRequest request = new HttpRequest
-				(method, uri, protocolVersion, false);
+		HttpRequest request = new HttpRequest(
+				method, uri, protocolVersion, false);
 		HttpResponse response = (new HttpResponse(protocolVersion,
 				HttpStatus.NOT_IMPLEMENTED, false)).setRequest(request); 
 		return request.setResponse(response);
@@ -148,8 +148,8 @@ public class HttpRequestDecoder
 			throws HttpProtocolException {
 		reportHeaderReceived = true;
 		// Handle field of special interest
-		Optional<HttpStringField> host = message.getField
-				(HttpStringField.class, HttpField.HOST);
+		Optional<HttpStringField> host = message.getField(
+				HttpStringField.class, HttpField.HOST);
 		if (host.isPresent()) {
 			try {
 				URI parsed = new URI("http://" + host.get().getValue());
@@ -216,7 +216,7 @@ public class HttpRequestDecoder
 	 * 
 	 * @author Michael N. Lipp
 	 */
-	public static abstract class Result 
+	public abstract static class Result 
 		extends HttpDecoder.Result<HttpResponse> {
 
 		/**
@@ -273,7 +273,7 @@ public class HttpRequestDecoder
 			 *            response is required
 			 * @return the result
 			 */
-			public Result newResult (boolean overflow, boolean underflow, 
+			public Result newResult(boolean overflow, boolean underflow, 
 					boolean headerCompleted, HttpResponse response, 
 					boolean responseOnly) {
 				return new Result(overflow, underflow, 

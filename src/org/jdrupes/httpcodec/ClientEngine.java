@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,11 +14,14 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+
+import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 
 /**
  * An engine that can be used as a client. It has an associated
@@ -53,6 +56,7 @@ public abstract class ClientEngine<Q extends MessageHeader,
 	public Encoder<Q> requestEncoder() {
 		return requestEncoder;
 	}
+	
 	/**
 	 * @return the responseDecoder
 	 */
@@ -108,8 +112,7 @@ public abstract class ClientEngine<Q extends MessageHeader,
 	 * @param endOfInput {@code true} if end of input
 	 * @return the result
 	 * @throws ProtocolException if the input violates the protocol
-	 * @see org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder#decode(java.nio.ByteBuffer,
-	 *      java.nio.Buffer, boolean)
+	 * @see HttpResponseDecoder#decode(java.nio.ByteBuffer, java.nio.Buffer, boolean)
 	 */
 	public Decoder.Result<Q> decode(
 	        ByteBuffer in, Buffer out, boolean endOfInput)

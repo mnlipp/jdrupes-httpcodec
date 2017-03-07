@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.websocket;
 
 import java.io.IOException;
@@ -38,7 +39,8 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
 public class WsEncoder implements Encoder<WsFrameHeader> {
 
 	private static enum State { STARTING_FRAME, WRITING_HEADER,  
-		WRITING_LENGTH, WRITING_MASK, WRITING_PAYLOAD };
+		WRITING_LENGTH, WRITING_MASK, WRITING_PAYLOAD }
+	
 	private static float bytesPerCharUtf8		
 		= Charset.forName("utf-8").newEncoder().averageBytesPerChar();
 	private static final Result.Factory resultFactory = new Result.Factory();
@@ -76,7 +78,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	}
 	
 	private Result frameFinished(boolean endOfInput) {
-		boolean close = (messageHeaders.peek() instanceof WsCloseFrame);
+		final boolean close = (messageHeaders.peek() instanceof WsCloseFrame);
 		if (!(messageHeaders.peek() instanceof WsMessageHeader) 
 				|| endOfInput) {
 			messageHeaders.pop();
@@ -93,8 +95,8 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	@Override
 	public void encode(WsFrameHeader messageHeader) {
 		if (state != State.STARTING_FRAME) {
-			throw new IllegalStateException
-				("Trying to start new frame while previous "
+			throw new IllegalStateException(
+					"Trying to start new frame while previous "
 						+ "has not completely been sent");
 		}
 		if (messageHeader instanceof WsMessageHeader) {
@@ -242,8 +244,8 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	}
 
 	private void convTextData(Buffer in) {
-		convData.setOverflowBufferSize
-			((int) (in.remaining() * bytesPerCharUtf8));
+		convData.setOverflowBufferSize(
+				(int) (in.remaining() * bytesPerCharUtf8));
 		try {
 			OutputStreamWriter charWriter = new OutputStreamWriter(
 			        convData, "utf-8");

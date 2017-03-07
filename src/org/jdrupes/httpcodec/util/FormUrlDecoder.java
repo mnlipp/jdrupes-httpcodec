@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.util;
 
 import java.io.UnsupportedEncodingException;
@@ -32,15 +33,15 @@ public class FormUrlDecoder {
 	private Map<String,String> fields = new HashMap<>();
 	private String rest = "";
 	
-	public void addData(ByteBuffer b) {
+	public void addData(ByteBuffer buf) {
 		try {
 			String data;
-			if (b.hasArray()) {
-				data = rest + new String(b.array(),
-						b.arrayOffset() + b.position(), b.remaining(), "ascii");
+			if (buf.hasArray()) {
+				data = rest + new String(buf.array(),
+						buf.arrayOffset() + buf.position(), buf.remaining(), "ascii");
 			} else {
-				byte[] bc = new byte[b.remaining()];
-				b.get(bc);
+				byte[] bc = new byte[buf.remaining()];
+				buf.get(bc);
 				data = rest + new String(bc, "ascii");
 			}
 			int oldPos = 0;

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,13 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.ws;
+ */
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+package org.jdrupes.httpcodec.test.ws;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -32,6 +28,11 @@ import org.jdrupes.httpcodec.protocols.websocket.WsDecoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsEncoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
 import org.jdrupes.httpcodec.test.Common;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -63,7 +64,7 @@ public class TinyTests {
 	
 	@Test
 	public void testTinyEncodeSingleUnmaskedText() throws ProtocolException {
-		byte[] expectedBytes = new byte[] 
+		final byte[] expectedBytes = new byte[] 
 				{(byte)0x81, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f};
 		WsEncoder encoder = new WsEncoder(false);
 		CharBuffer txt = CharBuffer.allocate(20);
@@ -71,8 +72,8 @@ public class TinyTests {
 		txt.flip();
 		ByteBuffer msg = ByteBuffer.allocate(100);
 		encoder.encode(new WsMessageHeader(true, true));
-		Encoder.Result result = Common.tinyEncodeLoop
-				(encoder, txt, txt.capacity(), msg, 1, true);
+		Encoder.Result result = Common.tinyEncodeLoop(
+				encoder, txt, txt.capacity(), msg, 1, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		msg.flip();
@@ -90,8 +91,8 @@ public class TinyTests {
 		txt.flip();
 		ByteBuffer msg = ByteBuffer.allocate(100);
 		encoder.encode(new WsMessageHeader(true, true));
-		Encoder.Result result = Common.tinyEncodeLoop 
-				(encoder, txt, 1, msg, 1, true);
+		Encoder.Result result = Common.tinyEncodeLoop(
+				encoder, txt, 1, msg, 1, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		msg.flip();

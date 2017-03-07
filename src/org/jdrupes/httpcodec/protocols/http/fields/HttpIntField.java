@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,14 +41,14 @@ public class HttpIntField extends HttpField<Long> {
 		this.value = value;
 	}
 
-	protected static <T extends HttpIntField> T fromString
-		(Class<T> type, String name, String s) throws ParseException {
+	protected static <T extends HttpIntField> T fromString(
+			Class<T> type, String name, String text) throws ParseException {
 		try {
 			long value;
 			try {
-				value = Long.parseLong(unquote(s));
+				value = Long.parseLong(unquote(text));
 			} catch (NumberFormatException e) {
-				throw new ParseException(s, 0);
+				throw new ParseException(text, 0);
 			}
 			T result = type.getConstructor(String.class, long.class)
 			        .newInstance(name, value);
@@ -65,14 +66,14 @@ public class HttpIntField extends HttpField<Long> {
 	 * 
 	 * @param name
 	 *            the field name
-	 * @param s
+	 * @param text
 	 *            the string to parse
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpIntField fromString(String name, String s)
+	public static HttpIntField fromString(String name, String text)
 			throws ParseException {
-		return fromString(HttpIntField.class, name, s);
+		return fromString(HttpIntField.class, name, text);
 	}
 
 	/**

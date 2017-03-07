@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec;
 
 import java.nio.Buffer;
@@ -87,7 +88,7 @@ public interface Decoder<T extends MessageHeader,
 	 *            the type of the optionally generated response message
 	 * @author Michael N. Lipp
 	 */
-	public static abstract class Result<R extends MessageHeader> 
+	public abstract static class Result<R extends MessageHeader> 
 		extends Codec.Result {
 
 		private boolean headerCompleted;
@@ -172,23 +173,30 @@ public interface Decoder<T extends MessageHeader,
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (!super.equals(obj))
+			}
+			if (!super.equals(obj)) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			@SuppressWarnings("rawtypes")
 			Result other = (Result) obj;
-			if (headerCompleted != other.headerCompleted)
+			if (headerCompleted != other.headerCompleted) {
 				return false;
+			}
 			if (response == null) {
-				if (other.response != null)
+				if (other.response != null) {
 					return false;
-			} else if (!response.equals(other.response))
+				}
+			} else if (!response.equals(other.response)) {
 				return false;
-			if (responseOnly != other.responseOnly)
+			}
+			if (responseOnly != other.responseOnly) {
 				return false;
+			}
 			return true;
 		}
 

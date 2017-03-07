@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,10 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.ws;
+ */
 
-import static org.junit.Assert.*;
+package org.jdrupes.httpcodec.test.ws;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -32,6 +31,8 @@ import org.jdrupes.httpcodec.protocols.websocket.WsEncoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
 import org.jdrupes.httpcodec.protocols.websocket.WsPingFrame;
 import org.jdrupes.httpcodec.protocols.websocket.WsPongFrame;
+
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class MiscTests {
@@ -96,9 +97,9 @@ public class MiscTests {
 	@Test
 	public void testEncodeInsertedPing() 
 			throws ProtocolException, UnsupportedEncodingException {
-		byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
-		byte[] msgBytes2 = new byte[] {(byte)0x80, 0x02, 0x6c, 0x6f};
-		byte[] pingBytes = new byte[] 
+		final byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
+		final byte[] msgBytes2 = new byte[] {(byte)0x80, 0x02, 0x6c, 0x6f};
+		final byte[] pingBytes = new byte[] 
 				{(byte)0x89, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f};
 		WsEncoder encoder = new WsEncoder(false);
 		CharBuffer txt = CharBuffer.allocate(20);

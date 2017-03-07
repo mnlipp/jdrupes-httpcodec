@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.lang.reflect.InvocationTargetException;
@@ -25,13 +26,13 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 import org.jdrupes.httpcodec.MessageHeader;
+
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
-
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * Represents an HTTP message header (either request or response).
@@ -114,9 +115,11 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * Returns the header field with the given type if it exists.
 	 * The well known header fields are always parsed with their
 	 * proper type. Unknown header fields will be parsed as string fields.
-	 * <P>
+	 * 
 	 * String fields will be automatically converted to more specific types
 	 * if they are requested as integer fields or string list fields.
+	 * If the convertion fails, the field is considered ill-formatted and 
+	 * handled as if it didn't exist.
 	 * 
 	 * @param <T> the header field class
 	 * @param type the header field type
@@ -143,20 +146,24 @@ public abstract class HttpMessageHeader implements MessageHeader {
 			} catch (InstantiationException | IllegalAccessException
 			        | IllegalArgumentException | InvocationTargetException
 			        | NoSuchMethodException | SecurityException e) {
+				// Shouldn't happen
+				return Optional.empty();
 			}
 		}
 		if (HttpStringListField.class.isAssignableFrom(type)) {
 			try {
-				T result = type.getConstructor
-						(String.class, String.class, boolean.class)
-						.newInstance(name, ((HttpStringField) field).getValue(),
-								true);
+				T result = type.getConstructor(
+						String.class, String.class, boolean.class)
+						.newInstance(name, 
+								((HttpStringField) field).getValue(), true);
 				removeField(name);
 				setField(result);
 				return Optional.of(type.cast(result));
 			} catch (InstantiationException | IllegalAccessException
 			        | IllegalArgumentException | InvocationTargetException
 			        | NoSuchMethodException | SecurityException e) {
+				// Shouldn't happen
+				return Optional.empty();
 			}
 		}
 		if (HttpIntListField.class.isAssignableFrom(type)) {
@@ -169,6 +176,8 @@ public abstract class HttpMessageHeader implements MessageHeader {
 			} catch (InstantiationException | IllegalAccessException
 			        | IllegalArgumentException | InvocationTargetException
 			        | NoSuchMethodException | SecurityException e) {
+				// Shouldn't happen
+				return Optional.empty();
 			}
 		}
 		return Optional.empty();
@@ -196,8 +205,8 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * it doesn't exist
 	 * @return the header field if it exists
 	 */
-	public <T extends HttpField<?>> T computeIfAbsent
-			(Class<T> type, String name, Function<String, T> computeFunction) {
+	public <T extends HttpField<?>> T computeIfAbsent(
+			Class<T> type, String name, Function<String, T> computeFunction) {
 		Optional<T> result = getField(type, name);
 		if (result.isPresent()) {
 			return result.get();

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.util;
 
 import java.nio.ByteBuffer;
@@ -261,7 +262,10 @@ public class OptimizedCharsetDecoder {
 	 */
 	@Override
 	public int hashCode() {
-		return backing.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((backing == null) ? 0 : backing.hashCode());
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -269,18 +273,24 @@ public class OptimizedCharsetDecoder {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		OptimizedCharsetDecoder other = (OptimizedCharsetDecoder) obj;
 		if (backing == null) {
-			if (other.backing != null)
+			if (other.backing != null) {
 				return false;
-		} else if (!backing.equals(other.backing))
+			}
+		} else if (!backing.equals(other.backing)) {
 			return false;
+		}
 		return true;
 	}
+
 }

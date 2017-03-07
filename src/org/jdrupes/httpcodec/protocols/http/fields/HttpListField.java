@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
@@ -113,6 +114,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 						 continue;
 					 case '\"':
 						 inDquote = false;
+						 // fall through
 					 default:
 						 position += 1;
 						 continue;
@@ -141,6 +143,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 				switch (ch) {
 				case '\"':
 					inDquote = true;
+					// fall through
 				default:
 					position += 1;
 					continue;
@@ -233,22 +236,22 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#add(java.lang.Object)
 	 */
-	public boolean add(T e) {
-		return elements.add(e);
+	public boolean add(T element) {
+		return elements.add(element);
 	}
 
 	/**
 	 * @see java.util.List#addAll(java.util.Collection)
 	 */
-	public boolean addAll(Collection<? extends T> c) {
-		return elements.addAll(c);
+	public boolean addAll(Collection<? extends T> collection) {
+		return elements.addAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#addAll(int, java.util.Collection)
 	 */
-	public boolean addAll(int index, Collection<? extends T> c) {
-		return elements.addAll(index, c);
+	public boolean addAll(int index, Collection<? extends T> collection) {
+		return elements.addAll(index, collection);
 	}
 
 	/**
@@ -261,15 +264,15 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#contains(java.lang.Object)
 	 */
-	public boolean contains(Object o) {
-		return elements.contains(o);
+	public boolean contains(Object object) {
+		return elements.contains(object);
 	}
 
 	/**
 	 * @see java.util.List#containsAll(java.util.Collection)
 	 */
-	public boolean containsAll(Collection<?> c) {
-		return elements.containsAll(c);
+	public boolean containsAll(Collection<?> collection) {
+		return elements.containsAll(collection);
 	}
 
 	/**
@@ -282,8 +285,8 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#indexOf(java.lang.Object)
 	 */
-	public int indexOf(Object o) {
-		return elements.indexOf(o);
+	public int indexOf(Object object) {
+		return elements.indexOf(object);
 	}
 
 	/**
@@ -303,8 +306,8 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#lastIndexOf(java.lang.Object)
 	 */
-	public int lastIndexOf(Object o) {
-		return elements.lastIndexOf(o);
+	public int lastIndexOf(Object object) {
+		return elements.lastIndexOf(object);
 	}
 
 	/**
@@ -331,22 +334,22 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#remove(java.lang.Object)
 	 */
-	public boolean remove(Object o) {
-		return elements.remove(o);
+	public boolean remove(Object object) {
+		return elements.remove(object);
 	}
 
 	/**
 	 * @see java.util.List#removeAll(java.util.Collection)
 	 */
-	public boolean removeAll(Collection<?> c) {
-		return elements.removeAll(c);
+	public boolean removeAll(Collection<?> collection) {
+		return elements.removeAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#retainAll(java.util.Collection)
 	 */
-	public boolean retainAll(Collection<?> c) {
-		return elements.retainAll(c);
+	public boolean retainAll(Collection<?> collection) {
+		return elements.retainAll(collection);
 	}
 
 	/**
@@ -380,8 +383,8 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#toArray(java.lang.Object[])
 	 */
-	public <U> U[] toArray(U[] a) {
-		return elements.toArray(a);
+	public <U> U[] toArray(U[] array) {
+		return elements.toArray(array);
 	}
 	
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.websocket;
 
 import java.nio.Buffer;
@@ -36,7 +37,8 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 
 	private static enum State { READING_HEADER, READING_LENGTH,
 		READING_MASK, READING_PAYLOAD, READING_PING_DATA,
-		READING_PONG_DATA, READING_CLOSE_DATA };
+		READING_PONG_DATA, READING_CLOSE_DATA }
+	
 	private static enum Opcode { CONT_FRAME, TEXT_FRAME, BIN_FRAME,
 		CON_CLOSE, PING, PONG;
 
@@ -52,6 +54,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			throw new IllegalArgumentException();
 		}
 	}
+	
 	private static Result.Factory resultFactory = new Result.Factory();
 	
 	private State state = State.READING_HEADER;
@@ -98,8 +101,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return Optional.ofNullable(receivedHeader);
 	}
 
-	private Result createResult
-		(boolean overflow, boolean underflow, 
+	private Result createResult(boolean overflow, boolean underflow, 
 				WsFrameHeader response, boolean responseOnly) {
 		if (receivedHeader != null && receivedHeader != reportedHeader) {
 			reportedHeader = receivedHeader;
@@ -110,14 +112,13 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 				response, responseOnly);
 	}
 
-	private Result createResult
-		(boolean overflow, boolean underflow) {
+	private Result createResult(boolean overflow, boolean underflow) {
 		return createResult(overflow, underflow, null, false);
 	}
 
 	
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.RequestDecoder#decode(java.nio.ByteBuffer, java.nio.Buffer, boolean)
+	 * @see RequestDecoder#decode(java.nio.ByteBuffer, java.nio.Buffer, boolean)
 	 */
 	@Override
 	public Decoder.Result<WsFrameHeader> decode(ByteBuffer in, Buffer out, 
@@ -249,13 +250,13 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	}
 
 	private Decoder.Result<WsFrameHeader> headerComplete() {
-		Opcode opcode = Opcode.fromInt(curHeaderHead >> 8 & 0xf);
 		receivedHeader = null;
 		reportedHeader = null;
 		if ((curHeaderHead >> 8 & 0x8) == 0) {
 			dataMessageFinished = isFinalFrame();
 		}
 		bytesExpected = payloadLength;
+		Opcode opcode = Opcode.fromInt(curHeaderHead >> 8 & 0xf);
 		switch (opcode) {
 		case CONT_FRAME:
 			if (payloadLength == 0) {
@@ -272,7 +273,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			break;
 		case PING:
 			if (bytesExpected == 0) {
-				return createResult	(false, !dataMessageFinished, 
+				return createResult(false, !dataMessageFinished, 
 						new WsPongFrame(null), true);
 			}
 			controlData = ByteBuffer.allocate((int)bytesExpected);
@@ -280,7 +281,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			return null;
 		case PONG:
 			if (bytesExpected == 0) {
-				return createResult	(false, !dataMessageFinished);
+				return createResult(false, !dataMessageFinished);
 			}
 			controlData = ByteBuffer.allocate((int)bytesExpected);
 			state = State.READING_PONG_DATA;
@@ -316,16 +317,16 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return (curHeaderHead & 0x80) != 0;
 	}
 	
-	private CoderResult copyData
-		(Buffer out, ByteBuffer in, int limit, boolean endOfInput) {
+	private CoderResult copyData(
+			Buffer out, ByteBuffer in, int limit, boolean endOfInput) {
 		if (out instanceof ByteBuffer) {
 			if (!isDataMasked()) {
 				ByteBufferUtils.putAsMuchAsPossible((ByteBuffer) out, in, limit);
 				return null;
 			}
 			while (limit > 0 && in.hasRemaining() && out.hasRemaining()) {
-				((ByteBuffer) out).put
-					((byte)(in.get() ^ maskingKey[maskIndex]));
+				((ByteBuffer) out).put(
+						(byte)(in.get() ^ maskingKey[maskIndex]));
 				maskIndex = (maskIndex + 1) % 4;
 				limit -= 1;
 			}
@@ -369,7 +370,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
 	 */
-	public static abstract class Result
+	public abstract static class Result
 		extends Decoder.Result<WsFrameHeader> {
 
 		protected Result(boolean overflow, boolean underflow,
@@ -401,7 +402,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			 *            response is required
 			 * @return the result
 			 */
-			public Result newResult (boolean overflow, boolean underflow, 
+			public Result newResult(boolean overflow, boolean underflow, 
 					boolean closeConnection, boolean headerCompleted, 
 					WsFrameHeader response, boolean responseOnly) {
 				return new Result(overflow, underflow, closeConnection,

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,10 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.fields;
+ */
 
-import static org.junit.Assert.*;
+package org.jdrupes.httpcodec.test.fields;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,6 +29,8 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class FieldAccessTests {

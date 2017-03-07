@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.net.HttpCookie;
@@ -31,23 +32,23 @@ public class HttpCookieListField extends HttpListField<HttpCookie> {
 	 * Creates a new object with the field name "Cookie" and the given unparsed
 	 * value.
 	 * 
-	 * @param s the unparsed value
+	 * @param text the unparsed value
 	 */
-	protected HttpCookieListField(String s) {
-		super(HttpField.COOKIE, s);
+	protected HttpCookieListField(String text) {
+		super(HttpField.COOKIE, text);
 	}
 
 	/**
 	 * Creates a new object with the elements obtained by parsing the given
 	 * String.
 	 * 
-	 * @param s the string to parse
+	 * @param text the string to parse
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpCookieListField fromString(String s) 
+	public static HttpCookieListField fromString(String text) 
 			throws ParseException {
-		HttpCookieListField result = new HttpCookieListField(s);
+		HttpCookieListField result = new HttpCookieListField(text);
 		while (true) {
 			String element = result.nextElement();
 			if (element == null) {

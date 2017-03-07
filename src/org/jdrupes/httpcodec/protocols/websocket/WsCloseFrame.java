@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.websocket;
 
 import java.nio.CharBuffer;
@@ -46,6 +47,7 @@ public class WsCloseFrame extends WsFrameHeader {
 	public Integer getStatusCode() {
 		return statusCode;
 	}
+	
 	/**
 	 * @return the reason
 	 */

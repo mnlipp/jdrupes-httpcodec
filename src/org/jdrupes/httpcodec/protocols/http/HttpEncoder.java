@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.util.Stack;
 
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Encoder;
+
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
@@ -40,8 +43,6 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
-
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * Implements an encoder for HTTP. The class can be used as base class for both
@@ -81,6 +82,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		try {
 			writer = new OutputStreamWriter(outStream, "ascii");
 		} catch (UnsupportedEncodingException e) {
+			// Cannot happen (specified to be supported)
 		}
 		states.push(State.INITIAL);
 	}
@@ -192,7 +194,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			case INITIAL:
 				outStream.clear();
 				outStream.assignBuffer(out);
-				startMessage();
+				startEncoding();
 				break;
 
 			case HEADERS:
@@ -289,7 +291,8 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				// Everything is written
 				if (!endOfInput) {
 					if (in.remaining() == 0) {
-						return resultFactory().newResult(false, true, false);
+						return resultFactory()
+								.newResult(false, true, false);
 					}
 					throw new IllegalStateException("Unexpected input.");
 				}
@@ -317,7 +320,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 * body-mode and puts the state machine in output-headers mode, unless the
 	 * body-mode is "collect body".
 	 */
-	private void startMessage() {
+	private void startEncoding() {
 		// Make sure we have a Date, RFC 7231 7.1.1.2
 		if (!messageHeader.fields().containsKey(HttpField.DATE)) {
 			messageHeader.setField(new HttpDateField());
@@ -530,7 +533,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 * @param in the data
 	 * @return the result
 	 */
-	private Encoder.Result startChunk (Buffer in, boolean endOfInput) {
+	private Encoder.Result startChunk(Buffer in, boolean endOfInput) {
 		if (endOfInput) {
 			states.pop();
 			states.push(State.FINISH_CHUNKED);
@@ -553,8 +556,8 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				outStream.write("\r\n".getBytes("ascii"));
 				states.push(State.FINISH_CHUNK);
 				states.push(State.STREAM_CHUNK);
-				return resultFactory().newResult
-						(outStream.remaining() <= 0, false, false);
+				return resultFactory().newResult(
+						outStream.remaining() <= 0, false, false);
 			}
 		} catch (IOException e) {
 			// Formally thrown by outStream, cannot happen.

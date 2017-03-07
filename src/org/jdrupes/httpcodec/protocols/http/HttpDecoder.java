@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.io.UnsupportedEncodingException;
@@ -31,6 +32,8 @@ import java.util.regex.Pattern;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.MessageHeader;
+
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpListField;
@@ -39,7 +42,6 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.DynamicByteArray;
 import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * Implements a decoder for HTTP. The class can be used as base class for both
@@ -51,13 +53,13 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	R extends HttpMessageHeader> 
 	extends HttpCodec<T> implements Decoder<T, R> {
 
-	final protected static String TOKEN = "[" + Pattern.quote(TOKEN_CHARS)
+	protected static final String TOKEN = "[" + Pattern.quote(TOKEN_CHARS)
 	        + "]+";
-	final protected static String SP = "[ \\t]+";
-	final protected static String HTTP_VERSION = "HTTP/\\d+\\.\\d";
+	protected static final String SP = "[ \\t]+";
+	protected static final String HTTP_VERSION = "HTTP/\\d+\\.\\d";
 
 	// RFC 7230 3.2, 3.2.4
-	final protected static Pattern headerLinePatter = Pattern
+	protected static final Pattern headerLinePatter = Pattern
 	        .compile("^(" + TOKEN + "):(.*)$");
 
 	private enum State {
@@ -72,7 +74,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 
 	protected enum BodyMode {
 		NO_BODY, CHUNKED, LENGTH, UNTIL_CLOSE
-	};
+	}
 
 	private long maxHeaderLength = 4194304;
 	private Stack<State> states = new Stack<>();
@@ -177,8 +179,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 * @throws HttpProtocolException
 	 *             if the message violates the HTTP
 	 */
-	public Decoder.Result<R> decode 
-		(ByteBuffer in, Buffer out, boolean endOfInput)
+	public Decoder.Result<R> decode( 
+		ByteBuffer in, Buffer out, boolean endOfInput)
 	        throws HttpProtocolException {
 		try {
 			return uncheckedDecode(in, out, endOfInput);
@@ -188,8 +190,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		}
 	}
 
-	private Decoder.Result<R> uncheckedDecode
-		(ByteBuffer in, Buffer out, boolean endOfInput)
+	private Decoder.Result<R> uncheckedDecode(
+		ByteBuffer in, Buffer out, boolean endOfInput)
 			throws HttpProtocolException, ParseException {
 		while(true) {
 			switch (states.peek()) {
@@ -343,7 +345,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				if (in.remaining() <= leftToRead) {
 					decRes = copyBodyData(out, in, in.remaining(), endOfInput);
 				} else {
-					decRes = copyBodyData(out, in, (int) leftToRead, endOfInput);
+					decRes = copyBodyData(
+							out, in, (int) leftToRead, endOfInput);
 				}
 				leftToRead -= (initiallyRemaining - in.remaining());
 				if (leftToRead == 0) {
@@ -355,8 +358,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					}
 					break;
 				}
-				return resultFactory().newResult
-						((!out.hasRemaining() && in.hasRemaining())
+				return resultFactory().newResult(
+						(!out.hasRemaining() && in.hasRemaining())
 						|| (decRes != null && decRes.isOverflow()),
 				        !in.hasRemaining() 
 				        || (decRes != null && decRes.isUnderflow()));
@@ -409,14 +412,14 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private void newHeaderLine() throws HttpProtocolException, ParseException {
 		headerLength += headerLine.length() + 2;
 		// RFC 7230 3.2
-		Matcher m = headerLinePatter.matcher(headerLine);
-		if (!m.matches()) {
+		Matcher hlp = headerLinePatter.matcher(headerLine);
+		if (!hlp.matches()) {
 			throw new HttpProtocolException(protocolVersion,
 			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
 		}
-		String fieldName = m.group(1);
+		String fieldName = hlp.group(1);
 		// RFC 7230 3.2.4
-		String fieldValue = m.group(2).trim();
+		String fieldValue = hlp.group(2).trim();
 		HttpField<?> field = HttpField.fromString(fieldName, fieldValue);
 		switch (field.getName()) {
 		case HttpField.CONTENT_LENGTH:
@@ -450,14 +453,14 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private void newTrailerLine() throws HttpProtocolException, ParseException {
 		headerLength += headerLine.length() + 2;
 		// RFC 7230 3.2
-		Matcher m = headerLinePatter.matcher(headerLine);
-		if (!m.matches()) {
+		Matcher hlp = headerLinePatter.matcher(headerLine);
+		if (!hlp.matches()) {
 			throw new HttpProtocolException(protocolVersion,
 			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
 		}
-		String fieldName = m.group(1);
+		String fieldName = hlp.group(1);
 		// RFC 7230 3.2.4
-		String fieldValue = m.group(2).trim();
+		String fieldValue = hlp.group(2).trim();
 		HttpField<?> field = HttpField.fromString(fieldName, fieldValue);
 		// RFC 7230 4.4
 		HttpStringListField trailerField = messageHeader
@@ -514,8 +517,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		}
 	}
 
-	private CoderResult copyBodyData
-		(Buffer out, ByteBuffer in, int limit, boolean endOfInput) {
+	private CoderResult copyBodyData(
+			Buffer out, ByteBuffer in, int limit, boolean endOfInput) {
 		if (out instanceof ByteBuffer) {
 			ByteBufferUtils.putAsMuchAsPossible((ByteBuffer) out, in, limit);
 			return null;
@@ -590,8 +593,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			 *            {@code true} if more data is expected
 			 * @return the result
 			 */
-			protected abstract Result<R> newResult 
-				(boolean overflow, boolean underflow);
+			protected abstract Result<R> newResult(
+				boolean overflow, boolean underflow);
 		}		
 	}
 }

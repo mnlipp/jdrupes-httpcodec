@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.jdrupes.httpcodec.protocols.http.client;
 
 import java.nio.Buffer;
@@ -23,16 +24,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.Encoder;
+import org.jdrupes.httpcodec.ResponseDecoder;
+
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
-
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * A decoder for HTTP reponses that accepts data from a sequence of
@@ -58,7 +59,7 @@ public class HttpResponseDecoder
 	implements ResponseDecoder<HttpResponse, HttpRequest> {
 
 	// RFC 7230 3.1.2
-	private final static Pattern responseLinePatter = Pattern
+	private static final Pattern responseLinePatter = Pattern
 	        .compile("^(" + HTTP_VERSION + ")" + SP + "([1-9][0-9][0-9])"
 	                + SP + "(.*)$");
 
@@ -254,28 +255,37 @@ public class HttpResponseDecoder
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (!super.equals(obj))
+			}
+			if (!super.equals(obj)) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			Result other = (Result) obj;
 			if (newDecoder == null) {
-				if (other.newDecoder != null)
+				if (other.newDecoder != null) {
 					return false;
-			} else if (!newDecoder.equals(other.newDecoder))
+				}
+			} else if (!newDecoder.equals(other.newDecoder)) {
 				return false;
+			}
 			if (newEncoder == null) {
-				if (other.newEncoder != null)
+				if (other.newEncoder != null) {
 					return false;
-			} else if (!newEncoder.equals(other.newEncoder))
+				}
+			} else if (!newEncoder.equals(other.newEncoder)) {
 				return false;
+			}
 			if (newProtocol == null) {
-				if (other.newProtocol != null)
+				if (other.newProtocol != null) {
 					return false;
-			} else if (!newProtocol.equals(other.newProtocol))
+				}
+			} else if (!newProtocol.equals(other.newProtocol)) {
 				return false;
+			}
 			return true;
 		}
 
@@ -339,7 +349,7 @@ public class HttpResponseDecoder
 			}
 
 			/* (non-Javadoc)
-			 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder.Result.Factory#newResult(boolean, boolean, boolean)
+			 * @see HttpDecoder.Result.Factory#newResult(boolean, boolean, boolean)
 			 */
 			@Override
 			protected Result newResult(

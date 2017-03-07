@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,12 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.http;
+ */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -30,6 +27,10 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -65,8 +66,8 @@ public class RequestDecoderTests {
 		assertEquals("/test",
 		        decoder.getHeader().get().getRequestUri().getPath());
 		Optional<HttpCookieListField> field = decoder.getHeader()
-				.flatMap(h -> h.getField
-						(HttpCookieListField.class, HttpField.COOKIE));
+				.flatMap(h -> h.getField(
+						HttpCookieListField.class, HttpField.COOKIE));
 		assertEquals(2, field.get().size());
 		assertEquals("yes", field.get().valueForName("_test.").get());
 		assertEquals("", field.get().valueForName("gsScrollPos").get());
@@ -369,17 +370,17 @@ public class RequestDecoderTests {
 		assertEquals("firstname=J.&lastname=Grapes", bodyText);
 		// Trailer
 		Optional<HttpStringListField> trailer = decoder.getHeader()
-				.flatMap(f -> f.getField
-						(HttpStringListField.class, HttpField.TRAILER));
+				.flatMap(f -> f.getField(
+						HttpStringListField.class, HttpField.TRAILER));
 		assertEquals(2, trailer.get().size());
 		trailer.get().containsIgnoreCase("X-Test-Field");
 		trailer.get().containsIgnoreCase("X-Summary-Field");
 		Optional<HttpStringField> testField = decoder.getHeader()
-		        .flatMap(h -> h.getField
-		        		(HttpStringField.class, "X-Test-Field"));
+		        .flatMap(h -> h.getField(
+		        		HttpStringField.class, "X-Test-Field"));
 		assertEquals("Valid", testField.get().getValue());
-		testField = decoder.getHeader().flatMap
-				(h -> h.getField(HttpStringField.class, "X-Summary-Field"));
+		testField = decoder.getHeader().flatMap(
+				h -> h.getField(HttpStringField.class, "X-Summary-Field"));
 		assertEquals("Good", testField.get().getValue());
 	}
 

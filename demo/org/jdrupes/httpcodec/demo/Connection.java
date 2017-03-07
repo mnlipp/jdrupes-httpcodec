@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.demo;
 
 import java.io.BufferedReader;
@@ -32,9 +33,9 @@ import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ServerEngine;
+import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
-import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
@@ -58,8 +59,8 @@ public class Connection extends Thread {
 	public Connection(SocketChannel channel) {
 		this.channel = channel;
 		ServerEngine<HttpRequest,HttpResponse> 
-			serverEngine = new ServerEngine<>
-				(new HttpRequestDecoder(), new HttpResponseEncoder());
+			serverEngine = new ServerEngine<>(
+					new HttpRequestDecoder(), new HttpResponseEncoder());
 		engine = serverEngine;
 		in = ByteBuffer.allocate(2048);
 		out = ByteBuffer.allocate(2048);
@@ -80,8 +81,8 @@ public class Connection extends Thread {
 					Decoder.Result<?> decoderResult 
 						= engine.decode(in, null, false);
 					if (decoderResult.getResponse().isPresent()) {
-						sendResponseWithoutBody
-							(decoderResult.getResponse().get());
+						sendResponseWithoutBody(
+								decoderResult.getResponse().get());
 					}
 					if (!decoderResult.isResponseOnly()
 					        && decoderResult.isHeaderCompleted()) {
@@ -100,6 +101,7 @@ public class Connection extends Thread {
 				}
 			}
 		} catch (IOException | ProtocolException e) {
+			// Just a test
 		}
 	}
 
@@ -130,6 +132,7 @@ public class Connection extends Thread {
 			media.setParameter("charset", "utf-8");
 			response.setField(media);
 		} catch (ParseException e) {
+			// Just a test
 		}
 		ByteBuffer body = ByteBuffer.wrap("Not Found".getBytes("utf-8"));
 		sendResponse(response, body, true);
@@ -145,6 +148,7 @@ public class Connection extends Thread {
 			media.setParameter("charset", "utf-8");
 			response.setField(media);
 		} catch (ParseException e) {
+			// Just a test
 		}
 		String form = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -188,6 +192,7 @@ public class Connection extends Thread {
 			media.setParameter("charset", "utf-8");
 			response.setField(media);
 		} catch (ParseException e) {
+			// Just a test
 		}
 		String data = "First name: " + fieldDecoder.getFields().get("firstname")
 		        + "\r\n" + "Last name: "
@@ -211,6 +216,7 @@ public class Connection extends Thread {
 			media.setParameter("charset", "utf-8");
 			response.setField(media);
 		} catch (ParseException e) {
+			// Just a test
 		}
 		String page = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(

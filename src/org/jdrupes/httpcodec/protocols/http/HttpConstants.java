@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http;
 
 /**
@@ -87,6 +88,7 @@ public interface HttpConstants {
     		this.statusCode = statusCode;
     		this.reasonPhrase = reasonPhrase;
     	}
+    	
 		/**
 		 * @return the status code
 		 */
@@ -117,7 +119,7 @@ public interface HttpConstants {
 		}
     }
 
-	public final static String TOKEN_CHARS 
+	public static final String TOKEN_CHARS 
 		= "!#$%&'*+-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 			+ "^`abcdefghijklmnopqrstuvwxyz|~";
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.websocket;
 
 import java.io.UnsupportedEncodingException;
@@ -28,10 +29,10 @@ import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
+import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpUnquotedStringField;
-import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 
 /**
  * A protocol provider for the WebSocket protocol.
@@ -82,8 +83,8 @@ public class WsProtocolProvider extends ProtocolProvider {
 			return;
 		}
 		// RFC 6455 4.1
-		if(response.getRequest().flatMap
-				(r -> r.getField(HttpIntField.class, "Sec-WebSocket-Version"))
+		if(response.getRequest().flatMap(
+				r -> r.getField(HttpIntField.class, "Sec-WebSocket-Version"))
 				.map(HttpIntField::asInt).orElse(-1) != 13) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setMessageHasBody(false).clearHeaders();
@@ -92,13 +93,13 @@ public class WsProtocolProvider extends ProtocolProvider {
 			return;
 			
 		}
-		String s = wsKey.get() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+		String magic = wsKey.get() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 		try {
 			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-			byte[] sha1 = crypt.digest(s.getBytes("ascii"));
+			byte[] sha1 = crypt.digest(magic.getBytes("ascii"));
 			String accept = Base64.getEncoder().encodeToString(sha1);
-			response.setField(new HttpUnquotedStringField
-					("Sec-WebSocket-Accept", accept));
+			response.setField(new HttpUnquotedStringField(
+					"Sec-WebSocket-Accept", accept));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 				.setMessageHasBody(false).clearHeaders();

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec.protocols.http.server;
 
 import java.io.IOException;
@@ -31,12 +32,12 @@ import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.plugin.ProtocolProvider;
+
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
-
-import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 /**
  * An encoder for HTTP responses that accepts a header and optional
@@ -79,7 +80,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#encode(org.jdrupes.httpcodec.protocols.http.HttpMessageHeader)
+	 * @see HttpEncoder#encode(HttpMessageHeader)
 	 */
 	@Override
 	public void encode(HttpResponse messageHeader) {
@@ -88,6 +89,23 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			switchingTo = prepareSwitchProtocol(messageHeader);
 		}
 		super.encode(messageHeader);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.internal.Encoder#encode(java.nio.ByteBuffer, java.nio.ByteBuffer)
+	 */
+	@Override
+	public Result encode(Buffer in, ByteBuffer out, boolean endOfInput) {
+		Result result = (Result)super.encode(in, out, endOfInput);
+		if (switchingTo != null && endOfInput 
+				&& !result.isUnderflow() && !result.isOverflow()) {
+			// Last invocation of encode
+			return resultFactory().newResult(false, false, 
+					result.getCloseConnection(), switchingTo, 
+					protocolPlugin.createRequestDecoder(switchingTo), 
+					protocolPlugin.createResponseEncoder(switchingTo));
+		}
+		return result;
 	}
 
 	private String prepareSwitchProtocol(HttpResponse response) {
@@ -125,23 +143,6 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.internal.Encoder#encode(java.nio.ByteBuffer, java.nio.ByteBuffer)
-	 */
-	@Override
-	public Result encode(Buffer in, ByteBuffer out, boolean endOfInput) {
-		Result result = (Result)super.encode(in, out, endOfInput);
-		if (switchingTo != null && endOfInput 
-				&& !result.isUnderflow() && !result.isOverflow()) {
-			// Last invocation of encode
-			return resultFactory().newResult(false, false, 
-					result.getCloseConnection(), switchingTo, 
-					protocolPlugin.createRequestDecoder(switchingTo), 
-					protocolPlugin.createResponseEncoder(switchingTo));
-		}
-		return result;
-	}
-
-	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.internal.Encoder#startMessage(java.io.Writer)
 	 */
 	@Override
@@ -160,8 +161,6 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	 * codec result, a response encoder may signal to the invoker that the
 	 * connection to the requester must be closed and that the protocol has
 	 * been switched.
-	 * 
-	 * @author Michael N. Lipp
 	 */
 	public abstract static class Result extends HttpEncoder.Result
 		implements Codec.ProtocolSwitchResult {
@@ -228,28 +227,37 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (!super.equals(obj))
+			}
+			if (!super.equals(obj)) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			Result other = (Result) obj;
 			if (newDecoder == null) {
-				if (other.newDecoder != null)
+				if (other.newDecoder != null) {
 					return false;
-			} else if (!newDecoder.equals(other.newDecoder))
+				}
+			} else if (!newDecoder.equals(other.newDecoder)) {
 				return false;
+			}
 			if (newEncoder == null) {
-				if (other.newEncoder != null)
+				if (other.newEncoder != null) {
 					return false;
-			} else if (!newEncoder.equals(other.newEncoder))
+				}
+			} else if (!newEncoder.equals(other.newEncoder)) {
 				return false;
+			}
 			if (newProtocol == null) {
-				if (other.newProtocol != null)
+				if (other.newProtocol != null) {
 					return false;
-			} else if (!newProtocol.equals(other.newProtocol))
+				}
+			} else if (!newProtocol.equals(other.newProtocol)) {
 				return false;
+			}
 			return true;
 		}
 
@@ -303,10 +311,10 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			 * @param newEncoder the new decoder if a switch occurred
 			 * @return the result
 			 */
-			public Result newResult (boolean overflow, boolean underflow,
+			public Result newResult(boolean overflow, boolean underflow,
 			        boolean closeConnection, String newProtocol,
 			        Decoder<?, ?> newDecoder, Encoder<?> newEncoder) {
-				return new Result (overflow, underflow, closeConnection,
+				return new Result(overflow, underflow, closeConnection,
 						newProtocol, newDecoder, newEncoder) {
 				};
 			}

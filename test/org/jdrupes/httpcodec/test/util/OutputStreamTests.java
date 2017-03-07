@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,10 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.util;
+ */
 
-import static org.junit.Assert.*;
+package org.jdrupes.httpcodec.test.util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,14 +24,14 @@ import java.util.Random;
 
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
+
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class OutputStreamTests {
 
 	@Test
 	public void testPutAsMuch() {
-		StringBuilder s = new StringBuilder();
-		
 		ByteBuffer src = ByteBuffer.allocate(1000);
 		src.put("Hello World!".getBytes());
 		src.flip();
@@ -41,22 +40,23 @@ public class OutputStreamTests {
 		assertEquals(5, dest.position());
 		assertEquals(7, src.remaining());
 		dest.flip();
-		byte[] b = new byte[dest.remaining()];
-		dest.get(b);
-		s.append(new String(b));
+		byte[] data = new byte[dest.remaining()];
+		dest.get(data);
+
+		StringBuilder result = new StringBuilder();
+		result.append(new String(data));
 		dest = ByteBuffer.allocate(100);
 		ByteBufferUtils.putAsMuchAsPossible(dest, src);
 		dest.flip();
-		b = new byte[dest.remaining()];
-		dest.get(b);
-		s.append(new String(b));
-		assertEquals("Hello World!", s.toString());
+		data = new byte[dest.remaining()];
+		dest.get(data);
+		result.append(new String(data));
+		assertEquals("Hello World!", result.toString());
 	}
 	
 	@Test
 	public void testOverflow() throws IOException {
 		ByteBuffer dataSource = ByteBuffer.allocate(2048);
-		ByteBuffer sink = ByteBuffer.allocate(dataSource.capacity());
 		Random rand = new Random();
 		byte[] bytes = new byte[dataSource.remaining()];
 		rand.nextBytes(bytes);
@@ -77,6 +77,7 @@ public class OutputStreamTests {
 		os.write(bytes);
 		assertEquals(500, os.bytesWritten());
 		assignedBuf.flip();
+		ByteBuffer sink = ByteBuffer.allocate(dataSource.capacity());
 		sink.put(assignedBuf); // 256/500 sinked
 		assertTrue(os.remaining() < 0);
 		// Now get 32 (only part of overflow buffer fits)

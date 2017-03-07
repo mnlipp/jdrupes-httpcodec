@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
+
 package org.jdrupes.httpcodec;
 
 import java.nio.ByteBuffer;
@@ -28,7 +29,7 @@ public interface Codec {
 	 * An empty input buffer that can be used for codec invocations
 	 * when the (expected) body data is not yet available.
 	 */
-	public final static ByteBuffer EMPTY_IN = ByteBuffer.allocate(0);
+	public static final ByteBuffer EMPTY_IN = ByteBuffer.allocate(0);
 
 	/**
 	 * The common properties of the result types returned by the various codecs.
@@ -110,7 +111,7 @@ public interface Codec {
 		public boolean getCloseConnection() {
 			return closeConnection;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */
@@ -129,19 +130,25 @@ public interface Codec {
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			Result other = (Result) obj;
-			if (closeConnection != other.closeConnection)
+			if (closeConnection != other.closeConnection) {
 				return false;
-			if (overflow != other.overflow)
+			}
+			if (overflow != other.overflow) {
 				return false;
-			if (underflow != other.underflow)
+			}
+			if (underflow != other.underflow) {
 				return false;
+			}
 			return true;
 		}
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,10 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.http;
+ */
 
-import static org.junit.Assert.*;
+package org.jdrupes.httpcodec.test.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,10 +28,12 @@ import java.nio.CharBuffer;
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.ProtocolException;
-import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
+import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.test.Common;
+
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -248,11 +249,11 @@ public class DecoderClosedTests {
 		byte[] ba = new byte[1];
 		Decoder.Result<?> result;
 		while (true) {
-			int b = is.read();
-			if (b == -1) {
+			int data = is.read();
+			if (data == -1) {
 				break;
 			}
-			ba[0] = (byte)b;
+			ba[0] = (byte)data;
 			ByteBuffer buffer = ByteBuffer.wrap(ba);
 			result = decoder.decode(buffer, body, false);
 			assertTrue(result.isUnderflow());

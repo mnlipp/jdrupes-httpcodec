@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * This file is part of the JDrupes non-blocking HTTP Codec
  * Copyright (C) 2016  Michael N. Lipp
  *
@@ -14,15 +14,16 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along 
  * with this program; if not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-package org.jdrupes.httpcodec.test.http;
+ */
 
-import static org.junit.Assert.*;
+package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 import org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder;
+
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
