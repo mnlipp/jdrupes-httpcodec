@@ -62,6 +62,31 @@ public abstract class HttpField<T> implements Cloneable {
 		fieldNameMap.put(VIA, VIA);
 	}
 	
+	private final String name;
+	
+	/**
+	 * Creates a new representation of a header field value. For fields with
+	 * a constant definition in this class, the name is normalized.
+	 * 
+	 * @param name the field name
+	 */
+	protected HttpField(String name) {
+		this.name = fieldNameMap.getOrDefault(name, name);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public HttpField<T> clone() {
+		try {
+			return (HttpField<T>)super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Returns an HttpField that represents the given header field, using the
 	 * best matching derived class in this package. Works for all well known
@@ -106,31 +131,6 @@ public abstract class HttpField<T> implements Cloneable {
 		}
 	}
 	
-	private final String name;
-	
-	/**
-	 * Creates a new representation of a header field value. For fields with
-	 * a constant definition in this class, the name is normalized.
-	 * 
-	 * @param name the field name
-	 */
-	protected HttpField(String name) {
-		this.name = fieldNameMap.getOrDefault(name, name);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public HttpField<T> clone() {
-		try {
-			return (HttpField<T>)super.clone();
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
-	}
-
 	/**
 	 * Returns the header field name.
 	 * 
@@ -245,6 +245,7 @@ public abstract class HttpField<T> implements Cloneable {
 				// fall through
 			default:
 				result.append(ch);
+				break;
 			}
 		}
 		result.append('\"');
