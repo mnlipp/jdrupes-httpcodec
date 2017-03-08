@@ -19,7 +19,10 @@
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -28,9 +31,8 @@ import java.util.function.Function;
 import org.jdrupes.httpcodec.MessageHeader;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
@@ -43,6 +45,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	private Map<String,HttpField<?>> headers 
 		= new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	private boolean messageHasBody;
+	private Map<Class<?>, Method> fromStringMethods = new HashMap<>();
 
 	/**
 	 * Creates a new message header.
@@ -111,13 +114,24 @@ public abstract class HttpMessageHeader implements MessageHeader {
 
 	/**
 	 * Returns the header field with the given type if it exists.
-	 * The well known header fields are always parsed with their
-	 * proper type. Unknown header fields will be parsed as string fields.
 	 * 
-	 * String fields will be automatically converted to more specific types
-	 * if they are requested as integer fields or string list fields.
-	 * If the convertion fails, the field is considered ill-formatted and 
-	 * handled as if it didn't exist.
+	 * The well known header fields are always parsed with their
+	 * proper type. Unknown header fields are provisionally 
+	 * parsed as {@link HttpStringField}s. When an attempt is made to
+	 * retrieve such a provisional string field with its real type,
+	 * it is automatically converted to the real type.
+	 * 
+	 * In order for the automatic conversion to take place,
+	 * the requested type must declare a static method `fromString`
+	 * with one or two parameters of type `String`. A method with
+	 * one parameter is assumed to return a concrete field type,
+	 * i.e. a type that has a predefined field name. It is invoked
+	 * with the text to be parsed. A `fromString` method with two 
+	 * parameters is invoked with the requested field name as first,
+	 * and the text to be parsed as second parameter.
+	 * 
+	 * If the conversion fails, the field is considered ill-formatted 
+	 * and handled as if it didn't exist.
 	 * 
 	 * @param <T> the header field class
 	 * @param type the header field type
@@ -127,58 +141,60 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	public <T extends HttpField<?>> Optional<T> 
 		getField(Class<T> type, String name) {
 		HttpField<?> field = headers.get(name);
+		// Not found or type matches
 		if (field == null || type.isAssignableFrom(field.getClass()) ) {
 			return Optional.ofNullable(type.cast(field));
 		}
+		// Not a string field
 		if (!(field instanceof HttpStringField)) {
 			return Optional.empty();
 		}
-		if (HttpIntField.class.isAssignableFrom(type)) {
-			long value = Long.parseLong(((HttpStringField) field).getValue());
-			try {
-				T result = type.getConstructor(String.class, long.class)
-				        .newInstance(name, value);
-				removeField(name);
-				setField(result);
-				return Optional.of(type.cast(result));
-			} catch (InstantiationException | IllegalAccessException
-			        | IllegalArgumentException | InvocationTargetException
-			        | NoSuchMethodException | SecurityException e) {
-				// Shouldn't happen
-				return Optional.empty();
+		// Try conversion...
+		Method fromString = fromStringMethods.get(type);
+		if (fromString == null) {
+			for (Method m: type.getDeclaredMethods()) {
+				if ("fromString".equals(m.getName())) {
+					if (!Modifier.isStatic(m.getModifiers())) {
+						continue;
+					}
+					Class<?>[] paramTypes = m.getParameterTypes();
+					if (paramTypes.length == 1 
+							&& paramTypes[0].isAssignableFrom(String.class)) {
+						fromString = m;
+						break;
+					}
+					if (paramTypes.length == 2
+							&& paramTypes[0].isAssignableFrom(String.class)
+							&& paramTypes[1].isAssignableFrom(String.class)) {
+						fromString = m;
+					}
+				}
 			}
+			fromStringMethods.put(type, fromString);
 		}
-		if (HttpStringListField.class.isAssignableFrom(type)) {
-			try {
-				T result = type.getConstructor(
-						String.class, String.class, boolean.class)
-						.newInstance(name, 
-								((HttpStringField) field).getValue(), true);
-				removeField(name);
-				setField(result);
-				return Optional.of(type.cast(result));
-			} catch (InstantiationException | IllegalAccessException
-			        | IllegalArgumentException | InvocationTargetException
-			        | NoSuchMethodException | SecurityException e) {
-				// Shouldn't happen
-				return Optional.empty();
+		if (fromString == null) {
+			return Optional.empty();
+		}
+		try {
+			T newField = null;
+			if (fromString.getParameterTypes().length == 1) {
+				@SuppressWarnings("unchecked")
+				T result = (T)fromString.invoke(
+						null, ((HttpStringField)field).getValue());
+				newField = result;
+			} else {
+				@SuppressWarnings("unchecked")
+				T result = (T)fromString.invoke(
+						null, name, ((HttpStringField)field).getValue());
+				newField = result;
 			}
+			removeField(name);
+			setField(newField);
+			return Optional.of(newField);
+		} catch (IllegalAccessException | IllegalArgumentException
+		        | InvocationTargetException e) {
+			return Optional.empty();
 		}
-		if (HttpIntListField.class.isAssignableFrom(type)) {
-			try {
-				T result = type.getConstructor(String.class, String.class)
-					.newInstance(name, ((HttpStringField) field).getValue());
-				removeField(name);
-				setField(result);
-				return Optional.of(type.cast(result));
-			} catch (InstantiationException | IllegalAccessException
-			        | IllegalArgumentException | InvocationTargetException
-			        | NoSuchMethodException | SecurityException e) {
-				// Shouldn't happen
-				return Optional.empty();
-			}
-		}
-		return Optional.empty();
 	}
 
 	/**

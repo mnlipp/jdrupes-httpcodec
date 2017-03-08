@@ -113,7 +113,7 @@ public abstract class HttpField<T> implements Cloneable {
 		case HttpField.CONTENT_TYPE:
 			return HttpMediaTypeField.fromString(fieldName, fieldValue);
 		case HttpField.DATE:
-			return HttpDateField.fromString(fieldName, fieldValue);
+			return HttpDateField.fromString(fieldValue);
 		case HttpField.SET_COOKIE:
 			return HttpSetCookieListField.fromString(fieldValue);
 		case HttpField.TRAILER:
