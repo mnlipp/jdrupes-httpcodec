@@ -29,8 +29,6 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
  * 
  * @param <Q> the message header type handled be the encoder (the request)
  * @param <R> the message header type handled by the decoder (the response)
- * 
- * @author Michael N. Lipp
  */
 public abstract class ClientEngine<Q extends MessageHeader, 
 	R extends MessageHeader> extends Engine {

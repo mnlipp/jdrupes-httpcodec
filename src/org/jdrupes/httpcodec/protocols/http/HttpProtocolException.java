@@ -26,8 +26,6 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
  * Represents a violation of the HTTP protocol. This kind of exception
  * is thrown by the HTTP codecs when a problem is detected while encoding
  * or decoding a message.
- * 
- * @author Michael N. Lipp
  */
 public class HttpProtocolException extends ProtocolException {
 

@@ -21,8 +21,7 @@ package org.jdrupes.httpcodec.protocols.websocket;
 import java.nio.ByteBuffer;
 
 /**
- * @author Michael N. Lipp
- *
+ * The Websocket ping frame.
  */
 public class WsPingFrame extends WsDefaultControlFrame {
 

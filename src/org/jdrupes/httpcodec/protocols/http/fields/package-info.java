@@ -16,8 +16,7 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * @author Michael N. Lipp
- *
+ * Classes that represent fields in HTTP headers.
  */
 @org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec.protocols.http.fields;

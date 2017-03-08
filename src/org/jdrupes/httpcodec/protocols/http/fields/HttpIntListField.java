@@ -25,8 +25,6 @@ import java.util.Arrays;
  * An HTTP field value that consists of a comma separated list of 
  * integers. The class provides a "list of integers" view
  * of the values.
- * 
- * @author Michael N. Lipp
  */
 public class HttpIntListField extends HttpListField<Long>
 	implements Cloneable {

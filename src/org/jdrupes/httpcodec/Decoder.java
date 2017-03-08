@@ -28,9 +28,6 @@ import java.util.Optional;
  * @param <T> the type of message decoded by this decoder
  * @param <R> the type of message that may be generated as response
  * (see {@link Decoder.Result#getResponse()})
- * 
- * @author Michael N. Lipp
- *
  */
 public interface Decoder<T extends MessageHeader,
 	R extends MessageHeader> extends Codec {
@@ -86,7 +83,6 @@ public interface Decoder<T extends MessageHeader,
 	 *
 	 * @param <R>
 	 *            the type of the optionally generated response message
-	 * @author Michael N. Lipp
 	 */
 	public abstract static class Result<R extends MessageHeader> 
 		extends Codec.Result {

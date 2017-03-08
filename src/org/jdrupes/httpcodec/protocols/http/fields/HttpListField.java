@@ -28,8 +28,6 @@ import java.util.ListIterator;
 /**
  * An HTTP field value that consists of a list of separated by a delimiter
  * strings. The class provides a "list of field values" view of the values.
- * 
- * @author Michael N. Lipp
  */
 public abstract class HttpListField<T> extends HttpField<List<T>>
 	implements List<T>, Cloneable {

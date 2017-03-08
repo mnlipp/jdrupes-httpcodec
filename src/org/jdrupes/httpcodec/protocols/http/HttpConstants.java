@@ -19,8 +19,7 @@
 package org.jdrupes.httpcodec.protocols.http;
 
 /**
- * @author Michael N. Lipp
- *
+ * Common HTTP constants.
  */
 public interface HttpConstants {
 

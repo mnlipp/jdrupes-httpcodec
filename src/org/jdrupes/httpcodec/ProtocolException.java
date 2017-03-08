@@ -21,8 +21,6 @@ package org.jdrupes.httpcodec;
 /**
  * Represents the base class of all exceptions thrown due to protocol
  * violations.
- * 
- * @author Michael N. Lipp
  */
 public class ProtocolException extends Exception {
 

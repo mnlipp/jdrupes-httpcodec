@@ -29,8 +29,6 @@ import javax.activation.MimeTypeParseException;
 /**
  * Represents a media type header field and provides methods for interpreting
  * its value.
- * 
- * @author Michael N. Lipp
  */
 public class HttpMediaTypeField extends HttpField<MimeType> {
 

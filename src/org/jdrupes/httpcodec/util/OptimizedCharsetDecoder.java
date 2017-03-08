@@ -49,8 +49,6 @@ import java.nio.charset.CodingErrorAction;
  * next time, as many bytes as needed to decode a complete character will be
  * added to the cached bytes and the now available character is appended to the
  * output. Then, the rest of the input is bulk processed as usual.
- * 
- * @author Michael N. Lipp
  */
 public class OptimizedCharsetDecoder {
 

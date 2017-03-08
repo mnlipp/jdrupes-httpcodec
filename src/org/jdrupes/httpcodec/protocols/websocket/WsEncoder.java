@@ -34,7 +34,7 @@ import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 
 /**
- * @author Michael N. Lipp
+ * The Websocket encoder.
  */
 public class WsEncoder implements Encoder<WsFrameHeader> {
 

@@ -20,8 +20,6 @@ package org.jdrupes.httpcodec;
 
 /**
  * Represents an engine with an associated encoder and decoder.
- * 
- * @author Michael N. Lipp
  */
 public abstract class Engine {
 

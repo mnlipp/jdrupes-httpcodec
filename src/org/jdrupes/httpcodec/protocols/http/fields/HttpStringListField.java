@@ -27,8 +27,6 @@ import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
  * An HTTP field value that consists of a comma separated list of 
  * strings. The class provides a "list of strings" view
  * of the values.
- * 
- * @author Michael N. Lipp
  */
 public class HttpStringListField extends HttpListField<String>
 	implements Cloneable {

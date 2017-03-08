@@ -22,8 +22,6 @@ import java.nio.ByteBuffer;
 
 /**
  * Control frames with binary application data.
- * 
- * @author Michael N. Lipp
  */
 public class WsDefaultControlFrame extends WsFrameHeader {
 

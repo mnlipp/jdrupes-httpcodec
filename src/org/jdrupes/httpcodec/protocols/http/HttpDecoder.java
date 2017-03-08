@@ -46,8 +46,6 @@ import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 /**
  * Implements a decoder for HTTP. The class can be used as base class for both
  * a request and a response decoder.
- * 
- * @author Michael N. Lipp
  */
 public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	R extends HttpMessageHeader> 

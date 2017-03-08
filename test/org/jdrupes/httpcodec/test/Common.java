@@ -29,8 +29,6 @@ import org.jdrupes.httpcodec.ProtocolException;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author Michael N. Lipp
- *
  */
 public class Common {
 

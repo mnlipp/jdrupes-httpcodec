@@ -36,8 +36,6 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
 /**
  * Represents an HTTP message header (either request or response).
- * 
- * @author Michael N. Lipp
  */
 public abstract class HttpMessageHeader implements MessageHeader {
 

@@ -20,8 +20,6 @@ package org.jdrupes.httpcodec.util;
 
 /**
  * A dynamically growing byte array.
- * 
- * @author Michael N. Lipp
  */
 public class DynamicByteArray {
 

@@ -31,7 +31,7 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 
 /**
- * @author Michael N. Lipp
+ * The Websocket decoder.
  */
 public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 

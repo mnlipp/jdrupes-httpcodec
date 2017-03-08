@@ -21,8 +21,7 @@ package org.jdrupes.httpcodec.protocols.websocket;
 import java.nio.CharBuffer;
 
 /**
- * @author Michael N. Lipp
- *
+ * Represents a Websocket close frame.
  */
 public class WsCloseFrame extends WsFrameHeader {
 

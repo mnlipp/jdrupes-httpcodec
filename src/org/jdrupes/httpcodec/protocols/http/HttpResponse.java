@@ -29,8 +29,6 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 
 /**
  * Represents an HTTP response header.
- * 
- * @author Michael N. Lipp
  */
 public class HttpResponse extends HttpMessageHeader {
 

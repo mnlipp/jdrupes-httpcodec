@@ -30,8 +30,6 @@ import org.jdrupes.httpcodec.Codec.ProtocolSwitchResult;
  * 
  * @param <Q> the message header type handled by the decoder (the request)
  * @param <R> the message header type handled be the encoder (the response)
- * 
- * @author Michael N. Lipp
  */
 public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	extends Engine {

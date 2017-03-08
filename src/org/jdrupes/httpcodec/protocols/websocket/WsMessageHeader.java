@@ -19,8 +19,7 @@
 package org.jdrupes.httpcodec.protocols.websocket;
 
 /**
- * @author Michael N. Lipp
- *
+ * The Websocket message header.
  */
 public class WsMessageHeader extends WsFrameHeader {
 

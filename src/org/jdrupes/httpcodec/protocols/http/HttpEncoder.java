@@ -47,8 +47,6 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
 /**
  * Implements an encoder for HTTP. The class can be used as base class for both
  * a request and a response encoder.
- * 
- * @author Michael N. Lipp
  */
 public abstract class HttpEncoder<T extends HttpMessageHeader> 
 	extends HttpCodec<T> implements Encoder<T> {

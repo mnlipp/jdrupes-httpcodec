@@ -24,8 +24,6 @@ import java.text.ParseException;
  * Represents a header field that has a simple string as its value.
  * The value is never quoted, even if the string contains characters
  * that could be interpreted as delimiters.
- * 
- * @author Michael N. Lipp
  */
 public class HttpUnquotedStringField extends HttpField<String> {
 

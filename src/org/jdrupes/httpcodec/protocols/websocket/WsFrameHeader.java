@@ -21,8 +21,7 @@ package org.jdrupes.httpcodec.protocols.websocket;
 import org.jdrupes.httpcodec.MessageHeader;
 
 /**
- * @author Michael N. Lipp
- *
+ * The base class for all Websocket frame headers.
  */
 public class WsFrameHeader implements MessageHeader {
 

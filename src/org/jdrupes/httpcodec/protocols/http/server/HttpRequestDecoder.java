@@ -213,8 +213,6 @@ public class HttpRequestDecoder
 	 * 
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
-	 * 
-	 * @author Michael N. Lipp
 	 */
 	public abstract static class Result 
 		extends HttpDecoder.Result<HttpResponse> {

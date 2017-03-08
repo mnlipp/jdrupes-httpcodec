@@ -27,8 +27,6 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 
 /**
  * Represents an HTTP request header.
- * 
- * @author Michael N. Lipp
  */
 public class HttpRequest extends HttpMessageHeader {
 

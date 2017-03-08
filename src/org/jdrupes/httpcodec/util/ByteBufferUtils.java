@@ -21,8 +21,7 @@ package org.jdrupes.httpcodec.util;
 import java.nio.ByteBuffer;
 
 /**
- * @author Michael N. Lipp
- *
+ * Utilities for handling `ByteBuffer`s
  */
 public class ByteBufferUtils {
 

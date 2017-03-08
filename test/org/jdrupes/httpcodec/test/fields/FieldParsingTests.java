@@ -34,8 +34,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * @author Michael N. Lipp
- *
+ * Field parsing tests.
  */
 public class FieldParsingTests {
 

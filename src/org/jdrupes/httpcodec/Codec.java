@@ -37,8 +37,6 @@ public interface Codec {
 	 * 
 	 * The class is declared abstract to promote the usage of the factory
 	 * method.
-	 * 
-	 * @author Michael N. Lipp
 	 */
 	public abstract static class Result {
 
@@ -184,8 +182,6 @@ public interface Codec {
 
 	/**
 	 * Results that indicate a protocol switch must implement this interface.
-	 * 
-	 * @author Michael N. Lipp
 	 */
 	public interface ProtocolSwitchResult {
 		

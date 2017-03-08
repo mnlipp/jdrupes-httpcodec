@@ -23,8 +23,7 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 
 /**
- * @author Michael N. Lipp
- *
+ * The base class for HTTP codecs.
  */
 public abstract class HttpCodec<T extends HttpMessageHeader>
 	implements Codec {

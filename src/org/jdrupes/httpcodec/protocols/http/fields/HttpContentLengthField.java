@@ -23,8 +23,6 @@ import java.text.ParseException;
 /**
  * A specialization of {@link HttpIntField} that represents the
  * content-length.
- * 
- * @author Michael N. Lipp
  */
 public class HttpContentLengthField extends HttpIntField {
 

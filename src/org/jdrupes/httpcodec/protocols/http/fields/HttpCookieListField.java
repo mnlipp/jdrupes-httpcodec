@@ -23,8 +23,7 @@ import java.text.ParseException;
 import java.util.Optional;
 
 /**
- * @author Michael N. Lipp
- *
+ * The cookies representation.
  */
 public class HttpCookieListField extends HttpListField<HttpCookie> {
 

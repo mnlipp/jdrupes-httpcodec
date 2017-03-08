@@ -22,8 +22,6 @@ package org.jdrupes.httpcodec;
  * Represents a message header (either request or response) which preceeds
  * the option payload data. Header and payload together form the complete
  * message.
- * 
- * @author Michael N. Lipp
  */
 public interface MessageHeader {
 

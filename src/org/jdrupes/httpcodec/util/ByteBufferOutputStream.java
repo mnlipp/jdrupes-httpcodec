@@ -32,9 +32,6 @@ import java.util.Queue;
  * While writing to this stream, {@link #remaining()} should be checked
  * regularly and the production of data should be suspended if possible when no
  * more space is left to avoid the usage of intermediate storage.
- * 
- * @author Michael N. Lipp
- *
  */
 public class ByteBufferOutputStream extends OutputStream {
 

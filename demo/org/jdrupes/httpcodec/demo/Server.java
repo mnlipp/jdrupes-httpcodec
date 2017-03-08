@@ -24,8 +24,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 /**
- * @author Michael N. Lipp
- *
+ * Demo server.
  */
 public class Server {
 

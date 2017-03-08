@@ -31,8 +31,6 @@ import org.junit.Test;
 
 /**
  * Tests focusing on encoding the response header.
- * 
- * @author Michael N. Lipp
  */
 public class ResponseEncoderTests {
 

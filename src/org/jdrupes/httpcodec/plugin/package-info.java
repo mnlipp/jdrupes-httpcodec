@@ -16,8 +16,7 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 /**
- * @author Michael N. Lipp
- *
+ * Provides the API for adding "upgrade" protocols
  */
 @org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec.plugin;

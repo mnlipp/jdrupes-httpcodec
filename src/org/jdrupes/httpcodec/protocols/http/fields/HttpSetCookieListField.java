@@ -27,8 +27,6 @@ import java.util.Optional;
  * actually set with several headers. However, to provide uniform access to all
  * header fields, they are converted to a field with a list of values in the
  * internal representation.
- * 
- * @author Michael N. Lipp
  */
 public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 

@@ -23,8 +23,6 @@ import java.text.ParseException;
 
 /**
  * An HTTP field value that is an integer.
- * 
- * @author Michael N. Lipp
  */
 public class HttpIntField extends HttpField<Long> {
 

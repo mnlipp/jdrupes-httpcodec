@@ -26,8 +26,6 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 
 /**
  * A base class for all kinds of header field values.
- * 
- * @author Michael N. Lipp
  */
 public abstract class HttpField<T> implements Cloneable {
 

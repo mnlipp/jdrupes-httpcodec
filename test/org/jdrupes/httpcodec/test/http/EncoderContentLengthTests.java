@@ -36,8 +36,6 @@ import org.junit.Test;
 /**
  * Tests focusing on the body, applicable to both requests and responses,
  * using content length.
- * 
- * @author Michael N. Lipp
  */
 public class EncoderContentLengthTests {
 

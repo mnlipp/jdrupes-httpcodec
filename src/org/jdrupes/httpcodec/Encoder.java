@@ -23,9 +23,6 @@ import java.nio.ByteBuffer;
 
 /**
  * The general interface of an encoder.
- * 
- * @author Michael N. Lipp
- *
  */
 public interface Encoder<T extends MessageHeader> extends Codec {
 

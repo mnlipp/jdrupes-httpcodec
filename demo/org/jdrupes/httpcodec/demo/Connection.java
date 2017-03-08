@@ -46,8 +46,7 @@ import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
 import org.jdrupes.httpcodec.util.FormUrlDecoder;
 
 /**
- * @author Michael N. Lipp
- *
+ * A connection to a client.
  */
 public class Connection extends Thread {
 

@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Michael N. Lipp
- *
+ * A decoder for URL-encoded form data.
  */
 public class FormUrlDecoder {
 

@@ -25,7 +25,8 @@ import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 
 /**
- * @author Michael N. Lipp
+ * The base class for a protocol that the HTTP connection
+ * can be upgraded to.
  */
 public abstract class ProtocolProvider {
 

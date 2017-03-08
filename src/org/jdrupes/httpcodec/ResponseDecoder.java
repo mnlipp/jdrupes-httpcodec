@@ -30,8 +30,6 @@ import java.nio.ByteBuffer;
  * @param <Q>
  *            the type of the message header that caused the response (the
  *            request)
- * 
- * @author Michael N. Lipp
  */
 public interface ResponseDecoder<T extends MessageHeader, 
 	Q extends MessageHeader> extends Decoder<T, Q> {

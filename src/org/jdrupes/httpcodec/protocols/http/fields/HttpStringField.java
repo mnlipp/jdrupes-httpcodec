@@ -22,8 +22,6 @@ import java.text.ParseException;
 
 /**
  * Represents a header field that has a simple string as its value.
- * 
- * @author Michael N. Lipp
  */
 public class HttpStringField extends HttpField<String> {
 
