@@ -21,6 +21,10 @@ engines:
   pmd:
     enabled: true
     channel: beta
+    # ... CONFIG CONTENT ...
+    checks:
+      AvoidBranchingStatementAsLastInLoop:
+        enabled: false
 ratings:
   paths:
   - "**.java"

@@ -242,7 +242,6 @@ public class ByteBufferOutputStream extends OutputStream {
 	 */
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
 		super.close();
 	}
 
