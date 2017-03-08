@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="sourceContainer">
-<pre><span class="sourceLineNo">001</span>/*******************************************************************************<a name="line.1"></a>
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
 <span class="sourceLineNo">002</span> * This file is part of the JDrupes non-blocking HTTP Codec<a name="line.2"></a>
 <span class="sourceLineNo">003</span> * Copyright (C) 2016  Michael N. Lipp<a name="line.3"></a>
 <span class="sourceLineNo">004</span> *<a name="line.4"></a>
@@ -22,37 +22,37 @@
 <span class="sourceLineNo">014</span> *<a name="line.14"></a>
 <span class="sourceLineNo">015</span> * You should have received a copy of the GNU Lesser General Public License along <a name="line.15"></a>
 <span class="sourceLineNo">016</span> * with this program; if not, see &lt;http://www.gnu.org/licenses/&gt;.<a name="line.16"></a>
-<span class="sourceLineNo">017</span> *******************************************************************************/<a name="line.17"></a>
-<span class="sourceLineNo">018</span>package org.jdrupes.httpcodec.protocols.http.fields;<a name="line.18"></a>
-<span class="sourceLineNo">019</span><a name="line.19"></a>
-<span class="sourceLineNo">020</span>import java.text.ParseException;<a name="line.20"></a>
-<span class="sourceLineNo">021</span>import java.util.Map;<a name="line.21"></a>
-<span class="sourceLineNo">022</span>import java.util.TreeMap;<a name="line.22"></a>
-<span class="sourceLineNo">023</span><a name="line.23"></a>
-<span class="sourceLineNo">024</span>import org.jdrupes.httpcodec.protocols.http.HttpConstants;<a name="line.24"></a>
-<span class="sourceLineNo">025</span><a name="line.25"></a>
-<span class="sourceLineNo">026</span>/**<a name="line.26"></a>
-<span class="sourceLineNo">027</span> * A base class for all kinds of header field values.<a name="line.27"></a>
-<span class="sourceLineNo">028</span> * <a name="line.28"></a>
-<span class="sourceLineNo">029</span> * @author Michael N. Lipp<a name="line.29"></a>
-<span class="sourceLineNo">030</span> */<a name="line.30"></a>
-<span class="sourceLineNo">031</span>public abstract class HttpField&lt;T&gt; implements Cloneable {<a name="line.31"></a>
-<span class="sourceLineNo">032</span><a name="line.32"></a>
-<span class="sourceLineNo">033</span>        final public static String COOKIE = "Cookie";<a name="line.33"></a>
-<span class="sourceLineNo">034</span>        final public static String CONNECTION = "Connection";<a name="line.34"></a>
-<span class="sourceLineNo">035</span>        final public static String CONTENT_LENGTH = "Content-Length";<a name="line.35"></a>
-<span class="sourceLineNo">036</span>        final public static String CONTENT_TYPE = "Content-Type";<a name="line.36"></a>
-<span class="sourceLineNo">037</span>        final public static String DATE = "Date";<a name="line.37"></a>
-<span class="sourceLineNo">038</span>        final public static String HOST = "Host";<a name="line.38"></a>
-<span class="sourceLineNo">039</span>        final public static String SET_COOKIE = "Set-Cookie";<a name="line.39"></a>
-<span class="sourceLineNo">040</span>        final public static String TE = "TE";<a name="line.40"></a>
-<span class="sourceLineNo">041</span>        final public static String TRAILER = "Trailer";<a name="line.41"></a>
-<span class="sourceLineNo">042</span>        final public static String TRANSFER_ENCODING = "Transfer-Encoding";<a name="line.42"></a>
-<span class="sourceLineNo">043</span>        final public static String UPGRADE = "Upgrade";<a name="line.43"></a>
-<span class="sourceLineNo">044</span>        final public static String VIA = "Via";<a name="line.44"></a>
-<span class="sourceLineNo">045</span>        <a name="line.45"></a>
-<span class="sourceLineNo">046</span>        private static Map&lt;String, String&gt; fieldNameMap = new TreeMap&lt;&gt;(<a name="line.46"></a>
-<span class="sourceLineNo">047</span>                String.CASE_INSENSITIVE_ORDER);<a name="line.47"></a>
+<span class="sourceLineNo">017</span> */<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>package org.jdrupes.httpcodec.protocols.http.fields;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>import java.text.ParseException;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.util.Map;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import java.util.TreeMap;<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import org.jdrupes.httpcodec.protocols.http.HttpConstants;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>/**<a name="line.27"></a>
+<span class="sourceLineNo">028</span> * A base class for all kinds of header field values.<a name="line.28"></a>
+<span class="sourceLineNo">029</span> */<a name="line.29"></a>
+<span class="sourceLineNo">030</span>public abstract class HttpField&lt;T&gt; implements Cloneable {<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>        public static final String COOKIE = "Cookie";<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        public static final String CONNECTION = "Connection";<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        public static final String CONTENT_LENGTH = "Content-Length";<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        public static final String CONTENT_TYPE = "Content-Type";<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        public static final String DATE = "Date";<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        public static final String HOST = "Host";<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        public static final String SET_COOKIE = "Set-Cookie";<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        public static final String TE = "TE";<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        public static final String TRAILER = "Trailer";<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        public static final String TRANSFER_ENCODING = "Transfer-Encoding";<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        public static final String UPGRADE = "Upgrade";<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        public static final String VIA = "Via";<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        <a name="line.44"></a>
+<span class="sourceLineNo">045</span>        private static Map&lt;String, String&gt; fieldNameMap = new TreeMap&lt;&gt;(<a name="line.45"></a>
+<span class="sourceLineNo">046</span>                String.CASE_INSENSITIVE_ORDER);<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        <a name="line.47"></a>
 <span class="sourceLineNo">048</span>        static {<a name="line.48"></a>
 <span class="sourceLineNo">049</span>                fieldNameMap.put(COOKIE, COOKIE);<a name="line.49"></a>
 <span class="sourceLineNo">050</span>                fieldNameMap.put(CONNECTION, CONNECTION);<a name="line.50"></a>
@@ -68,75 +68,75 @@
 <span class="sourceLineNo">060</span>                fieldNameMap.put(VIA, VIA);<a name="line.60"></a>
 <span class="sourceLineNo">061</span>        }<a name="line.61"></a>
 <span class="sourceLineNo">062</span>        <a name="line.62"></a>
-<span class="sourceLineNo">063</span>        /**<a name="line.63"></a>
-<span class="sourceLineNo">064</span>         * Returns an HttpField that represents the given header field, using the<a name="line.64"></a>
-<span class="sourceLineNo">065</span>         * best matching derived class in this package. Works for all well known<a name="line.65"></a>
-<span class="sourceLineNo">066</span>         * field names, i.e. the field names defined as constants in this class. If<a name="line.66"></a>
-<span class="sourceLineNo">067</span>         * the field name is unknown, the result will be of type<a name="line.67"></a>
-<span class="sourceLineNo">068</span>         * {@link HttpStringField}.<a name="line.68"></a>
-<span class="sourceLineNo">069</span>         * <a name="line.69"></a>
-<span class="sourceLineNo">070</span>         * @param fieldName<a name="line.70"></a>
-<span class="sourceLineNo">071</span>         *            the field name<a name="line.71"></a>
-<span class="sourceLineNo">072</span>         * @param fieldValue<a name="line.72"></a>
-<span class="sourceLineNo">073</span>         *            the field value<a name="line.73"></a>
-<span class="sourceLineNo">074</span>         * @return a typed representation<a name="line.74"></a>
-<span class="sourceLineNo">075</span>         * @throws ParseException if the input violates the field format<a name="line.75"></a>
-<span class="sourceLineNo">076</span>         */<a name="line.76"></a>
-<span class="sourceLineNo">077</span>        public static HttpField&lt;?&gt; fromString(String fieldName,<a name="line.77"></a>
-<span class="sourceLineNo">078</span>                String fieldValue) throws ParseException {<a name="line.78"></a>
-<span class="sourceLineNo">079</span>                String normalizedFieldName = fieldNameMap<a name="line.79"></a>
-<span class="sourceLineNo">080</span>                                .getOrDefault(fieldName, fieldName);<a name="line.80"></a>
-<span class="sourceLineNo">081</span>                switch (normalizedFieldName) {<a name="line.81"></a>
-<span class="sourceLineNo">082</span>                case HttpField.COOKIE:<a name="line.82"></a>
-<span class="sourceLineNo">083</span>                        return HttpCookieListField.fromString(fieldValue);<a name="line.83"></a>
-<span class="sourceLineNo">084</span>                case HttpField.CONNECTION:<a name="line.84"></a>
-<span class="sourceLineNo">085</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.85"></a>
-<span class="sourceLineNo">086</span>                case HttpField.CONTENT_LENGTH:<a name="line.86"></a>
-<span class="sourceLineNo">087</span>                        return HttpContentLengthField.fromString(fieldValue);<a name="line.87"></a>
-<span class="sourceLineNo">088</span>                case HttpField.CONTENT_TYPE:<a name="line.88"></a>
-<span class="sourceLineNo">089</span>                        return HttpMediaTypeField.fromString(fieldName, fieldValue);<a name="line.89"></a>
-<span class="sourceLineNo">090</span>                case HttpField.DATE:<a name="line.90"></a>
-<span class="sourceLineNo">091</span>                        return HttpDateField.fromString(fieldName, fieldValue);<a name="line.91"></a>
-<span class="sourceLineNo">092</span>                case HttpField.SET_COOKIE:<a name="line.92"></a>
-<span class="sourceLineNo">093</span>                        return HttpSetCookieListField.fromString(fieldValue);<a name="line.93"></a>
-<span class="sourceLineNo">094</span>                case HttpField.TRAILER:<a name="line.94"></a>
-<span class="sourceLineNo">095</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.95"></a>
-<span class="sourceLineNo">096</span>                case HttpField.TRANSFER_ENCODING:<a name="line.96"></a>
-<span class="sourceLineNo">097</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.97"></a>
-<span class="sourceLineNo">098</span>                case HttpField.UPGRADE:<a name="line.98"></a>
-<span class="sourceLineNo">099</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.99"></a>
-<span class="sourceLineNo">100</span>                case HttpField.VIA:<a name="line.100"></a>
-<span class="sourceLineNo">101</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.101"></a>
-<span class="sourceLineNo">102</span>                default:<a name="line.102"></a>
-<span class="sourceLineNo">103</span>                        return HttpStringField.fromString(fieldName, fieldValue);<a name="line.103"></a>
-<span class="sourceLineNo">104</span>                }<a name="line.104"></a>
-<span class="sourceLineNo">105</span>        }<a name="line.105"></a>
-<span class="sourceLineNo">106</span>        <a name="line.106"></a>
-<span class="sourceLineNo">107</span>        final private String name;<a name="line.107"></a>
-<span class="sourceLineNo">108</span>        <a name="line.108"></a>
-<span class="sourceLineNo">109</span>        /**<a name="line.109"></a>
-<span class="sourceLineNo">110</span>         * Creates a new representation of a header field value. For fields with<a name="line.110"></a>
-<span class="sourceLineNo">111</span>         * a constant definition in this class, the name is normalized.<a name="line.111"></a>
-<span class="sourceLineNo">112</span>         * <a name="line.112"></a>
-<span class="sourceLineNo">113</span>         * @param name the field name<a name="line.113"></a>
-<span class="sourceLineNo">114</span>         */<a name="line.114"></a>
-<span class="sourceLineNo">115</span>        protected HttpField(String name) {<a name="line.115"></a>
-<span class="sourceLineNo">116</span>                this.name = fieldNameMap.getOrDefault(name, name);<a name="line.116"></a>
-<span class="sourceLineNo">117</span>        }<a name="line.117"></a>
-<span class="sourceLineNo">118</span><a name="line.118"></a>
-<span class="sourceLineNo">119</span>        /* (non-Javadoc)<a name="line.119"></a>
-<span class="sourceLineNo">120</span>         * @see java.lang.Object#clone()<a name="line.120"></a>
-<span class="sourceLineNo">121</span>         */<a name="line.121"></a>
-<span class="sourceLineNo">122</span>        @Override<a name="line.122"></a>
-<span class="sourceLineNo">123</span>        @SuppressWarnings("unchecked")<a name="line.123"></a>
-<span class="sourceLineNo">124</span>        public HttpField&lt;T&gt; clone() {<a name="line.124"></a>
-<span class="sourceLineNo">125</span>                try {<a name="line.125"></a>
-<span class="sourceLineNo">126</span>                        return (HttpField&lt;T&gt;)super.clone();<a name="line.126"></a>
-<span class="sourceLineNo">127</span>                } catch (CloneNotSupportedException e) {<a name="line.127"></a>
-<span class="sourceLineNo">128</span>                        return null;<a name="line.128"></a>
+<span class="sourceLineNo">063</span>        private final String name;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        <a name="line.64"></a>
+<span class="sourceLineNo">065</span>        /**<a name="line.65"></a>
+<span class="sourceLineNo">066</span>         * Creates a new representation of a header field value. For fields with<a name="line.66"></a>
+<span class="sourceLineNo">067</span>         * a constant definition in this class, the name is normalized.<a name="line.67"></a>
+<span class="sourceLineNo">068</span>         * <a name="line.68"></a>
+<span class="sourceLineNo">069</span>         * @param name the field name<a name="line.69"></a>
+<span class="sourceLineNo">070</span>         */<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        protected HttpField(String name) {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                this.name = fieldNameMap.getOrDefault(name, name);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>        /* (non-Javadoc)<a name="line.75"></a>
+<span class="sourceLineNo">076</span>         * @see java.lang.Object#clone()<a name="line.76"></a>
+<span class="sourceLineNo">077</span>         */<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        @Override<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        @SuppressWarnings("unchecked")<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        public HttpField&lt;T&gt; clone() {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                try {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>                        return (HttpField&lt;T&gt;)super.clone();<a name="line.82"></a>
+<span class="sourceLineNo">083</span>                } catch (CloneNotSupportedException e) {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                        return null;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                }<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        }<a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>        /**<a name="line.88"></a>
+<span class="sourceLineNo">089</span>         * Returns an HttpField that represents the given header field, using the<a name="line.89"></a>
+<span class="sourceLineNo">090</span>         * best matching derived class in this package. Works for all well known<a name="line.90"></a>
+<span class="sourceLineNo">091</span>         * field names, i.e. the field names defined as constants in this class. If<a name="line.91"></a>
+<span class="sourceLineNo">092</span>         * the field name is unknown, the result will be of type<a name="line.92"></a>
+<span class="sourceLineNo">093</span>         * {@link HttpStringField}.<a name="line.93"></a>
+<span class="sourceLineNo">094</span>         * <a name="line.94"></a>
+<span class="sourceLineNo">095</span>         * @param fieldName<a name="line.95"></a>
+<span class="sourceLineNo">096</span>         *            the field name<a name="line.96"></a>
+<span class="sourceLineNo">097</span>         * @param fieldValue<a name="line.97"></a>
+<span class="sourceLineNo">098</span>         *            the field value<a name="line.98"></a>
+<span class="sourceLineNo">099</span>         * @return a typed representation<a name="line.99"></a>
+<span class="sourceLineNo">100</span>         * @throws ParseException if the input violates the field format<a name="line.100"></a>
+<span class="sourceLineNo">101</span>         */<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        public static HttpField&lt;?&gt; fromString(String fieldName,<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                String fieldValue) throws ParseException {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                String normalizedFieldName = fieldNameMap<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                                .getOrDefault(fieldName, fieldName);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                switch (normalizedFieldName) {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                case HttpField.COOKIE:<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                        return HttpCookieListField.fromString(fieldValue);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                case HttpField.CONNECTION:<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                case HttpField.CONTENT_LENGTH:<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                        return HttpContentLengthField.fromString(fieldValue);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>                case HttpField.CONTENT_TYPE:<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                        return HttpMediaTypeField.fromString(fieldName, fieldValue);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>                case HttpField.DATE:<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                        return HttpDateField.fromString(fieldValue);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                case HttpField.SET_COOKIE:<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                        return HttpSetCookieListField.fromString(fieldValue);<a name="line.118"></a>
+<span class="sourceLineNo">119</span>                case HttpField.TRAILER:<a name="line.119"></a>
+<span class="sourceLineNo">120</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>                case HttpField.TRANSFER_ENCODING:<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>                case HttpField.UPGRADE:<a name="line.123"></a>
+<span class="sourceLineNo">124</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.124"></a>
+<span class="sourceLineNo">125</span>                case HttpField.VIA:<a name="line.125"></a>
+<span class="sourceLineNo">126</span>                        return HttpStringListField.fromString(fieldName, fieldValue);<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                default:<a name="line.127"></a>
+<span class="sourceLineNo">128</span>                        return HttpStringField.fromString(fieldName, fieldValue);<a name="line.128"></a>
 <span class="sourceLineNo">129</span>                }<a name="line.129"></a>
 <span class="sourceLineNo">130</span>        }<a name="line.130"></a>
-<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">131</span>        <a name="line.131"></a>
 <span class="sourceLineNo">132</span>        /**<a name="line.132"></a>
 <span class="sourceLineNo">133</span>         * Returns the header field name.<a name="line.133"></a>
 <span class="sourceLineNo">134</span>         * <a name="line.134"></a>
@@ -176,12 +176,12 @@
 <span class="sourceLineNo">168</span>         */<a name="line.168"></a>
 <span class="sourceLineNo">169</span>        @Override<a name="line.169"></a>
 <span class="sourceLineNo">170</span>        public String toString() {<a name="line.170"></a>
-<span class="sourceLineNo">171</span>                StringBuilder s = new StringBuilder();<a name="line.171"></a>
-<span class="sourceLineNo">172</span>                s.append(getClass().getSimpleName());<a name="line.172"></a>
-<span class="sourceLineNo">173</span>                s.append(" [");<a name="line.173"></a>
-<span class="sourceLineNo">174</span>                s.append(asHeaderField().replace("\r\n", " CRLF "));<a name="line.174"></a>
-<span class="sourceLineNo">175</span>                s.append("]");<a name="line.175"></a>
-<span class="sourceLineNo">176</span>                return s.toString();<a name="line.176"></a>
+<span class="sourceLineNo">171</span>                StringBuilder result = new StringBuilder();<a name="line.171"></a>
+<span class="sourceLineNo">172</span>                result.append(getClass().getSimpleName());<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                result.append(" [");<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                result.append(asHeaderField().replace("\r\n", " CRLF "));<a name="line.174"></a>
+<span class="sourceLineNo">175</span>                result.append("]");<a name="line.175"></a>
+<span class="sourceLineNo">176</span>                return result.toString();<a name="line.176"></a>
 <span class="sourceLineNo">177</span>        }<a name="line.177"></a>
 <span class="sourceLineNo">178</span><a name="line.178"></a>
 <span class="sourceLineNo">179</span>        /**<a name="line.179"></a>
@@ -248,18 +248,20 @@
 <span class="sourceLineNo">240</span>                        case '"':<a name="line.240"></a>
 <span class="sourceLineNo">241</span>                        case '\\':<a name="line.241"></a>
 <span class="sourceLineNo">242</span>                                result.append('\\');<a name="line.242"></a>
-<span class="sourceLineNo">243</span>                        default:<a name="line.243"></a>
-<span class="sourceLineNo">244</span>                                result.append(ch);<a name="line.244"></a>
-<span class="sourceLineNo">245</span>                        }<a name="line.245"></a>
-<span class="sourceLineNo">246</span>                }<a name="line.246"></a>
-<span class="sourceLineNo">247</span>                result.append('\"');<a name="line.247"></a>
-<span class="sourceLineNo">248</span>                if (needsQuoting) {<a name="line.248"></a>
-<span class="sourceLineNo">249</span>                        return result.toString();<a name="line.249"></a>
-<span class="sourceLineNo">250</span>                }<a name="line.250"></a>
-<span class="sourceLineNo">251</span>                return value;<a name="line.251"></a>
-<span class="sourceLineNo">252</span>        }<a name="line.252"></a>
-<span class="sourceLineNo">253</span><a name="line.253"></a>
-<span class="sourceLineNo">254</span>}<a name="line.254"></a>
+<span class="sourceLineNo">243</span>                                // fall through<a name="line.243"></a>
+<span class="sourceLineNo">244</span>                        default:<a name="line.244"></a>
+<span class="sourceLineNo">245</span>                                result.append(ch);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>                                break;<a name="line.246"></a>
+<span class="sourceLineNo">247</span>                        }<a name="line.247"></a>
+<span class="sourceLineNo">248</span>                }<a name="line.248"></a>
+<span class="sourceLineNo">249</span>                result.append('\"');<a name="line.249"></a>
+<span class="sourceLineNo">250</span>                if (needsQuoting) {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>                        return result.toString();<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                return value;<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        }<a name="line.254"></a>
+<span class="sourceLineNo">255</span><a name="line.255"></a>
+<span class="sourceLineNo">256</span>}<a name="line.256"></a>
 
 
 

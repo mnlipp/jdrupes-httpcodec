@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="sourceContainer">
-<pre><span class="sourceLineNo">001</span>/*******************************************************************************<a name="line.1"></a>
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
 <span class="sourceLineNo">002</span> * This file is part of the JDrupes non-blocking HTTP Codec<a name="line.2"></a>
 <span class="sourceLineNo">003</span> * Copyright (C) 2016  Michael N. Lipp<a name="line.3"></a>
 <span class="sourceLineNo">004</span> *<a name="line.4"></a>
@@ -22,16 +22,16 @@
 <span class="sourceLineNo">014</span> *<a name="line.14"></a>
 <span class="sourceLineNo">015</span> * You should have received a copy of the GNU Lesser General Public License along <a name="line.15"></a>
 <span class="sourceLineNo">016</span> * with this program; if not, see &lt;http://www.gnu.org/licenses/&gt;.<a name="line.16"></a>
-<span class="sourceLineNo">017</span> *******************************************************************************/<a name="line.17"></a>
-<span class="sourceLineNo">018</span>package org.jdrupes.httpcodec.protocols.http.fields;<a name="line.18"></a>
-<span class="sourceLineNo">019</span><a name="line.19"></a>
-<span class="sourceLineNo">020</span>import java.net.HttpCookie;<a name="line.20"></a>
-<span class="sourceLineNo">021</span>import java.text.ParseException;<a name="line.21"></a>
-<span class="sourceLineNo">022</span>import java.util.Optional;<a name="line.22"></a>
-<span class="sourceLineNo">023</span><a name="line.23"></a>
-<span class="sourceLineNo">024</span>/**<a name="line.24"></a>
-<span class="sourceLineNo">025</span> * @author Michael N. Lipp<a name="line.25"></a>
-<span class="sourceLineNo">026</span> *<a name="line.26"></a>
+<span class="sourceLineNo">017</span> */<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>package org.jdrupes.httpcodec.protocols.http.fields;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>import java.net.HttpCookie;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.text.ParseException;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import java.util.Optional;<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>/**<a name="line.25"></a>
+<span class="sourceLineNo">026</span> * The cookies representation.<a name="line.26"></a>
 <span class="sourceLineNo">027</span> */<a name="line.27"></a>
 <span class="sourceLineNo">028</span>public class HttpCookieListField extends HttpListField&lt;HttpCookie&gt; {<a name="line.28"></a>
 <span class="sourceLineNo">029</span><a name="line.29"></a>
@@ -39,23 +39,23 @@
 <span class="sourceLineNo">031</span>         * Creates a new object with the field name "Cookie" and the given unparsed<a name="line.31"></a>
 <span class="sourceLineNo">032</span>         * value.<a name="line.32"></a>
 <span class="sourceLineNo">033</span>         * <a name="line.33"></a>
-<span class="sourceLineNo">034</span>         * @param s the unparsed value<a name="line.34"></a>
+<span class="sourceLineNo">034</span>         * @param text the unparsed value<a name="line.34"></a>
 <span class="sourceLineNo">035</span>         */<a name="line.35"></a>
-<span class="sourceLineNo">036</span>        protected HttpCookieListField(String s) {<a name="line.36"></a>
-<span class="sourceLineNo">037</span>                super(HttpField.COOKIE, s);<a name="line.37"></a>
+<span class="sourceLineNo">036</span>        protected HttpCookieListField(String text) {<a name="line.36"></a>
+<span class="sourceLineNo">037</span>                super(HttpField.COOKIE, text);<a name="line.37"></a>
 <span class="sourceLineNo">038</span>        }<a name="line.38"></a>
 <span class="sourceLineNo">039</span><a name="line.39"></a>
 <span class="sourceLineNo">040</span>        /**<a name="line.40"></a>
 <span class="sourceLineNo">041</span>         * Creates a new object with the elements obtained by parsing the given<a name="line.41"></a>
 <span class="sourceLineNo">042</span>         * String.<a name="line.42"></a>
 <span class="sourceLineNo">043</span>         * <a name="line.43"></a>
-<span class="sourceLineNo">044</span>         * @param s the string to parse<a name="line.44"></a>
+<span class="sourceLineNo">044</span>         * @param text the string to parse<a name="line.44"></a>
 <span class="sourceLineNo">045</span>         * @return the result<a name="line.45"></a>
 <span class="sourceLineNo">046</span>         * @throws ParseException if the input violates the field format<a name="line.46"></a>
 <span class="sourceLineNo">047</span>         */<a name="line.47"></a>
-<span class="sourceLineNo">048</span>        public static HttpCookieListField fromString(String s) <a name="line.48"></a>
+<span class="sourceLineNo">048</span>        public static HttpCookieListField fromString(String text) <a name="line.48"></a>
 <span class="sourceLineNo">049</span>                        throws ParseException {<a name="line.49"></a>
-<span class="sourceLineNo">050</span>                HttpCookieListField result = new HttpCookieListField(s);<a name="line.50"></a>
+<span class="sourceLineNo">050</span>                HttpCookieListField result = new HttpCookieListField(text);<a name="line.50"></a>
 <span class="sourceLineNo">051</span>                while (true) {<a name="line.51"></a>
 <span class="sourceLineNo">052</span>                        String element = result.nextElement();<a name="line.52"></a>
 <span class="sourceLineNo">053</span>                        if (element == null) {<a name="line.53"></a>
