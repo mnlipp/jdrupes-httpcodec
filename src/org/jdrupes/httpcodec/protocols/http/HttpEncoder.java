@@ -36,7 +36,6 @@ import org.jdrupes.httpcodec.Encoder;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
