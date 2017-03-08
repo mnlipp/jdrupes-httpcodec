@@ -36,6 +36,7 @@ import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpDateField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
@@ -45,6 +46,13 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
  * {@link Buffer}s.
  * 
  * ![HttpResponseEncoder](httpresponseencoder.svg)
+ *
+ * Headers
+ * -------
+ * 
+ * The encoder automatically adds a `Date` header as specified
+ * in [RFC 7231, Section 7.1.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.1.2).
+ * Any existing `Date` header will be overwritten. 
  * 
  * @startuml httpresponseencoder.svg
  * class HttpResponseEncoder {
@@ -88,6 +96,10 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 					== HttpStatus.SWITCHING_PROTOCOLS.getStatusCode()) {
 			switchingTo = prepareSwitchProtocol(messageHeader);
 		}
+		
+		// Make sure we have an up-to-date Date, RFC 7231 7.1.1.2
+		messageHeader.setField(new HttpDateField());
+		
 		super.encode(messageHeader);
 	}
 

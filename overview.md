@@ -131,7 +131,7 @@ As you can see, we still have'nt reached the goal yet to get concrete
 HTTP codecs. This is because there is a difference between HTTP request
 messages and HTTP response messages.
 
-![HTTP request and response meaasges](http-messages.svg)
+![HTTP request and response messages](http-messages.svg)
 
 Now we have all the pieces together. In order to write an HTTP server
 you need an `HTTPDecoder` parameterized with `HTTPRequest` as type of the 
@@ -145,6 +145,9 @@ of the messages to be encode, in short an
 
 For implementing an HTTP client, you need an {@link org.jdrupes.httpcodec.protocols.http.client.HttpRequestEncoder}
 and an {@link org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder}.
+
+Have a look at the classes javadoc to find out what kind of support each
+of the codecs provides regarding header field handling. 
 
 Protocol switching
 ------------------
@@ -379,9 +382,15 @@ class HttpRequest {
 
 class HttpResponse {
 }
+
+class HttpField {
+}
+
 HttpMessageHeader <|-- HttpResponse
 
 HttpMessageHeader <|-- HttpRequest
+
+HttpMessageHeader *-right- "*" HttpField 
 
 MessageHeader <|.. HttpMessageHeader
 

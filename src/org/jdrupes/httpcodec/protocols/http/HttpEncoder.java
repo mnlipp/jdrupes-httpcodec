@@ -319,11 +319,6 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 * body-mode is "collect body".
 	 */
 	private void startEncoding() {
-		// Make sure we have a Date, RFC 7231 7.1.1.2
-		if (!messageHeader.fields().containsKey(HttpField.DATE)) {
-			messageHeader.setField(new HttpDateField());
-		}
-
 		// Complete content type
 		HttpMediaTypeField contentType = (HttpMediaTypeField) messageHeader
 		        .fields().get(HttpField.CONTENT_TYPE);
