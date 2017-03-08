@@ -104,6 +104,32 @@ public class FieldParsingTests {
 	}
 	
 	@Test
+	public void testParseDateRfc850() throws ParseException {
+		String dateTime = "Sunday, 06-Nov-94 08:49:37 GMT";
+		HttpDateField field = HttpDateField.fromString("Date", dateTime);
+		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
+		assertEquals(6, value.getDayOfMonth());
+		assertEquals(Month.NOVEMBER, value.getMonth());
+		assertEquals(1994, value.getYear());
+		assertEquals(8, value.getHour());
+		assertEquals(49, value.getMinute());
+		assertEquals(37, value.getSecond());
+	}
+	
+	@Test
+	public void testParseDateAnsi() throws ParseException {
+		String dateTime = "Sun Nov  6 08:49:37 1994";
+		HttpDateField field = HttpDateField.fromString("Date", dateTime);
+		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
+		assertEquals(6, value.getDayOfMonth());
+		assertEquals(Month.NOVEMBER, value.getMonth());
+		assertEquals(1994, value.getYear());
+		assertEquals(8, value.getHour());
+		assertEquals(49, value.getMinute());
+		assertEquals(37, value.getSecond());
+	}
+	
+	@Test
 	public void testIntFromString() throws ParseException {
 		HttpIntField field = HttpIntField.fromString("test", "42");
 		assertEquals(42, field.getValue().longValue());

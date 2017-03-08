@@ -21,17 +21,32 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.Year;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.util.Locale;
 
 /**
- * The HTTP Date field.
- * 
- * @author Michael N. Lipp
+ * An HTTP Date field as specified by 
+ * [RFC 7231, Section 7.1.1.1](https://tools.ietf.org/html/rfc7231#section-7.1.1.1)
  */
 public class HttpDateField extends HttpField<Instant> {
 
+	// "Sunday, 06-Nov-94 08:49:37 GMT"
+	private static final DateTimeFormatter RFC_850_DATE_TIME
+		= new DateTimeFormatterBuilder().appendPattern("EEEE, dd-MMM-")
+		.appendValueReduced(ChronoField.YEAR, 2, 2, Year.now().getValue() - 50)
+		.appendPattern(" HH:mm:ss zz")
+		.toFormatter().withZone(ZoneId.of("GMT"))
+		.withLocale(Locale.US);
+	// "Sun Nov  6 08:49:37 1994"
+	private static final DateTimeFormatter ANSI_DATE_TIME
+		= DateTimeFormatter.ofPattern("EEE MMM ppd HH:mm:ss yyyy", Locale.US)
+		.withZone(ZoneId.of("GMT"));
+	
 	private Instant value;
 
 	/**
@@ -62,7 +77,17 @@ public class HttpDateField extends HttpField<Instant> {
 				((HttpDateField) result).value = Instant
 				        .from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(text));
 			} catch (DateTimeParseException e) {
-				throw new ParseException(text, 0);
+				try {
+					((HttpDateField) result).value = Instant
+					        .from(RFC_850_DATE_TIME.parse(text));
+				} catch (DateTimeParseException e1) {
+					try {
+						((HttpDateField) result).value = Instant
+						        .from(ANSI_DATE_TIME.parse(text));
+					} catch (DateTimeParseException e2) {
+						throw new ParseException(text, 0);
+					}
+				}
 			}
 			return result;
 		} catch (InstantiationException | IllegalAccessException
