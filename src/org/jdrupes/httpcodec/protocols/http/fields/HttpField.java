@@ -34,7 +34,13 @@ public abstract class HttpField<T> implements Cloneable {
 	public static final String CONTENT_LENGTH = "Content-Length";
 	public static final String CONTENT_TYPE = "Content-Type";
 	public static final String DATE = "Date";
+	public static final String ETAG = "ETag";
 	public static final String HOST = "Host";
+	public static final String IF_MATCH = "If-Match";
+	public static final String IF_NONE_MATCH = "If-None-Match";
+	public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+	public static final String LAST_MODIFIED = "Last-Modified";
 	public static final String SET_COOKIE = "Set-Cookie";
 	public static final String TE = "TE";
 	public static final String TRAILER = "Trailer";
@@ -51,7 +57,13 @@ public abstract class HttpField<T> implements Cloneable {
 		fieldNameMap.put(CONTENT_LENGTH, CONTENT_LENGTH);
 		fieldNameMap.put(CONTENT_TYPE, CONTENT_TYPE);
 		fieldNameMap.put(DATE, DATE);
+		fieldNameMap.put(ETAG, ETAG);
 		fieldNameMap.put(HOST, HOST);
+		fieldNameMap.put(IF_MATCH, IF_MATCH);
+		fieldNameMap.put(IF_NONE_MATCH, IF_NONE_MATCH);
+		fieldNameMap.put(IF_MODIFIED_SINCE, IF_MODIFIED_SINCE);
+		fieldNameMap.put(IF_UNMODIFIED_SINCE, IF_UNMODIFIED_SINCE);
+		fieldNameMap.put(LAST_MODIFIED, LAST_MODIFIED);
 		fieldNameMap.put(SET_COOKIE, SET_COOKIE);
 		fieldNameMap.put(TE, TE);
 		fieldNameMap.put(TRAILER, TRAILER);
@@ -113,7 +125,15 @@ public abstract class HttpField<T> implements Cloneable {
 		case HttpField.CONTENT_TYPE:
 			return HttpMediaTypeField.fromString(fieldName, fieldValue);
 		case HttpField.DATE:
-			return HttpDateField.fromString(fieldValue);
+			return HttpDateTimeField.fromString(fieldName, fieldValue);
+		case HttpField.IF_MODIFIED_SINCE:
+			return HttpDateTimeField.fromString(fieldName, fieldValue);
+		case HttpField.IF_NONE_MATCH:
+			return HttpStringListField.fromString(fieldName, fieldValue);
+		case HttpField.IF_UNMODIFIED_SINCE:
+			return HttpDateTimeField.fromString(fieldName, fieldValue);
+		case HttpField.LAST_MODIFIED:
+			return HttpDateTimeField.fromString(fieldName, fieldValue);
 		case HttpField.SET_COOKIE:
 			return HttpSetCookieListField.fromString(fieldValue);
 		case HttpField.TRAILER:

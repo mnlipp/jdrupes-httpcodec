@@ -23,7 +23,7 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
@@ -90,7 +90,8 @@ public class FieldParsingTests {
 	@Test
 	public void testParseDateType() throws ParseException {
 		String dateTime = "Tue, 15 Nov 1994 08:12:31 GMT";
-		HttpDateField field = HttpDateField.fromString(dateTime);
+		HttpDateTimeField field = HttpDateTimeField
+				.fromString(HttpField.DATE, dateTime);
 		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
 		assertEquals(15, value.getDayOfMonth());
 		assertEquals(Month.NOVEMBER, value.getMonth());
@@ -98,14 +99,16 @@ public class FieldParsingTests {
 		assertEquals(8, value.getHour());
 		assertEquals(12, value.getMinute());
 		assertEquals(31, value.getSecond());
-		HttpDateField back = new HttpDateField(value.toInstant());
+		HttpDateTimeField back = new HttpDateTimeField(
+				HttpField.DATE, value.toInstant());
 		assertEquals(dateTime, back.asFieldValue());
 	}
 	
 	@Test
 	public void testParseDateRfc850() throws ParseException {
 		String dateTime = "Sunday, 06-Nov-94 08:49:37 GMT";
-		HttpDateField field = HttpDateField.fromString(dateTime);
+		HttpDateTimeField field = HttpDateTimeField
+				.fromString(HttpField.DATE, dateTime);
 		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
 		assertEquals(6, value.getDayOfMonth());
 		assertEquals(Month.NOVEMBER, value.getMonth());
@@ -118,7 +121,8 @@ public class FieldParsingTests {
 	@Test
 	public void testParseDateAnsi() throws ParseException {
 		String dateTime = "Sun Nov  6 08:49:37 1994";
-		HttpDateField field = HttpDateField.fromString(dateTime);
+		HttpDateTimeField field = HttpDateTimeField
+				.fromString(HttpField.DATE, dateTime);
 		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
 		assertEquals(6, value.getDayOfMonth());
 		assertEquals(Month.NOVEMBER, value.getMonth());

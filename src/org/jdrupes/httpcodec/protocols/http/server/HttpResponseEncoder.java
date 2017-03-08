@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,7 @@ import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
@@ -98,7 +99,8 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		}
 		
 		// Make sure we have an up-to-date Date, RFC 7231 7.1.1.2
-		messageHeader.setField(new HttpDateField());
+		messageHeader.setField(
+				new HttpDateTimeField(HttpField.DATE, Instant.now()));
 		
 		super.encode(messageHeader);
 	}

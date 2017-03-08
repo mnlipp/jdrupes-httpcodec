@@ -68,7 +68,7 @@ public class HttpStringListField extends HttpListField<String>
 	 * @param unparsed used to distinguish constructors
 	 * @throws ParseException if the input violates the field format
 	 */
-	public HttpStringListField(String name, String unparsedValue, 
+	protected HttpStringListField(String name, String unparsedValue, 
 			boolean unparsed) throws ParseException {
 		super(name, unparsedValue);
 		while (true) {

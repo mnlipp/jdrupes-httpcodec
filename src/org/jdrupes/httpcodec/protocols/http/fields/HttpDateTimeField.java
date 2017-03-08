@@ -18,7 +18,6 @@
 
 package org.jdrupes.httpcodec.protocols.http.fields;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.Year;
@@ -79,20 +78,6 @@ public class HttpDateTimeField extends HttpField<Instant> {
 		}
 	}
 	
-	protected static <T extends HttpDateTimeField> T fromString(
-			Class<T> type, String name, String text) throws ParseException {
-		try {
-			Instant value = instantFromString(text);
-			T result = type.getConstructor(String.class, Instant.class)
-			        .newInstance(name, value);
-			return result;
-		} catch (InstantiationException | IllegalAccessException
-		        | IllegalArgumentException | InvocationTargetException
-		        | NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException();
-		}
-	}
-
 	/**
 	 * Creates a new object with a value obtained by parsing the given String.
 	 * 
@@ -105,7 +90,8 @@ public class HttpDateTimeField extends HttpField<Instant> {
 	 */
 	public static HttpDateTimeField fromString(String name, String text)
 	        throws ParseException {
-		return fromString(HttpDateField.class, name, text);
+		Instant value = instantFromString(text);
+		return new HttpDateTimeField(name, value);
 	}
 
 	/**
