@@ -40,7 +40,7 @@ public class FieldValuesTests {
 		assertEquals("you", iter.next());
 		assertEquals("out there", iter.next());
 		assertFalse(iter.hasNext());
-		assertEquals("How, are, you, \"out there\"", fv.asFieldValue());;
+		assertEquals("How, are, you, \"out there\"", fv.asFieldValue());
 	}
 
 	@Test

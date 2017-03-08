@@ -135,7 +135,7 @@ public class RequestDecoderTests {
 		        decoder.getHeader().get().getRequestUri().getPath());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(!buffer.hasRemaining());
+		assertFalse(buffer.hasRemaining());
 		body.flip();
 		String bodyText = new String(body.array(), body.position(),
 		        body.limit());
