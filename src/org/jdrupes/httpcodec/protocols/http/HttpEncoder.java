@@ -291,7 +291,10 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 						return resultFactory()
 								.newResult(false, true, false);
 					}
-					throw new IllegalStateException("Unexpected input.");
+					throw new IllegalStateException(
+							"A message has been completely encoded but"
+							+ " encode has not been invoked with endOfInput"
+							+ " set to true.");
 				}
 				states.pop();
 				if (closeAfterBody) {
