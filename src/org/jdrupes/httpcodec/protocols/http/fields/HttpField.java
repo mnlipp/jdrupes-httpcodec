@@ -26,15 +26,22 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 
 /**
  * A base class for all kinds of header field values.
+ * 
+ * @see https://www.iana.org/assignments/message-headers/message-headers.xhtml
  */
 public abstract class HttpField<T> implements Cloneable {
 
+	// https://tools.ietf.org/html/rfc7231#section-5.3.2
+	public static final String ACCEPT = "Accept";
 	public static final String COOKIE = "Cookie";
+	// https://tools.ietf.org/html/rfc7230#section-6.1
 	public static final String CONNECTION = "Connection";
+	// https://tools.ietf.org/html/rfc7230#section-3.3.2
 	public static final String CONTENT_LENGTH = "Content-Length";
 	public static final String CONTENT_TYPE = "Content-Type";
 	public static final String DATE = "Date";
 	public static final String ETAG = "ETag";
+	// https://tools.ietf.org/html/rfc7230#section-5.4
 	public static final String HOST = "Host";
 	public static final String IF_MATCH = "If-Match";
 	public static final String IF_NONE_MATCH = "If-None-Match";
@@ -42,16 +49,22 @@ public abstract class HttpField<T> implements Cloneable {
 	public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 	public static final String LAST_MODIFIED = "Last-Modified";
 	public static final String SET_COOKIE = "Set-Cookie";
+	// https://tools.ietf.org/html/rfc7230#section-4.3
 	public static final String TE = "TE";
+	// https://tools.ietf.org/html/rfc7230#section-4.4
 	public static final String TRAILER = "Trailer";
+	// https://tools.ietf.org/html/rfc7230#section-3.3.1
 	public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+	// https://tools.ietf.org/html/rfc7230#section-6.7
 	public static final String UPGRADE = "Upgrade";
+	// https://tools.ietf.org/html/rfc7230#section-5.7.1
 	public static final String VIA = "Via";
 	
 	private static Map<String, String> fieldNameMap = new TreeMap<>(
 	        String.CASE_INSENSITIVE_ORDER);
 	
 	static {
+		fieldNameMap.put(ACCEPT, ACCEPT);
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
 		fieldNameMap.put(CONTENT_LENGTH, CONTENT_LENGTH);
@@ -116,6 +129,8 @@ public abstract class HttpField<T> implements Cloneable {
 		String normalizedFieldName = fieldNameMap
 				.getOrDefault(fieldName, fieldName);
 		switch (normalizedFieldName) {
+//		case HttpField.ACCEPT:
+//			return 
 		case HttpField.COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
 		case HttpField.CONNECTION:
