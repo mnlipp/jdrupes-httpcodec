@@ -126,6 +126,8 @@ public abstract class HttpField<T> implements Cloneable {
 			return HttpMediaTypeField.fromString(fieldName, fieldValue);
 		case HttpField.DATE:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
+		case HttpField.IF_MATCH:
+			return HttpStringListField.fromString(fieldName, fieldValue);
 		case HttpField.IF_MODIFIED_SINCE:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
 		case HttpField.IF_NONE_MATCH:
