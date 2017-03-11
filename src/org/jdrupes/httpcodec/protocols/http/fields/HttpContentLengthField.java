@@ -24,7 +24,8 @@ import java.text.ParseException;
  * A specialization of {@link HttpIntField} that represents the
  * content-length.
  */
-public class HttpContentLengthField extends HttpIntField {
+public class HttpContentLengthField extends HttpIntField
+	implements Cloneable {
 
 	/**
 	 * Creates a new content-length field with the given value.
@@ -33,6 +34,14 @@ public class HttpContentLengthField extends HttpIntField {
 	 */
 	public HttpContentLengthField(long value) {
 		super(CONTENT_LENGTH, value);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
+	 */
+	@Override
+	public HttpContentLengthField clone() {
+		return (HttpContentLengthField)super.clone();
 	}
 
 	/**

@@ -20,21 +20,45 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.net.HttpCookie;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * The cookies representation.
+ * Represents the list of cookies to be sent from client to server.
+ * 
+ * @see "[RFC 6265](https://tools.ietf.org/html/rfc6265)"
  */
-public class HttpCookieListField extends HttpListField<HttpCookie> {
+public class HttpCookieListField extends HttpListField<HttpCookie>
+	implements Cloneable {
 
+	public static final ListConverter<HttpCookie> CONVERTER 
+		= new ListConverter<HttpCookie>(new Converter<HttpCookie>() {
+			
+			@Override
+			public String asFieldValue(HttpCookie value) {
+				return value.toString();
+			}
+
+			@Override
+			public HttpCookie fromFieldValue(String text)
+			        throws ParseException {
+				try {
+					return HttpCookie.parse(text).get(0);
+				} catch (IllegalArgumentException e) {
+					throw new ParseException(text, 0);
+				}
+			}
+		}, ";");
+	
 	/**
-	 * Creates a new object with the field name "Cookie" and the given unparsed
-	 * value.
+	 * Creates a new object with the field name "Cookie" and the given
+	 * cookies.
 	 * 
-	 * @param text the unparsed value
+	 * @param value the cookies
 	 */
-	protected HttpCookieListField(String text) {
-		super(HttpField.COOKIE, text);
+	public HttpCookieListField(List<HttpCookie> value) {
+		super(HttpField.COOKIE, value, CONVERTER);
 	}
 
 	/**
@@ -47,35 +71,24 @@ public class HttpCookieListField extends HttpListField<HttpCookie> {
 	 */
 	public static HttpCookieListField fromString(String text) 
 			throws ParseException {
-		HttpCookieListField result = new HttpCookieListField(text);
-		while (true) {
-			String element = result.nextElement();
-			if (element == null) {
-				break;
-			}
-			try {
-				result.addAll(HttpCookie.parse(element));
-			} catch (IllegalArgumentException e) {
-				throw new ParseException(element, 0);
-			}
-		}
-		return result;
+		return new HttpCookieListField(CONVERTER.fromFieldValue(text));
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpListField#getSeparator()
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
 	 */
 	@Override
-	protected char getDelimiter() {
-		return ';';
+	public HttpCookieListField clone() {
+		return (HttpCookieListField)super.clone();
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpListField#elementToString(java.lang.Object)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
 	 */
 	@Override
-	protected String elementToString(HttpCookie element) {
-		return element.toString();
+	protected List<HttpCookie> cloneValue() {
+		return getValue().stream()
+				.map(c -> (HttpCookie)c.clone()).collect(Collectors.toList());
 	}
 
 	/**
@@ -88,4 +101,5 @@ public class HttpCookieListField extends HttpListField<HttpCookie> {
 		return stream().filter(cookie -> cookie.getName().equals(name))
 				.findFirst().map(HttpCookie::getValue);
 	}
+	
 }

@@ -27,7 +27,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 /**
  * A base class for all kinds of header field values.
  * 
- * @see https://www.iana.org/assignments/message-headers/message-headers.xhtml
+ * @see "[MessageHeaders](https://www.iana.org/assignments/message-headers/message-headers.xhtml)"
  */
 public abstract class HttpField<T> implements Cloneable {
 
@@ -86,30 +86,60 @@ public abstract class HttpField<T> implements Cloneable {
 	}
 	
 	private final String name;
+	private T value;
+	private Converter<T> converter;
 	
 	/**
-	 * Creates a new representation of a header field value. For fields with
+	 * Creates a new representation of a header field. For fields with
 	 * a constant definition in this class, the name is normalized.
 	 * 
 	 * @param name the field name
+	 * @param converter the converter
 	 */
-	protected HttpField(String name) {
+	protected HttpField(String name, Converter<T> converter) {
 		this.name = fieldNameMap.getOrDefault(name, name);
+		this.converter = converter;
+	}
+
+	/**
+	 * Creates a new representation of a header field with the 
+	 * given value and converter. For fields with a 
+	 * constant definition in this class, the name is normalized.
+	 * 
+	 * @param name the field name
+	 * @param value the value
+	 * @param converter the converter
+	 */
+	protected HttpField(String name, T value, Converter<T> converter) {
+		this(name, converter);
+		this.value = value;
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public HttpField<T> clone() {
 		try {
-			return (HttpField<T>)super.clone();
+			@SuppressWarnings("unchecked")
+			HttpField<T> clone =  (HttpField<T>)super.clone();
+			clone.value = cloneValue();
+			return clone;
 		} catch (CloneNotSupportedException e) {
-			return null;
+			throw new IllegalArgumentException(e); 
 		}
 	}
 
+	/**
+	 * Called by {@link #clone()} to clone the value. Should
+	 * be overridden by derived classes if the value is not immutable.
+	 * 
+	 * @return return the value
+	 */
+	protected T cloneValue() {
+		return value;
+	}
+	
 	/**
 	 * Returns an HttpField that represents the given header field, using the
 	 * best matching derived class in this package. Works for all well known
@@ -180,19 +210,23 @@ public abstract class HttpField<T> implements Cloneable {
 	 * 
 	 * @return the field's value
 	 */
-	public abstract T getValue();
+	public T getValue() {
+		return value;
+	}
 	
 	/**
 	 * Returns the string representation of this field's value.
 	 * 
 	 * @return the field value as string
 	 */
-	public abstract String asFieldValue();
+	public String asFieldValue() {
+		return converter.asFieldValue(value);
+	}
 	
 	/**
 	 * Returns the string representation of this header field as it appears in
 	 * an HTTP message. Note that the returned string may span several
-	 * lines (may contain CRLF).
+	 * lines (may contain CR/LF), but is has no trailing CR/LF.
 	 * 
 	 * @return the field as it occurs in a header
 	 */
@@ -290,4 +324,27 @@ public abstract class HttpField<T> implements Cloneable {
 		return value;
 	}
 
+	/**
+	 * Implemented by classes that convert between a value and its 
+	 * string representation in the HTTP header field.
+	 */
+	public interface Converter<T> {
+
+		/**
+		 * Returns the representation of this value in a header field.
+		 * 
+		 * @return the representation
+		 */
+		String asFieldValue(T value);
+		
+		/**
+		 * Parses the given text and returns the parsed value.
+		 * 
+		 * @param text the value from the header field
+		 * @return the parsed value
+		 * @throws ParseException if the value cannot be parsed
+		 */
+		T fromFieldValue(String text) throws ParseException;
+	}
+	
 }

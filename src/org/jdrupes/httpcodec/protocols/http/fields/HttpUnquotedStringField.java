@@ -25,10 +25,33 @@ import java.text.ParseException;
  * The value is never quoted, even if the string contains characters
  * that could be interpreted as delimiters.
  */
-public class HttpUnquotedStringField extends HttpField<String> {
+public class HttpUnquotedStringField extends HttpField<String>
+	implements Cloneable {
 
-	private String value;
-	
+	public static final Converter<String> CONVERTER 
+		= new Converter<String>() {
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see Converter#asFieldValue(java.lang.Object)
+         */
+        @Override
+        public String asFieldValue(String value) {
+	        return value;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see Converter#fromFieldValue(java.lang.String)
+         */
+        @Override
+        public String fromFieldValue(String text) throws ParseException {
+	        return text.trim();
+        }
+    };
+
 	/**
 	 * Creates a new header field object with the given field name and value.
 	 * 
@@ -36,8 +59,15 @@ public class HttpUnquotedStringField extends HttpField<String> {
 	 * @param value the field value
 	 */
 	public HttpUnquotedStringField(String name, String value) {
-		super(name);
-		this.value = value.trim();
+		super(name, value, CONVERTER);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
+	 */
+	@Override
+	public HttpUnquotedStringField clone() {
+		return (HttpUnquotedStringField)super.clone();
 	}
 
 	/**
@@ -52,22 +82,8 @@ public class HttpUnquotedStringField extends HttpField<String> {
 	 */
 	public static HttpUnquotedStringField fromString(String name, String text)
 			throws ParseException {
-		return new HttpUnquotedStringField(name, text.trim());
+		return new HttpUnquotedStringField(
+				name, CONVERTER.fromFieldValue(text));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpField#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return value;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.util.HttpFieldValue#asString()
-	 */
-	@Override
-	public String asFieldValue() {
-		return value;
-	}
 }

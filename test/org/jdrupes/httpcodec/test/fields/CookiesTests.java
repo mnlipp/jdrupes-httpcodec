@@ -45,21 +45,53 @@ public class CookiesTests {
 		assertEquals("", field.valueForName("gsScrollPos").get());
 	}
 	
+	@Test
 	public void testSetCookieFromString() throws ParseException {
 		String header = "set-cookie:autorf=deleted; "
 				+ "expires=Sun, 26-Jul-2015 12:32:17 GMT; "
 				+ "path=/; domain=www.test.com";
-		HttpSetCookieListField field = new HttpSetCookieListField();
-		field.addFromString(header);
+		HttpSetCookieListField field 
+			= HttpSetCookieListField.fromString(header);
 		header = "Set-Cookie:SRCHUID=V=2&GUID=2853211950;"
 				+ " expires=Wed, 25-Jul-2018 12:42:14 GMT; path=/";
-		field.addFromString(header);
+		HttpSetCookieListField field2
+			= HttpSetCookieListField.fromString(header);
+		field.addAll(field2.getValue());
 		header = "Set-Cookie:MUIDB=13BEF4C6DC68E5; path=/; "
 				+ "httponly; expires=Wed, 25-Jul-2018 12:42:14 GMT";
-		field.addFromString(header);
+		field2 = HttpSetCookieListField.fromString(header);
+		field.addAll(field2.getValue());
 		assertEquals(3, field.size());
 		assertEquals("deleted", field.valueForName("autorf").get());
 		assertEquals("V=2&GUID=2853211950", field.valueForName("SRCHUID").get());
 		assertEquals("13BEF4C6DC68E5", field.valueForName("MUIDB").get());
+	}
+	
+	@Test
+	public void testRfcExamples() throws ParseException {
+		// Simple
+		String header = "Set-Cookie: SID=31d4d96e407aad42";
+		HttpSetCookieListField setField 
+			= HttpSetCookieListField.fromString(header);
+		HttpCookieListField cookieField = new HttpCookieListField(setField);
+		assertEquals("Cookie: SID=31d4d96e407aad42", cookieField.asHeaderField());
+		// Two with attributes
+		header = "Set-Cookie: SID=31d4d96e407aad42; Path=/; Secure; HttpOnly";
+		setField = HttpSetCookieListField.fromString(header);
+		header = "Set-Cookie: lang=en-US; Path=/; Domain=example.com";
+		setField.add(HttpSetCookieListField.fromString(header).get(0));
+		assertEquals("/", setField.get(0).getPath());
+		assertTrue(setField.get(0).getSecure());
+		assertTrue(setField.get(0).isHttpOnly());
+		assertEquals("/", setField.get(1).getPath());
+		assertEquals("example.com", setField.get(1).getDomain());
+		cookieField = new HttpCookieListField(setField);
+		assertEquals("Cookie: SID=31d4d96e407aad42; lang=en-US",
+				cookieField.asHeaderField());
+		// Expires
+		header = "Set-Cookie: lang=en-US; Expires=Wed, 09 Jun 2001 10:18:14 GMT";
+		setField = HttpSetCookieListField.fromString(header);
+		cookieField = new HttpCookieListField(setField);
+		assertEquals("Cookie: lang=en-US", cookieField.asHeaderField());
 	}
 }

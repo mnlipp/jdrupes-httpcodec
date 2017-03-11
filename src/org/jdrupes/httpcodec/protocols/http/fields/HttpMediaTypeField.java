@@ -30,11 +30,179 @@ import javax.activation.MimeTypeParseException;
  * Represents a media type header field and provides methods for interpreting
  * its value.
  */
-public class HttpMediaTypeField extends HttpField<MimeType> {
+public class HttpMediaTypeField extends HttpField<MimeType>
+	implements Cloneable {
 
-	private MimeType value;
+	public static final Converter<MimeType> CONVERTER 
+		= new Converter<MimeType>() {
 
-	private class RestrictedMimeType extends MimeType {
+		@Override
+		public String asFieldValue(MimeType value) {
+			return value.toString();
+		}
+
+		@Override
+		public MimeType fromFieldValue(String text) throws ParseException {
+			try {
+				return new RestrictedMimeType(text);
+			} catch (MimeTypeParseException e) {
+				throw new ParseException(text, 0);
+			}
+		}
+	};
+
+	/**
+	 * Creates new header field object with the given type and subtype and no
+	 * parameters.
+	 * 
+	 * @param name
+	 *            the field name
+	 * @param type
+	 *            the type
+	 * @param subtype
+	 *            the sub type
+	 * @throws ParseException if the input violates the field format
+	 */
+	public HttpMediaTypeField(String name, String type, String subtype) 
+			throws ParseException {
+		super(name, createMimeType(type, subtype), CONVERTER);
+	}
+
+	private static RestrictedMimeType createMimeType(
+			String type, String subtype)
+		throws ParseException {
+		try {
+			return new RestrictedMimeType(type, subtype);
+		} catch (MimeTypeParseException e) {
+			throw new ParseException(e.getMessage(), 0);
+		}
+		
+	}
+	
+	/**
+	 * Creates new header field object with the name and type.
+	 * 
+	 * @param name
+	 *            the field name
+	 * @param type
+	 *            the type
+	 */
+	public HttpMediaTypeField(String name, MimeType type) {
+		super(name, type, CONVERTER);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
+	 */
+	@Override
+	public HttpMediaTypeField clone() {
+		return (HttpMediaTypeField)super.clone();
+	}
+
+	/**
+	 * Creates a new representation of a media type field value.
+	 * 
+	 * @param name the field name
+	 * @param value the field value
+	 * @return the result
+	 * @throws ParseException if the input violates the field format
+	 */
+	public static HttpMediaTypeField fromString(String name, String value)
+	        throws ParseException {
+		return new HttpMediaTypeField(name, CONVERTER.fromFieldValue(value));
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
+	 */
+	@Override
+	protected MimeType cloneValue() {
+		try {
+			return new MimeType(getValue().toString());
+		} catch (MimeTypeParseException e) {
+			// Would be strange, indeed.
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	/**
+	 * @return the result
+	 * @see javax.activation.MimeType#getBaseType()
+	 */
+	public String getBaseType() {
+		return getValue().getBaseType();
+	}
+
+	/**
+	 * @param name the name
+	 * @return the result
+	 * @see javax.activation.MimeType#getParameter(java.lang.String)
+	 */
+	public String getParameter(String name) {
+		return getValue().getParameter(name);
+	}
+
+	/**
+	 * @return the result
+	 * @see javax.activation.MimeType#getParameters()
+	 */
+	public MimeTypeParameterList getParameters() {
+		return getValue().getParameters();
+	}
+
+	/**
+	 * @return the result
+	 * @see javax.activation.MimeType#getPrimaryType()
+	 */
+	public String getPrimaryType() {
+		return getValue().getPrimaryType();
+	}
+
+	/**
+	 * @return the result
+	 * @see javax.activation.MimeType#getSubType()
+	 */
+	public String getSubType() {
+		return getValue().getSubType();
+	}
+
+	/**
+	 * @param type the type
+	 * @return the result
+	 * @see javax.activation.MimeType#match(javax.activation.MimeType)
+	 */
+	public boolean match(MimeType type) {
+		return getValue().match(type);
+	}
+
+	/**
+	 * @param rawdata the data
+	 * @return the result
+	 * @throws MimeTypeParseException if an error occurred
+	 * @see javax.activation.MimeType#match(java.lang.String)
+	 */
+	public boolean match(String rawdata) throws MimeTypeParseException {
+		return getValue().match(rawdata);
+	}
+
+	/**
+	 * @param name the name
+	 * @see javax.activation.MimeType#removeParameter(java.lang.String)
+	 */
+	public void removeParameter(String name) {
+		getValue().removeParameter(name);
+	}
+
+	/**
+	 * @param name the name
+	 * @param value the value
+	 * @see javax.activation.MimeType#setParameter(java.lang.String, java.lang.String)
+	 */
+	public void setParameter(String name, String value) {
+		getValue().setParameter(name, value);
+	}
+
+	private static class RestrictedMimeType extends MimeType {
 		
 		public RestrictedMimeType(String primary, String sub)
 		        throws MimeTypeParseException {
@@ -65,141 +233,4 @@ public class HttpMediaTypeField extends HttpField<MimeType> {
 		}
 	}
 	
-	/**
-	 * Creates new header field object with the given type and subtype and no
-	 * parameters.
-	 * 
-	 * @param name
-	 *            the field name
-	 * @param type
-	 *            the type
-	 * @param subtype
-	 *            the sub type
-	 * @throws ParseException if the input violates the field format
-	 */
-	public HttpMediaTypeField(String name, String type, String subtype) 
-			throws ParseException {
-		super(name);
-		try {
-			this.value = new RestrictedMimeType(type, subtype);
-		} catch (MimeTypeParseException e) {
-			throw new ParseException(e.getMessage(), 0);
-		}
-	}
-
-	private HttpMediaTypeField(String name, String value)
-	        throws ParseException {
-		super(name);
-		try {
-			this.value = new RestrictedMimeType(value);
-		} catch (MimeTypeParseException e) {
-			throw new ParseException(e.getMessage(), 0);
-		}
-	}
-	
-	/**
-	 * Creates a new representation of a media type field value.
-	 * 
-	 * @param name the field name
-	 * @param value the field value
-	 * @return the result
-	 * @throws ParseException if the input violates the field format
-	 */
-	public static HttpMediaTypeField fromString(String name, String value)
-	        throws ParseException {
-		return new HttpMediaTypeField(name, value);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpField#getValue()
-	 */
-	@Override
-	public MimeType getValue() {
-		return value;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.util.HttpFieldValue#asString()
-	 */
-	@Override
-	public String asFieldValue() {
-		return value.toString();
-	}
-
-	/**
-	 * @return the result
-	 * @see javax.activation.MimeType#getBaseType()
-	 */
-	public String getBaseType() {
-		return value.getBaseType();
-	}
-
-	/**
-	 * @param name the name
-	 * @return the result
-	 * @see javax.activation.MimeType#getParameter(java.lang.String)
-	 */
-	public String getParameter(String name) {
-		return value.getParameter(name);
-	}
-
-	/**
-	 * @return the result
-	 * @see javax.activation.MimeType#getParameters()
-	 */
-	public MimeTypeParameterList getParameters() {
-		return value.getParameters();
-	}
-
-	/**
-	 * @return the result
-	 * @see javax.activation.MimeType#getPrimaryType()
-	 */
-	public String getPrimaryType() {
-		return value.getPrimaryType();
-	}
-
-	/**
-	 * @return the result
-	 * @see javax.activation.MimeType#getSubType()
-	 */
-	public String getSubType() {
-		return value.getSubType();
-	}
-
-	/**
-	 * @param type the type
-	 * @return the result
-	 * @see javax.activation.MimeType#match(javax.activation.MimeType)
-	 */
-	public boolean match(MimeType type) {
-		return value.match(type);
-	}
-
-	/**
-	 * @param rawdata the data
-	 * @return the result
-	 * @throws MimeTypeParseException if an error occurred
-	 * @see javax.activation.MimeType#match(java.lang.String)
-	 */
-	public boolean match(String rawdata) throws MimeTypeParseException {
-		return value.match(rawdata);
-	}
-
-	/**
-	 * @param name the name
-	 * @see javax.activation.MimeType#removeParameter(java.lang.String)
-	 */
-	public void removeParameter(String name) {
-		value.removeParameter(name);
-	}
-
-	/**
-	 * @param name the name
-	 * @param value the value
-	 * @see javax.activation.MimeType#setParameter(java.lang.String, java.lang.String)
-	 */
-	public void setParameter(String name, String value) {
-		this.value.setParameter(name, value);
-	}
 }

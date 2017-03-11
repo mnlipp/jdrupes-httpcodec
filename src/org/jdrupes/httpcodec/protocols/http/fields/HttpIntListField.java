@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * An HTTP field value that consists of a comma separated list of 
@@ -28,6 +29,9 @@ import java.util.Arrays;
  */
 public class HttpIntListField extends HttpListField<Long>
 	implements Cloneable {
+
+	public static final Converter<List<Long>> CONVERTER 
+        = new HttpListField.ListConverter<Long>(HttpIntField.CONVERTER);
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -39,8 +43,7 @@ public class HttpIntListField extends HttpListField<Long>
 	 * @param name the field name
 	 */
 	public HttpIntListField(String name) {
-		super(name);
-		reset();
+		super(name, CONVERTER);
 	}
 
 	/**
@@ -51,32 +54,21 @@ public class HttpIntListField extends HttpListField<Long>
 	 * @param values more values
 	 */
 	public HttpIntListField(String name, Long value, Long... values) {
-		super(name);
+		super(name, CONVERTER);
 		add(value);
 		addAll(Arrays.asList(values));
 	}
 
-	/**
-	 * Creates a new object with the given field name and unparsed value.
-	 * 
-	 * @param name the field name
-	 * @param unparsedValue the unparsed value
-	 * @throws ParseException if the input violates the field format
+	private HttpIntListField(String name, List<Long> value) {
+		super(name, value, CONVERTER);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
 	 */
-	public HttpIntListField(String name, String unparsedValue)
-			throws ParseException {
-		super(name, unparsedValue);
-		while (true) {
-			String element = nextElement();
-			if (element == null) {
-				break;
-			}
-			try {
-				add(Long.parseLong(element));
-			} catch (NumberFormatException e) {
-				throw new ParseException(element, 0);
-			}
-		}
+	@Override
+	public HttpIntListField clone() {
+		return (HttpIntListField)super.clone();
 	}
 
 	/**
@@ -90,23 +82,7 @@ public class HttpIntListField extends HttpListField<Long>
 	 */
 	public static HttpIntListField fromString(String name, String text) 
 			throws ParseException {
-		return new HttpIntListField(name, text);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public HttpIntListField clone() {
-		return (HttpIntListField)super.clone();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpListField#elementAsString(java.lang.Object)
-	 */
-	@Override
-	protected String elementToString(Long element) {
-		return element.toString();
+		return new HttpIntListField(name, CONVERTER.fromFieldValue(text));
 	}
 
 }

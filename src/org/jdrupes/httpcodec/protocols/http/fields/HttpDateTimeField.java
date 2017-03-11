@@ -32,22 +32,12 @@ import java.util.Locale;
  * An HTTP Date/Time field as specified by 
  * [RFC 7231, Section 7.1.1.1](https://tools.ietf.org/html/rfc7231#section-7.1.1.1)
  */
-public class HttpDateTimeField extends HttpField<Instant> {
+public class HttpDateTimeField extends HttpField<Instant>
+	implements Cloneable {
 
-	// "Sunday, 06-Nov-94 08:49:37 GMT"
-	private static final DateTimeFormatter RFC_850_DATE_TIME
-		= new DateTimeFormatterBuilder().appendPattern("EEEE, dd-MMM-")
-		.appendValueReduced(ChronoField.YEAR, 2, 2, Year.now().getValue() - 50)
-		.appendPattern(" HH:mm:ss zz")
-		.toFormatter().withZone(ZoneId.of("GMT"))
-		.withLocale(Locale.US);
-	// "Sun Nov  6 08:49:37 1994"
-	private static final DateTimeFormatter ANSI_DATE_TIME
-		= DateTimeFormatter.ofPattern("EEE MMM ppd HH:mm:ss yyyy", Locale.US)
-		.withZone(ZoneId.of("GMT"));
+	public static final Converter<Instant> CONVERTER 
+		= new InstantConverter();
 	
-	private Instant value;
-
 	/**
 	 * Creates a header field object with the given value.
 	 * 
@@ -56,30 +46,20 @@ public class HttpDateTimeField extends HttpField<Instant> {
 	 *            the field value
 	 */
 	public HttpDateTimeField(String name, Instant value) {
-		super(name);
-		this.value = value;
+		super(name, value, CONVERTER);
 	}
 
-	protected static Instant instantFromString(String text) 
-			throws ParseException {
-		try {
-			return Instant.from(
-					DateTimeFormatter.RFC_1123_DATE_TIME.parse(text));
-		} catch (DateTimeParseException e) {
-			try {
-				return Instant.from(RFC_850_DATE_TIME.parse(text));
-			} catch (DateTimeParseException e1) {
-				try {
-					return Instant.from(ANSI_DATE_TIME.parse(text));
-				} catch (DateTimeParseException e2) {
-					throw new ParseException(text, 0);
-				}
-			}
-		}
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
+	 */
+	@Override
+	public HttpDateTimeField clone() {
+		return (HttpDateTimeField)super.clone();
 	}
-	
+
 	/**
-	 * Creates a new object with a value obtained by parsing the given String.
+	 * Creates a new header field object with a value obtained by parsing the
+	 * given String.
 	 * 
 	 * @param name
 	 *            the field name
@@ -89,30 +69,47 @@ public class HttpDateTimeField extends HttpField<Instant> {
 	 * @throws ParseException if the input violates the field format
 	 */
 	public static HttpDateTimeField fromString(String name, String text)
-	        throws ParseException {
-		Instant value = instantFromString(text);
-		return new HttpDateTimeField(name, value);
+			throws ParseException {
+		return new HttpDateTimeField(name, CONVERTER.fromFieldValue(text));
 	}
+	
+	private static class InstantConverter implements Converter<Instant> {
 
-	/**
-	 * Returns the value.
-	 * 
-	 * @return the value
-	 */
-	@Override
-	public Instant getValue() {
-		return value;
+		// "Sunday, 06-Nov-94 08:49:37 GMT"
+		private static final DateTimeFormatter RFC_850_DATE_TIME
+			= new DateTimeFormatterBuilder().appendPattern("EEEE, dd-MMM-")
+			.appendValueReduced(ChronoField.YEAR, 2, 2, Year.now().getValue() - 50)
+			.appendPattern(" HH:mm:ss zz")
+			.toFormatter().withZone(ZoneId.of("GMT"))
+			.withLocale(Locale.US);
+		// "Sun Nov  6 08:49:37 1994"
+		private static final DateTimeFormatter ANSI_DATE_TIME
+			= DateTimeFormatter.ofPattern("EEE MMM ppd HH:mm:ss yyyy", Locale.US)
+			.withZone(ZoneId.of("GMT"));
+	
+		@Override
+		public String asFieldValue(Instant value) {
+			return DateTimeFormatter.RFC_1123_DATE_TIME.format(
+					value.atZone(ZoneId.of("GMT")));	
+		}
+
+		@Override
+		public Instant fromFieldValue(String text) throws ParseException {
+			try {
+				return Instant.from(
+						DateTimeFormatter.RFC_1123_DATE_TIME.parse(text));
+			} catch (DateTimeParseException e) {
+				try {
+					return Instant.from(RFC_850_DATE_TIME.parse(text));
+				} catch (DateTimeParseException e1) {
+					try {
+						return Instant.from(ANSI_DATE_TIME.parse(text));
+					} catch (DateTimeParseException e2) {
+						throw new ParseException(text, 0);
+					}
+				}
+			}
+		}
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.jdrupes.httpcodec.util.HttpFieldValue#asString()
-	 */
-	@Override
-	public String asFieldValue() {
-		return DateTimeFormatter.RFC_1123_DATE_TIME.format(
-				value.atZone(ZoneId.of("GMT")));	
-	}
-
+	
 }

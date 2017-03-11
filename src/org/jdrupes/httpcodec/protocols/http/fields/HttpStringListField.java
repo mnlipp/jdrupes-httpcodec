@@ -20,8 +20,7 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
 import java.util.Arrays;
-
-import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
+import java.util.List;
 
 /**
  * An HTTP field value that consists of a comma separated list of 
@@ -30,6 +29,9 @@ import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
  */
 public class HttpStringListField extends HttpListField<String>
 	implements Cloneable {
+
+	public static final Converter<List<String>> CONVERTER 
+    	= new HttpListField.ListConverter<String>(HttpStringField.CONVERTER);
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -41,8 +43,7 @@ public class HttpStringListField extends HttpListField<String>
 	 * @param name the field name
 	 */
 	public HttpStringListField(String name) {
-		super(name);
-		reset();
+		super(name, CONVERTER);
 	}
 
 	/**
@@ -53,31 +54,21 @@ public class HttpStringListField extends HttpListField<String>
 	 * @param values more values
 	 */
 	public HttpStringListField(String name, String value, String... values) {
-		super(name);
+		super(name, CONVERTER);
 		add(value);
 		addAll(Arrays.asList(values));
 	}
 
-	/**
-	 * Creates a new object with the given field name and unparsed value.
-	 * Derived classes must implement this constructor to support automatic
-	 * conversion (see {@link HttpMessageHeader#getField(Class, String)}).
-	 * 
-	 * @param name the field name
-	 * @param unparsedValue the unparsed value
-	 * @param unparsed used to distinguish constructors
-	 * @throws ParseException if the input violates the field format
+	private HttpStringListField(String name, List<String> values) {
+		super(name, values, CONVERTER);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
 	 */
-	protected HttpStringListField(String name, String unparsedValue, 
-			boolean unparsed) throws ParseException {
-		super(name, unparsedValue);
-		while (true) {
-			String element = nextElement();
-			if (element == null) {
-				break;
-			}
-			add(unquote(element));
-		}
+	@Override
+	public HttpStringListField clone() {
+		return (HttpStringListField)super.clone();
 	}
 
 	/**
@@ -91,23 +82,7 @@ public class HttpStringListField extends HttpListField<String>
 	 */
 	public static HttpStringListField fromString(String name, String text) 
 			throws ParseException {
-		return new HttpStringListField(name, text, true);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public HttpStringListField clone() {
-		return (HttpStringListField)super.clone();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpListField#elementAsString(java.lang.Object)
-	 */
-	@Override
-	protected String elementToString(String element) {
-		return quoteIfNecessary(element);
+		return new HttpStringListField(name, CONVERTER.fromFieldValue(text));
 	}
 
 	/**

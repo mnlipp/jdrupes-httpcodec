@@ -18,15 +18,31 @@
 
 package org.jdrupes.httpcodec.protocols.http.fields;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 
 /**
- * An HTTP field value that is an integer.
+ * An HTTP field with a value that is an integer.
  */
-public class HttpIntField extends HttpField<Long> {
+public class HttpIntField extends HttpField<Long>
+	implements Cloneable {
 
-	private long value;
+	public static final Converter<Long> CONVERTER 
+		= new Converter<Long>() {
+
+		@Override
+		public String asFieldValue(Long value) {
+			return value.toString();
+		}
+
+		@Override
+		public Long fromFieldValue(String text) throws ParseException {
+			try {
+				return Long.parseLong(unquote(text));
+			} catch (NumberFormatException e) {
+				throw new ParseException(text, 0);
+			}
+		}
+	};
 	
 	/**
 	 * Creates the header field object with the given value.
@@ -35,29 +51,17 @@ public class HttpIntField extends HttpField<Long> {
 	 * @param value the field value
 	 */
 	public HttpIntField(String name, long value) {
-		super(name);
-		this.value = value;
+		super(name, value, CONVERTER);
 	}
 
-	protected static <T extends HttpIntField> T fromString(
-			Class<T> type, String name, String text) throws ParseException {
-		try {
-			long value;
-			try {
-				value = Long.parseLong(unquote(text));
-			} catch (NumberFormatException e) {
-				throw new ParseException(text, 0);
-			}
-			T result = type.getConstructor(String.class, long.class)
-			        .newInstance(name, value);
-			return result;
-		} catch (InstantiationException | IllegalAccessException
-		        | IllegalArgumentException | InvocationTargetException
-		        | NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException();
-		}
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
+	 */
+	@Override
+	public HttpIntField clone() {
+		return (HttpIntField)super.clone();
 	}
-	
+
 	/**
 	 * Creates a new header field object with a value obtained by parsing the
 	 * given String.
@@ -71,35 +75,17 @@ public class HttpIntField extends HttpField<Long> {
 	 */
 	public static HttpIntField fromString(String name, String text)
 			throws ParseException {
-		return fromString(HttpIntField.class, name, text);
+		return new HttpIntField(name, CONVERTER.fromFieldValue(text));
 	}
 
-	/**
-	 * Returns the value.
-	 * 
-	 * @return the value
-	 */
-	@Override
-	public Long getValue() {
-		return value;
-	}
-	
 	/**
 	 * Returns the value.
 	 * 
 	 * @return the value
 	 */
 	public int asInt() {
-		return (int)value;
+		return getValue().intValue();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.util.HttpFieldValue#asString()
-	 */
-	@Override
-	public String asFieldValue() {
-		return Long.toString(value);
-	}
-	
 	
 }

@@ -20,40 +20,53 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.net.HttpCookie;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Represents all "Set-Cookie" fields in a Response header. Several cookies are
  * actually set with several headers. However, to provide uniform access to all
  * header fields, they are converted to a field with a list of values in the
  * internal representation.
+ * 
+ * @see "[RFC 6265](https://tools.ietf.org/html/rfc6265)"
  */
-public class HttpSetCookieListField extends HttpListField<HttpCookie> {
+public class HttpSetCookieListField extends HttpListField<HttpCookie>
+	implements Cloneable {
+
+	public static final Converter<List<HttpCookie>> CONVERTER 
+		= new Converter<List<HttpCookie>>() {
+
+		@Override
+		public List<HttpCookie> fromFieldValue(String text)
+		        throws ParseException {
+			try {
+				return HttpCookie.parse(text);
+			} catch (IllegalArgumentException e) {
+				throw new ParseException(text, 0);
+			}
+		}
+
+		@Override
+		public String asFieldValue(List<HttpCookie> value) {
+			throw new UnsupportedOperationException();
+		}
+	};
 
 	/**
 	 * Creates a new header field object with the field name "Set-Cookie".
 	 */
 	public HttpSetCookieListField() {
-		super(HttpField.SET_COOKIE);
+		super(HttpField.SET_COOKIE, CONVERTER);
 	}
 
-	/**
-	 * Adds a new cookie obtained by parsing the given String.
-	 * 
-	 * @param text
-	 *            the string to parse
-	 * @return this object for easy chaining
-	 * @throws ParseException
-	 *             if the input violates the field format
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
 	 */
-	public HttpSetCookieListField addFromString(String text)
-	        throws ParseException {
-		try {
-			addAll(HttpCookie.parse(text));
-		} catch (IllegalArgumentException e) {
-			throw new ParseException(text, 0);
-		}
-		return this;
+	@Override
+	public HttpSetCookieListField clone() {
+		return (HttpSetCookieListField)super.clone();
 	}
 
 	/**
@@ -69,20 +82,23 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 	public static HttpSetCookieListField fromString(String text)
 	        throws ParseException {
 		HttpSetCookieListField result = new HttpSetCookieListField();
-		result.addFromString(text);
+		result.addAll(CONVERTER.fromFieldValue(text));
 		return result;
 	}
-
-	/*
-	 * (non-Javadoc)
+	
+	/**
+	 * Returns the string representation of this header field as it appears in
+	 * an HTTP message. Set-Cookie is special because each cookie
+	 * has a header line of its own.
 	 * 
-	 * @see
-	 * org.jdrupes.httpcodec.fields.HttpListField#elementToString(java.lang.
-	 * Object)
+	 * @return the field as it occurs in a header
+	 * 
+	 * @see "[RFC 7230, 3.2.2](https://tools.ietf.org/html/rfc7230#section-3.2.2)"
 	 */
 	@Override
-	protected String elementToString(HttpCookie element) {
-		throw new UnsupportedOperationException();
+	public String asHeaderField() {
+		return stream().map(cookie -> getName() + ": " + cookie.toString())
+				.collect(Collectors.joining("\r\n"));
 	}
 
 	/**
@@ -95,5 +111,14 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 	public Optional<String> valueForName(String name) {
 		return stream().filter(cookie -> cookie.getName().equals(name))
 			.findFirst().map(HttpCookie::getValue);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
+	 */
+	@Override
+	protected List<HttpCookie> cloneValue() {
+		return getValue().stream()
+				.map(c -> (HttpCookie)c.clone()).collect(Collectors.toList());
 	}
 }

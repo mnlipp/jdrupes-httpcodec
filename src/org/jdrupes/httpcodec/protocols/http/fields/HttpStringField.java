@@ -23,9 +23,28 @@ import java.text.ParseException;
 /**
  * Represents a header field that has a simple string as its value.
  */
-public class HttpStringField extends HttpField<String> {
+public class HttpStringField extends HttpField<String>
+	implements Cloneable {
 
-	private String value;
+	public static final Converter<String> CONVERTER 
+		= new Converter<String>() {
+
+		/* (non-Javadoc)
+		 * @see Converter#asFieldValue(java.lang.Object)
+		 */
+		@Override
+		public String asFieldValue(String value) {
+			return quoteIfNecessary(value);
+		}
+
+		/* (non-Javadoc)
+		 * @see Converter#fromFieldValue(java.lang.String)
+		 */
+		@Override
+		public String fromFieldValue(String text) throws ParseException {
+			return unquote(text.trim());
+		}
+	};
 	
 	/**
 	 * Creates a new header field object with the given field name and value.
@@ -34,8 +53,15 @@ public class HttpStringField extends HttpField<String> {
 	 * @param value the field value
 	 */
 	public HttpStringField(String name, String value) {
-		super(name);
-		this.value = value.trim();
+		super(name, value, CONVERTER);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
+	 */
+	@Override
+	public HttpStringField clone() {
+		return (HttpStringField)super.clone();
 	}
 
 	/**
@@ -50,22 +76,8 @@ public class HttpStringField extends HttpField<String> {
 	 */
 	public static HttpStringField fromString(String name, String text)
 			throws ParseException {
-		return new HttpStringField(name, unquote(text.trim()));
+		return new HttpStringField(
+				name, CONVERTER.fromFieldValue(text));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpField#getValue()
-	 */
-	@Override
-	public String getValue() {
-		return value;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.util.HttpFieldValue#asString()
-	 */
-	@Override
-	public String asFieldValue() {
-		return quoteIfNecessary(value);
-	}
 }

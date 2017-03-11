@@ -25,17 +25,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jdrupes.httpcodec.util.ListItemizer;
+
 /**
- * An HTTP field value that consists of a list of separated by a delimiter
- * strings. The class provides a "list of field values" view of the values.
+ * An HTTP field value that consists of a list of values separated by 
+ * a delimiter. The class provides a "list of field values" view 
+ * of the values.
  */
 public abstract class HttpListField<T> extends HttpField<List<T>>
 	implements List<T>, Cloneable {
 
-	private String unparsedValue;
-	private int position;
-	private List<T> elements = new ArrayList<>();
-	
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
 	 * that in this
@@ -44,146 +43,41 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * that add values.
 	 * 
 	 * @param name the field name
+	 * @param converter the converter for the items
 	 */
-	protected HttpListField(String name) {
-		super(name);
-		reset();
+	protected HttpListField(String name, Converter<List<T>> converter) {
+		super(name, new ArrayList<>(), converter);
 	}
 
 	/**
-	 * Creates a new header field object with the given field name and unparsed
-	 * value.
+	 * Creates a new header field object with the given field name and values.
 	 * 
 	 * @param name
 	 *            the field name
-	 * @param unparsedValue
-	 * 			  the field value as it appears in the HTTP header
+	 * @param items
+	 * 			  the items
+	 * @param converter 
+	 * 			  the converter for the items
 	 */
-	protected HttpListField(String name, String unparsedValue) {
-		this(name);
-		this.unparsedValue = unparsedValue;
+	protected HttpListField(String name, List<T> items, 
+			Converter<List<T>> converter) {
+		super(name, items, converter);
 	}
 
 	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
 	 */
 	@Override
 	public HttpListField<T> clone() {
-		HttpListField<T> result = (HttpListField<T>)super.clone();
-		result.elements = new ArrayList<>(elements);
-		return result;
+		return (HttpListField<T>)super.clone();
 	}
-
-	/**
-	 * Returns the char that separates the items in the list.
-	 * 
-	 * @return the default implementation returns a comma
-	 */
-	protected char getDelimiter() {
-		// Used by default in RFC 7230, see section 7.
-		return ',';
-	}
-	
-	/**
-	 * Reset the parsing state.
-	 */
-	protected void reset() {
-		position = 0;
-	}
-	
-	/**
-	 * Returns the next element from the unparsed value.
-	 * 
-	 * @return the next element or {@code null} if no elements remain
-	 * @throws ParseException if the input violates the field format
-	 */
-	protected String nextElement() throws ParseException {
-		// RFC 7230 3.2.6
-		boolean inDquote = false;
-		int startPosition = position;
-		char separator = getDelimiter();
-		try {
-			while (true) {
-				if (inDquote) {
-					char ch = unparsedValue.charAt(position);
-					switch (ch) {
-					 case '\\':
-						 position += 2;
-						 continue;
-					 case '\"':
-						 inDquote = false;
-						 // fall through
-					 default:
-						 position += 1;
-						 continue;
-					}
-				}
-				if (position == unparsedValue.length()) {
-					if (position == startPosition) {
-						return null;
-					}
-					return unparsedValue.substring(startPosition, position);
-				}
-				char ch = unparsedValue.charAt(position);
-				if (ch == separator) {
-					String result = unparsedValue
-					        .substring(startPosition, position);
-					position += 1; // Skip comma
-					while (true) { // Skip optional white space
-						ch = unparsedValue.charAt(position);
-						if (ch != ' ' && ch != '\t') {
-							break;
-						}
-						position += 1;
-					}
-					return result;
-				}
-				switch (ch) {
-				case '\"':
-					inDquote = true;
-					// fall through
-				default:
-					position += 1;
-					continue;
-				}
-			}
-		} catch (IndexOutOfBoundsException e) {
-			throw new ParseException(unparsedValue, position);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.fields.HttpField#getValue()
-	 */
-	@Override
-	public List<T> getValue() {
-		return this;
-	}
-
-	protected abstract String elementToString(T element);
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.util.HttpFieldValue#asString()
+	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
 	 */
 	@Override
-	public String asFieldValue() {
-		if (size() == 0) {
-			throw new IllegalStateException(
-			        "Field with list value may not be empty.");
-		}
-		char separator = getDelimiter();
-		boolean first = true;
-		StringBuilder result = new StringBuilder();
-		for (T e: this) {
-			if (first) {
-				first = false;
-			} else {
-				result.append(separator);
-				result.append(" ");
-			}
-			result.append(elementToString(e));
-		}
-		return result.toString();
+	protected List<T> cloneValue() {
+		return new ArrayList<>(getValue());
 	}
 
 	/**
@@ -193,7 +87,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @return the field
 	 */
 	public HttpListField<T> append(T value) {
-		elements.add(value);
+		getValue().add(value);
 		return this;
 	}
 	
@@ -204,8 +98,8 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @return the field
 	 */
 	public HttpListField<T> appendIfNotContained(T value) {
-		if (!elements.contains(value)) {
-			elements.add(value);
+		if (!getValue().contains(value)) {
+			getValue().add(value);
 		}
 		return this;
 	}
@@ -228,161 +122,241 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @see java.util.List#add(int, java.lang.Object)
 	 */
 	public void add(int index, T element) {
-		elements.add(index, element);
+		getValue().add(index, element);
 	}
 
 	/**
 	 * @see java.util.List#add(java.lang.Object)
 	 */
 	public boolean add(T element) {
-		return elements.add(element);
+		return getValue().add(element);
 	}
 
 	/**
 	 * @see java.util.List#addAll(java.util.Collection)
 	 */
 	public boolean addAll(Collection<? extends T> collection) {
-		return elements.addAll(collection);
+		return getValue().addAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#addAll(int, java.util.Collection)
 	 */
 	public boolean addAll(int index, Collection<? extends T> collection) {
-		return elements.addAll(index, collection);
+		return getValue().addAll(index, collection);
 	}
 
 	/**
 	 * @see java.util.List#clear()
 	 */
 	public void clear() {
-		elements.clear();
+		getValue().clear();
 	}
 
 	/**
 	 * @see java.util.List#contains(java.lang.Object)
 	 */
 	public boolean contains(Object object) {
-		return elements.contains(object);
+		return getValue().contains(object);
 	}
 
 	/**
 	 * @see java.util.List#containsAll(java.util.Collection)
 	 */
 	public boolean containsAll(Collection<?> collection) {
-		return elements.containsAll(collection);
+		return getValue().containsAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#get(int)
 	 */
 	public T get(int index) {
-		return elements.get(index);
+		return getValue().get(index);
 	}
 
 	/**
 	 * @see java.util.List#indexOf(java.lang.Object)
 	 */
 	public int indexOf(Object object) {
-		return elements.indexOf(object);
+		return getValue().indexOf(object);
 	}
 
 	/**
 	 * @see java.util.List#isEmpty()
 	 */
 	public boolean isEmpty() {
-		return elements.isEmpty();
+		return getValue().isEmpty();
 	}
 
 	/**
 	 * @see java.util.List#iterator()
 	 */
 	public Iterator<T> iterator() {
-		return elements.iterator();
+		return getValue().iterator();
 	}
 
 	/**
 	 * @see java.util.List#lastIndexOf(java.lang.Object)
 	 */
 	public int lastIndexOf(Object object) {
-		return elements.lastIndexOf(object);
+		return getValue().lastIndexOf(object);
 	}
 
 	/**
 	 * @see java.util.List#listIterator()
 	 */
 	public ListIterator<T> listIterator() {
-		return elements.listIterator();
+		return getValue().listIterator();
 	}
 
 	/**
 	 * @see java.util.List#listIterator(int)
 	 */
 	public ListIterator<T> listIterator(int index) {
-		return elements.listIterator(index);
+		return getValue().listIterator(index);
 	}
 
 	/**
 	 * @see java.util.List#remove(int)
 	 */
 	public T remove(int index) {
-		return elements.remove(index);
+		return getValue().remove(index);
 	}
 
 	/**
 	 * @see java.util.List#remove(java.lang.Object)
 	 */
 	public boolean remove(Object object) {
-		return elements.remove(object);
+		return getValue().remove(object);
 	}
 
 	/**
 	 * @see java.util.List#removeAll(java.util.Collection)
 	 */
 	public boolean removeAll(Collection<?> collection) {
-		return elements.removeAll(collection);
+		return getValue().removeAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#retainAll(java.util.Collection)
 	 */
 	public boolean retainAll(Collection<?> collection) {
-		return elements.retainAll(collection);
+		return getValue().retainAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#set(int, java.lang.Object)
 	 */
 	public T set(int index, T element) {
-		return elements.set(index, element);
+		return getValue().set(index, element);
 	}
 
 	/**
 	 * @see java.util.List#size()
 	 */
 	public int size() {
-		return elements.size();
+		return getValue().size();
 	}
 
 	/**
 	 * @see java.util.List#subList(int, int)
 	 */
 	public List<T> subList(int fromIndex, int toIndex) {
-		return elements.subList(fromIndex, toIndex);
+		return getValue().subList(fromIndex, toIndex);
 	}
 
 	/**
 	 * @see java.util.List#toArray()
 	 */
 	public Object[] toArray() {
-		return elements.toArray();
+		return getValue().toArray();
 	}
 
 	/**
 	 * @see java.util.List#toArray(java.lang.Object[])
 	 */
 	public <U> U[] toArray(U[] array) {
-		return elements.toArray(array);
+		return getValue().toArray(array);
 	}
 	
+	/**
+	 * Implemented by classes that convert field values which consist
+	 * of lists of values.
+	 * 
+	 * @param <T> the type of the elements
+	 */
+	public static class ListConverter<T> implements Converter<List<T>> {
+
+		private Converter<T> itemConverter;
+		// Used by default in RFC 7230, see section 7.
+		private String delimiters = ",";
+		
+		/**
+		 * Creates a new list converter with the given converter for the items
+		 * and comma as item delimiter.
+		 * 
+		 * @param itemConverter the converter for the items
+		 * @see [ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)
+		 */
+		public ListConverter(Converter<T> itemConverter) {
+			this.itemConverter = itemConverter;
+		}
+
+		/**
+		 * Creates a new list converter with the given converter for the items
+		 * and the given delimiters for the items. Any character in `delimiters`
+		 * is considered a delimiter when parsing the string. The first
+		 * character will be used when items are joined in a
+		 * textual representation.
+		 * 
+		 * @param itemConverter the converter for the items
+		 * @param delimiters the delimiters
+		 */
+		public ListConverter(Converter<T> itemConverter, String delimiters) {
+			this.itemConverter = itemConverter;
+			this.delimiters = delimiters;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.jdrupes.httpcodec.protocols.http.fields.Converter#asFieldValue(java.lang.Object)
+		 */
+		@Override
+		public String asFieldValue(List<T> value) {
+			if (value.size() == 0) {
+				throw new IllegalStateException(
+				        "Field with list value may not be empty.");
+			}
+			boolean first = true;
+			StringBuilder result = new StringBuilder();
+			for (T e: value) {
+				if (first) {
+					first = false;
+				} else {
+					result.append(delimiters.charAt(0));
+					result.append(' ');
+				}
+				result.append(itemConverter.asFieldValue(e));
+			}
+			return result.toString();
+		}
+
+		
+		/* (non-Javadoc)
+		 * @see Converter#fromFieldValue(java.lang.String)
+		 */
+		@Override
+		public List<T> fromFieldValue(String text) throws ParseException {
+			List<T> result = new ArrayList<>();
+			ListItemizer itemizer = new ListItemizer(text, delimiters);
+			while (true) {
+				String nextRepr = itemizer.nextItem();
+				if (nextRepr == null) {
+					break;
+				}
+				result.add(itemConverter.fromFieldValue(nextRepr));
+			}
+			return result;
+		}
+		
+	}
 }
