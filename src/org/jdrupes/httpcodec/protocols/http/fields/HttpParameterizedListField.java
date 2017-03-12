@@ -71,5 +71,4 @@ public class HttpParameterizedListField<T>
 		return new ListConverter<ParameterizedValue<T>>(
 				new ParameterizedValueConverter<T>(valueConverter));
 	}
-	
 }

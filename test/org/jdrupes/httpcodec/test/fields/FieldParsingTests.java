@@ -22,11 +22,16 @@ import java.text.ParseException;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Iterator;
+
+import javax.activation.MimeType;
 
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
@@ -136,5 +141,18 @@ public class FieldParsingTests {
 	public void testIntFromString() throws ParseException {
 		HttpIntField field = HttpIntField.fromString("test", "42");
 		assertEquals(42, field.getValue().longValue());
+	}
+	
+	@Test
+	public void testAccept() throws ParseException {
+		HttpMediaTypeListField field 
+			= HttpMediaTypeListField.fromString("Accept",
+				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
+		field.sortByWeightDesc();
+		Iterator<MimeType> itr = field.iterator();
+		assertEquals("text/html", itr.next().toString());
+		assertEquals("text/x-c", itr.next().toString());
+		assertEquals("text/x-dvi; q=0.8", itr.next().toString());
+		assertEquals("text/plain; q=0.5", itr.next().toString());
 	}
 }

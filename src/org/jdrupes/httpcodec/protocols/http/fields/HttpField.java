@@ -138,7 +138,7 @@ public abstract class HttpField<T> implements Cloneable {
 		public String fromFieldValue(String text) throws ParseException {
 			return unquote(text.trim());
 		}
-};
+	};
 
 
 	private final String name;
@@ -215,8 +215,8 @@ public abstract class HttpField<T> implements Cloneable {
 		String normalizedFieldName = fieldNameMap
 				.getOrDefault(fieldName, fieldName);
 		switch (normalizedFieldName) {
-//		case HttpField.ACCEPT:
-//			return 
+		case HttpField.ACCEPT:
+			return HttpMediaTypeListField.fromString(fieldName, fieldValue);
 		case HttpField.COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
 		case HttpField.CONNECTION:

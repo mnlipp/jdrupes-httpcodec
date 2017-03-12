@@ -79,7 +79,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	protected List<T> cloneValue() {
 		return new ArrayList<>(getValue());
 	}
-
+	
 	/**
 	 * Appends the value to the list of values.
 	 * 
