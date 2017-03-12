@@ -19,10 +19,14 @@
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
+import org.jdrupes.httpcodec.util.ListItemizer;
 
 /**
  * A base class for all kinds of header field values.
@@ -254,9 +258,9 @@ public abstract class HttpField<T> implements Cloneable {
 	 * @param value the value to unquote
 	 * @return the unquoted value
 	 * @throws ParseException if the input violates the field format
+	 * @see [Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)
 	 */
 	public static String unquote(String value) throws ParseException {
-		// RFC 7230 3.2.6
 		if (value.length() == 0 || value.charAt(0) != '\"') {
 			return value;
 		}
@@ -295,9 +299,9 @@ public abstract class HttpField<T> implements Cloneable {
 	 * 
 	 * @param value the value to quote if necessary
 	 * @return the result
+	 * @see [Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)
 	 */
 	public static String quoteIfNecessary(String value) {
-		// RFC 7230 3.2.6
 		StringBuilder result = new StringBuilder();
 		int position = 0;
 		boolean needsQuoting = false;
@@ -347,4 +351,127 @@ public abstract class HttpField<T> implements Cloneable {
 		T fromFieldValue(String text) throws ParseException;
 	}
 	
+	/**
+	 * Represents a parameterized value
+	 * such as `value; param1=value1; param2=value2`.
+	 * 
+	 * @param <T> the type of the value
+	 */
+	public static class ParameterizedValue<T> {
+
+		private T value;
+		private Map<String, String> params;
+		
+		/**
+		 * Creates a new object with the given value and parameters. 
+		 * 
+		 * @param value the value
+		 * @param parameters the parameters
+		 */
+		public ParameterizedValue(T value, Map<String,String> parameters) {
+			this.value = value;
+			this.params = parameters;
+		}
+
+		/**
+		 * Returns the value.
+		 * 
+		 * @return the value
+		 */
+		public T getValue() {
+			return value;
+		}
+
+		/**
+		 * Returns the parameters.
+		 * 
+		 * @return the parameters as unmodifiable map 
+		 */
+		public Map<String, String> getParameters() {
+			return Collections.unmodifiableMap(params);
+		}
+	}
+
+	/**
+	 * A converter for values with parameter. Converts field values
+	 * such as `value; param1=value1; param2=value2`.
+	 * 
+	 * @param <T> the type of the value
+	 */
+	public static class ParameterizedValueConverter<T>
+		implements Converter<ParameterizedValue<T>> {
+
+		private Converter<T> valueConverter;
+		boolean quoteIfNecessary = false;
+
+		/**
+		 * Creates a new converter by extending the given value converter
+		 * with functionality for handling the parameters. Parameter
+		 * values are used literally (no quoting).
+		 * 
+		 * @param valueConverter the converter for a value (without parameters)
+		 */
+		public ParameterizedValueConverter(Converter<T> valueConverter) {
+			this(valueConverter, false);
+		}
+
+		/**
+		 * Creates a new converter by extending the given value converter
+		 * with functionality for handling the parameters.
+		 * 
+		 * @param valueConverter the converter for a value (without parameters)
+		 * @param quoteIfNecessary if set to `true` applies
+		 * {@link #quoteIfNecessary} and {@link #unquote} to parameter values
+		 */
+		public ParameterizedValueConverter(
+				Converter<T> valueConverter, boolean quoteIfNecessary) {
+			this.valueConverter = valueConverter;
+		}
+
+		@Override
+		public String asFieldValue(ParameterizedValue<T> value) {
+			StringBuilder result = new StringBuilder();
+			result.append(valueConverter.asFieldValue(value.getValue()));
+			for (Entry<String, String> e: value.getParameters().entrySet()) {
+				result.append("; ");
+				result.append(e.getKey());
+				result.append('=');
+				result.append(quoteIfNecessary 
+						? quoteIfNecessary(e.getValue()): e.getValue());
+			}
+			return null;
+		}
+
+		@Override
+		public ParameterizedValue<T> fromFieldValue(String text)
+				throws ParseException {
+			ListItemizer li = new ListItemizer(text, ";");
+			String valueRepr = li.nextItem();
+			if (valueRepr == null) {
+				throw new ParseException("Value may not be empty", 0);
+			}
+			T value = valueConverter.fromFieldValue(valueRepr);
+			Map<String,String> params = new HashMap<>();
+			while (true) {
+				String param = li.nextItem().trim();
+				if (param == null) {
+					break;
+				}
+				ListItemizer pi = new ListItemizer(param, "=");
+				String paramKey = pi.nextItem().trim();
+				if (paramKey == null) {
+					throw new ParseException("parameter may not be empty", 0);
+				}
+				String paramValue = pi.nextItem();
+				if (paramValue != null) {
+					paramValue = paramValue.trim();
+					if (quoteIfNecessary) {
+						paramValue = unquote(paramValue);
+					}
+				}
+				params.put(paramKey, paramValue);
+			}
+			return new ParameterizedValue<>(value, params);
+		}
+	}
 }
