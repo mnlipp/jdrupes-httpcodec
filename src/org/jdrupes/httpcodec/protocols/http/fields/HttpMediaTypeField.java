@@ -33,7 +33,7 @@ import javax.activation.MimeTypeParseException;
 public class HttpMediaTypeField extends HttpField<MimeType>
 	implements Cloneable {
 
-	public static final Converter<MimeType> CONVERTER 
+	public static final Converter<MimeType> MEDIA_TYPE_CONVERTER 
 		= new Converter<MimeType>() {
 
 		@Override
@@ -65,7 +65,7 @@ public class HttpMediaTypeField extends HttpField<MimeType>
 	 */
 	public HttpMediaTypeField(String name, String type, String subtype) 
 			throws ParseException {
-		super(name, createMimeType(type, subtype), CONVERTER);
+		super(name, createMimeType(type, subtype), MEDIA_TYPE_CONVERTER);
 	}
 
 	private static RestrictedMimeType createMimeType(
@@ -88,7 +88,7 @@ public class HttpMediaTypeField extends HttpField<MimeType>
 	 *            the type
 	 */
 	public HttpMediaTypeField(String name, MimeType type) {
-		super(name, type, CONVERTER);
+		super(name, type, MEDIA_TYPE_CONVERTER);
 	}
 	
 	/* (non-Javadoc)
@@ -109,7 +109,7 @@ public class HttpMediaTypeField extends HttpField<MimeType>
 	 */
 	public static HttpMediaTypeField fromString(String name, String value)
 	        throws ParseException {
-		return new HttpMediaTypeField(name, CONVERTER.fromFieldValue(value));
+		return new HttpMediaTypeField(name, MEDIA_TYPE_CONVERTER.fromFieldValue(value));
 	}
 	
 	/* (non-Javadoc)

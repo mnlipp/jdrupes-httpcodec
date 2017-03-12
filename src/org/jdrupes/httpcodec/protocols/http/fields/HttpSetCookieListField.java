@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class HttpSetCookieListField extends HttpListField<HttpCookie>
 	implements Cloneable {
 
-	public static final Converter<List<HttpCookie>> CONVERTER 
+	public static final Converter<List<HttpCookie>> COOKIE_CONVERTER 
 		= new Converter<List<HttpCookie>>() {
 
 		@Override
@@ -58,7 +58,7 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie>
 	 * Creates a new header field object with the field name "Set-Cookie".
 	 */
 	public HttpSetCookieListField() {
-		super(HttpField.SET_COOKIE, CONVERTER);
+		super(HttpField.SET_COOKIE, COOKIE_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie>
 	public static HttpSetCookieListField fromString(String text)
 	        throws ParseException {
 		HttpSetCookieListField result = new HttpSetCookieListField();
-		result.addAll(CONVERTER.fromFieldValue(text));
+		result.addAll(COOKIE_CONVERTER.fromFieldValue(text));
 		return result;
 	}
 	

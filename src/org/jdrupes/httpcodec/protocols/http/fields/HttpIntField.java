@@ -26,7 +26,7 @@ import java.text.ParseException;
 public class HttpIntField extends HttpField<Long>
 	implements Cloneable {
 
-	public static final Converter<Long> CONVERTER 
+	public static final Converter<Long> INT_CONVERTER 
 		= new Converter<Long>() {
 
 		@Override
@@ -51,7 +51,7 @@ public class HttpIntField extends HttpField<Long>
 	 * @param value the field value
 	 */
 	public HttpIntField(String name, long value) {
-		super(name, value, CONVERTER);
+		super(name, value, INT_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -75,7 +75,7 @@ public class HttpIntField extends HttpField<Long>
 	 */
 	public static HttpIntField fromString(String name, String text)
 			throws ParseException {
-		return new HttpIntField(name, CONVERTER.fromFieldValue(text));
+		return new HttpIntField(name, INT_CONVERTER.fromFieldValue(text));
 	}
 
 	/**

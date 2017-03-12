@@ -30,8 +30,8 @@ import java.util.List;
 public class HttpStringListField extends HttpListField<String>
 	implements Cloneable {
 
-	public static final Converter<List<String>> CONVERTER 
-    	= new HttpListField.ListConverter<String>(HttpStringField.CONVERTER);
+	public static final Converter<List<String>> STRING_LIST_CONVERTER 
+    	= new HttpListField.ListConverter<String>(HttpStringField.STRING_CONVERTER);
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -43,7 +43,7 @@ public class HttpStringListField extends HttpListField<String>
 	 * @param name the field name
 	 */
 	public HttpStringListField(String name) {
-		super(name, CONVERTER);
+		super(name, STRING_LIST_CONVERTER);
 	}
 
 	/**
@@ -54,13 +54,13 @@ public class HttpStringListField extends HttpListField<String>
 	 * @param values more values
 	 */
 	public HttpStringListField(String name, String value, String... values) {
-		super(name, CONVERTER);
+		super(name, STRING_LIST_CONVERTER);
 		add(value);
 		addAll(Arrays.asList(values));
 	}
 
 	private HttpStringListField(String name, List<String> values) {
-		super(name, values, CONVERTER);
+		super(name, values, STRING_LIST_CONVERTER);
 	}
 	
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class HttpStringListField extends HttpListField<String>
 	 */
 	public static HttpStringListField fromString(String name, String text) 
 			throws ParseException {
-		return new HttpStringListField(name, CONVERTER.fromFieldValue(text));
+		return new HttpStringListField(name, STRING_LIST_CONVERTER.fromFieldValue(text));
 	}
 
 	/**

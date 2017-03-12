@@ -28,30 +28,6 @@ import java.text.ParseException;
 public class HttpUnquotedStringField extends HttpField<String>
 	implements Cloneable {
 
-	public static final Converter<String> CONVERTER 
-		= new Converter<String>() {
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see Converter#asFieldValue(java.lang.Object)
-         */
-        @Override
-        public String asFieldValue(String value) {
-	        return value;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see Converter#fromFieldValue(java.lang.String)
-         */
-        @Override
-        public String fromFieldValue(String text) throws ParseException {
-	        return text.trim();
-        }
-    };
-
 	/**
 	 * Creates a new header field object with the given field name and value.
 	 * 
@@ -59,7 +35,7 @@ public class HttpUnquotedStringField extends HttpField<String>
 	 * @param value the field value
 	 */
 	public HttpUnquotedStringField(String name, String value) {
-		super(name, value, CONVERTER);
+		super(name, value, UNQUOTED_STRING_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -83,7 +59,7 @@ public class HttpUnquotedStringField extends HttpField<String>
 	public static HttpUnquotedStringField fromString(String name, String text)
 			throws ParseException {
 		return new HttpUnquotedStringField(
-				name, CONVERTER.fromFieldValue(text));
+				name, UNQUOTED_STRING_CONVERTER.fromFieldValue(text));
 	}
 
 }

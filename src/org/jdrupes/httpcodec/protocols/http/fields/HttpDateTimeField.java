@@ -35,7 +35,7 @@ import java.util.Locale;
 public class HttpDateTimeField extends HttpField<Instant>
 	implements Cloneable {
 
-	public static final Converter<Instant> CONVERTER 
+	public static final Converter<Instant> DATE_TIME_CONVERTER 
 		= new InstantConverter();
 	
 	/**
@@ -46,7 +46,7 @@ public class HttpDateTimeField extends HttpField<Instant>
 	 *            the field value
 	 */
 	public HttpDateTimeField(String name, Instant value) {
-		super(name, value, CONVERTER);
+		super(name, value, DATE_TIME_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -70,7 +70,7 @@ public class HttpDateTimeField extends HttpField<Instant>
 	 */
 	public static HttpDateTimeField fromString(String name, String text)
 			throws ParseException {
-		return new HttpDateTimeField(name, CONVERTER.fromFieldValue(text));
+		return new HttpDateTimeField(name, DATE_TIME_CONVERTER.fromFieldValue(text));
 	}
 	
 	private static class InstantConverter implements Converter<Instant> {

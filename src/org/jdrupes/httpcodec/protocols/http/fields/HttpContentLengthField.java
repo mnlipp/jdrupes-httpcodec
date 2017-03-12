@@ -54,12 +54,7 @@ public class HttpContentLengthField extends HttpIntField
 	 */
 	public static HttpContentLengthField fromString(String text)
 			throws ParseException {
-		long value;
-		try {
-			value = Long.parseLong(unquote(text));
-		} catch (NumberFormatException e) {
-			throw new ParseException(text, 0);
-		}
-		return new HttpContentLengthField(value);
+		return new HttpContentLengthField(
+				HttpIntField.INT_CONVERTER.fromFieldValue(text));
 	}
 }

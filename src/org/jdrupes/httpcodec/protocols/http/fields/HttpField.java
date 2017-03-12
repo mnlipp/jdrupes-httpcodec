@@ -89,6 +89,58 @@ public abstract class HttpField<T> implements Cloneable {
 		fieldNameMap.put(VIA, VIA);
 	}
 	
+	/**
+	 * A noop converter, except that text is trimmed when converted to
+	 * a value.
+	 */
+	public static final Converter<String> UNQUOTED_STRING_CONVERTER 
+		= new Converter<String>() {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see Converter#asFieldValue(java.lang.Object)
+		 */
+		@Override
+		public String asFieldValue(String value) {
+			return value;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see Converter#fromFieldValue(java.lang.String)
+		 */
+		@Override
+		public String fromFieldValue(String text) throws ParseException {
+			return text.trim();
+		}
+	};
+
+	/**
+	 * A converter that quotes and unquoted strings as necessary.
+	 */
+	public static final Converter<String> STRING_CONVERTER 
+		= new Converter<String>() {
+
+		/* (non-Javadoc)
+		 * @see Converter#asFieldValue(java.lang.Object)
+		 */
+		@Override
+		public String asFieldValue(String value) {
+			return quoteIfNecessary(value);
+		}
+
+		/* (non-Javadoc)
+		 * @see Converter#fromFieldValue(java.lang.String)
+		 */
+		@Override
+		public String fromFieldValue(String text) throws ParseException {
+			return unquote(text.trim());
+		}
+};
+
+
 	private final String name;
 	private T value;
 	private Converter<T> converter;
@@ -402,6 +454,7 @@ public abstract class HttpField<T> implements Cloneable {
 		implements Converter<ParameterizedValue<T>> {
 
 		private Converter<T> valueConverter;
+		private Converter<String> paramValueConverter;
 		boolean quoteIfNecessary = false;
 
 		/**
@@ -426,6 +479,8 @@ public abstract class HttpField<T> implements Cloneable {
 		public ParameterizedValueConverter(
 				Converter<T> valueConverter, boolean quoteIfNecessary) {
 			this.valueConverter = valueConverter;
+			paramValueConverter = quoteIfNecessary
+					? STRING_CONVERTER : UNQUOTED_STRING_CONVERTER;
 		}
 
 		@Override
@@ -436,8 +491,7 @@ public abstract class HttpField<T> implements Cloneable {
 				result.append("; ");
 				result.append(e.getKey());
 				result.append('=');
-				result.append(quoteIfNecessary 
-						? quoteIfNecessary(e.getValue()): e.getValue());
+				paramValueConverter.asFieldValue(e.getValue());
 			}
 			return null;
 		}
@@ -464,10 +518,7 @@ public abstract class HttpField<T> implements Cloneable {
 				}
 				String paramValue = pi.nextItem();
 				if (paramValue != null) {
-					paramValue = paramValue.trim();
-					if (quoteIfNecessary) {
-						paramValue = unquote(paramValue);
-					}
+					paramValueConverter.fromFieldValue(paramValue);
 				}
 				params.put(paramKey, paramValue);
 			}
