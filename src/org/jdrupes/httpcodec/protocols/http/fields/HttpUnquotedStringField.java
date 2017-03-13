@@ -20,6 +20,8 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
 
+import org.jdrupes.httpcodec.types.Converters;
+
 /**
  * Represents a header field that has a simple string as its value.
  * The value is never quoted, even if the string contains characters
@@ -35,7 +37,7 @@ public class HttpUnquotedStringField extends HttpField<String>
 	 * @param value the field value
 	 */
 	public HttpUnquotedStringField(String name, String value) {
-		super(name, value, UNQUOTED_STRING_CONVERTER);
+		super(name, value, Converters.UNQUOTED_STRING_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -59,7 +61,7 @@ public class HttpUnquotedStringField extends HttpField<String>
 	public static HttpUnquotedStringField fromString(String name, String text)
 			throws ParseException {
 		return new HttpUnquotedStringField(
-				name, UNQUOTED_STRING_CONVERTER.fromFieldValue(text));
+				name, Converters.UNQUOTED_STRING_CONVERTER.fromFieldValue(text));
 	}
 
 }

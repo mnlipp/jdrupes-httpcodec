@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.jdrupes.httpcodec.types.Converters;
+
 /**
  * Represents the list of cookies to be sent from client to server.
  * 
@@ -32,25 +34,6 @@ import java.util.stream.Collectors;
 public class HttpCookieListField extends HttpListField<HttpCookie>
 	implements Cloneable {
 
-	public static final ListConverter<HttpCookie> COOKIE_LIST_CONVERTER 
-		= new ListConverter<HttpCookie>(new Converter<HttpCookie>() {
-			
-			@Override
-			public String asFieldValue(HttpCookie value) {
-				return value.toString();
-			}
-
-			@Override
-			public HttpCookie fromFieldValue(String text)
-			        throws ParseException {
-				try {
-					return HttpCookie.parse(text).get(0);
-				} catch (IllegalArgumentException e) {
-					throw new ParseException(text, 0);
-				}
-			}
-		}, ";");
-	
 	/**
 	 * Creates a new object with the field name "Cookie" and the given
 	 * cookies.
@@ -58,7 +41,7 @@ public class HttpCookieListField extends HttpListField<HttpCookie>
 	 * @param value the cookies
 	 */
 	public HttpCookieListField(List<HttpCookie> value) {
-		super(HttpField.COOKIE, value, COOKIE_LIST_CONVERTER);
+		super(HttpField.COOKIE, value, Converters.COOKIE_LIST_CONVERTER);
 	}
 
 	/**
@@ -71,7 +54,7 @@ public class HttpCookieListField extends HttpListField<HttpCookie>
 	 */
 	public static HttpCookieListField fromString(String text) 
 			throws ParseException {
-		return new HttpCookieListField(COOKIE_LIST_CONVERTER.fromFieldValue(text));
+		return new HttpCookieListField(Converters.COOKIE_LIST_CONVERTER.fromFieldValue(text));
 	}
 
 	/* (non-Javadoc)

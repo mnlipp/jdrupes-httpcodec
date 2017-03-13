@@ -40,6 +40,7 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 
@@ -322,14 +323,15 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 */
 	private void startEncoding() {
 		// Complete content type
-		HttpMediaTypeField contentType = (HttpMediaTypeField) messageHeader
+		HttpMediaTypeField contentField = (HttpMediaTypeField) messageHeader
 		        .fields().get(HttpField.CONTENT_TYPE);
-		String charset = null;
-		if (contentType != null) {
-			charset = contentType.getParameter("charset");
-			if (charset == null) {
-				charset = "utf-8";
-				contentType.setParameter("charset", charset);
+		if (contentField != null) {
+			if ("text".equals(contentField.getValue().getTopLevelType())
+					&& contentField.getValue().getParameter("charset") == null) {
+				messageHeader.setField(new HttpMediaTypeField(
+						HttpField.CONTENT_TYPE,
+						MediaType.builder().from(contentField.getValue())
+						.setParameter("charset", "utf-8").build()));
 			}
 		}
 		

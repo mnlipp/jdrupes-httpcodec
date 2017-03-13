@@ -22,6 +22,8 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jdrupes.httpcodec.types.Converters;
+
 /**
  * An HTTP field value that consists of a comma separated list of 
  * integers. The class provides a "list of integers" view
@@ -29,9 +31,6 @@ import java.util.List;
  */
 public class HttpIntListField extends HttpListField<Long>
 	implements Cloneable {
-
-	public static final Converter<List<Long>> INT_LIST_CONVERTER 
-        = new HttpListField.ListConverter<Long>(HttpIntField.INT_CONVERTER);
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -43,7 +42,7 @@ public class HttpIntListField extends HttpListField<Long>
 	 * @param name the field name
 	 */
 	public HttpIntListField(String name) {
-		super(name, INT_LIST_CONVERTER);
+		super(name, Converters.INT_LIST_CONVERTER);
 	}
 
 	/**
@@ -54,13 +53,13 @@ public class HttpIntListField extends HttpListField<Long>
 	 * @param values more values
 	 */
 	public HttpIntListField(String name, Long value, Long... values) {
-		super(name, INT_LIST_CONVERTER);
+		super(name, Converters.INT_LIST_CONVERTER);
 		add(value);
 		addAll(Arrays.asList(values));
 	}
 
 	private HttpIntListField(String name, List<Long> value) {
-		super(name, value, INT_LIST_CONVERTER);
+		super(name, value, Converters.INT_LIST_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +81,7 @@ public class HttpIntListField extends HttpListField<Long>
 	 */
 	public static HttpIntListField fromString(String name, String text) 
 			throws ParseException {
-		return new HttpIntListField(name, INT_LIST_CONVERTER.fromFieldValue(text));
+		return new HttpIntListField(name, Converters.INT_LIST_CONVERTER.fromFieldValue(text));
 	}
 
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2017 Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -16,24 +16,9 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jdrupes.httpcodec.protocols.http;
-
-import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
+@org.osgi.annotation.versioning.Version("${api_version}")
 
 /**
- * The base class for HTTP codecs.
+ * Special types related to HTTP.
  */
-public abstract class HttpCodec<T extends HttpMessageHeader>
-	implements Codec {
-
-	protected T messageHeader = null;
-	
-	protected String bodyCharset() {
-		return messageHeader
-			.getField(HttpMediaTypeField.class, HttpField.CONTENT_TYPE)
-			.map(f -> f.getValue().getParameter("charset")).orElse("utf-8");
-	}
-	
-}
+package org.jdrupes.httpcodec.types;

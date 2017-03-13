@@ -20,6 +20,11 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.util.List;
 
+import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ParameterizedValue;
+import org.jdrupes.httpcodec.types.ParameterizedValueConverter;
+
 /**
  * A HTTP header field with a list of values that can have
  * parameters.
@@ -27,7 +32,7 @@ import java.util.List;
  * @param <T> the value type
  */
 public class HttpParameterizedListField<T> 
-	extends HttpListField<HttpField.ParameterizedValue<T>> {
+	extends HttpListField<ParameterizedValue<T>> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 

@@ -20,6 +20,8 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
 
+import org.jdrupes.httpcodec.types.Converters;
+
 /**
  * Represents a header field that has a simple string as its value.
  */
@@ -33,7 +35,7 @@ public class HttpStringField extends HttpField<String>
 	 * @param value the field value
 	 */
 	public HttpStringField(String name, String value) {
-		super(name, value, STRING_CONVERTER);
+		super(name, value, Converters.STRING_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -57,7 +59,7 @@ public class HttpStringField extends HttpField<String>
 	public static HttpStringField fromString(String name, String text)
 			throws ParseException {
 		return new HttpStringField(
-				name, STRING_CONVERTER.fromFieldValue(text));
+				name, Converters.STRING_CONVERTER.fromFieldValue(text));
 	}
 
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2017 Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -16,24 +16,29 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jdrupes.httpcodec.protocols.http;
+package org.jdrupes.httpcodec.types;
 
-import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
+import java.text.ParseException;
 
 /**
- * The base class for HTTP codecs.
+ * Implemented by classes that convert between a value and its 
+ * string representation in the HTTP header field.
  */
-public abstract class HttpCodec<T extends HttpMessageHeader>
-	implements Codec {
+public interface Converter<T> {
 
-	protected T messageHeader = null;
+	/**
+	 * Returns the representation of this value in a header field.
+	 * 
+	 * @return the representation
+	 */
+	String asFieldValue(T value);
 	
-	protected String bodyCharset() {
-		return messageHeader
-			.getField(HttpMediaTypeField.class, HttpField.CONTENT_TYPE)
-			.map(f -> f.getValue().getParameter("charset")).orElse("utf-8");
-	}
-	
+	/**
+	 * Parses the given text and returns the parsed value.
+	 * 
+	 * @param text the value from the header field
+	 * @return the parsed value
+	 * @throws ParseException if the value cannot be parsed
+	 */
+	T fromFieldValue(String text) throws ParseException;
 }

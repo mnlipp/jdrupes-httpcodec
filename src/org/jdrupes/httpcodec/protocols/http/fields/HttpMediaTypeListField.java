@@ -22,15 +22,13 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.activation.MimeType;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.MediaType;
 
 /**
  * A list of media types.
  */
-public class HttpMediaTypeListField extends HttpListField<MimeType> {
-
-	public static final ListConverter<MimeType> MEDIA_TYPE_LIST_CONVERTER
-		= new ListConverter<MimeType>(HttpMediaTypeField.MEDIA_TYPE_CONVERTER);
+public class HttpMediaTypeListField extends HttpListField<MediaType> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -42,7 +40,7 @@ public class HttpMediaTypeListField extends HttpListField<MimeType> {
 	 * @param name the field name
 	 */
 	public HttpMediaTypeListField(String name) {
-		super(name, MEDIA_TYPE_LIST_CONVERTER);
+		super(name, Converters.MEDIA_TYPE_LIST_CONVERTER);
 	}
 
 	/**
@@ -53,8 +51,8 @@ public class HttpMediaTypeListField extends HttpListField<MimeType> {
 	 * @param items
 	 * 			  the items
 	 */
-	public HttpMediaTypeListField(String name, List<MimeType> items) {
-		super(name, items, MEDIA_TYPE_LIST_CONVERTER);
+	public HttpMediaTypeListField(String name, List<MediaType> items) {
+		super(name, items, Converters.MEDIA_TYPE_LIST_CONVERTER);
 	}
 
 	/**
@@ -69,10 +67,10 @@ public class HttpMediaTypeListField extends HttpListField<MimeType> {
 	public static HttpMediaTypeListField fromString(String name, String text) 
 			throws ParseException {
 		return new HttpMediaTypeListField(
-				name, MEDIA_TYPE_LIST_CONVERTER.fromFieldValue(text));
+				name, Converters.MEDIA_TYPE_LIST_CONVERTER.fromFieldValue(text));
 	}
 	
-	private static Comparator<MimeType> COMP = Comparator.nullsFirst(
+	private static Comparator<MediaType> COMP = Comparator.nullsFirst(
 			Comparator.comparing(mt -> mt.getParameter("q"),
 					Comparator.nullsFirst(
 							Comparator.comparing(Float::parseFloat)

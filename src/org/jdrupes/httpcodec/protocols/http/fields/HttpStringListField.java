@@ -22,6 +22,10 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.ListConverter;
+
 /**
  * An HTTP field value that consists of a comma separated list of 
  * strings. The class provides a "list of strings" view
@@ -31,7 +35,7 @@ public class HttpStringListField extends HttpListField<String>
 	implements Cloneable {
 
 	public static final Converter<List<String>> STRING_LIST_CONVERTER 
-    	= new HttpListField.ListConverter<String>(HttpStringField.STRING_CONVERTER);
+    	= new ListConverter<String>(Converters.STRING_CONVERTER);
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 

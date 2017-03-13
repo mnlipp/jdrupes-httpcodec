@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.jdrupes.httpcodec.types.Converters;
+
 /**
  * Represents all "Set-Cookie" fields in a Response header. Several cookies are
  * actually set with several headers. However, to provide uniform access to all
@@ -35,30 +37,11 @@ import java.util.stream.Collectors;
 public class HttpSetCookieListField extends HttpListField<HttpCookie>
 	implements Cloneable {
 
-	public static final Converter<List<HttpCookie>> COOKIE_CONVERTER 
-		= new Converter<List<HttpCookie>>() {
-
-		@Override
-		public List<HttpCookie> fromFieldValue(String text)
-		        throws ParseException {
-			try {
-				return HttpCookie.parse(text);
-			} catch (IllegalArgumentException e) {
-				throw new ParseException(text, 0);
-			}
-		}
-
-		@Override
-		public String asFieldValue(List<HttpCookie> value) {
-			throw new UnsupportedOperationException();
-		}
-	};
-
 	/**
 	 * Creates a new header field object with the field name "Set-Cookie".
 	 */
 	public HttpSetCookieListField() {
-		super(HttpField.SET_COOKIE, COOKIE_CONVERTER);
+		super(HttpField.SET_COOKIE, Converters.COOKIE_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +65,7 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie>
 	public static HttpSetCookieListField fromString(String text)
 	        throws ParseException {
 		HttpSetCookieListField result = new HttpSetCookieListField();
-		result.addAll(COOKIE_CONVERTER.fromFieldValue(text));
+		result.addAll(Converters.COOKIE_CONVERTER.fromFieldValue(text));
 		return result;
 	}
 	

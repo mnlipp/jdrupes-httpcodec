@@ -43,6 +43,7 @@ import org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder;
 import org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsFrameHeader;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
+import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.util.FormUrlDecoder;
 
 /**
@@ -126,12 +127,11 @@ public class Connection extends Thread {
 				.setStatus(HttpStatus.NOT_FOUND).setMessageHasBody(true);
 		HttpMediaTypeField media;
 		try {
-			media = new HttpMediaTypeField(
-			        HttpField.CONTENT_TYPE, "text", "plain");
-			media.setParameter("charset", "utf-8");
+			media = new HttpMediaTypeField(HttpField.CONTENT_TYPE, 
+				        MediaType.fromString("text/plain; charset=utf-8"));
 			response.setField(media);
 		} catch (ParseException e) {
-			// Just a test
+			// Should work...
 		}
 		ByteBuffer body = ByteBuffer.wrap("Not Found".getBytes("utf-8"));
 		sendResponse(response, body, true);
@@ -140,15 +140,11 @@ public class Connection extends Thread {
 	private void handleGetForm(HttpRequest request) throws IOException {
 		HttpResponse response = request.getResponse().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
-		HttpMediaTypeField media;
-		try {
-			media = new HttpMediaTypeField(
-			        HttpField.CONTENT_TYPE, "text", "html");
-			media.setParameter("charset", "utf-8");
-			response.setField(media);
-		} catch (ParseException e) {
-			// Just a test
-		}
+		HttpMediaTypeField media = new HttpMediaTypeField(
+				HttpField.CONTENT_TYPE,
+				MediaType.builder().setType("text", "html")
+				.setParameter("charset", "utf-8").build());
+		response.setField(media);
 		String form = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(
 		        getClass().getResourceAsStream("form.html"), "utf-8"))) {
@@ -184,15 +180,11 @@ public class Connection extends Thread {
 		}
 		response.setStatus(HttpStatus.OK);
 		response.setMessageHasBody(true);
-		HttpMediaTypeField media;
-		try {
-			media = new HttpMediaTypeField(
-			        HttpField.CONTENT_TYPE, "text", "plain");
-			media.setParameter("charset", "utf-8");
-			response.setField(media);
-		} catch (ParseException e) {
-			// Just a test
-		}
+		HttpMediaTypeField media = new HttpMediaTypeField(
+				HttpField.CONTENT_TYPE, 
+				MediaType.builder().setType("text", "plain")
+				.setParameter("charset", "utf-8").build());
+		response.setField(media);
 		String data = "First name: " + fieldDecoder.getFields().get("firstname")
 		        + "\r\n" + "Last name: "
 		        + fieldDecoder.getFields().get("lastname");
@@ -208,15 +200,11 @@ public class Connection extends Thread {
 		}
 		HttpResponse response = request.getResponse().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
-		HttpMediaTypeField media;
-		try {
-			media = new HttpMediaTypeField(
-			        HttpField.CONTENT_TYPE, "text", "html");
-			media.setParameter("charset", "utf-8");
-			response.setField(media);
-		} catch (ParseException e) {
-			// Just a test
-		}
+		HttpMediaTypeField media = new HttpMediaTypeField(
+				HttpField.CONTENT_TYPE,
+				MediaType.builder().setType("text", "html")
+				.setParameter("charset", "utf-8").build());
+		response.setField(media);
 		String page = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(
 		        getClass().getResourceAsStream("echo.html"), "utf-8"))) {

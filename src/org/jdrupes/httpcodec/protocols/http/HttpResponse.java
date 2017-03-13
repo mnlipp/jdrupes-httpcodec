@@ -26,6 +26,7 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
+import org.jdrupes.httpcodec.types.MediaType;
 
 /**
  * Represents an HTTP response header.
@@ -139,8 +140,8 @@ public class HttpResponse extends HttpMessageHeader {
 	public HttpResponse setContentType(String type, String subtype,
 			String charset) throws ParseException {
 		HttpMediaTypeField mt = new HttpMediaTypeField(HttpField.CONTENT_TYPE,
-		        type, subtype);
-		mt.setParameter("charset", charset);
+				MediaType.builder().setType(type, subtype)
+				.setParameter("charset", charset).build());
 		return setField(mt);
 	}
 	

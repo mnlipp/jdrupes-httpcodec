@@ -20,30 +20,14 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
 
+import org.jdrupes.httpcodec.types.Converters;
+
 /**
  * An HTTP field with a value that is an integer.
  */
 public class HttpIntField extends HttpField<Long>
 	implements Cloneable {
 
-	public static final Converter<Long> INT_CONVERTER 
-		= new Converter<Long>() {
-
-		@Override
-		public String asFieldValue(Long value) {
-			return value.toString();
-		}
-
-		@Override
-		public Long fromFieldValue(String text) throws ParseException {
-			try {
-				return Long.parseLong(unquote(text));
-			} catch (NumberFormatException e) {
-				throw new ParseException(text, 0);
-			}
-		}
-	};
-	
 	/**
 	 * Creates the header field object with the given value.
 	 * 
@@ -51,7 +35,7 @@ public class HttpIntField extends HttpField<Long>
 	 * @param value the field value
 	 */
 	public HttpIntField(String name, long value) {
-		super(name, value, INT_CONVERTER);
+		super(name, value, Converters.INT_CONVERTER);
 	}
 
 	/* (non-Javadoc)
@@ -75,7 +59,7 @@ public class HttpIntField extends HttpField<Long>
 	 */
 	public static HttpIntField fromString(String name, String text)
 			throws ParseException {
-		return new HttpIntField(name, INT_CONVERTER.fromFieldValue(text));
+		return new HttpIntField(name, Converters.INT_CONVERTER.fromFieldValue(text));
 	}
 
 	/**
