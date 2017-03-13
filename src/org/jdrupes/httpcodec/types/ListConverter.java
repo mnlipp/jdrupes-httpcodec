@@ -41,7 +41,7 @@ public class ListConverter<T> implements Converter<List<T>> {
 	 * and comma as item delimiter.
 	 * 
 	 * @param itemConverter the converter for the items
-	 * @see [ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)
+	 * @see "[ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)"
 	 */
 	public ListConverter(Converter<T> itemConverter) {
 		this.itemConverter = itemConverter;

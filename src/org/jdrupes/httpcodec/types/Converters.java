@@ -40,7 +40,7 @@ public final class Converters {
 	 * @param value the value to unquote
 	 * @return the unquoted value
 	 * @throws ParseException if the input violates the field format
-	 * @see [Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)
+	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
 	 */
 	public static String unquote(String value) throws ParseException {
 		if (value.length() == 0 || value.charAt(0) != '\"') {
@@ -81,7 +81,7 @@ public final class Converters {
 	 * 
 	 * @param value the value to quote if necessary
 	 * @return the result
-	 * @see [Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)
+	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
 	 */
 	public static String quoteIfNecessary(String value) {
 		StringBuilder result = new StringBuilder();

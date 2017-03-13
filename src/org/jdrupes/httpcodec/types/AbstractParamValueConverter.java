@@ -81,11 +81,11 @@ public class AbstractParamValueConverter<T> {
 	}
 
 	/**
-	 * Default implementation of {@link #fromFieldValue(String, BiFunction).
+	 * Default implementation of {@link #fromFieldValue(String, BiFunction)}.
 	 * 
 	 * @param text the textual representation
 	 * @return an instance created with 
-	 * {@link ParameterizedValue#ParameterizedValue(Object, Map)
+	 * {@link ParameterizedValue#ParameterizedValue(Object, Map)}
 	 * @throws ParseException
 	 */
 	public ParameterizedValue<T> fromFieldValue(String text)
