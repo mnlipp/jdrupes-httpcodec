@@ -5,4 +5,5 @@ org.jdrupes.httpcodec.protocols.http.client
 org.jdrupes.httpcodec.protocols.http.fields
 org.jdrupes.httpcodec.protocols.http.server
 org.jdrupes.httpcodec.protocols.websocket
+org.jdrupes.httpcodec.types
 org.jdrupes.httpcodec.util
