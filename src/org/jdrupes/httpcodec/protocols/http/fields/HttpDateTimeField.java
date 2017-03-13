@@ -34,8 +34,7 @@ import org.jdrupes.httpcodec.types.Converter;
  * An HTTP Date/Time field as specified by 
  * [RFC 7231, Section 7.1.1.1](https://tools.ietf.org/html/rfc7231#section-7.1.1.1)
  */
-public class HttpDateTimeField extends HttpField<Instant>
-	implements Cloneable {
+public class HttpDateTimeField extends HttpField<Instant> {
 
 	public static final Converter<Instant> DATE_TIME_CONVERTER 
 		= new InstantConverter();
@@ -49,14 +48,6 @@ public class HttpDateTimeField extends HttpField<Instant>
 	 */
 	public HttpDateTimeField(String name, Instant value) {
 		super(name, value, DATE_TIME_CONVERTER);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
-	 */
-	@Override
-	public HttpDateTimeField clone() {
-		return (HttpDateTimeField)super.clone();
 	}
 
 	/**

@@ -22,7 +22,6 @@ import java.net.HttpCookie;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.jdrupes.httpcodec.types.Converters;
 
@@ -31,8 +30,7 @@ import org.jdrupes.httpcodec.types.Converters;
  * 
  * @see "[RFC 6265](https://tools.ietf.org/html/rfc6265)"
  */
-public class HttpCookieListField extends HttpListField<HttpCookie>
-	implements Cloneable {
+public class HttpCookieListField extends HttpListField<HttpCookie> {
 
 	/**
 	 * Creates a new object with the field name "Cookie" and the given
@@ -55,23 +53,6 @@ public class HttpCookieListField extends HttpListField<HttpCookie>
 	public static HttpCookieListField fromString(String text) 
 			throws ParseException {
 		return new HttpCookieListField(Converters.COOKIE_LIST_CONVERTER.fromFieldValue(text));
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
-	 */
-	@Override
-	public HttpCookieListField clone() {
-		return (HttpCookieListField)super.clone();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
-	 */
-	@Override
-	protected List<HttpCookie> cloneValue() {
-		return getValue().stream()
-				.map(c -> (HttpCookie)c.clone()).collect(Collectors.toList());
 	}
 
 	/**

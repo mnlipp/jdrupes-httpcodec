@@ -27,8 +27,7 @@ import org.jdrupes.httpcodec.types.MediaType;
  * Represents a media type header field and provides methods for interpreting
  * its value.
  */
-public class HttpMediaTypeField 
-	extends HttpField<MediaType> implements Cloneable {
+public class HttpMediaTypeField extends HttpField<MediaType> {
 
 	/**
 	 * Creates new header field object with the given type and subtype and no

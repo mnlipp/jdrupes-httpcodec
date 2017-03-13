@@ -32,7 +32,7 @@ import org.jdrupes.httpcodec.types.Converter;
  * of the values.
  */
 public abstract class HttpListField<T> extends HttpField<List<T>>
-	implements List<T>, Cloneable {
+	implements List<T> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -63,22 +63,6 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 		super(name, items, converter);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
-	 */
-	@Override
-	public HttpListField<T> clone() {
-		return (HttpListField<T>)super.clone();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
-	 */
-	@Override
-	protected List<T> cloneValue() {
-		return new ArrayList<>(getValue());
-	}
-	
 	/**
 	 * Appends the value to the list of values.
 	 * 

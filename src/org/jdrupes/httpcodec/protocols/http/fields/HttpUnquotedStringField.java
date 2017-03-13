@@ -27,8 +27,7 @@ import org.jdrupes.httpcodec.types.Converters;
  * The value is never quoted, even if the string contains characters
  * that could be interpreted as delimiters.
  */
-public class HttpUnquotedStringField extends HttpField<String>
-	implements Cloneable {
+public class HttpUnquotedStringField extends HttpField<String> {
 
 	/**
 	 * Creates a new header field object with the given field name and value.
@@ -38,14 +37,6 @@ public class HttpUnquotedStringField extends HttpField<String>
 	 */
 	public HttpUnquotedStringField(String name, String value) {
 		super(name, value, Converters.UNQUOTED_STRING_CONVERTER);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
-	 */
-	@Override
-	public HttpUnquotedStringField clone() {
-		return (HttpUnquotedStringField)super.clone();
 	}
 
 	/**

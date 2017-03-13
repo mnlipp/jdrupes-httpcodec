@@ -20,7 +20,6 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.net.HttpCookie;
 import java.text.ParseException;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,22 +33,13 @@ import org.jdrupes.httpcodec.types.Converters;
  * 
  * @see "[RFC 6265](https://tools.ietf.org/html/rfc6265)"
  */
-public class HttpSetCookieListField extends HttpListField<HttpCookie>
-	implements Cloneable {
+public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 
 	/**
 	 * Creates a new header field object with the field name "Set-Cookie".
 	 */
 	public HttpSetCookieListField() {
 		super(HttpField.SET_COOKIE, Converters.COOKIE_CONVERTER);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
-	 */
-	@Override
-	public HttpSetCookieListField clone() {
-		return (HttpSetCookieListField)super.clone();
 	}
 
 	/**
@@ -94,14 +84,5 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie>
 	public Optional<String> valueForName(String name) {
 		return stream().filter(cookie -> cookie.getName().equals(name))
 			.findFirst().map(HttpCookie::getValue);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#cloneValue()
-	 */
-	@Override
-	protected List<HttpCookie> cloneValue() {
-		return getValue().stream()
-				.map(c -> (HttpCookie)c.clone()).collect(Collectors.toList());
 	}
 }

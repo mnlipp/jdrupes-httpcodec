@@ -29,7 +29,7 @@ import org.jdrupes.httpcodec.types.Converter;
  * 
  * @see "[MessageHeaders](https://www.iana.org/assignments/message-headers/message-headers.xhtml)"
  */
-public abstract class HttpField<T> implements Cloneable {
+public abstract class HttpField<T> {
 
 	// https://tools.ietf.org/html/rfc7231#section-5.3.2
 	public static final String ACCEPT = "Accept";
@@ -115,31 +115,6 @@ public abstract class HttpField<T> implements Cloneable {
 		this.value = value;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public HttpField<T> clone() {
-		try {
-			@SuppressWarnings("unchecked")
-			HttpField<T> clone =  (HttpField<T>)super.clone();
-			clone.value = cloneValue();
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			throw new IllegalArgumentException(e); 
-		}
-	}
-
-	/**
-	 * Called by {@link #clone()} to clone the value. Should
-	 * be overridden by derived classes if the value is not immutable.
-	 * 
-	 * @return return the value
-	 */
-	protected T cloneValue() {
-		return value;
-	}
-	
 	/**
 	 * Returns an HttpField that represents the given header field, using the
 	 * best matching derived class in this package. Works for all well known

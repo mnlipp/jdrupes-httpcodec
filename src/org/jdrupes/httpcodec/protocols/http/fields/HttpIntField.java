@@ -25,8 +25,7 @@ import org.jdrupes.httpcodec.types.Converters;
 /**
  * An HTTP field with a value that is an integer.
  */
-public class HttpIntField extends HttpField<Long>
-	implements Cloneable {
+public class HttpIntField extends HttpField<Long> {
 
 	/**
 	 * Creates the header field object with the given value.
@@ -36,14 +35,6 @@ public class HttpIntField extends HttpField<Long>
 	 */
 	public HttpIntField(String name, long value) {
 		super(name, value, Converters.INT_CONVERTER);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
-	 */
-	@Override
-	public HttpIntField clone() {
-		return (HttpIntField)super.clone();
 	}
 
 	/**

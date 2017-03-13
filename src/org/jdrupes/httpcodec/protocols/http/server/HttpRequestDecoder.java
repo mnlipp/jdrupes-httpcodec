@@ -22,9 +22,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
@@ -179,22 +182,20 @@ public class HttpRequestDecoder
 		        HttpStringListField.class, HttpField.TRANSFER_ENCODING)
 				.orElse(null);
 		if (transEncs != null) {
-			// RFC 7230 3.3.1
-			HttpStringListField tec = transEncs.clone();
-			tec.removeIgnoreCase(TransferCoding.CHUNKED.toString());
-			if (tec.size() > 0) {
+			List<String> tecs = transEncs.getValue();
+			// RFC 7230 3.3.1, currently only chunked is supported
+			if (tecs.stream().anyMatch(s -> !s.equalsIgnoreCase(
+							TransferCoding.CHUNKED.toString()))) {
 				throw new HttpProtocolException(protocolVersion,
 				        HttpStatus.NOT_IMPLEMENTED);
 			}
 			// RFC 7230 3.3.3 (3.)
-			if (transEncs != null) {
-				if (transEncs.get(transEncs.size() - 1)
-				        .equalsIgnoreCase(TransferCoding.CHUNKED.toString())) {
-					return BodyMode.CHUNKED;
-				} else {
-					throw new HttpProtocolException(protocolVersion,
-					        HttpStatus.BAD_REQUEST);
-				}
+			if (tecs.size() > 0	&& tecs.get(tecs.size() - 1)
+					.equalsIgnoreCase(TransferCoding.CHUNKED.toString())) {
+				return BodyMode.CHUNKED;
+			} else {
+				throw new HttpProtocolException(protocolVersion,
+						HttpStatus.BAD_REQUEST);
 			}
 		}
 		// RFC 7230 3.3.3 (5.)

@@ -42,16 +42,4 @@ public class FieldValuesTests {
 		assertFalse(iter.hasNext());
 		assertEquals("How, are, you, \"out there\"", fv.asFieldValue());
 	}
-
-	@Test
-	public void testClone() throws ParseException {
-		HttpStringListField field = HttpStringListField.fromString("Test",
-				"one, two, three");
-		HttpStringListField field2 = field.clone();
-		field2.removeIgnoreCase("Two");
-		assertTrue(field.size() == 3);
-		assertTrue(field2.size() == 2);
-		assertTrue(field2.containsIgnoreCase("one"));
-		assertTrue(field2.containsIgnoreCase("three"));
-	}
 }

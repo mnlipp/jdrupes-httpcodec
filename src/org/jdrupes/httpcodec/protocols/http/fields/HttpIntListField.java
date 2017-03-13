@@ -29,8 +29,7 @@ import org.jdrupes.httpcodec.types.Converters;
  * integers. The class provides a "list of integers" view
  * of the values.
  */
-public class HttpIntListField extends HttpListField<Long>
-	implements Cloneable {
+public class HttpIntListField extends HttpListField<Long> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -60,14 +59,6 @@ public class HttpIntListField extends HttpListField<Long>
 
 	private HttpIntListField(String name, List<Long> value) {
 		super(name, value, Converters.INT_LIST_CONVERTER);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
-	 */
-	@Override
-	public HttpIntListField clone() {
-		return (HttpIntListField)super.clone();
 	}
 
 	/**

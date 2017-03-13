@@ -31,8 +31,7 @@ import org.jdrupes.httpcodec.types.ListConverter;
  * strings. The class provides a "list of strings" view
  * of the values.
  */
-public class HttpStringListField extends HttpListField<String>
-	implements Cloneable {
+public class HttpStringListField extends HttpListField<String> {
 
 	public static final Converter<List<String>> STRING_LIST_CONVERTER 
     	= new ListConverter<String>(Converters.STRING_CONVERTER);
@@ -67,14 +66,6 @@ public class HttpStringListField extends HttpListField<String>
 		super(name, values, STRING_LIST_CONVERTER);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpListField#clone()
-	 */
-	@Override
-	public HttpStringListField clone() {
-		return (HttpStringListField)super.clone();
-	}
-
 	/**
 	 * Creates a new object with the elements obtained by parsing the given
 	 * String.

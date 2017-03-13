@@ -25,8 +25,7 @@ import org.jdrupes.httpcodec.types.Converters;
 /**
  * Represents a header field that has a simple string as its value.
  */
-public class HttpStringField extends HttpField<String>
-	implements Cloneable {
+public class HttpStringField extends HttpField<String> {
 
 	/**
 	 * Creates a new header field object with the given field name and value.
@@ -36,14 +35,6 @@ public class HttpStringField extends HttpField<String>
 	 */
 	public HttpStringField(String name, String value) {
 		super(name, value, Converters.STRING_CONVERTER);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.fields.HttpField#clone()
-	 */
-	@Override
-	public HttpStringField clone() {
-		return (HttpStringField)super.clone();
 	}
 
 	/**
