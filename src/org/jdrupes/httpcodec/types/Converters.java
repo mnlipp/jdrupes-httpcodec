@@ -211,10 +211,11 @@ public final class Converters {
 		= new ListConverter<Long>(INT_CONVERTER);
 
 	private static class MediaTypeConverter 
+		extends AbstractParamValueConverter<MediaMainType>
 		implements Converter<MediaType> {
 
-		private static ParameterizedValueConverter<MediaMainType> SUBCONV 
-			= new ParameterizedValueConverter<>(new Converter<MediaMainType>() {
+		public MediaTypeConverter() {
+			super(new Converter<MediaMainType>() {
 			
 				@Override
 				public String asFieldValue(MediaMainType value) {
@@ -228,15 +229,16 @@ public final class Converters {
 				}
 				
 			}, Converters.UNQUOTE_ONLY_CONVERTER);
+		}
 
 		@Override
 		public String asFieldValue(MediaType value) {
-			return SUBCONV.asFieldValue(value);
+			return super.asFieldValue(value);
 		}
 
 		@Override
 		public MediaType fromFieldValue(String text) throws ParseException {
-			return SUBCONV.fromFieldValue(text, MediaType::new);
+			return super.fromFieldValue(text, MediaType::new);
 		}
 	}
 	

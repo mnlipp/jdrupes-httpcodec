@@ -140,7 +140,7 @@ public class ParameterizedValue<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String toString() {
-		return new ParameterizedValueConverter<>(new Converter<Object>() {
+		return new AbstractParamValueConverter<>(new Converter<Object>() {
 
 			@Override
 			public String asFieldValue(Object value) {
