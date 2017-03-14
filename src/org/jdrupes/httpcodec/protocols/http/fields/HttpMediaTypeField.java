@@ -30,21 +30,6 @@ import org.jdrupes.httpcodec.types.MediaType;
 public class HttpMediaTypeField extends HttpField<MediaType> {
 
 	/**
-	 * Creates new header field object with the given type and subtype and no
-	 * parameters.
-	 * 
-	 * @param name
-	 *            the field name
-	 * @param type
-	 *            the type
-	 * @param subtype
-	 *            the sub type
-	 */
-	public HttpMediaTypeField(String name, String type, String subtype) {
-		super(name, new MediaType(type, subtype), Converters.MEDIA_TYPE_CONVERTER);
-	}
-
-	/**
 	 * Creates new header field object with the name and type.
 	 * 
 	 * @param name

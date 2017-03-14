@@ -124,7 +124,7 @@ public class HttpResponse extends HttpMessageHeader {
 	public HttpResponse setContentType(String type, String subtype) 
 			throws ParseException {
 		return setField(new HttpMediaTypeField(
-				HttpField.CONTENT_TYPE, type, subtype));
+				HttpField.CONTENT_TYPE, new MediaType(type, subtype)));
 	}
 
 	/**
