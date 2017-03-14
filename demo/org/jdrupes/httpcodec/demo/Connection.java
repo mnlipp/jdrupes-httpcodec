@@ -83,6 +83,9 @@ public class Connection extends Thread {
 					if (decoderResult.getResponse().isPresent()) {
 						sendResponseWithoutBody(
 								decoderResult.getResponse().get());
+						if (!channel.isOpen()) {
+							break;
+						}
 					}
 					if (!decoderResult.isResponseOnly()
 					        && decoderResult.isHeaderCompleted()) {
@@ -93,10 +96,6 @@ public class Connection extends Thread {
 						if (hdr instanceof WsFrameHeader) {
 							handleWsFrame((WsFrameHeader) hdr);
 						}
-					}
-					if (decoderResult.getCloseConnection()) {
-						channel.close();
-						break;
 					}
 				}
 			}

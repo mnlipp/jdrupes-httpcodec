@@ -40,24 +40,18 @@ The basic information provided by the decoding process (defined in
 {@link org.jdrupes.httpcodec.Codec.Result}) is
 known from the Charset codecs. "Underflow" indicates that more input
 data is needed in order to complete the decoding of the message.
-"Overflow" indicates that the output buffer is full. In addition,
-{@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection} may indicate
-that the connection, from which the data is obtained, should be closed
-after handling the received message[^closing]. This indication is needed 
-because closing the connection is sometimes required by HTTP to
-complete a message exchange. As a codec cannot close the connection 
-itself, this must be done by the invoker (the supplier of the data stream).
-
-[^closing]: If the decoded message is a request, the connection must 
-be closed after sending the response. If the decoded message is
-a response, no more data must be sent before closing the connection. 
+"Overflow" indicates that the output buffer is full. "Close connection"
+is usually only set by encoders and indicates that the connection
+should be closed. This is explained in the next section.
 
 Besides streams with body data, decoders such as an HTTP decoder
 provide the headers that precede this (payload) data. The successful decoding 
 of a header is indicated in the result by
 {@link org.jdrupes.httpcodec.Decoder.Result#isHeaderCompleted}. The 
 decoded header can be retrieved with
-{@link org.jdrupes.httpcodec.Decoder#getHeader}.
+{@link org.jdrupes.httpcodec.Decoder#getHeader}. Of course, if the
+receive buffer is rather small and the header rather big, it may
+take several decoder invocations before a header is available.
 
 Sometimes, HTTP requires a provisional feedback to be sent after receiving
 the message header. Because the decoder cannot send this feedback
@@ -85,8 +79,14 @@ If the information in the header indicates that the message does not
 have a body, {@link org.jdrupes.httpcodec.Encoder#encode(ByteBuffer)}
 can be called.
 
-The result of the encode method is simply a `Codec.Result` that indicates
+The result of the encode method is a `Codec.Result` that indicates
 whether the output buffer is full and/or further body data is required.
+In addition, {@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection} 
+may indicate that the connection, to which the data is send, should 
+be closed after handling the received message. This indication 
+is needed because closing the connection is sometimes required by HTTP to
+complete a message exchange. As an encoder cannot close the connection 
+itself, this must be done by the invoker (the supplier of the data stream).
 
 Why Generics?
 -------------
@@ -286,10 +286,11 @@ skinparam conditionStyle diamond
 title Handle Decoder Result
 start
 if () then ([result has message])
-  :Send response message;
+  :Send response;
 else ([else])
 endif
-if () then ([not response only 
+if () then ([!response only
+&& !connection closed
 && header complete])
   :Handle message;
   note
@@ -297,13 +298,11 @@ if () then ([not response only
   any remaining body 
   data
   end note
+  :Send response;
+  end
 else ([else])
+  end
 endif
-if () then ([close connection])
-  :Close connection;
-else ([else])
-endif
-end
 
 @enduml
 
