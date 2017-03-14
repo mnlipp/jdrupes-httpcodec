@@ -250,4 +250,15 @@ public abstract class HttpMessageHeader implements MessageHeader {
 		return messageHasBody;
 	}
 
+	/**
+	 * Returns true if this is a final message. A message is
+	 * final if the value of the `Connection` header field
+	 * includes the value "`close`".
+	 * 
+	 * @return the result
+	 */
+	public boolean isFinal() {
+		return getField(HttpStringListField.class, HttpField.CONNECTION)
+				.map(f -> f.contains("close")).orElse(false);
+	}
 }
