@@ -272,7 +272,7 @@ title Receive Loop
 start
 while ( ) is ([connection open])
   :Receive data;
-  while ( ) is ([data in receive buffer])
+  while ( ) is ([data in receive buffer\n && connection open])
     :Invoke decode;
     :Handle decoder result;
   endwhile ([else])
