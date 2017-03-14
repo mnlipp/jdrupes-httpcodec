@@ -238,6 +238,9 @@ public class Connection extends Thread {
 			if (encoderResult.isOverflow()) {
 				continue;
 			}
+			if (encoderResult.getCloseConnection()) {
+				channel.close();
+			}
 			break;
 		}
 	}
@@ -258,6 +261,9 @@ public class Connection extends Thread {
 			}
 			if (encoderResult.isOverflow()) {
 				continue;
+			}
+			if (encoderResult.getCloseConnection()) {
+				channel.close();
 			}
 			break;
 		}
