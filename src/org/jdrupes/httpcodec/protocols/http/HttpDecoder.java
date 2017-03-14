@@ -181,10 +181,16 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		ByteBuffer in, Buffer out, boolean endOfInput)
 	        throws HttpProtocolException {
 		try {
-			return uncheckedDecode(in, out, endOfInput);
-		} catch (ParseException | NumberFormatException e) {
-			throw new HttpProtocolException(protocolVersion,
-			        HttpStatus.BAD_REQUEST.getStatusCode(), e.getMessage());
+			try {
+				return uncheckedDecode(in, out, endOfInput);
+			} catch (ParseException | NumberFormatException e) {
+				throw new HttpProtocolException(protocolVersion,
+					HttpStatus.BAD_REQUEST.getStatusCode(), e.getMessage());
+			}
+		} catch (HttpProtocolException e) {
+			states.clear();
+			states.push(State.CLOSED);
+			throw e;
 		}
 	}
 
