@@ -190,6 +190,17 @@ public abstract class HttpField<T> {
 	}
 	
 	/**
+	 * Sets the header field's value.
+	 * 
+	 * @param value the new value
+	 * @return the field for easy chaining
+	 */
+	public HttpField<T> setValue(T value) {
+		this.value = value;
+		return this;
+	}
+	
+	/**
 	 * Returns the string representation of this field's value.
 	 * 
 	 * @return the field value as string
