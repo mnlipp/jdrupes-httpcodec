@@ -1,6 +1,6 @@
 Bundle-Name: JDrupes HTTP Codec
 Bundle-SymbolicName: org.jdrupes.httpcodec
-Bundle-Version: 0.9.5.${tstamp}
+Bundle-Version: 0.9.6.${tstamp}
 Bundle-Copyright: Michael N. Lipp (c) 2016
 Bundle-License: http://www.gnu.org/licenses/lgpl-3.0.txt
 
@@ -8,7 +8,7 @@ base_version = ${versionmask;===;${Bundle-Version}}
 # This is used as the general API version for all packages.
 # This being a library, individual API versions for packages don't 
 # really make sense.
-api_version = 0.6.0.${tstamp}
+api_version = 0.7.0.${tstamp}
 
 -exportcontents: org.jdrupes.*
 -sources: true
