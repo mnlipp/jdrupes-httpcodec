@@ -35,8 +35,10 @@ import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
@@ -102,6 +104,8 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		messageHeader.setField(
 				new HttpDateTimeField(HttpField.DATE, Instant.now()));
 		
+		checkContentLength(messageHeader);
+		
 		super.encode(messageHeader);
 	}
 
@@ -120,6 +124,40 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 					protocolPlugin.createResponseEncoder(switchingTo));
 		}
 		return result;
+	}
+
+	private void checkContentLength(HttpResponse messageHeader) {
+		// RFC 7230 3.3.2 
+		boolean forbidden = messageHeader.fields()
+				.containsKey(HttpField.TRANSFER_ENCODING)
+				|| messageHeader.getStatusCode() % 100 == 1
+				|| messageHeader.getStatusCode() 
+						== HttpStatus.NO_CONTENT.getStatusCode()
+				|| (messageHeader.getRequest().map(
+						r -> r.getMethod().equalsIgnoreCase("CONNECT"))
+						.orElse(false)
+					&& messageHeader.getStatusCode() % 100 == 2);
+		if (messageHeader.fields().containsKey(HttpField.CONTENT_LENGTH)) {
+			if (forbidden) {
+				messageHeader.removeField(HttpField.CONTENT_LENGTH);
+			}
+			return;
+		}
+		// No content length header, maybe we should add one?
+		if (forbidden || messageHeader.messageHasBody()) {
+			// Not needed or data will determine header
+			return;
+		}
+		// Don't add header if optional
+		if (messageHeader.getRequest().map(
+				r -> r.getMethod().equalsIgnoreCase("HEAD"))
+				.orElse(false)
+			|| messageHeader.getStatusCode() 
+					== HttpStatus.NOT_MODIFIED.getStatusCode()) {
+			return;
+		}
+		// Add 0 content length
+		messageHeader.setField(new HttpContentLengthField(0));
 	}
 
 	private String prepareSwitchProtocol(HttpResponse response) {

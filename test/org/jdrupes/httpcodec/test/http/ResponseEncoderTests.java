@@ -47,6 +47,7 @@ public class ResponseEncoderTests {
 		assertFalse(result.getCloseConnection());
 		String encoded = new String(out.array(), 0, out.position());
 		assertTrue(encoded.contains("HTTP/1.1 200 OK\r\n"));
+		assertTrue(encoded.contains("Content-Length: 0\r\n"));
 		assertTrue(encoded.endsWith("\r\n\r\n"));
 	}
 
