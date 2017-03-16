@@ -17,7 +17,7 @@ The main difference between the Charset codecs and the HTTP codecs API
 is due to the type of the decoded data. For Charset codecs this is a 
 homogeneous stream of `chars`, which is easy to handle. For HTTP codecs, 
 it's a mixture of headers and body data which can again consist 
-of `byte`s or `char`s.
+of either `byte`s or `char`s.
 
 Decoders
 --------
@@ -42,7 +42,7 @@ known from the Charset codecs. "Underflow" indicates that more input
 data is needed in order to complete the decoding of the message.
 "Overflow" indicates that the output buffer is full. "Close connection"
 is usually only set by encoders and indicates that the connection
-should be closed. This is explained in the next section.
+should be closed. This is explained in more detail in the next section.
 
 Besides streams with body data, decoders such as an HTTP decoder
 provide the headers that precede this (payload) data. The successful decoding 
@@ -51,7 +51,7 @@ of a header is indicated in the result by
 decoded header can be retrieved with
 {@link org.jdrupes.httpcodec.Decoder#getHeader}. Of course, if the
 receive buffer is rather small and the header rather big, it may
-take several decoder invocations before a header is available.
+take several decoder invocations before a header becomes available.
 
 Sometimes, HTTP requires a provisional feedback to be sent after receiving
 the message header. Because the decoder cannot send this feedback
@@ -82,17 +82,17 @@ can be called.
 The result of the encode method is a `Codec.Result` that indicates
 whether the output buffer is full and/or further body data is required.
 In addition, {@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection} 
-may indicate that the connection, to which the data is send, should 
-be closed after handling the received message. This indication 
+may indicate that the connection, to which the message is sent, should 
+be closed after sending the message. This indication 
 is needed because closing the connection is sometimes required by HTTP to
 complete a message exchange. As an encoder cannot close the connection 
-itself, this must be done by the invoker (the supplier of the data stream).
+itself, this must be done by the invoker (the manager of the connection).
 
 Why Generics?
 -------------
 
-While the previous text explains the interfaces and classes with
-reference to HTTP, you won't find "HTTP" in the names or methods
+While the previous sections explain the interfaces and classes with
+reference to HTTP, you don't find "HTTP" in the names or methods
 of the types presented. The reason is that the API presented above
 can be used to handle any "HTTP like" protocol (header with payload).
 We need such a general interface because modern HTTP provides the 
@@ -286,7 +286,9 @@ skinparam conditionStyle diamond
 title Handle Decoder Result
 start
 if () then ([result has message])
-  :Send response;
+  :Send response
+  contained in
+  result;
 else ([else])
 endif
 if () then ([!response only
@@ -298,7 +300,9 @@ if () then ([!response only
   any remaining body 
   data
   end note
-  :Send response;
+  :Send response 
+  created while 
+  handling message;
   end
 else ([else])
   end
