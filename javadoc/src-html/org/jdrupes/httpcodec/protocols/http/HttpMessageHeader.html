@@ -258,7 +258,18 @@
 <span class="sourceLineNo">250</span>                return messageHasBody;<a name="line.250"></a>
 <span class="sourceLineNo">251</span>        }<a name="line.251"></a>
 <span class="sourceLineNo">252</span><a name="line.252"></a>
-<span class="sourceLineNo">253</span>}<a name="line.253"></a>
+<span class="sourceLineNo">253</span>        /**<a name="line.253"></a>
+<span class="sourceLineNo">254</span>         * Returns true if this is a final message. A message is<a name="line.254"></a>
+<span class="sourceLineNo">255</span>         * final if the value of the `Connection` header field<a name="line.255"></a>
+<span class="sourceLineNo">256</span>         * includes the value "`close`".<a name="line.256"></a>
+<span class="sourceLineNo">257</span>         * <a name="line.257"></a>
+<span class="sourceLineNo">258</span>         * @return the result<a name="line.258"></a>
+<span class="sourceLineNo">259</span>         */<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        public boolean isFinal() {<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                return getField(HttpStringListField.class, HttpField.CONNECTION)<a name="line.261"></a>
+<span class="sourceLineNo">262</span>                                .map(f -&gt; f.contains("close")).orElse(false);<a name="line.262"></a>
+<span class="sourceLineNo">263</span>        }<a name="line.263"></a>
+<span class="sourceLineNo">264</span>}<a name="line.264"></a>
 
 
 

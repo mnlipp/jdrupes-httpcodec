@@ -132,7 +132,7 @@
 <span class="sourceLineNo">124</span>        public HttpResponse setContentType(String type, String subtype) <a name="line.124"></a>
 <span class="sourceLineNo">125</span>                        throws ParseException {<a name="line.125"></a>
 <span class="sourceLineNo">126</span>                return setField(new HttpMediaTypeField(<a name="line.126"></a>
-<span class="sourceLineNo">127</span>                                HttpField.CONTENT_TYPE, type, subtype));<a name="line.127"></a>
+<span class="sourceLineNo">127</span>                                HttpField.CONTENT_TYPE, new MediaType(type, subtype)));<a name="line.127"></a>
 <span class="sourceLineNo">128</span>        }<a name="line.128"></a>
 <span class="sourceLineNo">129</span><a name="line.129"></a>
 <span class="sourceLineNo">130</span>        /**<a name="line.130"></a>
