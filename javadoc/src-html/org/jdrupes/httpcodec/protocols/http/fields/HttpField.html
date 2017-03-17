@@ -143,7 +143,7 @@
 <span class="sourceLineNo">135</span>                                .getOrDefault(fieldName, fieldName);<a name="line.135"></a>
 <span class="sourceLineNo">136</span>                switch (normalizedFieldName) {<a name="line.136"></a>
 <span class="sourceLineNo">137</span>                case HttpField.ACCEPT:<a name="line.137"></a>
-<span class="sourceLineNo">138</span>                        return HttpMediaTypeListField.fromString(fieldName, fieldValue);<a name="line.138"></a>
+<span class="sourceLineNo">138</span>                        return HttpMediaRangeListField.fromString(fieldName, fieldValue);<a name="line.138"></a>
 <span class="sourceLineNo">139</span>                case HttpField.COOKIE:<a name="line.139"></a>
 <span class="sourceLineNo">140</span>                        return HttpCookieListField.fromString(fieldValue);<a name="line.140"></a>
 <span class="sourceLineNo">141</span>                case HttpField.CONNECTION:<a name="line.141"></a>
