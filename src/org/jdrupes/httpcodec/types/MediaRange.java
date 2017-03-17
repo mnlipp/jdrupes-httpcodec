@@ -19,18 +19,21 @@
 package org.jdrupes.httpcodec.types;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MediaType extends MediaBase {
+public class MediaRange extends MediaBase {
 
+	public static final MediaRange ALL_MEDIA = new MediaRange("*", "*");
+	
 	/**
 	 * Create a new object with the given type and subtype.
 	 * 
 	 * @param type the top-level type
 	 * @param subtype the subtype
 	 */
-	public MediaType(String type, String subtype) {
+	public MediaRange(String type, String subtype) {
 		super(new MediaTypePair(type, subtype));
 	}
 	
@@ -41,7 +44,7 @@ public class MediaType extends MediaBase {
 	 * @param subtype the subtype
 	 * @param parameters the parameters
 	 */
-	public MediaType(String type, String subtype, 
+	public MediaRange(String type, String subtype, 
 			Map<String, String> parameters) {
 		super(new MediaTypePair(type, subtype), parameters);
 	}
@@ -52,10 +55,17 @@ public class MediaType extends MediaBase {
 	 * @param type the type
 	 * @param parameters the parameters
 	 */
-	public MediaType(MediaTypePair type, Map<String, String> parameters) {
+	public MediaRange(MediaTypePair type, Map<String, String> parameters) {
 		super(type, parameters);
 	}
 
+	/**
+	 * For builder.
+	 */
+	private MediaRange() {
+		super(ALL_MEDIA.getValue(), Collections.emptyMap());
+	}
+	
 	/**
 	 * Creates a new instance with values obtained from parsing
 	 * the given text.
@@ -64,9 +74,9 @@ public class MediaType extends MediaBase {
 	 * @return the mime type
 	 * @throws ParseException if the text is not well-formed
 	 */
-	public static MediaType fromString(String text) 
+	public static MediaRange fromString(String text) 
 			throws ParseException {
-		return Converters.MEDIA_TYPE_CONVERTER.fromFieldValue(text);
+		return Converters.MEDIA_RANGE_CONVERTER.fromFieldValue(text);
 	}
 	
 	/**
@@ -83,19 +93,14 @@ public class MediaType extends MediaBase {
 	 * A builder for the (immutable) parameterized type.
 	 */
 	public static class Builder 
-		extends ParameterizedValue.Builder<MediaType, MediaTypePair> {
+		extends ParameterizedValue.Builder<MediaRange, MediaTypePair> {
 
 		private Builder() {
-			super(new MediaType("text", "plain", new HashMap<>()));
+			super(new MediaRange("*", "*", new HashMap<>()));
 		}
 		
-		@Override
-		public MediaType build() {
-			return (MediaType)super.build();
-		}
-
 		/**
-		 * Sets the media type.
+		 * Sets the media range.
 		 * 
 		 * @param topLevelType the top level type
 		 * @param subtype the subtype

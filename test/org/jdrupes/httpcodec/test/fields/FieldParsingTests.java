@@ -27,11 +27,11 @@ import java.util.Iterator;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaRangeListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
-import org.jdrupes.httpcodec.types.MediaType;
+import org.jdrupes.httpcodec.types.MediaRange;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -143,17 +143,17 @@ public class FieldParsingTests {
 	
 	@Test
 	public void testAccept() throws ParseException {
-		HttpMediaTypeListField field 
-			= HttpMediaTypeListField.fromString("Accept",
+		HttpMediaRangeListField field 
+			= HttpMediaRangeListField.fromString("Accept",
 				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
 		field.sortByWeightDesc();
-		Iterator<MediaType> itr = field.iterator();
+		Iterator<MediaRange> itr = field.iterator();
 		assertEquals("text/html", itr.next().toString());
 		assertEquals("text/x-c", itr.next().toString());
 		assertEquals("text/x-dvi; q=0.8", itr.next().toString());
 		assertEquals("text/plain; q=0.5", itr.next().toString());
 		// Second
-		field = HttpMediaTypeListField.fromString("Accept",
+		field = HttpMediaRangeListField.fromString("Accept",
 				"audio/*; q=0.2, audio/basic");
 		itr = field.iterator();
 		assertEquals("audio/*; q=0.2", itr.next().toString());

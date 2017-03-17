@@ -135,7 +135,7 @@ public abstract class HttpField<T> {
 				.getOrDefault(fieldName, fieldName);
 		switch (normalizedFieldName) {
 		case HttpField.ACCEPT:
-			return HttpMediaTypeListField.fromString(fieldName, fieldValue);
+			return HttpMediaRangeListField.fromString(fieldName, fieldValue);
 		case HttpField.COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
 		case HttpField.CONNECTION:

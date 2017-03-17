@@ -23,7 +23,7 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
-import org.jdrupes.httpcodec.types.MediaType.MediaMainType;
+import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
 
 /**
  * Utility methods and constants for converters.
@@ -210,25 +210,28 @@ public final class Converters {
 	public static final Converter<List<Long>> INT_LIST_CONVERTER 
 		= new ListConverter<Long>(INT_CONVERTER);
 
+	private static final class MediaTypePairConverter
+	        implements Converter<MediaTypePair> {
+		
+		@Override
+		public String asFieldValue(MediaTypePair value) {
+			return value.toString();
+		}
+
+		@Override
+		public MediaTypePair fromFieldValue(String text)
+		        throws ParseException {
+			return MediaTypePair.fromString(text);
+		}
+	}
+
 	private static class MediaTypeConverter 
-		extends AbstractParamValueConverter<MediaMainType>
+		extends AbstractParamValueConverter<MediaTypePair>
 		implements Converter<MediaType> {
 
 		public MediaTypeConverter() {
-			super(new Converter<MediaMainType>() {
-			
-				@Override
-				public String asFieldValue(MediaMainType value) {
-					return value.toString();
-				}
-			
-				@Override
-				public MediaMainType fromFieldValue(String text) 
-						throws ParseException {
-					return MediaMainType.fromString(text);
-				}
-				
-			}, Converters.UNQUOTE_ONLY_CONVERTER);
+			super(new MediaTypePairConverter(), 
+					Converters.UNQUOTE_ONLY_CONVERTER);
 		}
 
 		@Override
@@ -245,9 +248,32 @@ public final class Converters {
 	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
 		= new MediaTypeConverter();
 	
-	public static final ListConverter<MediaType> MEDIA_TYPE_LIST_CONVERTER
-		= new ListConverter<MediaType>(MEDIA_TYPE_CONVERTER);
-	
+	private static class MediaRangeConverter 
+		extends AbstractParamValueConverter<MediaTypePair>
+		implements Converter<MediaRange> {
+
+		public MediaRangeConverter() {
+			super(new MediaTypePairConverter(), 
+					Converters.UNQUOTE_ONLY_CONVERTER);
+		}
+
+		@Override
+		public String asFieldValue(MediaRange value) {
+			return super.asFieldValue(value);
+		}
+
+		@Override
+		public MediaRange fromFieldValue(String text) throws ParseException {
+			return super.fromFieldValue(text, MediaRange::new);
+		}
+	}
+
+	public static final Converter<MediaRange> MEDIA_RANGE_CONVERTER 
+		= new MediaRangeConverter();
+
+	public static final ListConverter<MediaRange> MEDIA_RANGE_LIST_CONVERTER
+		= new ListConverter<MediaRange>(MEDIA_RANGE_CONVERTER);
+
 	public static final Converter<List<HttpCookie>> COOKIE_CONVERTER 
 		= new Converter<List<HttpCookie>>() {
 	

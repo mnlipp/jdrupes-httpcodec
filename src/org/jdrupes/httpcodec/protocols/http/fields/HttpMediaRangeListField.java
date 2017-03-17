@@ -23,12 +23,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.MediaType;
+import org.jdrupes.httpcodec.types.MediaRange;
 
 /**
  * A list of media types.
  */
-public class HttpMediaTypeListField extends HttpListField<MediaType> {
+public class HttpMediaRangeListField extends HttpListField<MediaRange> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -39,8 +39,8 @@ public class HttpMediaTypeListField extends HttpListField<MediaType> {
 	 * 
 	 * @param name the field name
 	 */
-	public HttpMediaTypeListField(String name) {
-		super(name, Converters.MEDIA_TYPE_LIST_CONVERTER);
+	public HttpMediaRangeListField(String name) {
+		super(name, Converters.MEDIA_RANGE_LIST_CONVERTER);
 	}
 
 	/**
@@ -51,8 +51,8 @@ public class HttpMediaTypeListField extends HttpListField<MediaType> {
 	 * @param items
 	 * 			  the items
 	 */
-	public HttpMediaTypeListField(String name, List<MediaType> items) {
-		super(name, items, Converters.MEDIA_TYPE_LIST_CONVERTER);
+	public HttpMediaRangeListField(String name, List<MediaRange> items) {
+		super(name, items, Converters.MEDIA_RANGE_LIST_CONVERTER);
 	}
 
 	/**
@@ -64,13 +64,13 @@ public class HttpMediaTypeListField extends HttpListField<MediaType> {
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpMediaTypeListField fromString(String name, String text) 
+	public static HttpMediaRangeListField fromString(String name, String text) 
 			throws ParseException {
-		return new HttpMediaTypeListField(
-				name, Converters.MEDIA_TYPE_LIST_CONVERTER.fromFieldValue(text));
+		return new HttpMediaRangeListField(
+				name, Converters.MEDIA_RANGE_LIST_CONVERTER.fromFieldValue(text));
 	}
 	
-	private static Comparator<MediaType> COMP = Comparator.nullsFirst(
+	private static Comparator<MediaRange> COMP = Comparator.nullsFirst(
 			Comparator.comparing(mt -> mt.getParameter("q"),
 					Comparator.nullsFirst(
 							Comparator.comparing(Float::parseFloat)

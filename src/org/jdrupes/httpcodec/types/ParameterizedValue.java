@@ -85,8 +85,8 @@ public class ParameterizedValue<T> {
 	 * 
 	 * @return the builder
 	 */
-	public static <T> Builder<T> builder() {
-		return new Builder<>();
+	public static <T> Builder<ParameterizedValue<T>, T> builder() {
+		return new Builder<ParameterizedValue<T>, T>(new ParameterizedValue<>());
 	}
 	
 	/* (non-Javadoc)
@@ -158,15 +158,11 @@ public class ParameterizedValue<T> {
 	/**
 	 * A builder for the (immutable) parameterized type.
 	 */
-	public static class Builder<T> {
+	public static class Builder<R extends ParameterizedValue<T>, T> {
 		
-		private ParameterizedValue<T> value;
+		private R value;
 		
-		private Builder() {
-			value = new ParameterizedValue<>();
-		}
-
-		protected Builder(ParameterizedValue<T> value) {
+		protected Builder(R value) {
 			this.value = value;
 		}
 		
@@ -176,10 +172,11 @@ public class ParameterizedValue<T> {
 		 * @param existing the existing value, assumed to be immutable
 		 * @return the builder for easy chaining
 		 */
-		public Builder<T> from(ParameterizedValue<T> existing) {
-			value.value = existing.value;
-			value.params.clear();
-			value.params.putAll(existing.params);
+		public Builder<R, T> from(ParameterizedValue<T> existing) {
+			((ParameterizedValue<T>)value).value = existing.getValue();
+			((ParameterizedValue<T>)value).params.clear();
+			((ParameterizedValue<T>)value).params
+				.putAll(existing.getParameters());
 			return this;
 		}
 
@@ -188,9 +185,9 @@ public class ParameterizedValue<T> {
 		 * 
 		 * @return the object
 		 */
-		public ParameterizedValue<T> build() {
-			ParameterizedValue<T> result = value;
-			value = new ParameterizedValue<>();
+		public R build() {
+			R result = value;
+			value = null;
 			return result;
 		}
 		
@@ -200,8 +197,8 @@ public class ParameterizedValue<T> {
 		 * @param value the value
 		 * @return the builder for easy chaining
 		 */
-		public Builder<T> setValue(T value) {
-			this.value.value = value; 
+		public Builder<R, T> setValue(T value) {
+			((ParameterizedValue<T>)this.value).value = value; 
 			return this;
 		}
 
@@ -212,8 +209,8 @@ public class ParameterizedValue<T> {
 		 * @param value the value
 		 * @return the builder for easy chaining
 		 */
-		public Builder<T> setParameter(String name, String value) {
-			this.value.params.put(name, value);
+		public Builder<R, T> setParameter(String name, String value) {
+			((ParameterizedValue<T>)this.value).params.put(name, value);
 			return this;
 		}
 
@@ -223,8 +220,8 @@ public class ParameterizedValue<T> {
 		 * @param name the parameter name
 		 * @return the builder for easy chaining
 		 */
-		public Builder<T> remove(String name) {
-			this.value.params.remove(name);
+		public Builder<R, T> remove(String name) {
+			((ParameterizedValue<T>)this.value).params.remove(name);
 			return this;
 		}
 	}
