@@ -68,6 +68,9 @@ abstract class MediaBase extends ParameterizedValue<MediaBase.MediaTypePair> {
 	 */
 	public static class MediaTypePair {
 		
+		public static final MediaTypePair ALL_MEDIA 
+			= new MediaTypePair("*", "*");
+		
 		private String topLevelType;
 		private String subtype;
 		

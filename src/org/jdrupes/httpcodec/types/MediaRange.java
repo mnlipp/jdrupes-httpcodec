@@ -116,8 +116,22 @@ public class MediaRange extends MediaBase {
 	        extends ParamValueConverterBase<MediaRange, MediaTypePair> {
 
 		public MediaRangeConverter() {
-			super(Converters.MEDIA_TYPE_PAIR_CONVERTER,
-			        Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);
+			super(new MediaTypePairConverter() {
+				
+				/**
+				 * Work around faulty clients, notably
+				 * `HttpUrlConnection`.
+				 */
+				@Override
+				public MediaTypePair fromFieldValue(String text)
+				        throws ParseException {
+					if ("*".equals(text)) {
+						return MediaTypePair.ALL_MEDIA;
+					}
+					return super.fromFieldValue(text);
+				}
+			},
+			Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);
 		}
 	}
 
