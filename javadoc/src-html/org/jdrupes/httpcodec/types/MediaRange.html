@@ -120,7 +120,30 @@
 <span class="sourceLineNo">112</span>                }<a name="line.112"></a>
 <span class="sourceLineNo">113</span>        }<a name="line.113"></a>
 <span class="sourceLineNo">114</span>        <a name="line.114"></a>
-<span class="sourceLineNo">115</span>}<a name="line.115"></a>
+<span class="sourceLineNo">115</span>        public static class MediaRangeConverter<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                extends ParamValueConverterBase&lt;MediaRange, MediaTypePair&gt; {<a name="line.116"></a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span>                public MediaRangeConverter() {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>                        super(new MediaTypePairConverter() {<a name="line.119"></a>
+<span class="sourceLineNo">120</span>                                <a name="line.120"></a>
+<span class="sourceLineNo">121</span>                                /**<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                                 * Work around faulty clients, notably<a name="line.122"></a>
+<span class="sourceLineNo">123</span>                                 * `HttpUrlConnection`.<a name="line.123"></a>
+<span class="sourceLineNo">124</span>                                 */<a name="line.124"></a>
+<span class="sourceLineNo">125</span>                                @Override<a name="line.125"></a>
+<span class="sourceLineNo">126</span>                                public MediaTypePair fromFieldValue(String text)<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                                        throws ParseException {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>                                        if ("*".equals(text)) {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>                                                return MediaTypePair.ALL_MEDIA;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                                        }<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                                        return super.fromFieldValue(text);<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                                }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                        },<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                        Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>        }<a name="line.136"></a>
+<span class="sourceLineNo">137</span><a name="line.137"></a>
+<span class="sourceLineNo">138</span>}<a name="line.138"></a>
 
 
 

@@ -115,7 +115,16 @@
 <span class="sourceLineNo">107</span>                }<a name="line.107"></a>
 <span class="sourceLineNo">108</span>        }<a name="line.108"></a>
 <span class="sourceLineNo">109</span>        <a name="line.109"></a>
-<span class="sourceLineNo">110</span>}<a name="line.110"></a>
+<span class="sourceLineNo">110</span>        public static class MediaTypeConverter<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                extends ParamValueConverterBase&lt;MediaType, MediaTypePair&gt; {<a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112"></a>
+<span class="sourceLineNo">113</span>                public MediaTypeConverter() {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                        super(Converters.MEDIA_TYPE_PAIR_CONVERTER,<a name="line.114"></a>
+<span class="sourceLineNo">115</span>                                Converters.UNQUOTE_ONLY_CONVERTER, MediaType::new);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                }<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        }<a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span>}<a name="line.119"></a>
 
 
 
