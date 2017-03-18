@@ -173,4 +173,20 @@ abstract class MediaBase extends ParameterizedValue<MediaBase.MediaTypePair> {
 			return true;
 		}
 	}
+	
+	public static class MediaTypePairConverter
+		implements Converter<MediaTypePair> {
+
+		@Override
+		public String asFieldValue(MediaTypePair value) {
+			return value.toString();
+		}
+
+		@Override
+		public MediaTypePair fromFieldValue(String text)
+				throws ParseException {
+			return MediaTypePair.fromString(text);
+		}
+	}
+
 }

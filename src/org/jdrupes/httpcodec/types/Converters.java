@@ -23,7 +23,8 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
-import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
+import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
+import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
 
 /**
  * Utility methods and constants for converters.
@@ -210,64 +211,9 @@ public final class Converters {
 	public static final Converter<List<Long>> INT_LIST_CONVERTER 
 		= new ListConverter<Long>(INT_CONVERTER);
 
-	private static final class MediaTypePairConverter
-	        implements Converter<MediaTypePair> {
-		
-		@Override
-		public String asFieldValue(MediaTypePair value) {
-			return value.toString();
-		}
-
-		@Override
-		public MediaTypePair fromFieldValue(String text)
-		        throws ParseException {
-			return MediaTypePair.fromString(text);
-		}
-	}
-
-	private static class MediaTypeConverter 
-		extends AbstractParamValueConverter<MediaTypePair>
-		implements Converter<MediaType> {
-
-		public MediaTypeConverter() {
-			super(new MediaTypePairConverter(), 
-					Converters.UNQUOTE_ONLY_CONVERTER);
-		}
-
-		@Override
-		public String asFieldValue(MediaType value) {
-			return super.asFieldValue(value);
-		}
-
-		@Override
-		public MediaType fromFieldValue(String text) throws ParseException {
-			return super.fromFieldValue(text, MediaType::new);
-		}
-	}
-	
 	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
 		= new MediaTypeConverter();
 	
-	private static class MediaRangeConverter 
-		extends AbstractParamValueConverter<MediaTypePair>
-		implements Converter<MediaRange> {
-
-		public MediaRangeConverter() {
-			super(new MediaTypePairConverter(), 
-					Converters.UNQUOTE_ONLY_CONVERTER);
-		}
-
-		@Override
-		public String asFieldValue(MediaRange value) {
-			return super.asFieldValue(value);
-		}
-
-		@Override
-		public MediaRange fromFieldValue(String text) throws ParseException {
-			return super.fromFieldValue(text, MediaRange::new);
-		}
-	}
-
 	public static final Converter<MediaRange> MEDIA_RANGE_CONVERTER 
 		= new MediaRangeConverter();
 
