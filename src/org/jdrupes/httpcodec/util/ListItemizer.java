@@ -32,6 +32,9 @@ public class ListItemizer {
 	
 	/**
 	 * Generates a new itemizer.
+	 * 
+	 * @param list the list to be itemized
+	 * @param delimiters the set of delimiter characters
 	 */
 	public ListItemizer(String list, String delimiters) {
 		unparsedValue = list;

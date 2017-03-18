@@ -28,6 +28,8 @@ import org.jdrupes.httpcodec.types.Converters;
 /**
  * A base class for all kinds of header field values.
  * 
+ * @param <T> the type of the header field's value 
+ * 
  * @see "[MessageHeaders](https://www.iana.org/assignments/message-headers/message-headers.xhtml)"
  */
 public abstract class HttpField<T> {

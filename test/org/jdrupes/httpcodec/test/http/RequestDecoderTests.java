@@ -39,6 +39,8 @@ public class RequestDecoderTests {
 
 	/**
 	 * Simple GET request.
+	 * 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
 	public void testBasicGetRequestAtOnce()
@@ -384,6 +386,8 @@ public class RequestDecoderTests {
 
 	/**
 	 * Simple GET request.
+	 * 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
 	public void testUrlDecoding()

@@ -23,6 +23,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The general interface of an encoder.
+ * 
+ * @param <T> the type of the message header to be encoded
  */
 public interface Encoder<T extends MessageHeader> extends Codec {
 

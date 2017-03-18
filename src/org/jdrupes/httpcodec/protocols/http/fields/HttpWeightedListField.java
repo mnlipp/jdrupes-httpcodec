@@ -30,6 +30,8 @@ import org.jdrupes.httpcodec.types.ParameterizedValue;
 /**
  * An HTTP field value that consists of a list of parameterized 
  * values with an optional "q" parameter.
+ * 
+ * @param <T> the type of the parameterized value
  */
 public class HttpWeightedListField<T extends ParameterizedValue<?>>
 	extends HttpListField<T> {

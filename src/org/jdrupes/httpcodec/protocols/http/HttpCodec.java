@@ -24,6 +24,8 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 
 /**
  * The base class for HTTP codecs.
+ * 
+ * @param <T> the type of the message header processed by the codec
  */
 public abstract class HttpCodec<T extends HttpMessageHeader>
 	implements Codec {

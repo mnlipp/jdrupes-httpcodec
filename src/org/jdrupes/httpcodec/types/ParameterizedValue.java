@@ -31,11 +31,11 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  * Represents a parameterized value
  * such as `value; param1=value1; param2=value2`.
  * 
- * @param <T> the type of the value
+ * @param <U> the type of the unparameterized value
  */
-public class ParameterizedValue<T> {
+public class ParameterizedValue<U> {
 
-	private T value;
+	private U value;
 	private Map<String, String> params;
 	
 	/**
@@ -44,7 +44,7 @@ public class ParameterizedValue<T> {
 	 * @param value the value
 	 * @param parameters the parameters
 	 */
-	public ParameterizedValue(T value, Map<String,String> parameters) {
+	public ParameterizedValue(U value, Map<String,String> parameters) {
 		this.value = value;
 		this.params = parameters;
 	}
@@ -61,7 +61,7 @@ public class ParameterizedValue<T> {
 	 * 
 	 * @return the value
 	 */
-	public T getValue() {
+	public U getValue() {
 		return value;
 	}
 
@@ -161,6 +161,9 @@ public class ParameterizedValue<T> {
 
 	/**
 	 * A builder for the (immutable) parameterized type.
+	 * 
+	 * @param <R> the type of the parameterized value
+	 * @param <T> the type of the unparameterized value
 	 */
 	public static class Builder<R extends ParameterizedValue<T>, T> {
 		
@@ -235,15 +238,15 @@ public class ParameterizedValue<T> {
 	 * Converts field values such as `value; param1=value1; param2=value2`.
 	 * 
 	 * @param <P> the parameterized type
-	 * @param <B> the base (unparameterized) type
+	 * @param <U> the unparameterized type
 	 */
 	public static class 
-		ParamValueConverterBase<P extends ParameterizedValue<B>, B>
+		ParamValueConverterBase<P extends ParameterizedValue<U>, U>
 		implements Converter<P> {
 
-		private Converter<B> valueConverter;
+		private Converter<U> valueConverter;
 		private Converter<String> paramValueConverter;
-		private BiFunction<B, Map<String,String>, P> paramValueConstructor;
+		private BiFunction<U, Map<String,String>, P> paramValueConstructor;
 		
 		/**
 		 * Creates a new converter by extending the given value converter
@@ -255,8 +258,8 @@ public class ParameterizedValue<T> {
 		 * from an instance of the type and a map of parameters
 		 * (used by {@link #fromFieldValue(String)}).
 		 */
-		public ParamValueConverterBase(Converter<B> valueConverter,
-				BiFunction<B, Map<String,String>, P> paramValueConstructor) {
+		public ParamValueConverterBase(Converter<U> valueConverter,
+				BiFunction<U, Map<String,String>, P> paramValueConstructor) {
 			this(valueConverter, Converters.UNQUOTED_STRING_CONVERTER,
 					paramValueConstructor);
 		}
@@ -271,9 +274,9 @@ public class ParameterizedValue<T> {
 		 * from an instance of the type and a map of parameters
 		 * (used by {@link #fromFieldValue(String)}).
 		 */
-		public ParamValueConverterBase(	Converter<B> valueConverter, 
+		public ParamValueConverterBase(	Converter<U> valueConverter, 
 				Converter<String> paramValueConverter,
-				BiFunction<B, Map<String,String>, P> paramValueConstructor) {
+				BiFunction<U, Map<String,String>, P> paramValueConstructor) {
 			this.valueConverter = valueConverter;
 			this.paramValueConverter = paramValueConverter;
 			this.paramValueConstructor = paramValueConstructor;
@@ -297,7 +300,7 @@ public class ParameterizedValue<T> {
 			if (valueRepr == null) {
 				throw new ParseException("Value may not be empty", 0);
 			}
-			B value = valueConverter.fromFieldValue(valueRepr);
+			U value = valueConverter.fromFieldValue(valueRepr);
 			Map<String,String> params = new HashMap<>();
 			while (true) {
 				String param = li.nextItem();

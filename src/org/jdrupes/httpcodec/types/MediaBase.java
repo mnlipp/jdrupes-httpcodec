@@ -22,7 +22,8 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Map;
 
-public abstract class MediaBase extends ParameterizedValue<MediaBase.MediaTypePair> {
+public abstract class MediaBase 
+	extends ParameterizedValue<MediaBase.MediaTypePair> {
 
 	/**
 	 * Create a new object with the given type and no parameters.

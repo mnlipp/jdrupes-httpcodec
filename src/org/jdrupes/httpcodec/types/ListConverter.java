@@ -28,11 +28,11 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  * Used by by classes that convert field values which consist
  * of lists of values.
  * 
- * @param <T> the type of the elements
+ * @param <I> the type of the items
  */
-public class ListConverter<T> implements Converter<List<T>> {
+public class ListConverter<I> implements Converter<List<I>> {
 
-	private Converter<T> itemConverter;
+	private Converter<I> itemConverter;
 	// Used by default in RFC 7230, see section 7.
 	private String delimiters = ",";
 	
@@ -43,7 +43,7 @@ public class ListConverter<T> implements Converter<List<T>> {
 	 * @param itemConverter the converter for the items
 	 * @see "[ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)"
 	 */
-	public ListConverter(Converter<T> itemConverter) {
+	public ListConverter(Converter<I> itemConverter) {
 		this.itemConverter = itemConverter;
 	}
 
@@ -57,7 +57,7 @@ public class ListConverter<T> implements Converter<List<T>> {
 	 * @param itemConverter the converter for the items
 	 * @param delimiters the delimiters
 	 */
-	public ListConverter(Converter<T> itemConverter, String delimiters) {
+	public ListConverter(Converter<I> itemConverter, String delimiters) {
 		this.itemConverter = itemConverter;
 		this.delimiters = delimiters;
 	}
@@ -66,14 +66,14 @@ public class ListConverter<T> implements Converter<List<T>> {
 	 * @see org.jdrupes.httpcodec.protocols.http.fields.Converter#asFieldValue(java.lang.Object)
 	 */
 	@Override
-	public String asFieldValue(List<T> value) {
+	public String asFieldValue(List<I> value) {
 		if (value.size() == 0) {
 			throw new IllegalStateException(
 			        "Field with list value may not be empty.");
 		}
 		boolean first = true;
 		StringBuilder result = new StringBuilder();
-		for (T e: value) {
+		for (I e: value) {
 			if (first) {
 				first = false;
 			} else {
@@ -90,8 +90,8 @@ public class ListConverter<T> implements Converter<List<T>> {
 	 * @see Converter#fromFieldValue(java.lang.String)
 	 */
 	@Override
-	public List<T> fromFieldValue(String text) throws ParseException {
-		List<T> result = new ArrayList<>();
+	public List<I> fromFieldValue(String text) throws ParseException {
+		List<I> result = new ArrayList<>();
 		ListItemizer itemizer = new ListItemizer(text, delimiters);
 		while (true) {
 			String nextRepr = itemizer.nextItem();

@@ -46,6 +46,9 @@ import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 /**
  * Implements a decoder for HTTP. The class can be used as base class for both
  * a request and a response decoder.
+ * 
+ * @param <T> the type of the message header to be decoded
+ * @param <R> the type of the response message header
  */
 public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	R extends HttpMessageHeader> 
@@ -568,6 +571,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 * information to {@link org.jdrupes.httpcodec.Decoder.Result}. This
 	 * class provides only a factory for creating 
 	 * the results as required by {@link HttpDecoder}.
+	 * 
+	 * @param <R> the type of the response message header
 	 */
 	public static class Result<R extends MessageHeader>
 		extends Decoder.Result<R> {

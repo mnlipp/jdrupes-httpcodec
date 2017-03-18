@@ -122,7 +122,7 @@ public class DecoderClosedTests {
 	 * Response with body terminated by close.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testBodyClosedTiny()

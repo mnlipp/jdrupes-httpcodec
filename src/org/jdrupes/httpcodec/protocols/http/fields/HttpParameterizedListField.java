@@ -29,10 +29,10 @@ import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverte
  * A HTTP header field with a list of values that can have
  * parameters.
  * 
- * @param <T> the value type
+ * @param <U> the type of the unparameterized value
  */
-public class HttpParameterizedListField<T> 
-	extends HttpListField<ParameterizedValue<T>> {
+public class HttpParameterizedListField<U> 
+	extends HttpListField<ParameterizedValue<U>> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -44,7 +44,7 @@ public class HttpParameterizedListField<T>
 	 * @param listConverter the converter for the complete list content
 	 */
 	public HttpParameterizedListField(String name, 
-			ListConverter<ParameterizedValue<T>> listConverter) {
+			ListConverter<ParameterizedValue<U>> listConverter) {
 		super(name, listConverter);
 	}
 
@@ -58,8 +58,8 @@ public class HttpParameterizedListField<T>
 	 * @param listConverter the converter for the complete list content
 	 */
 	public HttpParameterizedListField(String name,
-			List<ParameterizedValue<T>> items,
-			ListConverter<ParameterizedValue<T>> listConverter) {
+			List<ParameterizedValue<U>> items,
+			ListConverter<ParameterizedValue<U>> listConverter) {
 		super(name, items, listConverter);
 	}
 

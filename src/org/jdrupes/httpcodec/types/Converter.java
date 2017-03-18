@@ -23,12 +23,15 @@ import java.text.ParseException;
 /**
  * Implemented by classes that convert between a value and its 
  * string representation in the HTTP header field.
+ * 
+ * @param <T> the type to be converted
  */
 public interface Converter<T> {
 
 	/**
 	 * Returns the representation of this value in a header field.
 	 * 
+	 * @param value the value to be converted
 	 * @return the representation
 	 */
 	String asFieldValue(T value);

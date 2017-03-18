@@ -30,9 +30,11 @@ import org.jdrupes.httpcodec.types.ListConverter;
  * An HTTP field value that consists of a list of values separated by 
  * a delimiter. The class provides a "list of field values" view 
  * of the values.
+ * 
+ * @param <I> the type of the items in the list
  */
-public abstract class HttpListField<T> extends HttpField<List<T>>
-	implements List<T> {
+public abstract class HttpListField<I> extends HttpField<List<I>>
+	implements List<I> {
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -44,7 +46,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @param name the field name
 	 * @param converter the converter for the items
 	 */
-	protected HttpListField(String name, ListConverter<T> converter) {
+	protected HttpListField(String name, ListConverter<I> converter) {
 		super(name, new ArrayList<>(), converter);
 	}
 
@@ -58,8 +60,8 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @param converter 
 	 * 			  the converter for the items
 	 */
-	protected HttpListField(String name, List<T> items, 
-			ListConverter<T> converter) {
+	protected HttpListField(String name, List<I> items, 
+			ListConverter<I> converter) {
 		super(name, items, converter);
 	}
 
@@ -69,7 +71,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @param value the value
 	 * @return the field
 	 */
-	public HttpListField<T> append(T value) {
+	public HttpListField<I> append(I value) {
 		getValue().add(value);
 		return this;
 	}
@@ -80,7 +82,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @param value the value
 	 * @return the field
 	 */
-	public HttpListField<T> appendIfNotContained(T value) {
+	public HttpListField<I> appendIfNotContained(I value) {
 		if (!getValue().contains(value)) {
 			getValue().add(value);
 		}
@@ -104,28 +106,28 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#add(int, java.lang.Object)
 	 */
-	public void add(int index, T element) {
+	public void add(int index, I element) {
 		getValue().add(index, element);
 	}
 
 	/**
 	 * @see java.util.List#add(java.lang.Object)
 	 */
-	public boolean add(T element) {
+	public boolean add(I element) {
 		return getValue().add(element);
 	}
 
 	/**
 	 * @see java.util.List#addAll(java.util.Collection)
 	 */
-	public boolean addAll(Collection<? extends T> collection) {
+	public boolean addAll(Collection<? extends I> collection) {
 		return getValue().addAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#addAll(int, java.util.Collection)
 	 */
-	public boolean addAll(int index, Collection<? extends T> collection) {
+	public boolean addAll(int index, Collection<? extends I> collection) {
 		return getValue().addAll(index, collection);
 	}
 
@@ -153,7 +155,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#get(int)
 	 */
-	public T get(int index) {
+	public I get(int index) {
 		return getValue().get(index);
 	}
 
@@ -174,7 +176,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#iterator()
 	 */
-	public Iterator<T> iterator() {
+	public Iterator<I> iterator() {
 		return getValue().iterator();
 	}
 
@@ -188,21 +190,21 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#listIterator()
 	 */
-	public ListIterator<T> listIterator() {
+	public ListIterator<I> listIterator() {
 		return getValue().listIterator();
 	}
 
 	/**
 	 * @see java.util.List#listIterator(int)
 	 */
-	public ListIterator<T> listIterator(int index) {
+	public ListIterator<I> listIterator(int index) {
 		return getValue().listIterator(index);
 	}
 
 	/**
 	 * @see java.util.List#remove(int)
 	 */
-	public T remove(int index) {
+	public I remove(int index) {
 		return getValue().remove(index);
 	}
 
@@ -230,7 +232,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#set(int, java.lang.Object)
 	 */
-	public T set(int index, T element) {
+	public I set(int index, I element) {
 		return getValue().set(index, element);
 	}
 
@@ -244,7 +246,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	/**
 	 * @see java.util.List#subList(int, int)
 	 */
-	public List<T> subList(int fromIndex, int toIndex) {
+	public List<I> subList(int fromIndex, int toIndex) {
 		return getValue().subList(fromIndex, toIndex);
 	}
 

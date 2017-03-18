@@ -140,7 +140,7 @@ public class DecoderContentLengthTests {
 	 * Response with body determined by length.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testWithBodyLengthTiny()
