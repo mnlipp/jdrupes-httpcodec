@@ -33,6 +33,8 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedListField;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaRange;
+import org.jdrupes.httpcodec.types.ParameterizedValue;
+import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -161,4 +163,17 @@ public class FieldParsingTests {
 		assertEquals("audio/*; q=0.2", itr.next().toString());
 		assertEquals("audio/basic", itr.next().toString());
 	}	
+	
+	@Test
+	public void testAcceptCharset() throws ParseException {
+		
+		HttpWeightedListField<ParameterizedValue<String>> field
+			= HttpWeightedListField.fromString("Accept-Charset", 
+				"iso-8859-5, unicode-1-1;q=0.8", 
+				new ParameterizedValueConverter<>(Converters.STRING_CONVERTER));
+		field.sortByWeightDesc();
+		Iterator<ParameterizedValue<String>> itr = field.iterator();
+		assertEquals("iso-8859-5", itr.next().toString());
+		assertEquals("unicode-1-1; q=0.8", itr.next().toString());
+	}
 }

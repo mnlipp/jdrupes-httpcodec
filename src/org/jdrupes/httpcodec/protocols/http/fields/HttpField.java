@@ -24,6 +24,7 @@ import java.util.TreeMap;
 
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
 /**
  * A base class for all kinds of header field values.
@@ -36,6 +37,7 @@ public abstract class HttpField<T> {
 
 	// https://tools.ietf.org/html/rfc7231#section-5.3.2
 	public static final String ACCEPT = "Accept";
+	public static final String ACCEPT_CHARSET = "Accept-Charset";
 	public static final String COOKIE = "Cookie";
 	// https://tools.ietf.org/html/rfc7230#section-6.1
 	public static final String CONNECTION = "Connection";
@@ -68,6 +70,7 @@ public abstract class HttpField<T> {
 	
 	static {
 		fieldNameMap.put(ACCEPT, ACCEPT);
+		fieldNameMap.put(ACCEPT_CHARSET, ACCEPT_CHARSET);
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
 		fieldNameMap.put(CONTENT_LENGTH, CONTENT_LENGTH);
@@ -140,6 +143,10 @@ public abstract class HttpField<T> {
 		case HttpField.ACCEPT:
 			return HttpWeightedListField.fromString(
 					fieldName, fieldValue, Converters.MEDIA_RANGE_CONVERTER);
+		case HttpField.ACCEPT_CHARSET:
+			return HttpWeightedListField.fromString(
+					fieldName, fieldValue, new ParameterizedValueConverter<>(
+							Converters.STRING_CONVERTER));
 		case HttpField.COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
 		case HttpField.CONNECTION:
