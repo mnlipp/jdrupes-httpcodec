@@ -33,86 +33,6 @@ import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
  */
 public final class Converters {
 
-	private Converters() {
-	}
-
-	/**
-	 * If the value is double quoted, remove the quotes and escape
-	 * characters.
-	 * 
-	 * @param value the value to unquote
-	 * @return the unquoted value
-	 * @throws ParseException if the input violates the field format
-	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static String unquote(String value) throws ParseException {
-		if (value.length() == 0 || value.charAt(0) != '\"') {
-			return value;
-		}
-		int startPosition = 1;
-		int position = 1;
-		try {
-			StringBuilder result = new StringBuilder();
-			while (true) {
-				char ch = value.charAt(position);
-				switch (ch) {
-				case '\\':
-					result.append(value.substring(startPosition, position));
-					position += 1;
-					result.append(value.charAt(position));
-					position += 1;
-					startPosition = position;
-					continue;
-				case '\"':
-					if (position != value.length() - 1) {
-						throw new ParseException(value, position);
-					}
-					result.append(value.substring(startPosition, position));
-					return result.toString();
-				default:
-					position += 1;
-					continue;
-				}
-			}
-		} catch (IndexOutOfBoundsException e) {
-			throw new ParseException(value, position);
-		}
-	}
-
-	/**
-	 * Returns the given string as double quoted string if necessary.
-	 * 
-	 * @param value the value to quote if necessary
-	 * @return the result
-	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static String quoteIfNecessary(String value) {
-		StringBuilder result = new StringBuilder();
-		int position = 0;
-		boolean needsQuoting = false;
-		result.append('"');
-		while (position < value.length()) {
-			char ch = value.charAt(position++);
-			if (!needsQuoting && HttpConstants.TOKEN_CHARS.indexOf(ch) < 0) {
-				needsQuoting = true;
-			}
-			switch(ch) {
-			case '"':
-			case '\\':
-				result.append('\\');
-				// fall through
-			default:
-				result.append(ch);
-				break;
-			}
-		}
-		result.append('\"');
-		if (needsQuoting) {
-			return result.toString();
-		}
-		return value;
-	}
-
 	/**
 	 * A noop converter, except that text is trimmed when converted to
 	 * a value.
@@ -237,4 +157,84 @@ public final class Converters {
 		}
 	}, ";");
 
+	private Converters() {
+	}
+
+	/**
+	 * If the value is double quoted, remove the quotes and escape
+	 * characters.
+	 * 
+	 * @param value the value to unquote
+	 * @return the unquoted value
+	 * @throws ParseException if the input violates the field format
+	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+	 */
+	public static String unquote(String value) throws ParseException {
+		if (value.length() == 0 || value.charAt(0) != '\"') {
+			return value;
+		}
+		int startPosition = 1;
+		int position = 1;
+		try {
+			StringBuilder result = new StringBuilder();
+			while (true) {
+				char ch = value.charAt(position);
+				switch (ch) {
+				case '\\':
+					result.append(value.substring(startPosition, position));
+					position += 1;
+					result.append(value.charAt(position));
+					position += 1;
+					startPosition = position;
+					continue;
+				case '\"':
+					if (position != value.length() - 1) {
+						throw new ParseException(value, position);
+					}
+					result.append(value.substring(startPosition, position));
+					return result.toString();
+				default:
+					position += 1;
+					continue;
+				}
+			}
+		} catch (IndexOutOfBoundsException e) {
+			throw new ParseException(value, position);
+		}
+	}
+
+	/**
+	 * Returns the given string as double quoted string if necessary.
+	 * 
+	 * @param value the value to quote if necessary
+	 * @return the result
+	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+	 */
+	public static String quoteIfNecessary(String value) {
+		StringBuilder result = new StringBuilder();
+		int position = 0;
+		boolean needsQuoting = false;
+		result.append('"');
+		while (position < value.length()) {
+			char ch = value.charAt(position++);
+			if (!needsQuoting && HttpConstants.TOKEN_CHARS.indexOf(ch) < 0) {
+				needsQuoting = true;
+			}
+			switch(ch) {
+			case '"':
+				// fall through
+			case '\\':
+				result.append('\\');
+				// fall through
+			default:
+				result.append(ch);
+				break;
+			}
+		}
+		result.append('\"');
+		if (needsQuoting) {
+			return result.toString();
+		}
+		return value;
+	}
 }

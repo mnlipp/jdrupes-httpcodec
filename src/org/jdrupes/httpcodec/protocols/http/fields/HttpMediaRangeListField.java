@@ -31,6 +31,15 @@ import org.jdrupes.httpcodec.types.MediaRange;
 public class HttpMediaRangeListField extends HttpListField<MediaRange> {
 
 	/**
+	 * See {@see #sortByWeightDesc()}.
+	 */
+	private static Comparator<MediaRange> COMP = Comparator.nullsFirst(
+			Comparator.comparing(mt -> mt.getParameter("q"),
+					Comparator.nullsFirst(
+							Comparator.comparing(Float::parseFloat)
+							.reversed())));
+	
+	/**
 	 * Creates a new object with the given field name and no elements. Note 
 	 * that in this
 	 * initial state, the field is invalid and no string representation
@@ -69,13 +78,6 @@ public class HttpMediaRangeListField extends HttpListField<MediaRange> {
 		return new HttpMediaRangeListField(
 				name, Converters.MEDIA_RANGE_LIST_CONVERTER.fromFieldValue(text));
 	}
-	
-	private static Comparator<MediaRange> COMP = Comparator.nullsFirst(
-			Comparator.comparing(mt -> mt.getParameter("q"),
-					Comparator.nullsFirst(
-							Comparator.comparing(Float::parseFloat)
-							.reversed())));
-			
 	
 	public void sortByWeightDesc() {
 		sort(COMP);

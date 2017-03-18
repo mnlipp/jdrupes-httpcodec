@@ -332,7 +332,7 @@ public class EncoderClosedTests {
 		String encoded = new String(out.array(), out.arrayOffset(),
 		        out.remaining());
 		assertTrue(encoded.contains("HTTP/1.0 200 OK\r\n"));
-		assertTrue(!encoded.contains("\r\nContent-Length:"));
+		assertFalse(encoded.contains("\r\nContent-Length:"));
 		assertTrue(encoded.endsWith("\r\n\r\näöü€ Hello World! ÄÖÜß"));
 	}
 
