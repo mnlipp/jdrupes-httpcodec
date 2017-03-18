@@ -37,10 +37,10 @@
 <span class="sourceLineNo">029</span> * A HTTP header field with a list of values that can have<a name="line.29"></a>
 <span class="sourceLineNo">030</span> * parameters.<a name="line.30"></a>
 <span class="sourceLineNo">031</span> * <a name="line.31"></a>
-<span class="sourceLineNo">032</span> * @param &lt;T&gt; the value type<a name="line.32"></a>
+<span class="sourceLineNo">032</span> * @param &lt;U&gt; the type of the unparameterized value<a name="line.32"></a>
 <span class="sourceLineNo">033</span> */<a name="line.33"></a>
-<span class="sourceLineNo">034</span>public class HttpParameterizedListField&lt;T&gt; <a name="line.34"></a>
-<span class="sourceLineNo">035</span>        extends HttpListField&lt;ParameterizedValue&lt;T&gt;&gt; {<a name="line.35"></a>
+<span class="sourceLineNo">034</span>public class HttpParameterizedListField&lt;U&gt; <a name="line.34"></a>
+<span class="sourceLineNo">035</span>        extends HttpListField&lt;ParameterizedValue&lt;U&gt;&gt; {<a name="line.35"></a>
 <span class="sourceLineNo">036</span><a name="line.36"></a>
 <span class="sourceLineNo">037</span>        /**<a name="line.37"></a>
 <span class="sourceLineNo">038</span>         * Creates a new object with the given field name and no elements. Note <a name="line.38"></a>
@@ -52,7 +52,7 @@
 <span class="sourceLineNo">044</span>         * @param listConverter the converter for the complete list content<a name="line.44"></a>
 <span class="sourceLineNo">045</span>         */<a name="line.45"></a>
 <span class="sourceLineNo">046</span>        public HttpParameterizedListField(String name, <a name="line.46"></a>
-<span class="sourceLineNo">047</span>                        ListConverter&lt;ParameterizedValue&lt;T&gt;&gt; listConverter) {<a name="line.47"></a>
+<span class="sourceLineNo">047</span>                        ListConverter&lt;ParameterizedValue&lt;U&gt;&gt; listConverter) {<a name="line.47"></a>
 <span class="sourceLineNo">048</span>                super(name, listConverter);<a name="line.48"></a>
 <span class="sourceLineNo">049</span>        }<a name="line.49"></a>
 <span class="sourceLineNo">050</span><a name="line.50"></a>
@@ -66,8 +66,8 @@
 <span class="sourceLineNo">058</span>         * @param listConverter the converter for the complete list content<a name="line.58"></a>
 <span class="sourceLineNo">059</span>         */<a name="line.59"></a>
 <span class="sourceLineNo">060</span>        public HttpParameterizedListField(String name,<a name="line.60"></a>
-<span class="sourceLineNo">061</span>                        List&lt;ParameterizedValue&lt;T&gt;&gt; items,<a name="line.61"></a>
-<span class="sourceLineNo">062</span>                        ListConverter&lt;ParameterizedValue&lt;T&gt;&gt; listConverter) {<a name="line.62"></a>
+<span class="sourceLineNo">061</span>                        List&lt;ParameterizedValue&lt;U&gt;&gt; items,<a name="line.61"></a>
+<span class="sourceLineNo">062</span>                        ListConverter&lt;ParameterizedValue&lt;U&gt;&gt; listConverter) {<a name="line.62"></a>
 <span class="sourceLineNo">063</span>                super(name, items, listConverter);<a name="line.63"></a>
 <span class="sourceLineNo">064</span>        }<a name="line.64"></a>
 <span class="sourceLineNo">065</span><a name="line.65"></a>

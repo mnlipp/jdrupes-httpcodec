@@ -36,11 +36,11 @@
 <span class="sourceLineNo">028</span> * Used by by classes that convert field values which consist<a name="line.28"></a>
 <span class="sourceLineNo">029</span> * of lists of values.<a name="line.29"></a>
 <span class="sourceLineNo">030</span> * <a name="line.30"></a>
-<span class="sourceLineNo">031</span> * @param &lt;T&gt; the type of the elements<a name="line.31"></a>
+<span class="sourceLineNo">031</span> * @param &lt;I&gt; the type of the items<a name="line.31"></a>
 <span class="sourceLineNo">032</span> */<a name="line.32"></a>
-<span class="sourceLineNo">033</span>public class ListConverter&lt;T&gt; implements Converter&lt;List&lt;T&gt;&gt; {<a name="line.33"></a>
+<span class="sourceLineNo">033</span>public class ListConverter&lt;I&gt; implements Converter&lt;List&lt;I&gt;&gt; {<a name="line.33"></a>
 <span class="sourceLineNo">034</span><a name="line.34"></a>
-<span class="sourceLineNo">035</span>        private Converter&lt;T&gt; itemConverter;<a name="line.35"></a>
+<span class="sourceLineNo">035</span>        private Converter&lt;I&gt; itemConverter;<a name="line.35"></a>
 <span class="sourceLineNo">036</span>        // Used by default in RFC 7230, see section 7.<a name="line.36"></a>
 <span class="sourceLineNo">037</span>        private String delimiters = ",";<a name="line.37"></a>
 <span class="sourceLineNo">038</span>        <a name="line.38"></a>
@@ -51,7 +51,7 @@
 <span class="sourceLineNo">043</span>         * @param itemConverter the converter for the items<a name="line.43"></a>
 <span class="sourceLineNo">044</span>         * @see "[ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)"<a name="line.44"></a>
 <span class="sourceLineNo">045</span>         */<a name="line.45"></a>
-<span class="sourceLineNo">046</span>        public ListConverter(Converter&lt;T&gt; itemConverter) {<a name="line.46"></a>
+<span class="sourceLineNo">046</span>        public ListConverter(Converter&lt;I&gt; itemConverter) {<a name="line.46"></a>
 <span class="sourceLineNo">047</span>                this.itemConverter = itemConverter;<a name="line.47"></a>
 <span class="sourceLineNo">048</span>        }<a name="line.48"></a>
 <span class="sourceLineNo">049</span><a name="line.49"></a>
@@ -65,53 +65,62 @@
 <span class="sourceLineNo">057</span>         * @param itemConverter the converter for the items<a name="line.57"></a>
 <span class="sourceLineNo">058</span>         * @param delimiters the delimiters<a name="line.58"></a>
 <span class="sourceLineNo">059</span>         */<a name="line.59"></a>
-<span class="sourceLineNo">060</span>        public ListConverter(Converter&lt;T&gt; itemConverter, String delimiters) {<a name="line.60"></a>
+<span class="sourceLineNo">060</span>        public ListConverter(Converter&lt;I&gt; itemConverter, String delimiters) {<a name="line.60"></a>
 <span class="sourceLineNo">061</span>                this.itemConverter = itemConverter;<a name="line.61"></a>
 <span class="sourceLineNo">062</span>                this.delimiters = delimiters;<a name="line.62"></a>
 <span class="sourceLineNo">063</span>        }<a name="line.63"></a>
 <span class="sourceLineNo">064</span><a name="line.64"></a>
-<span class="sourceLineNo">065</span>        /* (non-Javadoc)<a name="line.65"></a>
-<span class="sourceLineNo">066</span>         * @see org.jdrupes.httpcodec.protocols.http.fields.Converter#asFieldValue(java.lang.Object)<a name="line.66"></a>
-<span class="sourceLineNo">067</span>         */<a name="line.67"></a>
-<span class="sourceLineNo">068</span>        @Override<a name="line.68"></a>
-<span class="sourceLineNo">069</span>        public String asFieldValue(List&lt;T&gt; value) {<a name="line.69"></a>
-<span class="sourceLineNo">070</span>                if (value.size() == 0) {<a name="line.70"></a>
-<span class="sourceLineNo">071</span>                        throw new IllegalStateException(<a name="line.71"></a>
-<span class="sourceLineNo">072</span>                                "Field with list value may not be empty.");<a name="line.72"></a>
-<span class="sourceLineNo">073</span>                }<a name="line.73"></a>
-<span class="sourceLineNo">074</span>                boolean first = true;<a name="line.74"></a>
-<span class="sourceLineNo">075</span>                StringBuilder result = new StringBuilder();<a name="line.75"></a>
-<span class="sourceLineNo">076</span>                for (T e: value) {<a name="line.76"></a>
-<span class="sourceLineNo">077</span>                        if (first) {<a name="line.77"></a>
-<span class="sourceLineNo">078</span>                                first = false;<a name="line.78"></a>
-<span class="sourceLineNo">079</span>                        } else {<a name="line.79"></a>
-<span class="sourceLineNo">080</span>                                result.append(delimiters.charAt(0));<a name="line.80"></a>
-<span class="sourceLineNo">081</span>                                result.append(' ');<a name="line.81"></a>
-<span class="sourceLineNo">082</span>                        }<a name="line.82"></a>
-<span class="sourceLineNo">083</span>                        result.append(itemConverter.asFieldValue(e));<a name="line.83"></a>
-<span class="sourceLineNo">084</span>                }<a name="line.84"></a>
-<span class="sourceLineNo">085</span>                return result.toString();<a name="line.85"></a>
-<span class="sourceLineNo">086</span>        }<a name="line.86"></a>
-<span class="sourceLineNo">087</span><a name="line.87"></a>
-<span class="sourceLineNo">088</span>        <a name="line.88"></a>
-<span class="sourceLineNo">089</span>        /* (non-Javadoc)<a name="line.89"></a>
-<span class="sourceLineNo">090</span>         * @see Converter#fromFieldValue(java.lang.String)<a name="line.90"></a>
-<span class="sourceLineNo">091</span>         */<a name="line.91"></a>
-<span class="sourceLineNo">092</span>        @Override<a name="line.92"></a>
-<span class="sourceLineNo">093</span>        public List&lt;T&gt; fromFieldValue(String text) throws ParseException {<a name="line.93"></a>
-<span class="sourceLineNo">094</span>                List&lt;T&gt; result = new ArrayList&lt;&gt;();<a name="line.94"></a>
-<span class="sourceLineNo">095</span>                ListItemizer itemizer = new ListItemizer(text, delimiters);<a name="line.95"></a>
-<span class="sourceLineNo">096</span>                while (true) {<a name="line.96"></a>
-<span class="sourceLineNo">097</span>                        String nextRepr = itemizer.nextItem();<a name="line.97"></a>
-<span class="sourceLineNo">098</span>                        if (nextRepr == null) {<a name="line.98"></a>
-<span class="sourceLineNo">099</span>                                break;<a name="line.99"></a>
-<span class="sourceLineNo">100</span>                        }<a name="line.100"></a>
-<span class="sourceLineNo">101</span>                        result.add(itemConverter.fromFieldValue(nextRepr));<a name="line.101"></a>
-<span class="sourceLineNo">102</span>                }<a name="line.102"></a>
-<span class="sourceLineNo">103</span>                return result;<a name="line.103"></a>
-<span class="sourceLineNo">104</span>        }<a name="line.104"></a>
-<span class="sourceLineNo">105</span>        <a name="line.105"></a>
-<span class="sourceLineNo">106</span>}<a name="line.106"></a>
+<span class="sourceLineNo">065</span>        /**<a name="line.65"></a>
+<span class="sourceLineNo">066</span>         * Returns the item converter.<a name="line.66"></a>
+<span class="sourceLineNo">067</span>         * <a name="line.67"></a>
+<span class="sourceLineNo">068</span>         * @return the itemConverter<a name="line.68"></a>
+<span class="sourceLineNo">069</span>         */<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        public Converter&lt;I&gt; getItemConverter() {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                return itemConverter;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        }<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>        /* (non-Javadoc)<a name="line.74"></a>
+<span class="sourceLineNo">075</span>         * @see org.jdrupes.httpcodec.protocols.http.fields.Converter#asFieldValue(java.lang.Object)<a name="line.75"></a>
+<span class="sourceLineNo">076</span>         */<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        @Override<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        public String asFieldValue(List&lt;I&gt; value) {<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                if (value.size() == 0) {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                        throw new IllegalStateException(<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                                "Field with list value may not be empty.");<a name="line.81"></a>
+<span class="sourceLineNo">082</span>                }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>                boolean first = true;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                StringBuilder result = new StringBuilder();<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                for (I e: value) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>                        if (first) {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>                                first = false;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                        } else {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                                result.append(delimiters.charAt(0));<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                                result.append(' ');<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                        }<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                        result.append(itemConverter.asFieldValue(e));<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                return result.toString();<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        }<a name="line.95"></a>
+<span class="sourceLineNo">096</span><a name="line.96"></a>
+<span class="sourceLineNo">097</span>        <a name="line.97"></a>
+<span class="sourceLineNo">098</span>        /* (non-Javadoc)<a name="line.98"></a>
+<span class="sourceLineNo">099</span>         * @see Converter#fromFieldValue(java.lang.String)<a name="line.99"></a>
+<span class="sourceLineNo">100</span>         */<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        @Override<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        public List&lt;I&gt; fromFieldValue(String text) throws ParseException {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                List&lt;I&gt; result = new ArrayList&lt;&gt;();<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                ListItemizer itemizer = new ListItemizer(text, delimiters);<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                while (true) {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                        String nextRepr = itemizer.nextItem();<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                        if (nextRepr == null) {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                                break;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                        }<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                        result.add(itemConverter.fromFieldValue(nextRepr));<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                }<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                return result;<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        }<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        <a name="line.114"></a>
+<span class="sourceLineNo">115</span>}<a name="line.115"></a>
 
 
 
