@@ -118,21 +118,11 @@ public final class Converters {
 	public static final Converter<String> UNQUOTED_STRING_CONVERTER 
 		= new Converter<String>() {
 	
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see Converter#asFieldValue(java.lang.Object)
-		 */
 		@Override
 		public String asFieldValue(String value) {
 			return value;
 		}
 	
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see Converter#fromFieldValue(java.lang.String)
-		 */
 		@Override
 		public String fromFieldValue(String text) throws ParseException {
 			return text.trim();
@@ -146,21 +136,11 @@ public final class Converters {
 	public static final Converter<String> UNQUOTE_ONLY_CONVERTER 
 		= new Converter<String>() {
 	
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see Converter#asFieldValue(java.lang.Object)
-		 */
 		@Override
 		public String asFieldValue(String value) {
 			return value;
 		}
 	
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see Converter#fromFieldValue(java.lang.String)
-		 */
 		@Override
 		public String fromFieldValue(String text) throws ParseException {
 			return unquote(text.trim());
@@ -173,17 +153,11 @@ public final class Converters {
 	public static final Converter<String> STRING_CONVERTER 
 		= new Converter<String>() {
 	
-		/* (non-Javadoc)
-		 * @see Converter#asFieldValue(java.lang.Object)
-		 */
 		@Override
 		public String asFieldValue(String value) {
 			return quoteIfNecessary(value);
 		}
 	
-		/* (non-Javadoc)
-		 * @see Converter#fromFieldValue(java.lang.String)
-		 */
 		@Override
 		public String fromFieldValue(String text) throws ParseException {
 			return unquote(text.trim());

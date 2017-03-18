@@ -22,6 +22,10 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+
+import org.jdrupes.httpcodec.util.ListItemizer;
 
 /**
  * Represents a parameterized value
@@ -140,7 +144,7 @@ public class ParameterizedValue<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String toString() {
-		return new AbstractParamValueConverter<>(new Converter<Object>() {
+		return new ParameterizedValueConverter<>(new Converter<Object>() {
 
 			@Override
 			public String asFieldValue(Object value) {
@@ -167,7 +171,7 @@ public class ParameterizedValue<T> {
 		}
 		
 		/**
-		 * Initzialize the builder from an existing value. 
+		 * Initialize the builder from an existing value. 
 		 * 
 		 * @param existing the existing value, assumed to be immutable
 		 * @return the builder for easy chaining
@@ -181,7 +185,7 @@ public class ParameterizedValue<T> {
 		}
 
 		/**
-		 * Returns the built object.
+		 * Returns the object built.
 		 * 
 		 * @return the object
 		 */
@@ -215,7 +219,7 @@ public class ParameterizedValue<T> {
 		}
 
 		/**
-		 * Removes a parameter
+		 * Remove a parameter
 		 * 
 		 * @param name the parameter name
 		 * @return the builder for easy chaining
@@ -224,5 +228,109 @@ public class ParameterizedValue<T> {
 			((ParameterizedValue<T>)this.value).params.remove(name);
 			return this;
 		}
+	}
+	
+	/**
+	 * A base class for converters for parameterized values. 
+	 * Converts field values such as `value; param1=value1; param2=value2`.
+	 * 
+	 * @param <P> the parameterized type
+	 * @param <B> the base (unparameterized) type
+	 */
+	public static class 
+		ParamValueConverterBase<P extends ParameterizedValue<B>, B>
+		implements Converter<P> {
+
+		private Converter<B> valueConverter;
+		private Converter<String> paramValueConverter;
+		private BiFunction<B, Map<String,String>, P> resultConstructor;
+		
+		/**
+		 * Creates a new converter by extending the given value converter
+		 * with functionality for handling the parameters. Parameter
+		 * values are used literally (no quoting).
+		 * 
+		 * @param valueConverter the converter for a value (without parameters)
+		 * @param resultConstructor a method that creates the result
+		 * from an instance of the type and a map of parameters
+		 * (used by {@link #fromFieldValue(String)}).
+		 */
+		public ParamValueConverterBase(Converter<B> valueConverter,
+				BiFunction<B, Map<String,String>, P> resultConstructor) {
+			this(valueConverter, Converters.UNQUOTED_STRING_CONVERTER,
+					resultConstructor);
+		}
+
+		/**
+		 * Creates a new converter by extending the given value converter
+		 * with functionality for handling the parameters.
+		 * 
+		 * @param valueConverter the converter for a value (without parameters)
+		 * @param paramValueConverter the converter for parameterValues
+		 * @param resultConstructor a method that creates the result
+		 * from an instance of the type and a map of parameters
+		 * (used by {@link #fromFieldValue(String)}).
+		 */
+		public ParamValueConverterBase(	Converter<B> valueConverter, 
+				Converter<String> paramValueConverter,
+				BiFunction<B, Map<String,String>, P> resultConstructor) {
+			this.valueConverter = valueConverter;
+			this.paramValueConverter = paramValueConverter;
+			this.resultConstructor = resultConstructor;
+		}
+
+		public String asFieldValue(P value) {
+			StringBuilder result = new StringBuilder();
+			result.append(valueConverter.asFieldValue(value.getValue()));
+			for (Entry<String, String> e: value.getParameters().entrySet()) {
+				result.append("; ");
+				result.append(e.getKey());
+				result.append('=');
+				result.append(paramValueConverter.asFieldValue(e.getValue()));
+			}
+			return result.toString();
+		}
+
+		public P fromFieldValue(String text) throws ParseException {
+			ListItemizer li = new ListItemizer(text, ";");
+			String valueRepr = li.nextItem();
+			if (valueRepr == null) {
+				throw new ParseException("Value may not be empty", 0);
+			}
+			B value = valueConverter.fromFieldValue(valueRepr);
+			Map<String,String> params = new HashMap<>();
+			while (true) {
+				String param = li.nextItem();
+				if (param == null) {
+					break;
+				}
+				ListItemizer pi = new ListItemizer(param, "=");
+				String paramKey = pi.nextItem().trim().toLowerCase();
+				if (paramKey == null) {
+					throw new ParseException("parameter may not be empty", 0);
+				}
+				String paramValue = pi.nextItem();
+				if (paramValue != null) {
+					paramValue = paramValueConverter.fromFieldValue(paramValue);
+				}
+				params.put(paramKey, paramValue);
+			}
+			return resultConstructor.apply(value, params);
+		}
+	}
+
+	/**
+	 * Extends {@link ParamValueConverterBase} to a realization
+	 * of `Converter<ParameterizedValue<T>>`.
+	 * 
+	 * @param <T> the base value type
+	 */
+	public static class ParameterizedValueConverter<T> 
+		extends ParamValueConverterBase<ParameterizedValue<T>, T> {
+
+		public ParameterizedValueConverter(Converter<T> valueConverter) {
+			super(valueConverter, ParameterizedValue<T>::new);
+		}
+		
 	}
 }

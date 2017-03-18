@@ -113,22 +113,11 @@ public class MediaRange extends MediaBase {
 	}
 	
 	public static class MediaRangeConverter
-	        extends AbstractParamValueConverter<MediaTypePair>
-	        implements Converter<MediaRange> {
+	        extends ParamValueConverterBase<MediaRange, MediaTypePair> {
 
 		public MediaRangeConverter() {
 			super(new MediaTypePairConverter(),
-			        Converters.UNQUOTE_ONLY_CONVERTER);
-		}
-
-		@Override
-		public String asFieldValue(MediaRange value) {
-			return super.asFieldValue(value);
-		}
-
-		@Override
-		public MediaRange fromFieldValue(String text) throws ParseException {
-			return super.fromFieldValue(text, MediaRange::new);
+			        Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);
 		}
 	}
 

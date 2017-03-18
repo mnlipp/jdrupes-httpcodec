@@ -23,7 +23,7 @@ import java.util.List;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
-import org.jdrupes.httpcodec.types.ParameterizedValueConverter;
+import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
 /**
  * A HTTP header field with a list of values that can have

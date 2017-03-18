@@ -108,22 +108,11 @@ public class MediaType extends MediaBase {
 	}
 	
 	public static class MediaTypeConverter
-	        extends AbstractParamValueConverter<MediaTypePair>
-	        implements Converter<MediaType> {
+	        extends ParamValueConverterBase<MediaType, MediaTypePair> {
 
 		public MediaTypeConverter() {
 			super(new MediaTypePairConverter(),
-			        Converters.UNQUOTE_ONLY_CONVERTER);
-		}
-
-		@Override
-		public String asFieldValue(MediaType value) {
-			return super.asFieldValue(value);
-		}
-
-		@Override
-		public MediaType fromFieldValue(String text) throws ParseException {
-			return super.fromFieldValue(text, MediaType::new);
+			        Converters.UNQUOTE_ONLY_CONVERTER, MediaType::new);
 		}
 	}
 
