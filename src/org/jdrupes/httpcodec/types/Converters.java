@@ -21,6 +21,7 @@ package org.jdrupes.httpcodec.types;
 import java.net.HttpCookie;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
@@ -32,6 +33,11 @@ import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
  * Utility methods and constants for converters.
  */
 public final class Converters {
+
+	/*
+	 * Note that the initialization sequence is important.
+	 * Converters used by others must be defined first.
+	 */
 
 	/**
 	 * A noop converter, except that text is trimmed when converted to
@@ -86,14 +92,16 @@ public final class Converters {
 		}
 	};
 	
-	public static final Converter<Long> INT_CONVERTER 
-		= new Converter<Long>() {
-	
+	/**
+	 * An integer converter.
+	 */
+	public static final Converter<Long> INT_CONVERTER = new Converter<Long>() {
+
 		@Override
 		public String asFieldValue(Long value) {
 			return value.toString();
 		}
-	
+
 		@Override
 		public Long fromFieldValue(String text) throws ParseException {
 			try {
@@ -104,55 +112,93 @@ public final class Converters {
 		}
 	};
 
+	/**
+	 * An integer list converter.
+	 */
 	public static final ListConverter<Long> INT_LIST_CONVERTER 
 		= new ListConverter<Long>(INT_CONVERTER);
 
-	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR_CONVERTER
-		= new MediaTypePairConverter();
-	
-	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
-		= new MediaTypeConverter();
-	
-	public static final Converter<MediaRange> MEDIA_RANGE_CONVERTER 
-		= new MediaRangeConverter();
-
+	/**
+	 * A converter for cookies.
+	 */
 	public static final ListConverter<HttpCookie> COOKIE_CONVERTER 
 		= new ListConverter<HttpCookie>(null) {
-	
+
 		@Override
 		public List<HttpCookie> fromFieldValue(String text)
-		        throws ParseException {
+				throws ParseException {
 			try {
 				return HttpCookie.parse(text);
 			} catch (IllegalArgumentException e) {
 				throw new ParseException(text, 0);
 			}
 		}
-	
+
 		@Override
 		public String asFieldValue(List<HttpCookie> value) {
 			throw new UnsupportedOperationException();
 		}
 	};
-	
+
+	/**
+	 * A converter for a list of cookies.
+	 */
 	public static final ListConverter<HttpCookie> COOKIE_LIST_CONVERTER 
-	= new ListConverter<HttpCookie>(new Converter<HttpCookie>() {
-		
+		= new ListConverter<HttpCookie>(new Converter<HttpCookie>() {
+	
 		@Override
 		public String asFieldValue(HttpCookie value) {
 			return value.toString();
 		}
-	
+
 		@Override
 		public HttpCookie fromFieldValue(String text)
-		        throws ParseException {
+				throws ParseException {
 			try {
 				return HttpCookie.parse(text).get(0);
 			} catch (IllegalArgumentException e) {
 				throw new ParseException(text, 0);
 			}
 		}
-	}, ";");
+		}, ";");
+
+	/**
+	 * A converter for a language or language range. 
+	 * Language range "`*`" is converted to a Locale with an empty language.
+	 */
+	public static final Converter<Locale> LANGUAGE_CONVERTER 
+		= new Converter<Locale>() {
+		
+		@Override
+		public String asFieldValue(Locale value) {
+			return value.getCountry().length() == 0
+					? value.getLanguage()
+					: (value.getLanguage() + "-" + value.getCountry());
+		}
+	
+		@Override
+		public Locale fromFieldValue(String text) throws ParseException {
+			return Locale.forLanguageTag(text);
+		}
+	};
+	
+	/**
+	 * A converter for the media "topLevelType/Subtype" pair.
+	 */
+	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR_CONVERTER
+		= new MediaTypePairConverter();
+
+	/**
+	 * A converter for a media type pair with parameters.
+	 */
+	public static final Converter<MediaRange> MEDIA_RANGE_CONVERTER 
+		= new MediaRangeConverter();
+
+	/**
+	 * A converter for a media type pair with parameters.
+	 */
+	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
+		= new MediaTypeConverter();
 
 	private Converters() {
 	}

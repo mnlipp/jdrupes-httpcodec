@@ -23,6 +23,7 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
@@ -31,10 +32,9 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedListField;
-import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.MediaRange;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
-import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -145,11 +145,11 @@ public class FieldParsingTests {
 	}
 	
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testAccept() throws ParseException {
 		HttpWeightedListField<MediaRange> field 
-			= HttpWeightedListField.fromString("Accept",
-				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c",
-				Converters.MEDIA_RANGE_CONVERTER);
+			= (HttpWeightedListField<MediaRange>)HttpField.fromString("Accept",
+				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
 		field.sortByWeightDesc();
 		Iterator<MediaRange> itr = field.iterator();
 		assertEquals("text/html", itr.next().toString());
@@ -157,23 +157,50 @@ public class FieldParsingTests {
 		assertEquals("text/x-dvi; q=0.8", itr.next().toString());
 		assertEquals("text/plain; q=0.5", itr.next().toString());
 		// Second
-		field = HttpWeightedListField.fromString("Accept",
-				"audio/*; q=0.2, audio/basic", Converters.MEDIA_RANGE_CONVERTER);
+		field = (HttpWeightedListField<MediaRange>)HttpField.fromString(
+				"Accept", "audio/*; q=0.2, audio/basic");
 		itr = field.iterator();
 		assertEquals("audio/*; q=0.2", itr.next().toString());
 		assertEquals("audio/basic", itr.next().toString());
 	}	
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testAcceptCharset() throws ParseException {
-		
 		HttpWeightedListField<ParameterizedValue<String>> field
-			= HttpWeightedListField.fromString("Accept-Charset", 
-				"iso-8859-5, unicode-1-1;q=0.8", 
-				new ParameterizedValueConverter<>(Converters.STRING_CONVERTER));
+			= (HttpWeightedListField<ParameterizedValue<String>>)HttpField
+			.fromString("Accept-Charset", "iso-8859-5, unicode-1-1;q=0.8");
 		field.sortByWeightDesc();
 		Iterator<ParameterizedValue<String>> itr = field.iterator();
 		assertEquals("iso-8859-5", itr.next().toString());
 		assertEquals("unicode-1-1; q=0.8", itr.next().toString());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testAcceptLocale() throws ParseException {
+		HttpWeightedListField<ParameterizedValue<Locale>> field
+			= (HttpWeightedListField<ParameterizedValue<Locale>>)HttpField
+			.fromString("Accept-Language", "da, en-gb;q=0.8, *; q=0.1, en;q=0.7");
+		field.sortByWeightDesc();
+		Converter<ParameterizedValue<Locale>> itemConverter 
+			= field.getConverter().getItemConverter();
+		Iterator<ParameterizedValue<Locale>> itr = field.iterator();
+		assertEquals("da", itemConverter.asFieldValue(itr.next()));
+		assertEquals("en-GB; q=0.8", 
+				itemConverter.asFieldValue(itr.next()));
+		assertEquals("en; q=0.7", 
+				itemConverter.asFieldValue(itr.next()));
+		assertEquals("; q=0.1", 
+				itemConverter.asFieldValue(itr.next()));
+	}
+	
+	@Test
+	public void testAllow() throws ParseException {
+		HttpStringListField field = (HttpStringListField)HttpField
+				.fromString("Allow", "GET, HEAD, PUT");
+		assertEquals("GET", field.get(0));
+		assertEquals("HEAD", field.get(1));
+		assertEquals("PUT", field.get(2));
 	}
 }

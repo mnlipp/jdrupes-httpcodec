@@ -277,6 +277,10 @@ public class ParameterizedValue<U> {
 		public ParamValueConverterBase(	Converter<U> valueConverter, 
 				Converter<String> paramValueConverter,
 				BiFunction<U, Map<String,String>, P> paramValueConstructor) {
+			if (valueConverter == null) {
+				throw new IllegalArgumentException(
+						"Value converter may not be null.");
+			}
 			this.valueConverter = valueConverter;
 			this.paramValueConverter = paramValueConverter;
 			this.paramValueConstructor = paramValueConstructor;

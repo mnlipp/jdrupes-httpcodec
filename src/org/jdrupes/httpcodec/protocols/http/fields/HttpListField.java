@@ -66,6 +66,15 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	}
 
 	/**
+	 * Returns the cconverter used by this field.
+	 * 
+	 * @return the converter
+	 */
+	public ListConverter<I> getConverter() {
+		return (ListConverter<I>)super.getConverter();
+	}
+
+	/**
 	 * Appends the value to the list of values.
 	 * 
 	 * @param value the value

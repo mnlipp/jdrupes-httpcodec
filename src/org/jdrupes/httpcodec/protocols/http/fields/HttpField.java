@@ -37,7 +37,14 @@ public abstract class HttpField<T> {
 
 	// https://tools.ietf.org/html/rfc7231#section-5.3.2
 	public static final String ACCEPT = "Accept";
+	// https://tools.ietf.org/html/rfc7231#section-5.3.3
 	public static final String ACCEPT_CHARSET = "Accept-Charset";
+	// https://tools.ietf.org/html/rfc7231#section-5.3.4
+	public static final String ACCEPT_ENCODING = "Accept-Encoding";
+	// https://tools.ietf.org/html/rfc7231#section-5.3.5
+	public static final String ACCEPT_LANGUAGE = "Accept-Language";
+	// https://tools.ietf.org/html/rfc7231#section-7.4.1
+	public static final String ALLOW = "Allow";
 	public static final String COOKIE = "Cookie";
 	// https://tools.ietf.org/html/rfc7230#section-6.1
 	public static final String CONNECTION = "Connection";
@@ -71,6 +78,9 @@ public abstract class HttpField<T> {
 	static {
 		fieldNameMap.put(ACCEPT, ACCEPT);
 		fieldNameMap.put(ACCEPT_CHARSET, ACCEPT_CHARSET);
+		fieldNameMap.put(ACCEPT_ENCODING, ACCEPT_ENCODING);
+		fieldNameMap.put(ACCEPT_LANGUAGE, ACCEPT_LANGUAGE);
+		fieldNameMap.put(ALLOW, ALLOW);
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
 		fieldNameMap.put(CONTENT_LENGTH, CONTENT_LENGTH);
@@ -147,6 +157,16 @@ public abstract class HttpField<T> {
 			return HttpWeightedListField.fromString(
 					fieldName, fieldValue, new ParameterizedValueConverter<>(
 							Converters.STRING_CONVERTER));
+		case HttpField.ACCEPT_ENCODING:
+			return HttpWeightedListField.fromString(
+					fieldName, fieldValue, new ParameterizedValueConverter<>(
+							Converters.STRING_CONVERTER));
+		case HttpField.ACCEPT_LANGUAGE:
+			return HttpWeightedListField.fromString(
+					fieldName, fieldValue, new ParameterizedValueConverter<>(
+							Converters.LANGUAGE_CONVERTER));
+		case HttpField.ALLOW:
+			return HttpStringListField.fromString(fieldName, fieldValue);
 		case HttpField.COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
 		case HttpField.CONNECTION:
@@ -200,6 +220,15 @@ public abstract class HttpField<T> {
 		return value;
 	}
 	
+	/**
+	 * Returns the cconverter used by this field.
+	 * 
+	 * @return the converter
+	 */
+	public Converter<T> getConverter() {
+		return converter;
+	}
+
 	/**
 	 * Sets the header field's value.
 	 * 

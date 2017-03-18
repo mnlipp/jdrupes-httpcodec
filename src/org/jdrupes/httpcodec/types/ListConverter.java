@@ -62,6 +62,15 @@ public class ListConverter<I> implements Converter<List<I>> {
 		this.delimiters = delimiters;
 	}
 
+	/**
+	 * Returns the item converter.
+	 * 
+	 * @return the itemConverter
+	 */
+	public Converter<I> getItemConverter() {
+		return itemConverter;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.fields.Converter#asFieldValue(java.lang.Object)
 	 */
