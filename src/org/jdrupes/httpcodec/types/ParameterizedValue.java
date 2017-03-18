@@ -243,7 +243,7 @@ public class ParameterizedValue<T> {
 
 		private Converter<B> valueConverter;
 		private Converter<String> paramValueConverter;
-		private BiFunction<B, Map<String,String>, P> resultConstructor;
+		private BiFunction<B, Map<String,String>, P> paramValueConstructor;
 		
 		/**
 		 * Creates a new converter by extending the given value converter
@@ -251,14 +251,14 @@ public class ParameterizedValue<T> {
 		 * values are used literally (no quoting).
 		 * 
 		 * @param valueConverter the converter for a value (without parameters)
-		 * @param resultConstructor a method that creates the result
+		 * @param paramValueConstructor a method that creates the result
 		 * from an instance of the type and a map of parameters
 		 * (used by {@link #fromFieldValue(String)}).
 		 */
 		public ParamValueConverterBase(Converter<B> valueConverter,
-				BiFunction<B, Map<String,String>, P> resultConstructor) {
+				BiFunction<B, Map<String,String>, P> paramValueConstructor) {
 			this(valueConverter, Converters.UNQUOTED_STRING_CONVERTER,
-					resultConstructor);
+					paramValueConstructor);
 		}
 
 		/**
@@ -267,16 +267,16 @@ public class ParameterizedValue<T> {
 		 * 
 		 * @param valueConverter the converter for a value (without parameters)
 		 * @param paramValueConverter the converter for parameterValues
-		 * @param resultConstructor a method that creates the result
+		 * @param paramValueConstructor a method that creates the result
 		 * from an instance of the type and a map of parameters
 		 * (used by {@link #fromFieldValue(String)}).
 		 */
 		public ParamValueConverterBase(	Converter<B> valueConverter, 
 				Converter<String> paramValueConverter,
-				BiFunction<B, Map<String,String>, P> resultConstructor) {
+				BiFunction<B, Map<String,String>, P> paramValueConstructor) {
 			this.valueConverter = valueConverter;
 			this.paramValueConverter = paramValueConverter;
-			this.resultConstructor = resultConstructor;
+			this.paramValueConstructor = paramValueConstructor;
 		}
 
 		public String asFieldValue(P value) {
@@ -315,7 +315,7 @@ public class ParameterizedValue<T> {
 				}
 				params.put(paramKey, paramValue);
 			}
-			return resultConstructor.apply(value, params);
+			return paramValueConstructor.apply(value, params);
 		}
 	}
 

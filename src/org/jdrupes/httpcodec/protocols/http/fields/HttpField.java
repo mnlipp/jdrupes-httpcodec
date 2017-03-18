@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.Converters;
 
 /**
  * A base class for all kinds of header field values.
@@ -135,7 +136,8 @@ public abstract class HttpField<T> {
 				.getOrDefault(fieldName, fieldName);
 		switch (normalizedFieldName) {
 		case HttpField.ACCEPT:
-			return HttpMediaRangeListField.fromString(fieldName, fieldValue);
+			return HttpWeightedListField.fromString(
+					fieldName, fieldValue, Converters.MEDIA_RANGE_CONVERTER);
 		case HttpField.COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
 		case HttpField.CONNECTION:

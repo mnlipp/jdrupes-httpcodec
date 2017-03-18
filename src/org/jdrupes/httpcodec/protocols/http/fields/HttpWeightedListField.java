@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2017 Michael N. Lipp
+ * Copyright (C) 2016  Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -19,21 +19,26 @@
 package org.jdrupes.httpcodec.protocols.http.fields;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.MediaRange;
+import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ParameterizedValue;
 
 /**
- * A list of media types.
+ * An HTTP field value that consists of a list of parameterized 
+ * values with an optional "q" parameter.
  */
-public class HttpMediaRangeListField extends HttpListField<MediaRange> {
+public class HttpWeightedListField<T extends ParameterizedValue<?>>
+	extends HttpListField<T> {
 
 	/**
 	 * See {@see #sortByWeightDesc()}.
 	 */
-	private static Comparator<MediaRange> COMP = Comparator.nullsFirst(
+	private static Comparator<ParameterizedValue<?>> COMP 
+		= Comparator.nullsFirst(
 			Comparator.comparing(mt -> mt.getParameter("q"),
 					Comparator.nullsFirst(
 							Comparator.comparing(Float::parseFloat)
@@ -47,9 +52,10 @@ public class HttpMediaRangeListField extends HttpListField<MediaRange> {
 	 * that add values.
 	 * 
 	 * @param name the field name
+	 * @param converter the converter for the list
 	 */
-	public HttpMediaRangeListField(String name) {
-		super(name, Converters.MEDIA_RANGE_LIST_CONVERTER);
+	public HttpWeightedListField(String name, ListConverter<T> converter) {
+		super(name, new ArrayList<T>(), converter);
 	}
 
 	/**
@@ -59,9 +65,12 @@ public class HttpMediaRangeListField extends HttpListField<MediaRange> {
 	 *            the field name
 	 * @param items
 	 * 			  the items
+	 * @param converter 
+	 * 			  the converter for the list
 	 */
-	public HttpMediaRangeListField(String name, List<MediaRange> items) {
-		super(name, items, Converters.MEDIA_RANGE_LIST_CONVERTER);
+	public HttpWeightedListField(String name, List<T> items, 
+			ListConverter<T> converter) {
+		super(name, items, converter);
 	}
 
 	/**
@@ -70,15 +79,39 @@ public class HttpMediaRangeListField extends HttpListField<MediaRange> {
 	 * 
 	 * @param name the field name
 	 * @param text the string to parse
+	 * @param converter the converter for the list of items
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpMediaRangeListField fromString(String name, String text) 
+	public static <T extends ParameterizedValue<?>> 
+		HttpWeightedListField<T> fromString(
+			String name, String text, ListConverter<T> converter) 
 			throws ParseException {
-		return new HttpMediaRangeListField(
-				name, Converters.MEDIA_RANGE_LIST_CONVERTER.fromFieldValue(text));
+		
+		return new HttpWeightedListField<>(
+				name, (List<T>)converter.fromFieldValue(text), 
+				(ListConverter<T>)converter);
 	}
-	
+
+	/**
+	 * Creates a new object with the elements obtained by parsing the given
+	 * String.
+	 * 
+	 * @param name the field name
+	 * @param text the string to parse
+	 * @param itemConverter the converter for the items in the list
+	 * @return the result
+	 * @throws ParseException if the input violates the field format
+	 */
+	public static <T extends ParameterizedValue<?>> HttpWeightedListField<T> 
+		fromString(String name, String text, Converter<T> itemConverter) 
+			throws ParseException {
+		
+		ListConverter<T> listConverter = new ListConverter<>(itemConverter);
+		return new HttpWeightedListField<>(
+				name, listConverter.fromFieldValue(text), listConverter);
+	}
+
 	public void sortByWeightDesc() {
 		sort(COMP);
 	}

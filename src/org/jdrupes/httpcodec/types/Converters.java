@@ -104,7 +104,7 @@ public final class Converters {
 		}
 	};
 
-	public static final Converter<List<Long>> INT_LIST_CONVERTER 
+	public static final ListConverter<Long> INT_LIST_CONVERTER 
 		= new ListConverter<Long>(INT_CONVERTER);
 
 	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR_CONVERTER
@@ -116,11 +116,8 @@ public final class Converters {
 	public static final Converter<MediaRange> MEDIA_RANGE_CONVERTER 
 		= new MediaRangeConverter();
 
-	public static final ListConverter<MediaRange> MEDIA_RANGE_LIST_CONVERTER
-		= new ListConverter<MediaRange>(MEDIA_RANGE_CONVERTER);
-
-	public static final Converter<List<HttpCookie>> COOKIE_CONVERTER 
-		= new Converter<List<HttpCookie>>() {
+	public static final ListConverter<HttpCookie> COOKIE_CONVERTER 
+		= new ListConverter<HttpCookie>(null) {
 	
 		@Override
 		public List<HttpCookie> fromFieldValue(String text)

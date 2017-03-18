@@ -22,7 +22,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.ListConverter;
 
@@ -33,7 +32,7 @@ import org.jdrupes.httpcodec.types.ListConverter;
  */
 public class HttpStringListField extends HttpListField<String> {
 
-	public static final Converter<List<String>> STRING_LIST_CONVERTER 
+	public static final ListConverter<String> STRING_LIST_CONVERTER 
     	= new ListConverter<String>(Converters.STRING_CONVERTER);
 
 	/**

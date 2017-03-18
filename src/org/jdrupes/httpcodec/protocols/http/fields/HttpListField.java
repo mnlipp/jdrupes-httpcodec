@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.ListConverter;
 
 /**
  * An HTTP field value that consists of a list of values separated by 
@@ -44,7 +44,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * @param name the field name
 	 * @param converter the converter for the items
 	 */
-	protected HttpListField(String name, Converter<List<T>> converter) {
+	protected HttpListField(String name, ListConverter<T> converter) {
 		super(name, new ArrayList<>(), converter);
 	}
 
@@ -59,7 +59,7 @@ public abstract class HttpListField<T> extends HttpField<List<T>>
 	 * 			  the converter for the items
 	 */
 	protected HttpListField(String name, List<T> items, 
-			Converter<List<T>> converter) {
+			ListConverter<T> converter) {
 		super(name, items, converter);
 	}
 
