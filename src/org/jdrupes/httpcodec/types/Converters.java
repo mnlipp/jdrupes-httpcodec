@@ -23,6 +23,8 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
+import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
+import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
 import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
 import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
 
@@ -185,6 +187,9 @@ public final class Converters {
 	public static final Converter<List<Long>> INT_LIST_CONVERTER 
 		= new ListConverter<Long>(INT_CONVERTER);
 
+	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR_CONVERTER
+		= new MediaTypePairConverter();
+	
 	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
 		= new MediaTypeConverter();
 	

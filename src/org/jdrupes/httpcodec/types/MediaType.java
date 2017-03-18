@@ -111,7 +111,7 @@ public class MediaType extends MediaBase {
 	        extends ParamValueConverterBase<MediaType, MediaTypePair> {
 
 		public MediaTypeConverter() {
-			super(new MediaTypePairConverter(),
+			super(Converters.MEDIA_TYPE_PAIR_CONVERTER,
 			        Converters.UNQUOTE_ONLY_CONVERTER, MediaType::new);
 		}
 	}

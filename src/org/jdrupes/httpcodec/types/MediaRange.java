@@ -116,7 +116,7 @@ public class MediaRange extends MediaBase {
 	        extends ParamValueConverterBase<MediaRange, MediaTypePair> {
 
 		public MediaRangeConverter() {
-			super(new MediaTypePairConverter(),
+			super(Converters.MEDIA_TYPE_PAIR_CONVERTER,
 			        Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);
 		}
 	}
