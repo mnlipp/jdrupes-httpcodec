@@ -28,16 +28,18 @@ import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.ListConverter;
 
 /**
- * Represents the "User-Agent" field.
+ * Represents products descriptions as used in the `User-Agent`
+ * or `Server` field.
  */
-public class HttpUserAgentField 
+public class HttpProductsDescriptionField 
 	extends HttpListField<CommentedValue<String>> {
 
-	private static final UserAgentConverter USER_AGENT_CONVERTER 
-		= new UserAgentConverter();
+	private static final ProductsDescriptionConverter DESCRIPTIONS_CONVERTER 
+		= new ProductsDescriptionConverter();
 	
-	public HttpUserAgentField(String name, List<CommentedValue<String>> items) {
-		super(name, items, USER_AGENT_CONVERTER);
+	public HttpProductsDescriptionField(String name, 
+			List<CommentedValue<String>> items) {
+		super(name, items, DESCRIPTIONS_CONVERTER);
 	}
 
 	/**
@@ -48,19 +50,19 @@ public class HttpUserAgentField
 	 * @return the result
 	 * @throws ParseException if the input violates the field format
 	 */
-	public static HttpUserAgentField fromString(String text) 
-			throws ParseException {
-		return new HttpUserAgentField(HttpField.USER_AGENT, 
-				USER_AGENT_CONVERTER.fromFieldValue(text));
+	public static HttpProductsDescriptionField fromString(
+			String name, String text) throws ParseException {
+		return new HttpProductsDescriptionField(name, 
+				DESCRIPTIONS_CONVERTER.fromFieldValue(text));
 	}
 	
-	public static class UserAgentConverter 
+	public static class ProductsDescriptionConverter 
 		extends ListConverter<CommentedValue<String>> {
 
 		private static final CommentedValueConverter<String> ITEM_CONVERTER
 			= new CommentedValueConverter<>(Converters.STRING_CONVERTER);
 		
-		public UserAgentConverter() {
+		public ProductsDescriptionConverter() {
 			super(ITEM_CONVERTER, " ");
 		}
 

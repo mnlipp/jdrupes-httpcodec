@@ -29,10 +29,10 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpUriField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpUserAgentField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedListField;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.MediaRange;
@@ -225,15 +225,15 @@ public class FieldParsingTests {
 	}
 	
 	@Test public void testUserAgent() throws ParseException {
-		HttpUserAgentField field = HttpUserAgentField.fromString(
-				"CERN-LineMode/2.15 libwww/2.17b3");
+		HttpProductsDescriptionField field = HttpProductsDescriptionField
+				.fromString("User-Agent", "CERN-LineMode/2.15 libwww/2.17b3");
 		assertEquals("CERN-LineMode/2.15", field.get(0).getValue());
 		assertEquals("libwww/2.17b3", field.get(1).getValue());
 		
-		field = HttpUserAgentField.fromString("Client");
+		field = HttpProductsDescriptionField.fromString("User-Agent", "Client");
 		assertEquals("Client", field.get(0).getValue());
 		
-		field = HttpUserAgentField.fromString(
+		field = HttpProductsDescriptionField.fromString("User-Agent", 
 				"CERN-LineMode/2.15 (deprecated) (I think) libwww/2.17b3 (very old)");
 		assertEquals("CERN-LineMode/2.15", field.get(0).getValue());
 		assertEquals("deprecated", field.get(0).getComments()[0]);

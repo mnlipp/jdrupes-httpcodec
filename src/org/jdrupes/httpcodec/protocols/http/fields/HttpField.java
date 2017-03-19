@@ -75,6 +75,8 @@ public abstract class HttpField<T> {
 	public static final String MAX_FORWARDS = "Max-Forwards";
 	/** @see "[RFC 7231, 7.1.3](https://tools.ietf.org/html/rfc7231#section-7.1.3)" */
 	public static final String RETRY_AFTER = "Retry-After";
+	/** @see "[RFC 7231, 7.4.2](https://tools.ietf.org/html/rfc7231#section-7.4.2)" */
+	public static final String SERVER = "Server";
 	public static final String SET_COOKIE = "Set-Cookie";
 	/** @see "[RFC 7230, 4.3](https://tools.ietf.org/html/rfc7230#section-4.3)" */
 	public static final String TE = "TE";
@@ -116,6 +118,7 @@ public abstract class HttpField<T> {
 		fieldNameMap.put(LOCATION, LOCATION);
 		fieldNameMap.put(MAX_FORWARDS, MAX_FORWARDS);
 		fieldNameMap.put(RETRY_AFTER, RETRY_AFTER);
+		fieldNameMap.put(SERVER, SERVER);
 		fieldNameMap.put(SET_COOKIE, SET_COOKIE);
 		fieldNameMap.put(TE, TE);
 		fieldNameMap.put(TRAILER, TRAILER);
@@ -219,6 +222,9 @@ public abstract class HttpField<T> {
 			return HttpIntField.fromString(fieldName, fieldValue); 
 		case RETRY_AFTER:
 			return dateOrSpanField(fieldName, fieldValue);
+		case SERVER:
+			return HttpProductsDescriptionField
+					.fromString(fieldName, fieldValue);
 		case SET_COOKIE:
 			return HttpSetCookieListField.fromString(fieldValue);
 		case TRAILER:
@@ -228,7 +234,8 @@ public abstract class HttpField<T> {
 		case UPGRADE:
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		case USER_AGENT:
-			return HttpUserAgentField.fromString(fieldValue);
+			return HttpProductsDescriptionField
+					.fromString(fieldName, fieldValue);
 		case VIA:
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		default:
