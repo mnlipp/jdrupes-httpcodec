@@ -174,62 +174,62 @@ public abstract class HttpField<T> {
 		String normalizedFieldName = fieldNameMap
 				.getOrDefault(fieldName, fieldName);
 		switch (normalizedFieldName) {
-		case HttpField.ACCEPT:
+		case ACCEPT:
 			return HttpWeightedListField.fromString(
 					fieldName, fieldValue, Converters.MEDIA_RANGE_CONVERTER);
-		case HttpField.ACCEPT_CHARSET:
+		case ACCEPT_CHARSET:
 			return HttpWeightedListField.fromString(
 					fieldName, fieldValue, new ParameterizedValueConverter<>(
 							Converters.STRING_CONVERTER));
-		case HttpField.ACCEPT_ENCODING:
+		case ACCEPT_ENCODING:
 			return HttpWeightedListField.fromString(
 					fieldName, fieldValue, new ParameterizedValueConverter<>(
 							Converters.STRING_CONVERTER));
-		case HttpField.ACCEPT_LANGUAGE:
+		case ACCEPT_LANGUAGE:
 			return HttpWeightedListField.fromString(
 					fieldName, fieldValue, new ParameterizedValueConverter<>(
 							Converters.LANGUAGE_CONVERTER));
-		case HttpField.ALLOW:
+		case ALLOW:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.COOKIE:
+		case COOKIE:
 			return HttpCookieListField.fromString(fieldValue);
-		case HttpField.CONNECTION:
+		case CONNECTION:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.CONTENT_LENGTH:
+		case CONTENT_LENGTH:
 			return HttpContentLengthField.fromString(fieldValue);
-		case HttpField.CONTENT_LOCATION:
+		case CONTENT_LOCATION:
 			return HttpUriField.fromString(fieldName, fieldValue); 
-		case HttpField.CONTENT_TYPE:
+		case CONTENT_TYPE:
 			return HttpMediaTypeField.fromString(fieldName, fieldValue);
-		case HttpField.DATE:
+		case DATE:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case HttpField.IF_MATCH:
+		case IF_MATCH:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.IF_MODIFIED_SINCE:
+		case IF_MODIFIED_SINCE:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case HttpField.IF_NONE_MATCH:
+		case IF_NONE_MATCH:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.IF_UNMODIFIED_SINCE:
+		case IF_UNMODIFIED_SINCE:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case HttpField.LAST_MODIFIED:
+		case LAST_MODIFIED:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case HttpField.LOCATION:
+		case LOCATION:
 			return HttpUriField.fromString(fieldName, fieldValue); 
-		case HttpField.MAX_FORWARDS:
+		case MAX_FORWARDS:
 			return HttpIntField.fromString(fieldName, fieldValue); 
 		case RETRY_AFTER:
 			return dateOrSpanField(fieldName, fieldValue);
-		case HttpField.SET_COOKIE:
+		case SET_COOKIE:
 			return HttpSetCookieListField.fromString(fieldValue);
-		case HttpField.TRAILER:
+		case TRAILER:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.TRANSFER_ENCODING:
+		case TRANSFER_ENCODING:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.UPGRADE:
+		case UPGRADE:
 			return HttpStringListField.fromString(fieldName, fieldValue);
-		case HttpField.USER_AGENT:
+		case USER_AGENT:
 			return HttpUserAgentField.fromString(fieldValue);
-		case HttpField.VIA:
+		case VIA:
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		default:
 			return HttpStringField.fromString(fieldName, fieldValue);
