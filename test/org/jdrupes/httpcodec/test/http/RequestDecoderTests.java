@@ -269,7 +269,7 @@ public class RequestDecoderTests {
 		        decoder.getHeader().get().getRequestUri().getPath());
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertTrue(!buffer.hasRemaining());
+		assertFalse(buffer.hasRemaining());
 		// Rest
 		buffer = ByteBuffer.wrap("e=Grapes".getBytes("ascii"));
 		result = decoder.decode(buffer, body, false);
