@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.ListConverter;
 
 /**
  * An HTTP field value that consists of a comma separated list of 
@@ -31,9 +30,6 @@ import org.jdrupes.httpcodec.types.ListConverter;
  * of the values.
  */
 public class HttpStringListField extends HttpListField<String> {
-
-	public static final ListConverter<String> STRING_LIST_CONVERTER 
-    	= new ListConverter<String>(Converters.STRING_CONVERTER);
 
 	/**
 	 * Creates a new object with the given field name and no elements. Note 
@@ -45,7 +41,7 @@ public class HttpStringListField extends HttpListField<String> {
 	 * @param name the field name
 	 */
 	public HttpStringListField(String name) {
-		super(name, STRING_LIST_CONVERTER);
+		super(name, Converters.STRING_LIST_CONVERTER);
 	}
 
 	/**
@@ -56,13 +52,13 @@ public class HttpStringListField extends HttpListField<String> {
 	 * @param values more values
 	 */
 	public HttpStringListField(String name, String value, String... values) {
-		super(name, STRING_LIST_CONVERTER);
+		super(name, Converters.STRING_LIST_CONVERTER);
 		add(value);
 		addAll(Arrays.asList(values));
 	}
 
 	private HttpStringListField(String name, List<String> values) {
-		super(name, values, STRING_LIST_CONVERTER);
+		super(name, values, Converters.STRING_LIST_CONVERTER);
 	}
 	
 	/**
@@ -76,7 +72,8 @@ public class HttpStringListField extends HttpListField<String> {
 	 */
 	public static HttpStringListField fromString(String name, String text) 
 			throws ParseException {
-		return new HttpStringListField(name, STRING_LIST_CONVERTER.fromFieldValue(text));
+		return new HttpStringListField(
+				name, Converters.STRING_LIST_CONVERTER.fromFieldValue(text));
 	}
 
 	/**

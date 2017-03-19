@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.types;
 
 import java.net.HttpCookie;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,7 +31,7 @@ import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
 import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
 
 /**
- * Utility methods and constants for converters.
+ * Utility methods and singletons for converters.
  */
 public final class Converters {
 
@@ -92,6 +93,9 @@ public final class Converters {
 		}
 	};
 	
+	public static final ListConverter<String> STRING_LIST_CONVERTER 
+		= new ListConverter<String>(Converters.STRING_CONVERTER);
+
 	/**
 	 * An integer converter.
 	 */
@@ -117,6 +121,13 @@ public final class Converters {
 	 */
 	public static final ListConverter<Long> INT_LIST_CONVERTER 
 		= new ListConverter<Long>(INT_CONVERTER);
+
+	/**
+	 * A date/time converter.
+	 */
+	public static final Converter<Instant> DATE_TIME_CONVERTER 
+		= new InstantConverter();
+
 
 	/**
 	 * A converter for cookies.
