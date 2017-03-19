@@ -19,6 +19,7 @@
 package org.jdrupes.httpcodec.types;
 
 import java.net.HttpCookie;
+import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
@@ -211,6 +212,28 @@ public final class Converters {
 	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
 		= new MediaTypeConverter();
 
+	/**
+	 * A converter for a URI.
+	 */
+	public static final Converter<URI> URI_CONVERTER 
+		= new Converter<URI>() {
+		
+		@Override
+		public String asFieldValue(URI value) {
+			return value.toString();
+		}
+	
+		@Override
+		public URI fromFieldValue(String text) throws ParseException {
+			try {
+				return URI.create(text);
+			} catch (IllegalArgumentException e) {
+				throw new ParseException(e.getMessage(), 0);
+			}
+		}
+	};
+
+	
 	private Converters() {
 	}
 

@@ -41,14 +41,6 @@ public class HttpUserAgentField
 	}
 
 	/**
-	 * @param name
-	 * @param converter
-	 */
-	public HttpUserAgentField(String name) {
-		super(name, USER_AGENT_CONVERTER);
-	}
-
-	/**
 	 * Creates a new list field with the elements obtained by parsing the given
 	 * String.
 	 * 

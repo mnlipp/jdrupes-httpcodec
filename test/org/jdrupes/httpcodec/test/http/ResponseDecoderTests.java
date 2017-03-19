@@ -20,14 +20,17 @@ package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
+import org.jdrupes.httpcodec.types.Converters;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -39,10 +42,11 @@ public class ResponseDecoderTests {
 	 * 
 	 * @throws UnsupportedEncodingException
 	 * @throws HttpProtocolException 
+	 * @throws ParseException 
 	 */
 	@Test
-	public void testSetCookie()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	public void testSetCookie() throws UnsupportedEncodingException, 
+		HttpProtocolException, ParseException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -51,6 +55,7 @@ public class ResponseDecoderTests {
 				+ "Keep-Alive: timeout=5, max=100\r\n"
 				+ "Connection: Keep-Alive\r\n"
 				+ "Content-Type: text/plain\r\n"
+				+ "Retry-After: 120\r\n"
 				+ "set-cookie:autorf=deleted; "
 				+ "expires=Sun, 26-Jul-2015 12:32:17 GMT; "
 				+ "path=/; domain=www.test.com\r\n"
@@ -70,6 +75,10 @@ public class ResponseDecoderTests {
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
+		assertEquals(Converters.DATE_TIME_CONVERTER.fromFieldValue(
+				"Sat, 23 Jul 2016 16:56:54 GMT"),
+				decoder.getHeader().get().getField(HttpDateTimeField.class,
+						HttpField.RETRY_AFTER).get().getValue());
 		body.flip();
 		String bodyText = new String(body.array(), body.position(),
 		        body.limit());

@@ -31,6 +31,7 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpUriField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpUserAgentField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedListField;
 import org.jdrupes.httpcodec.types.Converter;
@@ -240,4 +241,19 @@ public class FieldParsingTests {
 		assertEquals("libwww/2.17b3", field.get(1).getValue());
 		assertEquals("very old", field.get(1).getComments()[0]);
 	}
+	
+	@Test
+	public void testContentLocation() throws ParseException {
+		HttpUriField field = (HttpUriField)HttpField.fromString(
+				"Content-Location", "test/index.html");
+		assertEquals("test/index.html", field.getValue().getPath());
+	}
+	
+	@Test
+	public void testMaxForwards() throws ParseException {
+		HttpIntField field = (HttpIntField)HttpField.fromString(
+				"Max-Forwards", "10");
+		assertEquals(10, field.getValue().intValue());
+	}
+
 }

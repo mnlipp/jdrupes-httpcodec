@@ -36,43 +36,57 @@ import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverte
  */
 public abstract class HttpField<T> {
 
-	// https://tools.ietf.org/html/rfc7231#section-5.3.2
+	/** @see "[RFC 7231, 5.3.2](https://tools.ietf.org/html/rfc7231#section-5.3.2)" */
 	public static final String ACCEPT = "Accept";
-	// https://tools.ietf.org/html/rfc7231#section-5.3.3
+	/** @see "[RFC 7231, 5.3.3](https://tools.ietf.org/html/rfc7231#section-5.3.3)" */
 	public static final String ACCEPT_CHARSET = "Accept-Charset";
-	// https://tools.ietf.org/html/rfc7231#section-5.3.4
+	/** @see "[RFC 7231, 5.3.4](https://tools.ietf.org/html/rfc7231#section-5.3.4)" */
 	public static final String ACCEPT_ENCODING = "Accept-Encoding";
-	// https://tools.ietf.org/html/rfc7231#section-5.3.5
+	/** @see "[RFC 7231, 5.3.5](https://tools.ietf.org/html/rfc7231#section-5.3.5)" */
 	public static final String ACCEPT_LANGUAGE = "Accept-Language";
-	// https://tools.ietf.org/html/rfc7231#section-7.4.1
+	/** @see "[RFC 7231, 7.4.1](https://tools.ietf.org/html/rfc7231#section-7.4.1)" */
 	public static final String ALLOW = "Allow";
 	public static final String COOKIE = "Cookie";
-	// https://tools.ietf.org/html/rfc7230#section-6.1
+	/** @see "[RFC 7230, 6.1](https://tools.ietf.org/html/rfc7230#section-6.1)" */
 	public static final String CONNECTION = "Connection";
-	// https://tools.ietf.org/html/rfc7230#section-3.3.2
+	/** @see "[RFC 7230, 3.3.2](https://tools.ietf.org/html/rfc7230#section-3.3.2)" */
 	public static final String CONTENT_LENGTH = "Content-Length";
+	/** @see "[RFC 7231, 3.1.4.2](https://tools.ietf.org/html/rfc7231#section-3.1.4.2)" */
+	public static final String CONTENT_LOCATION = "Content-Location";
+	/** @see "[RFC 7231, 3.1.1.5](https://tools.ietf.org/html/rfc7231#section-3.1.1.5)" */
 	public static final String CONTENT_TYPE = "Content-Type";
+	/** @see "[RFC 7231, 7.1.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.1.2)" */
 	public static final String DATE = "Date";
 	public static final String ETAG = "ETag";
-	// https://tools.ietf.org/html/rfc7230#section-5.4
+	/** @see "[RFC 7231, 5.1.1](https://tools.ietf.org/html/rfc7231#section-5.1.1)" */
+	public static final String EXPECT = "Expect";
+	/** @see "[RFC 7231, 5.5.1](https://tools.ietf.org/html/rfc7231#section-5.5.1)" */
+	public static final String FROM = "From";
+	/** @see "[RFC 7230, 5.4](https://tools.ietf.org/html/rfc7230#section-5.4)" */
 	public static final String HOST = "Host";
 	public static final String IF_MATCH = "If-Match";
 	public static final String IF_NONE_MATCH = "If-None-Match";
 	public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 	public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 	public static final String LAST_MODIFIED = "Last-Modified";
+	/** @see "[RFC 7231, 7.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.2)" */
+	public static final String LOCATION = "Location";
+	/** @see "[RFC 7231, 5.1.2](https://tools.ietf.org/html/rfc7231#section-5.1.2)" */
+	public static final String MAX_FORWARDS = "Max-Forwards";
+	/** @see "[RFC 7231, 7.1.3](https://tools.ietf.org/html/rfc7231#section-7.1.3)" */
+	public static final String RETRY_AFTER = "Retry-After";
 	public static final String SET_COOKIE = "Set-Cookie";
-	// https://tools.ietf.org/html/rfc7230#section-4.3
+	/** @see "[RFC 7230, 4.3](https://tools.ietf.org/html/rfc7230#section-4.3)" */
 	public static final String TE = "TE";
-	// https://tools.ietf.org/html/rfc7230#section-4.4
+	/** @see "[RFC 7230, 4.4](https://tools.ietf.org/html/rfc7230#section-4.4)" */
 	public static final String TRAILER = "Trailer";
-	// https://tools.ietf.org/html/rfc7230#section-3.3.1
+	/** @see "[RFC 7230, 3.3.1](https://tools.ietf.org/html/rfc7230#section-3.3.1)" */
 	public static final String TRANSFER_ENCODING = "Transfer-Encoding";
-	// https://tools.ietf.org/html/rfc7230#section-6.7
+	/** @see "[RFC 7230, 6.7](https://tools.ietf.org/html/rfc7230#section-6.7)" */
 	public static final String UPGRADE = "Upgrade";
-	// https://tools.ietf.org/html/rfc7231#section-5.5.3
+	/** @see "[RFC 7231, 5.5.3](https://tools.ietf.org/html/rfc7231#section-5.5.3)" */
 	public static final String USER_AGENT = "User-Agent";
-	// https://tools.ietf.org/html/rfc7230#section-5.7.1
+	/** @see "[RFC 7230,5.7.1](https://tools.ietf.org/html/rfc7230#section-5.7.1)" */
 	public static final String VIA = "Via";
 	
 	private static Map<String, String> fieldNameMap = new TreeMap<>(
@@ -87,15 +101,21 @@ public abstract class HttpField<T> {
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
 		fieldNameMap.put(CONTENT_LENGTH, CONTENT_LENGTH);
+		fieldNameMap.put(CONTENT_LOCATION, CONTENT_LOCATION);
 		fieldNameMap.put(CONTENT_TYPE, CONTENT_TYPE);
 		fieldNameMap.put(DATE, DATE);
 		fieldNameMap.put(ETAG, ETAG);
+		fieldNameMap.put(EXPECT, EXPECT);
+		fieldNameMap.put(FROM, FROM);
 		fieldNameMap.put(HOST, HOST);
 		fieldNameMap.put(IF_MATCH, IF_MATCH);
 		fieldNameMap.put(IF_NONE_MATCH, IF_NONE_MATCH);
 		fieldNameMap.put(IF_MODIFIED_SINCE, IF_MODIFIED_SINCE);
 		fieldNameMap.put(IF_UNMODIFIED_SINCE, IF_UNMODIFIED_SINCE);
 		fieldNameMap.put(LAST_MODIFIED, LAST_MODIFIED);
+		fieldNameMap.put(LOCATION, LOCATION);
+		fieldNameMap.put(MAX_FORWARDS, MAX_FORWARDS);
+		fieldNameMap.put(RETRY_AFTER, RETRY_AFTER);
 		fieldNameMap.put(SET_COOKIE, SET_COOKIE);
 		fieldNameMap.put(TE, TE);
 		fieldNameMap.put(TRAILER, TRAILER);
@@ -177,6 +197,8 @@ public abstract class HttpField<T> {
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		case HttpField.CONTENT_LENGTH:
 			return HttpContentLengthField.fromString(fieldValue);
+		case HttpField.CONTENT_LOCATION:
+			return HttpUriField.fromString(fieldName, fieldValue); 
 		case HttpField.CONTENT_TYPE:
 			return HttpMediaTypeField.fromString(fieldName, fieldValue);
 		case HttpField.DATE:
@@ -191,6 +213,12 @@ public abstract class HttpField<T> {
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
 		case HttpField.LAST_MODIFIED:
 			return HttpDateTimeField.fromString(fieldName, fieldValue);
+		case HttpField.LOCATION:
+			return HttpUriField.fromString(fieldName, fieldValue); 
+		case HttpField.MAX_FORWARDS:
+			return HttpIntField.fromString(fieldName, fieldValue); 
+		case RETRY_AFTER:
+			return dateOrSpanField(fieldName, fieldValue);
 		case HttpField.SET_COOKIE:
 			return HttpSetCookieListField.fromString(fieldValue);
 		case HttpField.TRAILER:
@@ -206,6 +234,14 @@ public abstract class HttpField<T> {
 		default:
 			return HttpStringField.fromString(fieldName, fieldValue);
 		}
+	}
+	
+	private static HttpField<?> dateOrSpanField(String name, String value) 
+			throws ParseException {
+		if (Character.isDigit(value.charAt(0))) {
+			return HttpIntField.fromString(name, value);
+		}
+		return HttpDateTimeField.fromString(name, value);
 	}
 	
 	/**

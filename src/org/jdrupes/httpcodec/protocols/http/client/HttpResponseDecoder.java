@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.protocols.http.client;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +33,9 @@ import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
 /**
@@ -41,6 +44,15 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
  * and their (optional) payload.
  * 
  * ![HttpResponseDecoder](httpresponsedecoder.svg)
+ * 
+ * Headers
+ * -------
+ * 
+ * The decoder converts a `Retry-After` header with a delay value to
+ * a header with a date by adding the span to the time in the `Date` header.
+ *  
+ * 
+ * @see "[RFC 7231, Section 7.1.3](https://tools.ietf.org/html/rfc7231#section-7.1.3)"
  * 
  * @startuml httpresponsedecoder.svg
  * class HttpResponseDecoder {
@@ -145,6 +157,15 @@ public class HttpResponseDecoder
 	protected BodyMode headerReceived(HttpResponse message)
 	        throws HttpProtocolException {
 		reportHeaderReceived = true;
+		// Adjust Retry-After
+		HttpField<?> retryAfter = message.fields().get(HttpField.RETRY_AFTER);
+		if (retryAfter != null && (retryAfter instanceof HttpIntField)) {
+			Instant base = message
+				.getField(HttpDateTimeField.class, HttpField.DATE)
+				.map(HttpDateTimeField::getValue).orElse(Instant.now());
+			message.setField(new HttpDateTimeField(HttpField.RETRY_AFTER,
+					base.plusSeconds(((HttpIntField)retryAfter).getValue())));
+		}
 		// RFC 7230 3.3.3 (1. & 2.)
 		int statusCode = message.getStatusCode();
 		if (requestMethod.equalsIgnoreCase("HEAD")
