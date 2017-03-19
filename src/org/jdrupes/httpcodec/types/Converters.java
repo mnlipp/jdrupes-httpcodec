@@ -72,7 +72,7 @@ public final class Converters {
 	
 		@Override
 		public String fromFieldValue(String text) throws ParseException {
-			return unquote(text.trim());
+			return unquoteString(text.trim());
 		}
 	};
 	
@@ -89,7 +89,7 @@ public final class Converters {
 	
 		@Override
 		public String fromFieldValue(String text) throws ParseException {
-			return unquote(text.trim());
+			return unquoteString(text.trim());
 		}
 	};
 	
@@ -109,7 +109,7 @@ public final class Converters {
 		@Override
 		public Long fromFieldValue(String text) throws ParseException {
 			try {
-				return Long.parseLong(unquote(text));
+				return Long.parseLong(unquoteString(text));
 			} catch (NumberFormatException e) {
 				throw new ParseException(text, 0);
 			}
@@ -215,6 +215,38 @@ public final class Converters {
 	}
 
 	/**
+	 * If the string contains a char with a backslash before it,
+	 * remove the backslash.
+	 * 
+	 * @param value the value to unquote
+	 * @return the unquoted value
+	 * @throws ParseException if the input violates the field format
+	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+	 */
+	public static String unquote(String value) {
+		StringBuilder result = new StringBuilder();
+		boolean pendingBackslash = false;
+		for(char ch: value.toCharArray()) {
+			switch (ch) {
+			case '\\':
+				if (pendingBackslash) {
+					result.append(ch);
+				} else {
+					pendingBackslash = true;
+					continue;
+				}
+			break;
+			
+			default:
+				result.append(ch);
+				break;
+			}
+			pendingBackslash = false;
+		}
+		return result.toString();
+	}
+
+	/**
 	 * If the value is double quoted, remove the quotes and escape
 	 * characters.
 	 * 
@@ -223,38 +255,15 @@ public final class Converters {
 	 * @throws ParseException if the input violates the field format
 	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
 	 */
-	public static String unquote(String value) throws ParseException {
+	public static String unquoteString(String value) throws ParseException {
 		if (value.length() == 0 || value.charAt(0) != '\"') {
 			return value;
 		}
-		int startPosition = 1;
-		int position = 1;
-		try {
-			StringBuilder result = new StringBuilder();
-			while (true) {
-				char ch = value.charAt(position);
-				switch (ch) {
-				case '\\':
-					result.append(value.substring(startPosition, position));
-					position += 1;
-					result.append(value.charAt(position));
-					position += 1;
-					startPosition = position;
-					continue;
-				case '\"':
-					if (position != value.length() - 1) {
-						throw new ParseException(value, position);
-					}
-					result.append(value.substring(startPosition, position));
-					return result.toString();
-				default:
-					position += 1;
-					continue;
-				}
-			}
-		} catch (IndexOutOfBoundsException e) {
-			throw new ParseException(value, position);
+		String unquoted = unquote(value);
+		if (!unquoted.endsWith("\"")) {
+			throw new ParseException(value, value.length() - 1);
 		}
+		return unquoted.substring(1, unquoted.length() - 1);
 	}
 
 	/**
@@ -266,11 +275,9 @@ public final class Converters {
 	 */
 	public static String quoteIfNecessary(String value) {
 		StringBuilder result = new StringBuilder();
-		int position = 0;
 		boolean needsQuoting = false;
 		result.append('"');
-		while (position < value.length()) {
-			char ch = value.charAt(position++);
+		for (char ch: value.toCharArray()) {
 			if (!needsQuoting && HttpConstants.TOKEN_CHARS.indexOf(ch) < 0) {
 				needsQuoting = true;
 			}
@@ -290,5 +297,25 @@ public final class Converters {
 			return result.toString();
 		}
 		return value;
+	}
+	
+	/**
+	 * Return a new string in which all characters from `toBeQuoted`
+	 * are prefixed with a backslash. 
+	 * 
+	 * @param value the string
+	 * @param toBeQuoted the characters to be quoted
+	 * @return the result
+	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+	 */
+	public static String quote(String value, String toBeQuoted) {
+		StringBuilder result = new StringBuilder();
+		for (char ch: value.toCharArray()) {
+			if (toBeQuoted.indexOf(ch) >= 0) {
+				result.append('\\');
+			}
+			result.append(ch);
+		}
+		return result.toString();
 	}
 }

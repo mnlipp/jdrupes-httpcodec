@@ -22,6 +22,9 @@ import java.text.ParseException;
 import java.util.Iterator;
 
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.CommentedValue;
+import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
+import org.jdrupes.httpcodec.types.Converters;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -41,5 +44,14 @@ public class FieldValuesTests {
 		assertEquals("out there", iter.next());
 		assertFalse(iter.hasNext());
 		assertEquals("How, are, you, \"out there\"", fv.asFieldValue());
+	}
+	
+	@Test
+	public void testCommented() {
+		CommentedValue<String> value = new CommentedValue<String>(
+				"Hello", "World(!)");
+		assertEquals("Hello (World\\(!\\))", 
+				(new CommentedValueConverter<>(Converters.STRING_CONVERTER))
+				.asFieldValue(value));
 	}
 }

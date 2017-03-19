@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
@@ -69,6 +70,8 @@ public abstract class HttpField<T> {
 	public static final String TRANSFER_ENCODING = "Transfer-Encoding";
 	// https://tools.ietf.org/html/rfc7230#section-6.7
 	public static final String UPGRADE = "Upgrade";
+	// https://tools.ietf.org/html/rfc7231#section-5.5.3
+	public static final String USER_AGENT = "User-Agent";
 	// https://tools.ietf.org/html/rfc7230#section-5.7.1
 	public static final String VIA = "Via";
 	
@@ -98,6 +101,7 @@ public abstract class HttpField<T> {
 		fieldNameMap.put(TRAILER, TRAILER);
 		fieldNameMap.put(TRANSFER_ENCODING, TRANSFER_ENCODING);
 		fieldNameMap.put(UPGRADE, UPGRADE);
+		fieldNameMap.put(USER_AGENT, USER_AGENT);
 		fieldNameMap.put(VIA, VIA);
 	}
 	
@@ -195,6 +199,8 @@ public abstract class HttpField<T> {
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		case HttpField.UPGRADE:
 			return HttpStringListField.fromString(fieldName, fieldValue);
+		case HttpField.USER_AGENT:
+			return HttpUserAgentField.fromString(fieldValue);
 		case HttpField.VIA:
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		default:
@@ -271,5 +277,77 @@ public abstract class HttpField<T> {
 		result.append(asHeaderField().replace("\r\n", " CRLF "));
 		result.append("]");
 		return result.toString();
+	}
+
+	/**
+	 * Determines the length of a token.
+	 * 
+	 * @param text the text to parse
+	 * @param startPos the start position
+	 * @return the length of the token
+	 */
+	public static int tokenLength(String text, int startPos) {
+		int pos = startPos;
+		while (pos < text.length()
+				&& HttpConstants.TOKEN_CHARS.indexOf(text.charAt(pos)) >= 0) {
+			pos += 1;
+		}
+		return pos - startPos;
+	}
+
+	/**
+	 * Determines the length of a white space sequence. 
+	 * 
+	 * @param text the test to parse 
+	 * @param startPos the start position
+	 * @return the length of the white space sequence
+	 */
+	public static int whiteSpaceLength(String text, int startPos) {
+		int pos = startPos;
+		while (pos < text.length()) {
+			switch (text.charAt(pos)) {
+			case ' ':
+				// fall through
+			case '\t':
+				pos += 1;
+				continue;
+				
+			default:
+				break;
+			}
+			break;
+		}
+		return pos - startPos;
+	}
+	
+	/**
+	 * Determines the length of a comment.
+	 * 
+	 * @param text the text to parse
+	 * @param startPos the staring position (must be the position of the
+	 * opening brace)
+	 * @return the length of the comment
+	 */
+	public static int commentLength(String text, int startPos) {
+		int pos = startPos + 1;
+		while (pos < text.length()) {
+			switch(text.charAt(pos)) {
+			case ')':
+				return pos - startPos + 1;
+				
+			case '(':
+				pos += commentLength(text, pos);
+				break;
+				
+			case '\\':
+				pos = Math.min(pos + 2, text.length());
+				break;
+				
+			default:
+				pos += 1;
+				break;
+			}
+		}
+		return pos - startPos;
 	}
 }
