@@ -21,6 +21,7 @@ package org.jdrupes.httpcodec.protocols.http.client;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +36,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 
 /**
@@ -158,13 +159,18 @@ public class HttpResponseDecoder
 	        throws HttpProtocolException {
 		reportHeaderReceived = true;
 		// Adjust Retry-After
-		HttpField<?> retryAfter = message.fields().get(HttpField.RETRY_AFTER);
-		if (retryAfter != null && (retryAfter instanceof HttpIntField)) {
-			Instant base = message
-				.getField(HttpDateTimeField.class, HttpField.DATE)
-				.map(HttpDateTimeField::getValue).orElse(Instant.now());
-			message.setField(new HttpDateTimeField(HttpField.RETRY_AFTER,
-					base.plusSeconds(((HttpIntField)retryAfter).getValue())));
+		Optional<?> retryAfterRaw = message.getField(
+				HttpField.class, HttpField.RETRY_AFTER);
+		if (retryAfterRaw.isPresent() 
+				&& (retryAfterRaw.get() instanceof HttpStringField)) {
+			String value = ((HttpStringField)retryAfterRaw.get()).getValue();
+			if (Character.isDigit(value.charAt(0))) {
+				Instant base = message
+						.getField(HttpDateTimeField.class, HttpField.DATE)
+						.map(HttpDateTimeField::getValue).orElse(Instant.now());
+				message.setField(new HttpDateTimeField(HttpField.RETRY_AFTER,
+						base.plusSeconds(Long.parseLong(value))));
+			}
 		}
 		// RFC 7230 3.3.3 (1. & 2.)
 		int statusCode = message.getStatusCode();

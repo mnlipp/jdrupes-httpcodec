@@ -46,6 +46,7 @@ public class HttpProductsDescriptionField
 	 * Creates a new list field with the elements obtained by parsing the given
 	 * String.
 	 * 
+	 * @param name the field name
 	 * @param text the string to parse
 	 * @return the result
 	 * @throws ParseException if the input violates the field format

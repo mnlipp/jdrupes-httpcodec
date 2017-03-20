@@ -115,10 +115,9 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	/**
 	 * Returns the header field with the given type if it exists.
 	 * 
-	 * The well known header fields are always parsed with their
-	 * proper type. Unknown header fields are provisionally 
-	 * parsed as {@link HttpStringField}s. When an attempt is made to
-	 * retrieve such a provisional string field with its real type,
+	 * Header fields are provisionally parsed as 
+	 * {@link HttpStringField}s. When an attempt is made to
+	 * retrieve such a string field with its real type,
 	 * it is automatically converted to the real type.
 	 * 
 	 * In order for the automatic conversion to take place,
@@ -132,6 +131,10 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * 
 	 * If the conversion fails, the field is considered ill-formatted 
 	 * and handled as if it didn't exist.
+	 * 
+	 * Note that field type conversion may already occur while doing internal
+	 * checks. This implies that not all fields can initially be
+	 * accessed as {@link HttpStringField}s.   
 	 * 
 	 * @param <T> the header field class
 	 * @param type the header field type

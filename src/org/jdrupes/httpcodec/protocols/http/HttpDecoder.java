@@ -37,6 +37,8 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.DynamicByteArray;
@@ -427,7 +429,12 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		String fieldName = hlp.group(1);
 		// RFC 7230 3.2.4
 		String fieldValue = hlp.group(2).trim();
-		HttpField<?> field = HttpField.fromString(fieldName, fieldValue);
+		HttpField<?> field;
+		if (fieldName.equalsIgnoreCase(HttpField.SET_COOKIE)) {
+			field = HttpSetCookieListField.fromString(fieldValue);
+		} else {
+			field = HttpStringField.fromString(fieldName, fieldValue);
+		}
 		switch (field.getName()) {
 		case HttpField.CONTENT_LENGTH:
 			// RFC 7230 3.3.3 (3.)
@@ -468,7 +475,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		String fieldName = hlp.group(1);
 		// RFC 7230 3.2.4
 		String fieldValue = hlp.group(2).trim();
-		HttpField<?> field = HttpField.fromString(fieldName, fieldValue);
+		HttpField<?> field = HttpStringField.fromString(fieldName, fieldValue);
 		// RFC 7230 4.4
 		HttpStringListField trailerField = messageHeader
 		        .computeIfAbsent(HttpStringListField.class, HttpField.TRAILER,

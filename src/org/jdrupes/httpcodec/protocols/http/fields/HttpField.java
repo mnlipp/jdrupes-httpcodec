@@ -18,7 +18,6 @@
 
 package org.jdrupes.httpcodec.protocols.http.fields;
 
-import java.text.ParseException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -156,92 +155,6 @@ public abstract class HttpField<T> {
 		this.value = value;
 	}
 
-	/**
-	 * Returns an HttpField that represents the given header field, using the
-	 * best matching derived class in this package. Works for all well known
-	 * field names, i.e. the field names defined as constants in this class. If
-	 * the field name is unknown, the result will be of type
-	 * {@link HttpStringField}.
-	 * 
-	 * @param fieldName
-	 *            the field name
-	 * @param fieldValue
-	 *            the field value
-	 * @return a typed representation
-	 * @throws ParseException if the input violates the field format
-	 */
-	public static HttpField<?> fromString(String fieldName,
-	        String fieldValue) throws ParseException {
-		String normalizedFieldName = fieldNameMap
-				.getOrDefault(fieldName, fieldName);
-		switch (normalizedFieldName) {
-		case ACCEPT:
-			return HttpWeightedMediaRangeListField.fromString(fieldName, fieldValue);
-		case ACCEPT_CHARSET:
-			return HttpWeightedStringListField.fromString(fieldName, fieldValue);
-		case ACCEPT_ENCODING:
-			return HttpWeightedStringListField.fromString(fieldName, fieldValue);
-		case ACCEPT_LANGUAGE:
-			return HttpWeightedLanguageListField.fromString(fieldName, fieldValue);
-		case ALLOW:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case COOKIE:
-			return HttpCookieListField.fromString(fieldValue);
-		case CONNECTION:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case CONTENT_LENGTH:
-			return HttpContentLengthField.fromString(fieldValue);
-		case CONTENT_LOCATION:
-			return HttpUriField.fromString(fieldName, fieldValue); 
-		case CONTENT_TYPE:
-			return HttpMediaTypeField.fromString(fieldName, fieldValue);
-		case DATE:
-			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case IF_MATCH:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case IF_MODIFIED_SINCE:
-			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case IF_NONE_MATCH:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case IF_UNMODIFIED_SINCE:
-			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case LAST_MODIFIED:
-			return HttpDateTimeField.fromString(fieldName, fieldValue);
-		case LOCATION:
-			return HttpUriField.fromString(fieldName, fieldValue); 
-		case MAX_FORWARDS:
-			return HttpIntField.fromString(fieldName, fieldValue); 
-		case RETRY_AFTER:
-			return dateOrSpanField(fieldName, fieldValue);
-		case SERVER:
-			return HttpProductsDescriptionField
-					.fromString(fieldName, fieldValue);
-		case SET_COOKIE:
-			return HttpSetCookieListField.fromString(fieldValue);
-		case TRAILER:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case TRANSFER_ENCODING:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case UPGRADE:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		case USER_AGENT:
-			return HttpProductsDescriptionField
-					.fromString(fieldName, fieldValue);
-		case VIA:
-			return HttpStringListField.fromString(fieldName, fieldValue);
-		default:
-			return HttpStringField.fromString(fieldName, fieldValue);
-		}
-	}
-	
-	private static HttpField<?> dateOrSpanField(String name, String value) 
-			throws ParseException {
-		if (Character.isDigit(value.charAt(0))) {
-			return HttpIntField.fromString(name, value);
-		}
-		return HttpDateTimeField.fromString(name, value);
-	}
-	
 	/**
 	 * Returns the header field name.
 	 * 

@@ -18,6 +18,8 @@
 
 package org.jdrupes.httpcodec.test.fields;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.time.Month;
 import java.time.ZoneId;
@@ -25,6 +27,9 @@ import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
+import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
+import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
@@ -33,7 +38,9 @@ import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpUriField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedLanguageListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedMediaRangeListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedStringListField;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.MediaRange;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
@@ -165,11 +172,13 @@ public class FieldParsingTests {
 	}
 	
 	@Test
-	@SuppressWarnings("unchecked")
-	public void testAccept() throws ParseException {
-		HttpWeightedListField<MediaRange> field 
-			= (HttpWeightedListField<MediaRange>)HttpField.fromString("Accept",
-				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
+	public void testAccept() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpStringField("Accept",
+				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"));
+		HttpWeightedMediaRangeListField field = hdr.getField(
+				HttpWeightedMediaRangeListField.class, "Accept").get();
 		field.sortByWeightDesc();
 		Iterator<MediaRange> itr = field.iterator();
 		assertEquals("text/html", itr.next().toString());
@@ -177,31 +186,36 @@ public class FieldParsingTests {
 		assertEquals("text/x-dvi; q=0.8", itr.next().toString());
 		assertEquals("text/plain; q=0.5", itr.next().toString());
 		// Second
-		field = (HttpWeightedListField<MediaRange>)HttpField.fromString(
-				"Accept", "audio/*; q=0.2, audio/basic");
+		hdr.setField(new HttpStringField("Accept", "audio/*; q=0.2, audio/basic"));
+		field = hdr.getField(
+				HttpWeightedMediaRangeListField.class, "Accept").get();
 		itr = field.iterator();
 		assertEquals("audio/*; q=0.2", itr.next().toString());
 		assertEquals("audio/basic", itr.next().toString());
 	}	
 	
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testAcceptCharset() throws ParseException {
-		HttpWeightedListField<ParameterizedValue<String>> field
-			= (HttpWeightedListField<ParameterizedValue<String>>)HttpField
-			.fromString("Accept-Charset", "iso-8859-5, unicode-1-1;q=0.8");
+	public void testAcceptCharset() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpStringField(
+				"Accept-Charset", "iso-8859-5, unicode-1-1;q=0.8"));
+		HttpWeightedStringListField field = hdr.getField(
+				HttpWeightedStringListField.class, "Accept-Charset").get();
 		field.sortByWeightDesc();
 		Iterator<ParameterizedValue<String>> itr = field.iterator();
 		assertEquals("iso-8859-5", itr.next().toString());
 		assertEquals("unicode-1-1; q=0.8", itr.next().toString());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testAcceptLocale() throws ParseException {
-		HttpWeightedListField<ParameterizedValue<Locale>> field
-			= (HttpWeightedListField<ParameterizedValue<Locale>>)HttpField
-			.fromString("Accept-Language", "da, en-gb;q=0.8, *; q=0.1, en;q=0.7");
+	public void testAcceptLocale() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpStringField(
+				"Accept-Language", "da, en-gb;q=0.8, *; q=0.1, en;q=0.7"));
+		HttpWeightedLanguageListField field = hdr.getField(
+				HttpWeightedLanguageListField.class, "Accept-Language").get();
 		field.sortByWeightDesc();
 		Converter<ParameterizedValue<Locale>> itemConverter 
 			= field.getConverter().getItemConverter();
@@ -216,9 +230,12 @@ public class FieldParsingTests {
 	}
 	
 	@Test
-	public void testAllow() throws ParseException {
-		HttpStringListField field = (HttpStringListField)HttpField
-				.fromString("Allow", "GET, HEAD, PUT");
+	public void testAllow() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpStringField("Allow", "GET, HEAD, PUT"));
+		HttpStringListField field = hdr.getField(
+				HttpStringListField.class, "Allow").get();
 		assertEquals("GET", field.get(0));
 		assertEquals("HEAD", field.get(1));
 		assertEquals("PUT", field.get(2));
@@ -243,16 +260,22 @@ public class FieldParsingTests {
 	}
 	
 	@Test
-	public void testContentLocation() throws ParseException {
-		HttpUriField field = (HttpUriField)HttpField.fromString(
-				"Content-Location", "test/index.html");
+	public void testContentLocation() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpStringField("Content-Location", "test/index.html"));
+		HttpUriField field = hdr.getField(
+				HttpUriField.class, "Content-Location").get();
 		assertEquals("test/index.html", field.getValue().getPath());
 	}
 	
 	@Test
-	public void testMaxForwards() throws ParseException {
-		HttpIntField field = (HttpIntField)HttpField.fromString(
-				"Max-Forwards", "10");
+	public void testMaxForwards() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpStringField("Max-Forwards", "10"));
+		HttpIntField field = hdr.getField(
+				HttpIntField.class, "Max-Forwards").get();
 		assertEquals(10, field.getValue().intValue());
 	}
 
