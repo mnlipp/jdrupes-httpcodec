@@ -85,6 +85,8 @@ public abstract class HttpField<T> {
 	public static final String UPGRADE = "Upgrade";
 	/** @see "[RFC 7231, 5.5.3](https://tools.ietf.org/html/rfc7231#section-5.5.3)" */
 	public static final String USER_AGENT = "User-Agent";
+	/** @see "[RFC 7231, 7.1.4](https://tools.ietf.org/html/rfc7231#section-7.1.4)" */
+	public static final String VARY = "Vary";
 	/** @see "[RFC 7230,5.7.1](https://tools.ietf.org/html/rfc7230#section-5.7.1)" */
 	public static final String VIA = "Via";
 	
@@ -122,6 +124,7 @@ public abstract class HttpField<T> {
 		fieldNameMap.put(TRANSFER_ENCODING, TRANSFER_ENCODING);
 		fieldNameMap.put(UPGRADE, UPGRADE);
 		fieldNameMap.put(USER_AGENT, USER_AGENT);
+		fieldNameMap.put(VARY, VARY);
 		fieldNameMap.put(VIA, VIA);
 	}
 	
