@@ -24,8 +24,6 @@ import java.util.TreeMap;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.Converter;
-import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
 /**
  * A base class for all kinds of header field values.
@@ -178,20 +176,13 @@ public abstract class HttpField<T> {
 				.getOrDefault(fieldName, fieldName);
 		switch (normalizedFieldName) {
 		case ACCEPT:
-			return HttpWeightedListField.fromString(
-					fieldName, fieldValue, Converters.MEDIA_RANGE_CONVERTER);
+			return HttpWeightedMediaRangeListField.fromString(fieldName, fieldValue);
 		case ACCEPT_CHARSET:
-			return HttpWeightedListField.fromString(
-					fieldName, fieldValue, new ParameterizedValueConverter<>(
-							Converters.STRING_CONVERTER));
+			return HttpWeightedStringListField.fromString(fieldName, fieldValue);
 		case ACCEPT_ENCODING:
-			return HttpWeightedListField.fromString(
-					fieldName, fieldValue, new ParameterizedValueConverter<>(
-							Converters.STRING_CONVERTER));
+			return HttpWeightedStringListField.fromString(fieldName, fieldValue);
 		case ACCEPT_LANGUAGE:
-			return HttpWeightedListField.fromString(
-					fieldName, fieldValue, new ParameterizedValueConverter<>(
-							Converters.LANGUAGE_CONVERTER));
+			return HttpWeightedLanguageListField.fromString(fieldName, fieldValue);
 		case ALLOW:
 			return HttpStringListField.fromString(fieldName, fieldValue);
 		case COOKIE:
