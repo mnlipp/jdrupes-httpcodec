@@ -29,6 +29,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
 import org.jdrupes.httpcodec.types.Converters;
 
@@ -56,6 +57,7 @@ public class ResponseDecoderTests {
 				+ "Connection: Keep-Alive\r\n"
 				+ "Content-Type: text/plain\r\n"
 				+ "Retry-After: 120\r\n"
+				+ "Server: Apache/2.4.18 (Ubuntu)\r\n"
 				+ "set-cookie:autorf=deleted; "
 				+ "expires=Sun, 26-Jul-2015 12:32:17 GMT; "
 				+ "path=/; domain=www.test.com\r\n"
@@ -79,6 +81,10 @@ public class ResponseDecoderTests {
 				"Sat, 23 Jul 2016 16:56:54 GMT"),
 				decoder.getHeader().get().getField(HttpDateTimeField.class,
 						HttpField.RETRY_AFTER).get().getValue());
+		HttpProductsDescriptionField server = decoder.getHeader().get().getField(
+				HttpProductsDescriptionField.class, HttpField.SERVER).get();
+		assertEquals("Apache/2.4.18", server.getValue().get(0).getValue());
+		assertEquals("Ubuntu", server.getValue().get(0).getComments()[0]);
 		body.flip();
 		String bodyText = new String(body.array(), body.position(),
 		        body.limit());
