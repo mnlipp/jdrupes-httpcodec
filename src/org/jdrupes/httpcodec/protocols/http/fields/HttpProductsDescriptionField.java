@@ -25,7 +25,7 @@ import java.util.List;
 import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ListConverter_1;
 
 /**
  * Represents products descriptions as used in the `User-Agent`
@@ -34,7 +34,7 @@ import org.jdrupes.httpcodec.types.ListConverter;
 public class HttpProductsDescriptionField 
 	extends HttpListField<CommentedValue<String>> {
 
-	private static final ProductsDescriptionConverter DESCRIPTIONS_CONVERTER 
+	public static final ProductsDescriptionConverter DESCRIPTIONS_CONVERTER 
 		= new ProductsDescriptionConverter();
 	
 	public HttpProductsDescriptionField(String name, 
@@ -58,10 +58,10 @@ public class HttpProductsDescriptionField
 	}
 	
 	public static class ProductsDescriptionConverter 
-		extends ListConverter<CommentedValue<String>> {
+		extends ListConverter_1<CommentedValue<String>> {
 
 		private static final CommentedValueConverter<String> ITEM_CONVERTER
-			= new CommentedValueConverter<>(Converters.STRING_CONVERTER);
+			= new CommentedValueConverter<>(Converters.STRING);
 		
 		public ProductsDescriptionConverter() {
 			super(ITEM_CONVERTER, " ");

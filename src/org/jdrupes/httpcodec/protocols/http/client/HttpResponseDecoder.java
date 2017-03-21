@@ -34,10 +34,9 @@ import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 /**
  * A decoder for HTTP reponses that accepts data from a sequence of
@@ -159,17 +158,18 @@ public class HttpResponseDecoder
 	        throws HttpProtocolException {
 		reportHeaderReceived = true;
 		// Adjust Retry-After
-		Optional<?> retryAfterRaw = message.getField(
-				HttpField.class, HttpField.RETRY_AFTER);
-		if (retryAfterRaw.isPresent() 
-				&& (retryAfterRaw.get() instanceof HttpStringField)) {
-			String value = ((HttpStringField)retryAfterRaw.get()).getValue();
-			if (Character.isDigit(value.charAt(0))) {
-				Instant base = message
-						.getField(HttpDateTimeField.class, HttpField.DATE)
-						.map(HttpDateTimeField::getValue).orElse(Instant.now());
-				message.setField(new HttpDateTimeField(HttpField.RETRY_AFTER,
-						base.plusSeconds(Long.parseLong(value))));
+		HttpField<?> hdr = message.fields().get(HttpField.RETRY_AFTER);
+		if (hdr != null) {
+			if (String.class.isAssignableFrom(hdr.value().getClass())) {
+				String value = (String)hdr.value();
+				if (Character.isDigit(value.charAt(0))) {
+					Instant base = message.getField(
+							HttpField.DATE, Converters.DATE_TIME)
+							.map(HttpField<Instant>::value).orElse(Instant.now());
+					message.setField(new HttpField<>(HttpField.RETRY_AFTER,
+							base.plusSeconds(Long.parseLong(value)),
+							Converters.DATE_TIME));
+				}
 			}
 		}
 		// RFC 7230 3.3.3 (1. & 2.)
@@ -182,12 +182,12 @@ public class HttpResponseDecoder
 		                && (statusCode % 100 == 2))) {
 			return BodyMode.NO_BODY;
 		}
-		HttpStringListField transEncs = message.getField(
-		        HttpStringListField.class, HttpField.TRANSFER_ENCODING)
-				.orElse(null);
+		Optional<HttpField<StringList>> transEncs = message.getField(
+		        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);
 		// RFC 7230 3.3.3 (3.)
-		if (transEncs != null) {
-			if (transEncs.get(transEncs.size() - 1)
+		if (transEncs.isPresent()) {
+			StringList values = transEncs.get().value(); 
+			if (values.get(values.size() - 1)
 			        .equalsIgnoreCase(TransferCoding.CHUNKED.toString())) {
 				return BodyMode.CHUNKED;
 			} else {

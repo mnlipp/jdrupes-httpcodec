@@ -30,9 +30,8 @@ import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpUnquotedStringField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.types.Converters;
 
 /**
  * A protocol provider for the WebSocket protocol.
@@ -75,21 +74,21 @@ public class WsProtocolProvider extends ProtocolProvider {
 	@Override
 	public void augmentInitialResponse(HttpResponse response) {
 		Optional<String> wsKey = response.getRequest()
-			.flatMap(r -> r.getStringField("Sec-WebSocket-Key"))
-			.map(HttpStringField::getValue);
+			.flatMap(r -> r.getStringValue("Sec-WebSocket-Key"));
 		if (!wsKey.isPresent()) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setMessageHasBody(false).clearHeaders();
 			return;
 		}
 		// RFC 6455 4.1
-		if(response.getRequest().flatMap(
-				r -> r.getField(HttpIntField.class, "Sec-WebSocket-Version"))
-				.map(HttpIntField::asInt).orElse(-1) != 13) {
+		if(response.getRequest().flatMap(r -> r.getField(
+				"Sec-WebSocket-Version", Converters.LONG))
+				.map(HttpField<Long>::value).orElse(-1L) != 13) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setMessageHasBody(false).clearHeaders();
 			// RFC 6455 4.4
-			response.setField(new HttpIntField("Sec-WebSocket-Version", 13));
+			response.setField(new HttpField<>(
+					"Sec-WebSocket-Version", 13L, Converters.LONG));
 			return;
 			
 		}
@@ -98,8 +97,8 @@ public class WsProtocolProvider extends ProtocolProvider {
 			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
 			byte[] sha1 = crypt.digest(magic.getBytes("ascii"));
 			String accept = Base64.getEncoder().encodeToString(sha1);
-			response.setField(new HttpUnquotedStringField(
-					"Sec-WebSocket-Accept", accept));
+			response.setField(new HttpField<String>(
+					"Sec-WebSocket-Accept", accept, Converters.UNQUOTED_STRING));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 				.setMessageHasBody(false).clearHeaders();

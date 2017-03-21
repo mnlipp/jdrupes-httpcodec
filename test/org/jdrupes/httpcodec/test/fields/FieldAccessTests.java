@@ -20,15 +20,16 @@ package org.jdrupes.httpcodec.test.fields;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntListField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -36,40 +37,41 @@ import org.junit.Test;
 public class FieldAccessTests {
 
 	@Test
-	public void testGetInt() throws URISyntaxException {
+	public void testGetInt() throws URISyntaxException, ParseException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Test", "42"));
-		Optional<HttpIntField> field = hdr.getField(HttpIntField.class, "Test");
+		hdr.setField(new HttpField<>("Test: 42", Converters.STRING));
+		Optional<HttpField<Long>> field 
+			= hdr.getField("Test", Converters.LONG);
 		assertTrue(field.isPresent());
-		assertEquals(42, field.get().asInt());
+		assertEquals(42, field.get().value().intValue());
 	}
 
 	@Test
 	public void testGetStringList() throws URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Test", "one, two"));
-		Optional<HttpStringListField> field = hdr
-		        .getField(HttpStringListField.class, "Test");
+		hdr.setField(new HttpField<>("Test", "one, two", Converters.STRING));
+		Optional<HttpField<StringList>> field = hdr
+		        .getField("Test", Converters.STRING_LIST);
 		assertTrue(field.isPresent());
-		assertEquals(2, field.get().size());
-		assertEquals("one", field.get().get(0));
-		assertEquals("two", field.get().get(1));
+		assertEquals(2, field.get().value().size());
+		assertEquals("one", field.get().value().get(0));
+		assertEquals("two", field.get().value().get(1));
 	}
 
 	@Test
 	public void testGetIntList() throws URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Test", "1, 2, 3"));
-		Optional<HttpIntListField> field = hdr
-		        .getField(HttpIntListField.class, "Test");
+		hdr.setField(new HttpField<>("Test", "1, 2, 3", Converters.STRING));
+		Optional<HttpField<List<Long>>> field = hdr
+		        .getField("Test", Converters.LONG_LIST);
 		assertTrue(field.isPresent());
-		assertEquals(3, field.get().size());
-		assertEquals(1, field.get().get(0).longValue());
-		assertEquals(2, field.get().get(1).longValue());
-		assertEquals(3, field.get().get(2).longValue());
+		assertEquals(3, field.get().value().size());
+		assertEquals(1, field.get().value().get(0).longValue());
+		assertEquals(2, field.get().value().get(1).longValue());
+		assertEquals(3, field.get().value().get(2).longValue());
 	}
 
 }

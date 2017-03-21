@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2017 Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -16,26 +16,32 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jdrupes.httpcodec.protocols.http;
+package org.jdrupes.httpcodec.types;
 
-import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.types.Converters;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
- * The base class for HTTP codecs.
+ * A list of parameterzed values that support a `q` parameter.
  * 
- * @param <T> the type of the message header processed by the codec
+ * @param <I> the type of elements in the list
  */
-public abstract class HttpCodec<T extends HttpMessageHeader>
-	implements Codec {
+@SuppressWarnings("serial")
+public class WeightedList<I extends ParameterizedValue<?>> 
+	extends ArrayList<I> {
 
-	protected T messageHeader = null;
+	/**
+	 * See {@see #sortByWeightDesc()}.
+	 */
+	private static Comparator<ParameterizedValue<?>> COMP 
+		= Comparator.nullsFirst(
+			Comparator.comparing(mt -> mt.getParameter("q"),
+					Comparator.nullsFirst(
+							Comparator.comparing(Float::parseFloat)
+							.reversed())));
 	
-	protected String bodyCharset() {
-		return messageHeader
-			.getField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE)
-			.map(f -> f.value().getParameter("charset")).orElse("utf-8");
+	public void sortByWeightDesc() {
+		sort(COMP);
 	}
-	
+
 }

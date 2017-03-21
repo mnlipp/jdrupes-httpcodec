@@ -21,10 +21,11 @@ package org.jdrupes.httpcodec.test.fields;
 import java.text.ParseException;
 import java.util.Iterator;
 
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -35,9 +36,9 @@ public class FieldValuesTests {
 
 	@Test
 	public void testStringList() throws ParseException {
-		HttpStringListField fv = HttpStringListField.fromString("Test", 
-		        "How, are,you,  \"out there\"");
-		Iterator<String> iter = fv.iterator();
+		HttpField<StringList> fv = new HttpField<>(
+				"Test: How, are,you,  \"out there\"", Converters.STRING_LIST);
+		Iterator<String> iter = fv.value().iterator();
 		assertEquals("How", iter.next());
 		assertEquals("are", iter.next());
 		assertEquals("you", iter.next());
@@ -51,7 +52,7 @@ public class FieldValuesTests {
 		CommentedValue<String> value = new CommentedValue<String>(
 				"Hello", "World(!)");
 		assertEquals("Hello (World\\(!\\))", 
-				(new CommentedValueConverter<>(Converters.STRING_CONVERTER))
+				(new CommentedValueConverter<>(Converters.STRING))
 				.asFieldValue(value));
 	}
 }

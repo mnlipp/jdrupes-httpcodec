@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2017 Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -16,43 +16,41 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jdrupes.httpcodec.protocols.http.fields;
+package org.jdrupes.httpcodec.types;
 
 import java.net.HttpCookie;
-import java.text.ParseException;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 
-import org.jdrupes.httpcodec.types.Converters;
-
 /**
- * Represents the list of cookies to be sent from client to server.
- * 
- * @see "[RFC 6265](https://tools.ietf.org/html/rfc6265)"
+ * Represents a list of cookies with some additional methods.
  */
-public class HttpCookieListField extends HttpListField<HttpCookie> {
+@SuppressWarnings("serial")
+public class CookieList extends ArrayList<HttpCookie> {
 
 	/**
-	 * Creates a new object with the field name "Cookie" and the given
-	 * cookies.
-	 * 
-	 * @param value the cookies
+	 * Creates a new empty list of strings.
 	 */
-	public HttpCookieListField(List<HttpCookie> value) {
-		super(HttpField.COOKIE, value, Converters.COOKIE_LIST_CONVERTER);
+	public CookieList() {
 	}
 
 	/**
-	 * Creates a new object with the elements obtained by parsing the given
-	 * String.
+	 * Creates a new empty list of strings with an initial capacity.
 	 * 
-	 * @param text the string to parse
-	 * @return the result
-	 * @throws ParseException if the input violates the field format
+	 * @param initialCapacity the capacity
 	 */
-	public static HttpCookieListField fromString(String text) 
-			throws ParseException {
-		return new HttpCookieListField(Converters.COOKIE_LIST_CONVERTER.fromFieldValue(text));
+	public CookieList(int initialCapacity) {
+		super(initialCapacity);
+	}
+
+	/**
+	 * Creates a new list with items copied from the existing collection.
+	 * 
+	 * @param existing the existing collection
+	 */
+	public CookieList(Collection<HttpCookie> existing) {
+		super(existing);
 	}
 
 	/**
@@ -65,5 +63,4 @@ public class HttpCookieListField extends HttpListField<HttpCookie> {
 		return stream().filter(cookie -> cookie.getName().equals(name))
 				.findFirst().map(HttpCookie::getValue);
 	}
-	
 }

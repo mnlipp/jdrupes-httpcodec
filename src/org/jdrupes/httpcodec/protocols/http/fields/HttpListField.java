@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ListConverter_1;
 
 /**
  * An HTTP field value that consists of a list of values separated by 
@@ -46,7 +46,7 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	 * @param name the field name
 	 * @param converter the converter for the items
 	 */
-	protected HttpListField(String name, ListConverter<I> converter) {
+	protected HttpListField(String name, ListConverter_1<I> converter) {
 		super(name, new ArrayList<>(), converter);
 	}
 
@@ -61,7 +61,7 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	 * 			  the converter for the items
 	 */
 	protected HttpListField(String name, List<I> items, 
-			ListConverter<I> converter) {
+			ListConverter_1<I> converter) {
 		super(name, items, converter);
 	}
 
@@ -70,8 +70,8 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	 * 
 	 * @return the converter
 	 */
-	public ListConverter<I> getConverter() {
-		return (ListConverter<I>)super.getConverter();
+	public ListConverter_1<I> converter() {
+		return (ListConverter_1<I>)super.converter();
 	}
 
 	/**
@@ -81,7 +81,7 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	 * @return the field
 	 */
 	public HttpListField<I> append(I value) {
-		getValue().add(value);
+		value().add(value);
 		return this;
 	}
 	
@@ -92,8 +92,8 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	 * @return the field
 	 */
 	public HttpListField<I> appendIfNotContained(I value) {
-		if (!getValue().contains(value)) {
-			getValue().add(value);
+		if (!value().contains(value)) {
+			value().add(value);
 		}
 		return this;
 	}
@@ -106,7 +106,7 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	@SuppressWarnings("unchecked")
 	public void combine(@SuppressWarnings("rawtypes") HttpListField other) {
 		if (!(getClass().equals(other.getClass()))
-				|| !getName().equals(other.getName())) {
+				|| !name().equals(other.name())) {
 			throw new IllegalArgumentException("Types and name must be equal.");
 		}
 		addAll(other);
@@ -116,160 +116,160 @@ public abstract class HttpListField<I> extends HttpField<List<I>>
 	 * @see java.util.List#add(int, java.lang.Object)
 	 */
 	public void add(int index, I element) {
-		getValue().add(index, element);
+		value().add(index, element);
 	}
 
 	/**
 	 * @see java.util.List#add(java.lang.Object)
 	 */
 	public boolean add(I element) {
-		return getValue().add(element);
+		return value().add(element);
 	}
 
 	/**
 	 * @see java.util.List#addAll(java.util.Collection)
 	 */
 	public boolean addAll(Collection<? extends I> collection) {
-		return getValue().addAll(collection);
+		return value().addAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#addAll(int, java.util.Collection)
 	 */
 	public boolean addAll(int index, Collection<? extends I> collection) {
-		return getValue().addAll(index, collection);
+		return value().addAll(index, collection);
 	}
 
 	/**
 	 * @see java.util.List#clear()
 	 */
 	public void clear() {
-		getValue().clear();
+		value().clear();
 	}
 
 	/**
 	 * @see java.util.List#contains(java.lang.Object)
 	 */
 	public boolean contains(Object object) {
-		return getValue().contains(object);
+		return value().contains(object);
 	}
 
 	/**
 	 * @see java.util.List#containsAll(java.util.Collection)
 	 */
 	public boolean containsAll(Collection<?> collection) {
-		return getValue().containsAll(collection);
+		return value().containsAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#get(int)
 	 */
 	public I get(int index) {
-		return getValue().get(index);
+		return value().get(index);
 	}
 
 	/**
 	 * @see java.util.List#indexOf(java.lang.Object)
 	 */
 	public int indexOf(Object object) {
-		return getValue().indexOf(object);
+		return value().indexOf(object);
 	}
 
 	/**
 	 * @see java.util.List#isEmpty()
 	 */
 	public boolean isEmpty() {
-		return getValue().isEmpty();
+		return value().isEmpty();
 	}
 
 	/**
 	 * @see java.util.List#iterator()
 	 */
 	public Iterator<I> iterator() {
-		return getValue().iterator();
+		return value().iterator();
 	}
 
 	/**
 	 * @see java.util.List#lastIndexOf(java.lang.Object)
 	 */
 	public int lastIndexOf(Object object) {
-		return getValue().lastIndexOf(object);
+		return value().lastIndexOf(object);
 	}
 
 	/**
 	 * @see java.util.List#listIterator()
 	 */
 	public ListIterator<I> listIterator() {
-		return getValue().listIterator();
+		return value().listIterator();
 	}
 
 	/**
 	 * @see java.util.List#listIterator(int)
 	 */
 	public ListIterator<I> listIterator(int index) {
-		return getValue().listIterator(index);
+		return value().listIterator(index);
 	}
 
 	/**
 	 * @see java.util.List#remove(int)
 	 */
 	public I remove(int index) {
-		return getValue().remove(index);
+		return value().remove(index);
 	}
 
 	/**
 	 * @see java.util.List#remove(java.lang.Object)
 	 */
 	public boolean remove(Object object) {
-		return getValue().remove(object);
+		return value().remove(object);
 	}
 
 	/**
 	 * @see java.util.List#removeAll(java.util.Collection)
 	 */
 	public boolean removeAll(Collection<?> collection) {
-		return getValue().removeAll(collection);
+		return value().removeAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#retainAll(java.util.Collection)
 	 */
 	public boolean retainAll(Collection<?> collection) {
-		return getValue().retainAll(collection);
+		return value().retainAll(collection);
 	}
 
 	/**
 	 * @see java.util.List#set(int, java.lang.Object)
 	 */
 	public I set(int index, I element) {
-		return getValue().set(index, element);
+		return value().set(index, element);
 	}
 
 	/**
 	 * @see java.util.List#size()
 	 */
 	public int size() {
-		return getValue().size();
+		return value().size();
 	}
 
 	/**
 	 * @see java.util.List#subList(int, int)
 	 */
 	public List<I> subList(int fromIndex, int toIndex) {
-		return getValue().subList(fromIndex, toIndex);
+		return value().subList(fromIndex, toIndex);
 	}
 
 	/**
 	 * @see java.util.List#toArray()
 	 */
 	public Object[] toArray() {
-		return getValue().toArray();
+		return value().toArray();
 	}
 
 	/**
 	 * @see java.util.List#toArray(java.lang.Object[])
 	 */
 	public <U> U[] toArray(U[] array) {
-		return getValue().toArray(array);
+		return value().toArray(array);
 	}
 }

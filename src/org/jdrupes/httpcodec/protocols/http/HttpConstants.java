@@ -18,6 +18,8 @@
 
 package org.jdrupes.httpcodec.protocols.http;
 
+import java.util.regex.Pattern;
+
 /**
  * Common HTTP constants.
  */
@@ -122,4 +124,6 @@ public interface HttpConstants {
 		= "!#$%&'*+-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 			+ "^`abcdefghijklmnopqrstuvwxyz|~";
 
+	public static final String TOKEN_REGEXP 
+		= "[" + Pattern.quote(TOKEN_CHARS) + "]+";
 }

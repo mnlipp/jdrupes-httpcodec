@@ -66,7 +66,7 @@ public class MediaType extends MediaBase {
 	 */
 	public static MediaType fromString(String text) 
 			throws ParseException {
-		return Converters.MEDIA_TYPE_CONVERTER.fromFieldValue(text);
+		return Converters.MEDIA_TYPE.fromFieldValue(text);
 	}
 	
 	/**
@@ -111,8 +111,8 @@ public class MediaType extends MediaBase {
 	        extends ParamValueConverterBase<MediaType, MediaTypePair> {
 
 		public MediaTypeConverter() {
-			super(Converters.MEDIA_TYPE_PAIR_CONVERTER,
-			        Converters.UNQUOTE_ONLY_CONVERTER, MediaType::new);
+			super(Converters.MEDIA_TYPE_PAIR,
+			        Converters.UNQUOTE_ONLY, MediaType::new);
 		}
 	}
 

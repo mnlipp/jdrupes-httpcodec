@@ -38,10 +38,8 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converters;
 
 /**
  * An encoder for HTTP responses that accepts a header and optional
@@ -101,8 +99,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		}
 		
 		// Make sure we have an up-to-date Date, RFC 7231 7.1.1.2
-		messageHeader.setField(
-				new HttpDateTimeField(HttpField.DATE, Instant.now()));
+		messageHeader.setField(HttpField.DATE, Instant.now());
 		
 		checkContentLength(messageHeader);
 		
@@ -157,13 +154,14 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			return;
 		}
 		// Add 0 content length
-		messageHeader.setField(new HttpContentLengthField(0));
+		messageHeader.setField(new HttpField<>(
+				HttpField.CONTENT_LENGTH, 0L, Converters.LONG));
 	}
 
 	private String prepareSwitchProtocol(HttpResponse response) {
 		Optional<String> protocol = response
-				.getField(HttpStringListField.class, HttpField.UPGRADE)
-				.map(l -> l.get(0));
+				.getField(HttpField.UPGRADE, Converters.STRING_LIST)
+				.map(l -> l.value().get(0));
 		if (!protocol.isPresent()) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setMessageHasBody(false).clearHeaders();

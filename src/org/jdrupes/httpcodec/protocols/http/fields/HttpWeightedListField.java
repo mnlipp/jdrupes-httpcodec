@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.jdrupes.httpcodec.types.Converter;
-import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ListConverter_1;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
 
 /**
@@ -56,7 +56,7 @@ public class HttpWeightedListField<T extends ParameterizedValue<?>>
 	 * @param name the field name
 	 * @param converter the converter for the list
 	 */
-	public HttpWeightedListField(String name, ListConverter<T> converter) {
+	public HttpWeightedListField(String name, ListConverter_1<T> converter) {
 		super(name, new ArrayList<T>(), converter);
 	}
 
@@ -71,7 +71,7 @@ public class HttpWeightedListField<T extends ParameterizedValue<?>>
 	 * 			  the converter for the list
 	 */
 	public HttpWeightedListField(String name, List<T> items, 
-			ListConverter<T> converter) {
+			ListConverter_1<T> converter) {
 		super(name, items, converter);
 	}
 
@@ -87,12 +87,12 @@ public class HttpWeightedListField<T extends ParameterizedValue<?>>
 	 */
 	public static <T extends ParameterizedValue<?>> 
 		HttpWeightedListField<T> fromString(
-			String name, String text, ListConverter<T> converter) 
+			String name, String text, ListConverter_1<T> converter) 
 			throws ParseException {
 		
 		return new HttpWeightedListField<>(
 				name, (List<T>)converter.fromFieldValue(text), 
-				(ListConverter<T>)converter);
+				(ListConverter_1<T>)converter);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class HttpWeightedListField<T extends ParameterizedValue<?>>
 		fromString(String name, String text, Converter<T> itemConverter) 
 			throws ParseException {
 		
-		ListConverter<T> listConverter = new ListConverter<>(itemConverter);
+		ListConverter_1<T> listConverter = new ListConverter_1<>(itemConverter);
 		return new HttpWeightedListField<>(
 				name, listConverter.fromFieldValue(text), listConverter);
 	}

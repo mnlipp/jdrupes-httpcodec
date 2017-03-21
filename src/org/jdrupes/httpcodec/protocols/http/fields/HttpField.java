@@ -18,11 +18,17 @@
 
 package org.jdrupes.httpcodec.protocols.http.fields;
 
+import java.text.ParseException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.Converters;
 
 /**
  * A base class for all kinds of header field values.
@@ -31,7 +37,11 @@ import org.jdrupes.httpcodec.types.Converter;
  * 
  * @see "[MessageHeaders](https://www.iana.org/assignments/message-headers/message-headers.xhtml)"
  */
-public abstract class HttpField<T> {
+public class HttpField<T> {
+
+	// RFC 7230 3.2, 3.2.4
+	protected static final Pattern headerLinePatter = Pattern
+	        .compile("^(" + TOKEN_REGEXP + "):(.*)$");
 
 	/** @see "[RFC 7231, 5.3.2](https://tools.ietf.org/html/rfc7231#section-5.3.2)" */
 	public static final String ACCEPT = "Accept";
@@ -133,18 +143,6 @@ public abstract class HttpField<T> {
 	private Converter<T> converter;
 	
 	/**
-	 * Creates a new representation of a header field. For fields with
-	 * a constant definition in this class, the name is normalized.
-	 * 
-	 * @param name the field name
-	 * @param converter the converter
-	 */
-	protected HttpField(String name, Converter<T> converter) {
-		this.name = fieldNameMap.getOrDefault(name, name);
-		this.converter = converter;
-	}
-
-	/**
 	 * Creates a new representation of a header field with the 
 	 * given value and converter. For fields with a 
 	 * constant definition in this class, the name is normalized.
@@ -153,17 +151,106 @@ public abstract class HttpField<T> {
 	 * @param value the value
 	 * @param converter the converter
 	 */
-	protected HttpField(String name, T value, Converter<T> converter) {
-		this(name, converter);
+	public HttpField(String name, T value, Converter<T> converter) {
+		this.name = fieldNameMap.getOrDefault(name, name);
+		this.converter = converter;
 		this.value = value;
 	}
 
+	/**
+	 * Creates a new representation of a header field from its textual
+	 * representation. For fields with a 
+	 * constant definition in this class, the name is normalized.
+	 * 
+	 * @param headerLine the header line
+	 * @param converter the converter
+	 * @throws ParseException if an error occurs while parsing the header line
+	 */
+	public HttpField(String headerLine, Converter<T> converter) 
+			throws ParseException {
+		this.converter = converter;
+		Matcher hlp = headerLinePatter.matcher(headerLine);
+		if (!hlp.matches()) {
+			throw new ParseException("Invalid header: ", 0);
+		}
+		this.name = fieldNameMap.getOrDefault(hlp.group(1), hlp.group(1));
+		// RFC 7230 3.2.4
+		this.value = converter.fromFieldValue(hlp.group(2).trim());
+	}
+
+	/**
+	 * Returns the proper converter for the header field with the given
+	 * name. Works for all well known
+	 * field names, i.e. the field names defined as constants in this class.
+	 * If the field name is unknown, a string converter is returned.
+	 * 
+	 * @param fieldName
+	 *            the field name
+	 * @return the converter
+	 */
+	public static Converter<?> lookupConverter(String fieldName) {
+		String normalizedFieldName = fieldNameMap
+				.getOrDefault(fieldName, fieldName);
+		switch (normalizedFieldName) {
+		case ACCEPT:
+			return Converters.MEDIA_RANGE;
+		case ACCEPT_LANGUAGE:
+			return Converters.LANGUAGE;
+		case ALLOW:
+			return Converters.STRING_LIST;
+		case COOKIE:
+			return Converters.COOKIE_LIST;
+		case CONNECTION:
+			return Converters.STRING_LIST;
+		case CONTENT_LENGTH:
+			return Converters.LONG;
+		case CONTENT_LOCATION:
+			return Converters.URI_CONV; 
+		case CONTENT_TYPE:
+			return Converters.MEDIA_TYPE;
+		case DATE:
+			return Converters.DATE_TIME;
+		case IF_MATCH:
+			return Converters.STRING_LIST;
+		case IF_MODIFIED_SINCE:
+			return Converters.DATE_TIME;
+		case IF_NONE_MATCH:
+			return Converters.STRING_LIST;
+		case IF_UNMODIFIED_SINCE:
+			return Converters.DATE_TIME;
+		case LAST_MODIFIED:
+			return Converters.DATE_TIME;
+		case LOCATION:
+			return Converters.URI_CONV; 
+		case MAX_FORWARDS:
+			return Converters.LONG; 
+		case RETRY_AFTER:
+			return Converters.DATE_TIME;
+		case SERVER:
+			return HttpProductsDescriptionField.DESCRIPTIONS_CONVERTER;
+		case SET_COOKIE:
+			return Converters.SET_COOKIE;
+		case TRAILER:
+			return Converters.STRING_LIST;
+		case TRANSFER_ENCODING:
+			return Converters.STRING_LIST;
+		case UPGRADE:
+			return Converters.STRING_LIST;
+		case USER_AGENT:
+			return HttpProductsDescriptionField.DESCRIPTIONS_CONVERTER;
+		case VIA:
+			return Converters.STRING_LIST;
+		default:
+			return Converters.STRING;
+		}
+	}
+	
 	/**
 	 * Returns the header field name.
 	 * 
 	 * @return the name
 	 */
-	public String getName() {
+	public String name() {
 		return name;
 	}
 
@@ -172,7 +259,7 @@ public abstract class HttpField<T> {
 	 * 
 	 * @return the field's value
 	 */
-	public T getValue() {
+	public T value() {
 		return value;
 	}
 	
@@ -181,7 +268,7 @@ public abstract class HttpField<T> {
 	 * 
 	 * @return the converter
 	 */
-	public Converter<T> getConverter() {
+	public Converter<T> converter() {
 		return converter;
 	}
 
@@ -213,7 +300,7 @@ public abstract class HttpField<T> {
 	 * @return the field as it occurs in a header
 	 */
 	public String asHeaderField() {
-		return getName() + ": " + asFieldValue();
+		return name() + ": " + asFieldValue();
 	}
 	
 	/* (non-Javadoc)

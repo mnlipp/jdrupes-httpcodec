@@ -76,7 +76,7 @@ public class MediaRange extends MediaBase {
 	 */
 	public static MediaRange fromString(String text) 
 			throws ParseException {
-		return Converters.MEDIA_RANGE_CONVERTER.fromFieldValue(text);
+		return Converters.MEDIA_RANGE.fromFieldValue(text);
 	}
 	
 	/**
@@ -131,7 +131,7 @@ public class MediaRange extends MediaBase {
 					return super.fromFieldValue(text);
 				}
 			},
-			Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);
+			Converters.UNQUOTE_ONLY, MediaRange::new);
 		}
 	}
 

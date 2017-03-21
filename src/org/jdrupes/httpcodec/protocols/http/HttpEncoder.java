@@ -29,18 +29,17 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Stack;
 
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Encoder;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
+import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 
@@ -325,15 +324,15 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 */
 	private void startEncoding() {
 		// Complete content type
-		HttpMediaTypeField contentField = (HttpMediaTypeField) messageHeader
-		        .fields().get(HttpField.CONTENT_TYPE);
-		if (contentField != null) {
-			if ("text".equals(contentField.getValue().getTopLevelType())
-					&& contentField.getValue().getParameter("charset") == null) {
-				messageHeader.setField(new HttpMediaTypeField(
-						HttpField.CONTENT_TYPE,
-						MediaType.builder().from(contentField.getValue())
-						.setParameter("charset", "utf-8").build()));
+		Optional<HttpField<MediaType>> contentField = messageHeader
+				.getField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE);
+		if (contentField.isPresent()) {
+			MediaType type = contentField.get().value();
+			if ("text".equals(type.getTopLevelType())
+					&& type.getParameter("charset") == null) {
+				messageHeader.setField(HttpField.CONTENT_TYPE,
+						MediaType.builder().from(type)
+						.setParameter("charset", "utf-8").build());
 			}
 		}
 		
@@ -351,8 +350,9 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		states.push(State.DONE);
 		// Get a default for closeAfterBody from the header fields
 		closeAfterBody = messageHeader
-		        .getField(HttpStringListField.class, HttpField.CONNECTION)
-		        .map(f -> f.containsIgnoreCase("close")).orElse(false);
+		        .getField(HttpField.CONNECTION, Converters.STRING_LIST)
+		        .map(h -> h.value()).map(f -> f.containsIgnoreCase("close"))
+		        .orElse(false);
 		// If there's no body, start outputting header fields
 		if (!messageHeader.messageHasBody()) {
 			states.push(State.HEADERS);
@@ -363,9 +363,9 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 
 	private void configureBodyHandling() {
 		// Message has a body, find out how to handle it
-		HttpIntField cl = messageHeader.getField(HttpIntField.class,
-		        HttpField.CONTENT_LENGTH).orElse(null);
-		leftToStream = (cl == null ? -1 : cl.getValue());
+		Optional<HttpField<Long>> cl = messageHeader
+				.getField(HttpField.CONTENT_LENGTH, Converters.LONG);
+		leftToStream = (!cl.isPresent() ? -1 : cl.get().value());
 		if (leftToStream >= 0) {
 			// Easiest: we have a content length, works always
 			states.push(State.STREAM_BODY);
@@ -375,16 +375,14 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		if (messageHeader.getProtocol()
 		        .compareTo(HttpProtocol.HTTP_1_0) > 0) {
 			// At least 1.1, use chunked
-			HttpStringListField transEnc = messageHeader.getField(
-			        HttpStringListField.class, HttpField.TRANSFER_ENCODING)
-					.orElse(null);
-			if (transEnc == null) {
-				messageHeader.setField(new HttpStringListField(
-				        HttpField.TRANSFER_ENCODING,
-				        TransferCoding.CHUNKED.toString()));
+			Optional<HttpField<StringList>> transEnc = messageHeader.getField(
+			        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);
+			if (!transEnc.isPresent()) {
+				messageHeader.setField(HttpField.TRANSFER_ENCODING,
+						new StringList(TransferCoding.CHUNKED.toString()));
 			} else {
-				transEnc.remove(TransferCoding.CHUNKED.toString());
-				transEnc.add(TransferCoding.CHUNKED.toString());
+				transEnc.get().value().remove(TransferCoding.CHUNKED.toString());
+				transEnc.get().value().add(TransferCoding.CHUNKED.toString());
 			}
 			states.push(State.CHUNK_BODY);
 			states.push(State.HEADERS);
@@ -515,8 +513,8 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		}
 		if (endOfInput) {
 			// End of body, found content length!
-			messageHeader.setField(new HttpContentLengthField(
-			        collectedBodyData.bytesWritten()));
+			messageHeader.setField(
+					HttpField.CONTENT_LENGTH, collectedBodyData.bytesWritten());
 			states.pop();
 			states.push(State.STREAM_COLLECTED);
 			states.push(State.HEADERS);

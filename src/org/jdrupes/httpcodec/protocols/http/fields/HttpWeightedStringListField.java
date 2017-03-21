@@ -22,7 +22,7 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ListConverter_1;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
 import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
@@ -32,10 +32,10 @@ import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverte
 public class HttpWeightedStringListField 
 	extends HttpWeightedListField<ParameterizedValue<String>> {
 
-	private static final ListConverter<ParameterizedValue<String>>
-		LIST_CONVERTER = new ListConverter<>(
+	private static final ListConverter_1<ParameterizedValue<String>>
+		LIST_CONVERTER = new ListConverter_1<>(
 				new ParameterizedValueConverter<>(
-						Converters.STRING_CONVERTER));
+						Converters.STRING));
 	
 	/**
 	 * Creates a new instance.

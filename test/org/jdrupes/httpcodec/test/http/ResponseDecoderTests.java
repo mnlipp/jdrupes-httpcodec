@@ -27,11 +27,10 @@ import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.CookieList;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -77,25 +76,24 @@ public class ResponseDecoderTests {
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
-		assertEquals(Converters.DATE_TIME_CONVERTER.fromFieldValue(
+		assertEquals(Converters.DATE_TIME.fromFieldValue(
 				"Sat, 23 Jul 2016 16:56:54 GMT"),
-				decoder.getHeader().get().getField(HttpDateTimeField.class,
-						HttpField.RETRY_AFTER).get().getValue());
+				decoder.getHeader().get().getField(HttpField.RETRY_AFTER,
+						Converters.DATE_TIME).get().value());
 		HttpProductsDescriptionField server = decoder.getHeader().get().getField(
 				HttpProductsDescriptionField.class, HttpField.SERVER).get();
-		assertEquals("Apache/2.4.18", server.getValue().get(0).getValue());
-		assertEquals("Ubuntu", server.getValue().get(0).getComments()[0]);
+		assertEquals("Apache/2.4.18", server.value().get(0).getValue());
+		assertEquals("Ubuntu", server.value().get(0).getComments()[0]);
 		body.flip();
 		String bodyText = new String(body.array(), body.position(),
 		        body.limit());
 		assertEquals("Hello World!", bodyText);
 		// Set-Cookies
-		Optional<HttpSetCookieListField> field = decoder.getHeader()
-				.flatMap(h -> h.getField(
-						HttpSetCookieListField.class, HttpField.SET_COOKIE));
-		assertEquals(2, field.get().size());
-		assertEquals("deleted", field.get().valueForName("autorf").get());
-		assertEquals("13BEF4C6DC68E5", field.get().valueForName("MUIDB").get());
+		Optional<HttpField<CookieList>> field = decoder.getHeader().get()
+				.getField(HttpField.SET_COOKIE, Converters.SET_COOKIE);
+		assertEquals(2, field.get().value().size());
+		assertEquals("deleted", field.get().value().valueForName("autorf").get());
+		assertEquals("13BEF4C6DC68E5", field.get().value().valueForName("MUIDB").get());
 	}
 
 }

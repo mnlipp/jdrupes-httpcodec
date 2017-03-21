@@ -131,9 +131,9 @@ public class DecoderContentLengthTests {
 		        .flatMap(h -> h.getField(
 		        		HttpSetCookieListField.class, HttpField.SET_COOKIE));
 		assertTrue(field.isPresent());
-		assertEquals(2, field.get().size());
-		assertEquals("deleted", field.get().valueForName("autorf").get());
-		assertEquals("13BEF4C6DC68E5", field.get().valueForName("MUIDB").get());
+		assertEquals(2, field.get().value().size());
+		assertEquals("deleted", field.get().value().valueForName("autorf").get());
+		assertEquals("13BEF4C6DC68E5", field.get().value().valueForName("MUIDB").get());
 	}
 
 	/**
@@ -181,9 +181,9 @@ public class DecoderContentLengthTests {
 		Optional<HttpSetCookieListField> field = decoder.getHeader()
 		        .flatMap(f -> f.getField(
 		        		HttpSetCookieListField.class, HttpField.SET_COOKIE));
-		assertEquals(2, field.get().size());
-		assertEquals("deleted", field.get().valueForName("autorf").get());
-		assertEquals("13BEF4C6DC68E5", field.get().valueForName("MUIDB").get());
+		assertEquals(2, field.get().value().size());
+		assertEquals("deleted", field.get().value().valueForName("autorf").get());
+		assertEquals("13BEF4C6DC68E5", field.get().value().valueForName("MUIDB").get());
 	}
 
 

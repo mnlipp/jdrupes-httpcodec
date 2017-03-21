@@ -37,13 +37,13 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
 import org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder;
 import org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsFrameHeader;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
+import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
+import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.FormUrlDecoder;
 
 /**
@@ -124,10 +124,10 @@ public class Connection extends Thread {
 		// fall back
 		HttpResponse response = request.getResponse().get()
 				.setStatus(HttpStatus.NOT_FOUND).setMessageHasBody(true);
-		HttpMediaTypeField media;
 		try {
-			media = new HttpMediaTypeField(HttpField.CONTENT_TYPE, 
-				        MediaType.fromString("text/plain; charset=utf-8"));
+			HttpField<MediaType> media = new HttpField<MediaType>(
+					HttpField.CONTENT_TYPE + ": text/plain; charset=utf-8",
+					Converters.MEDIA_TYPE);
 			response.setField(media);
 		} catch (ParseException e) {
 			// Should work...
@@ -139,11 +139,9 @@ public class Connection extends Thread {
 	private void handleGetForm(HttpRequest request) throws IOException {
 		HttpResponse response = request.getResponse().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
-		HttpMediaTypeField media = new HttpMediaTypeField(
-				HttpField.CONTENT_TYPE,
+		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "html")
 				.setParameter("charset", "utf-8").build());
-		response.setField(media);
 		String form = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(
 		        getClass().getResourceAsStream("form.html"), "utf-8"))) {
@@ -179,11 +177,9 @@ public class Connection extends Thread {
 		}
 		response.setStatus(HttpStatus.OK);
 		response.setMessageHasBody(true);
-		HttpMediaTypeField media = new HttpMediaTypeField(
-				HttpField.CONTENT_TYPE, 
+		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "plain")
 				.setParameter("charset", "utf-8").build());
-		response.setField(media);
 		String data = "First name: " + fieldDecoder.getFields().get("firstname")
 		        + "\r\n" + "Last name: "
 		        + fieldDecoder.getFields().get("lastname");
@@ -192,18 +188,18 @@ public class Connection extends Thread {
 	}
 
 	private void handleEcho(HttpRequest request) throws IOException {
-		if (request.getField(HttpStringListField.class, "upgrade")
-				.map(f -> f.containsIgnoreCase("websocket")).orElse(false)) {
+		if (request.getField(
+				HttpField.UPGRADE, Converters.STRING_LIST)
+				.map(f -> f.value().containsIgnoreCase("websocket"))
+				.orElse(false)) {
 			upgradeEcho(request);
 			return;
 		}
 		HttpResponse response = request.getResponse().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
-		HttpMediaTypeField media = new HttpMediaTypeField(
-				HttpField.CONTENT_TYPE,
+		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "html")
 				.setParameter("charset", "utf-8").build());
-		response.setField(media);
 		String page = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(
 		        getClass().getResourceAsStream("echo.html"), "utf-8"))) {
@@ -216,8 +212,7 @@ public class Connection extends Thread {
 	private void upgradeEcho(HttpRequest request) throws IOException {
 		HttpResponse response = request.getResponse().get()
 			.setStatus(HttpStatus.SWITCHING_PROTOCOLS)
-			.setField((new HttpStringListField(HttpField.UPGRADE))
-						.append("websocket"));
+			.setField(HttpField.UPGRADE, new StringList("websocket"));
 		sendResponse(response, null, true);
 	}
 	

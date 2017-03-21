@@ -25,21 +25,18 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CoderResult;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.MessageHeader;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.DynamicByteArray;
 import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
@@ -56,14 +53,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	R extends HttpMessageHeader> 
 	extends HttpCodec<T> implements Decoder<T, R> {
 
-	protected static final String TOKEN = "[" + Pattern.quote(TOKEN_CHARS)
-	        + "]+";
 	protected static final String SP = "[ \\t]+";
 	protected static final String HTTP_VERSION = "HTTP/\\d+\\.\\d";
-
-	// RFC 7230 3.2, 3.2.4
-	protected static final Pattern headerLinePatter = Pattern
-	        .compile("^(" + TOKEN + "):(.*)$");
 
 	private enum State {
 	    // Main states
@@ -421,21 +412,17 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private void newHeaderLine() throws HttpProtocolException, ParseException {
 		headerLength += headerLine.length() + 2;
 		// RFC 7230 3.2
-		Matcher hlp = headerLinePatter.matcher(headerLine);
-		if (!hlp.matches()) {
+		HttpField<?> field;
+		try {
+			field = new HttpField<>(headerLine, Converters.STRING);
+		} catch (ParseException e) {
 			throw new HttpProtocolException(protocolVersion,
 			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
 		}
-		String fieldName = hlp.group(1);
-		// RFC 7230 3.2.4
-		String fieldValue = hlp.group(2).trim();
-		HttpField<?> field;
-		if (fieldName.equalsIgnoreCase(HttpField.SET_COOKIE)) {
-			field = HttpSetCookieListField.fromString(fieldValue);
-		} else {
-			field = HttpStringField.fromString(fieldName, fieldValue);
+		if (field.name().equalsIgnoreCase(HttpField.SET_COOKIE)) {
+			field = new HttpSetCookieListField(headerLine);
 		}
-		switch (field.getName()) {
+		switch (field.name()) {
 		case HttpField.CONTENT_LENGTH:
 			// RFC 7230 3.3.3 (3.)
 			if (building.fields()
@@ -444,13 +431,15 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				break;
 			}
 			// RFC 7230 3.3.3 (4.)
-			HttpContentLengthField existing = building.getField(
-			        HttpContentLengthField.class, HttpField.CONTENT_LENGTH)
-					.orElse(null);
-			if (existing != null && !existing.getValue()
-			        .equals(((HttpContentLengthField) field).getValue())) {
-				throw new HttpProtocolException(protocolVersion,
-				        HttpStatus.BAD_REQUEST);
+			Optional<HttpField<Long>> existing = building.getField(
+			        HttpField.CONTENT_LENGTH, Converters.LONG);
+			if (existing.isPresent()) {
+				@SuppressWarnings("unchecked")
+				HttpField<Long> newLength = (HttpField<Long>)field;
+				if (!existing.get().value().equals(newLength.value())) {
+					throw new HttpProtocolException(protocolVersion,
+							HttpStatus.BAD_REQUEST);
+				}
 			}
 			break;
 		case HttpField.TRANSFER_ENCODING:
@@ -467,21 +456,19 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private void newTrailerLine() throws HttpProtocolException, ParseException {
 		headerLength += headerLine.length() + 2;
 		// RFC 7230 3.2
-		Matcher hlp = headerLinePatter.matcher(headerLine);
-		if (!hlp.matches()) {
+		HttpField<?> field;
+		try {
+			field = new HttpField<>(headerLine, Converters.STRING);
+		} catch (ParseException e) {
 			throw new HttpProtocolException(protocolVersion,
 			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
 		}
-		String fieldName = hlp.group(1);
-		// RFC 7230 3.2.4
-		String fieldValue = hlp.group(2).trim();
-		HttpField<?> field = HttpStringField.fromString(fieldName, fieldValue);
 		// RFC 7230 4.4
-		HttpStringListField trailerField = messageHeader
-		        .computeIfAbsent(HttpStringListField.class, HttpField.TRAILER,
-		        		n -> new HttpStringListField(n));
-		if (!trailerField.containsIgnoreCase(field.getName())) {
-			trailerField.add(field.getName());
+		HttpField<StringList> trailerField = messageHeader
+		        .computeIfAbsent(HttpField.TRAILER, Converters.STRING_LIST,
+		        		StringList::new);
+		if (!trailerField.value().containsIgnoreCase(field.name())) {
+			trailerField.value().add(field.name());
 		}
 		addHeaderField(messageHeader, field);
 	}
@@ -489,16 +476,15 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private void addHeaderField(T header, HttpField<?> field)
 	        throws HttpProtocolException, ParseException {
 		// RFC 7230 3.2.2
-		HttpField<?> existing = header.fields().get(field.getName());
+		HttpField<?> existing = header.fields().get(field.name());
 		if (existing != null) {
-			if (!(existing instanceof HttpListField<?>)
-			        || !(field instanceof HttpListField<?>)
-			        || !(existing.getClass().equals(field.getClass()))) {
+			if (!List.class.isAssignableFrom(existing.value().getClass())
+			        || !List.class.isAssignableFrom(field.value().getClass())) {
 				throw new HttpProtocolException(protocolVersion,
 				        HttpStatus.BAD_REQUEST.getStatusCode(),
-				        "Multiple occurences of field " + field.getName());
+				        "Multiple occurences of field " + field.name());
 			}
-			((HttpListField<?>) existing).combine((HttpListField<?>) field);
+			((List)existing.value()).addAll((List)field.value());
 		} else {
 			header.setField(field);
 		}
@@ -516,10 +502,9 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			states.push(State.RECEIVE_LINE);
 			break;
 		case LENGTH:
-			HttpContentLengthField clf = building.getField(
-			        HttpContentLengthField.class,
-			        HttpField.CONTENT_LENGTH).get();
-			leftToRead = clf.getValue();
+			HttpField<Long> clf = building.getField(
+			        HttpField.CONTENT_LENGTH, Converters.LONG).get();
+			leftToRead = clf.value();
 			if (leftToRead > 0) {
 				states.push(State.LENGTH_RECEIVED);
 				states.push(State.COPY_SPECIFIED);
@@ -558,10 +543,10 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 
 	private void adjustToEndOfMessage() {
 		// RFC 7230 6.3
-		Optional<HttpStringListField> connection = messageHeader
-		        .getField(HttpStringListField.class, HttpField.CONNECTION);
-		if (connection.isPresent() 
-				&& connection.get().containsIgnoreCase("close")) {
+		Optional<HttpField<StringList>> connection = messageHeader
+		        .getField(HttpField.CONNECTION, Converters.STRING_LIST);
+		if (connection.isPresent() && connection.get().value()
+				.stream().anyMatch(s -> s.equalsIgnoreCase("close"))) {
 			states.push(State.CLOSED);
 			return;
 		}

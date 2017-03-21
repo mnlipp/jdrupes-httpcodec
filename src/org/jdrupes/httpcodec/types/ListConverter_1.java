@@ -19,8 +19,8 @@
 package org.jdrupes.httpcodec.types;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.jdrupes.httpcodec.util.ListItemizer;
 
@@ -28,13 +28,10 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  * Used by by classes that convert field values which consist
  * of lists of values.
  * 
- * @param <L> the type of the list
  * @param <I> the type of the items
  */
-public class ListConverter<L extends List<I>, I> 
-	implements Converter<L> {
+public class ListConverter_1<I> implements Converter<List<I>> {
 
-	private Supplier<L> listCreator;
 	private Converter<I> itemConverter;
 	// Used by default in RFC 7230, see section 7.
 	private String delimiters = ",";
@@ -43,12 +40,11 @@ public class ListConverter<L extends List<I>, I>
 	 * Creates a new list converter with the given converter for the items
 	 * and comma as item delimiter.
 	 * 
-	 * @param listCreator a function that creates a new empty list
 	 * @param itemConverter the converter for the items
 	 * @see "[ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)"
 	 */
-	public ListConverter(Supplier<L> listCreator, Converter<I> itemConverter) {
-		this(listCreator, itemConverter, ",");
+	public ListConverter_1(Converter<I> itemConverter) {
+		this.itemConverter = itemConverter;
 	}
 
 	/**
@@ -58,13 +54,10 @@ public class ListConverter<L extends List<I>, I>
 	 * character will be used when items are joined in a
 	 * textual representation.
 	 * 
-	 * @param listCreator a function that creates a new empty list
 	 * @param itemConverter the converter for the items
 	 * @param delimiters the delimiters
 	 */
-	public ListConverter(Supplier<L> listCreator, Converter<I> itemConverter, 
-			String delimiters) {
-		this.listCreator = listCreator;
+	public ListConverter_1(Converter<I> itemConverter, String delimiters) {
 		this.itemConverter = itemConverter;
 		this.delimiters = delimiters;
 	}
@@ -82,7 +75,7 @@ public class ListConverter<L extends List<I>, I>
 	 * @see org.jdrupes.httpcodec.protocols.http.fields.Converter#asFieldValue(java.lang.Object)
 	 */
 	@Override
-	public String asFieldValue(L value) {
+	public String asFieldValue(List<I> value) {
 		if (value.size() == 0) {
 			throw new IllegalStateException(
 			        "Field with list value may not be empty.");
@@ -106,8 +99,8 @@ public class ListConverter<L extends List<I>, I>
 	 * @see Converter#fromFieldValue(java.lang.String)
 	 */
 	@Override
-	public L fromFieldValue(String text) throws ParseException {
-		L result = listCreator.get();
+	public List<I> fromFieldValue(String text) throws ParseException {
+		List<I> result = new ArrayList<>();
 		ListItemizer itemizer = new ListItemizer(text, delimiters);
 		while (true) {
 			String nextRepr = itemizer.nextItem();

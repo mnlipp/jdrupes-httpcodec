@@ -18,12 +18,11 @@
 
 package org.jdrupes.httpcodec.protocols.http.fields;
 
-import java.net.HttpCookie;
 import java.text.ParseException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.CookieList;
 
 /**
  * Represents all "Set-Cookie" fields in a Response header. Several cookies are
@@ -31,34 +30,33 @@ import org.jdrupes.httpcodec.types.Converters;
  * header fields, they are converted to a field with a list of values in the
  * internal representation.
  * 
+ * This class overrides the method {@link #asFieldValue()} to make
+ * it return a several header fields (as text).
+ * 
  * @see "[RFC 6265](https://tools.ietf.org/html/rfc6265)"
  */
-public class HttpSetCookieListField extends HttpListField<HttpCookie> {
+public class HttpSetCookieListField extends HttpField<CookieList> {
 
 	/**
-	 * Creates a new header field object with the field name "Set-Cookie".
-	 */
-	public HttpSetCookieListField() {
-		super(HttpField.SET_COOKIE, Converters.COOKIE_CONVERTER);
-	}
-
-	/**
-	 * Creates a new object and adds the set-cookie obtained by parsing the
-	 * given String.
+	 * Creates a new header field object.
 	 * 
-	 * @param text
-	 *            the string to parse
-	 * @return this object for easy chaining
-	 * @throws ParseException
-	 *             if the input violates the field format
+	 * @param headerLine the header line
+	 * @param converter the converter
+	 * @throws ParseException if an error occurs while parsing the header line
 	 */
-	public static HttpSetCookieListField fromString(String text)
-	        throws ParseException {
-		HttpSetCookieListField result = new HttpSetCookieListField();
-		result.addAll(Converters.COOKIE_CONVERTER.fromFieldValue(text));
-		return result;
+	public HttpSetCookieListField(String headerLine) throws ParseException {
+		super(headerLine, Converters.SET_COOKIE);
 	}
-	
+
+	/**
+	 * Creates a new header field object.
+	 * 
+	 * @param value the value
+	 */
+	public HttpSetCookieListField(CookieList value) {
+		super(HttpField.SET_COOKIE, value, Converters.SET_COOKIE);
+	}
+
 	/**
 	 * Returns the string representation of this header field as it appears in
 	 * an HTTP message. Set-Cookie is special because each cookie
@@ -70,19 +68,8 @@ public class HttpSetCookieListField extends HttpListField<HttpCookie> {
 	 */
 	@Override
 	public String asHeaderField() {
-		return stream().map(cookie -> getName() + ": " + cookie.toString())
+		return value().stream().map(
+				cookie -> name() + ": " + cookie.toString())
 				.collect(Collectors.joining("\r\n"));
-	}
-
-	/**
-	 * Returns the value for the cookie with the given name.
-	 * 
-	 * @param name
-	 *            the name
-	 * @return the value if a cookie with the given name exists
-	 */
-	public Optional<String> valueForName(String name) {
-		return stream().filter(cookie -> cookie.getName().equals(name))
-			.findFirst().map(HttpCookie::getValue);
 	}
 }

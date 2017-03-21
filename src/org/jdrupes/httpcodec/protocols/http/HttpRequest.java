@@ -78,6 +78,15 @@ public class HttpRequest extends HttpMessageHeader {
 	}
 
 	/* (non-Javadoc)
+	 * @see HttpMessageHeader#setField(java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public <T> HttpRequest setField(String name, T value) {
+		super.setField(name, value);
+		return this;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setMessageHasBody(boolean)
 	 */
 	@Override

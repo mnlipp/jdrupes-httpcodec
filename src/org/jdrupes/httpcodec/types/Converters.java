@@ -22,7 +22,6 @@ import java.net.HttpCookie;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.List;
 import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
@@ -30,6 +29,7 @@ import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
 import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
 import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
+import org.jdrupes.httpcodec.types.ParameterizedValue.ParamValueConverterBase;
 
 /**
  * Utility methods and singletons for converters.
@@ -45,7 +45,7 @@ public final class Converters {
 	 * A noop converter, except that text is trimmed when converted to
 	 * a value.
 	 */
-	public static final Converter<String> UNQUOTED_STRING_CONVERTER 
+	public static final Converter<String> UNQUOTED_STRING 
 		= new Converter<String>() {
 	
 		@Override
@@ -63,7 +63,7 @@ public final class Converters {
 	 * A noop converter, except that text is trimmed and unquoted
 	 * when converted to a value.
 	 */
-	public static final Converter<String> UNQUOTE_ONLY_CONVERTER 
+	public static final Converter<String> UNQUOTE_ONLY 
 		= new Converter<String>() {
 	
 		@Override
@@ -80,7 +80,7 @@ public final class Converters {
 	/**
 	 * A converter that quotes and unquoted strings as necessary.
 	 */
-	public static final Converter<String> STRING_CONVERTER 
+	public static final Converter<String> STRING 
 		= new Converter<String>() {
 	
 		@Override
@@ -94,13 +94,16 @@ public final class Converters {
 		}
 	};
 	
-	public static final ListConverter<String> STRING_LIST_CONVERTER 
-		= new ListConverter<String>(Converters.STRING_CONVERTER);
+	public static final ListConverter_1<String> STRING_LIST_CONVERTER_1 
+		= new ListConverter_1<String>(Converters.STRING);
+
+	public static final Converter<StringList> STRING_LIST 
+		= new ListConverter<>(StringList::new, STRING);
 
 	/**
 	 * An integer converter.
 	 */
-	public static final Converter<Long> INT_CONVERTER = new Converter<Long>() {
+	public static final Converter<Long> LONG = new Converter<Long>() {
 
 		@Override
 		public String asFieldValue(Long value) {
@@ -120,34 +123,34 @@ public final class Converters {
 	/**
 	 * An integer list converter.
 	 */
-	public static final ListConverter<Long> INT_LIST_CONVERTER 
-		= new ListConverter<Long>(INT_CONVERTER);
+	public static final ListConverter_1<Long> LONG_LIST 
+		= new ListConverter_1<Long>(LONG);
 
 	/**
 	 * A date/time converter.
 	 */
-	public static final Converter<Instant> DATE_TIME_CONVERTER 
+	public static final Converter<Instant> DATE_TIME 
 		= new InstantConverter();
 
 
 	/**
 	 * A converter for cookies.
 	 */
-	public static final ListConverter<HttpCookie> COOKIE_CONVERTER 
-		= new ListConverter<HttpCookie>(null) {
+	public static final ListConverter<CookieList, HttpCookie> SET_COOKIE 
+		= new ListConverter<CookieList, HttpCookie>(CookieList::new, null) {
 
 		@Override
-		public List<HttpCookie> fromFieldValue(String text)
+		public CookieList fromFieldValue(String text)
 				throws ParseException {
 			try {
-				return HttpCookie.parse(text);
+				return new CookieList(HttpCookie.parse(text));
 			} catch (IllegalArgumentException e) {
 				throw new ParseException(text, 0);
 			}
 		}
 
 		@Override
-		public String asFieldValue(List<HttpCookie> value) {
+		public String asFieldValue(CookieList value) {
 			throw new UnsupportedOperationException();
 		}
 	};
@@ -155,8 +158,9 @@ public final class Converters {
 	/**
 	 * A converter for a list of cookies.
 	 */
-	public static final ListConverter<HttpCookie> COOKIE_LIST_CONVERTER 
-		= new ListConverter<HttpCookie>(new Converter<HttpCookie>() {
+	public static final ListConverter<CookieList, HttpCookie> COOKIE_LIST 
+		= new ListConverter<CookieList, HttpCookie>(CookieList::new,
+				new Converter<HttpCookie>() {
 	
 		@Override
 		public String asFieldValue(HttpCookie value) {
@@ -178,7 +182,7 @@ public final class Converters {
 	 * A converter for a language or language range. 
 	 * Language range "`*`" is converted to a Locale with an empty language.
 	 */
-	public static final Converter<Locale> LANGUAGE_CONVERTER 
+	public static final Converter<Locale> LANGUAGE 
 		= new Converter<Locale>() {
 		
 		@Override
@@ -195,27 +199,47 @@ public final class Converters {
 	};
 	
 	/**
+	 * A converter for a list of languages.
+	 */
+	public static final ListConverter<WeightedList<ParameterizedValue<Locale>>,
+		ParameterizedValue<Locale>> LANGUAGE_LIST 
+			= new ListConverter<WeightedList<ParameterizedValue<Locale>>,
+					ParameterizedValue<Locale>>(WeightedList::new,
+							new ParamValueConverterBase
+								<ParameterizedValue<Locale>, Locale>(
+										LANGUAGE, ParameterizedValue<Locale>::new) {
+					});
+
+	/**
 	 * A converter for the media "topLevelType/Subtype" pair.
 	 */
-	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR_CONVERTER
+	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR
 		= new MediaTypePairConverter();
 
 	/**
 	 * A converter for a media type pair with parameters.
 	 */
-	public static final Converter<MediaRange> MEDIA_RANGE_CONVERTER 
+	public static final Converter<MediaRange> MEDIA_RANGE 
 		= new MediaRangeConverter();
+
+	/**
+	 * A converter for a list of media ranges.
+	 */
+	public static final ListConverter<WeightedList<MediaRange>,
+		MediaRange> MEDIA_RANGE_LIST 
+			= new ListConverter<WeightedList<MediaRange>,
+				MediaRange>(WeightedList::new, MEDIA_RANGE);
 
 	/**
 	 * A converter for a media type pair with parameters.
 	 */
-	public static final Converter<MediaType> MEDIA_TYPE_CONVERTER 
+	public static final Converter<MediaType> MEDIA_TYPE 
 		= new MediaTypeConverter();
 
 	/**
 	 * A converter for a URI.
 	 */
-	public static final Converter<URI> URI_CONVERTER 
+	public static final Converter<URI> URI_CONV 
 		= new Converter<URI>() {
 		
 		@Override

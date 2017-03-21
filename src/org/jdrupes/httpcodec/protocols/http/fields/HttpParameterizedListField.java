@@ -21,7 +21,7 @@ package org.jdrupes.httpcodec.protocols.http.fields;
 import java.util.List;
 
 import org.jdrupes.httpcodec.types.Converter;
-import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.ListConverter_1;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
 import org.jdrupes.httpcodec.types.ParameterizedValue.ParameterizedValueConverter;
 
@@ -44,7 +44,7 @@ public class HttpParameterizedListField<U>
 	 * @param listConverter the converter for the complete list content
 	 */
 	public HttpParameterizedListField(String name, 
-			ListConverter<ParameterizedValue<U>> listConverter) {
+			ListConverter_1<ParameterizedValue<U>> listConverter) {
 		super(name, listConverter);
 	}
 
@@ -59,7 +59,7 @@ public class HttpParameterizedListField<U>
 	 */
 	public HttpParameterizedListField(String name,
 			List<ParameterizedValue<U>> items,
-			ListConverter<ParameterizedValue<U>> listConverter) {
+			ListConverter_1<ParameterizedValue<U>> listConverter) {
 		super(name, items, listConverter);
 	}
 
@@ -71,9 +71,9 @@ public class HttpParameterizedListField<U>
 	 * @param valueConverter the converter for a value (without parameters)
 	 * @return the converter for a list of parameterized values
 	 */
-	public static <T> ListConverter<ParameterizedValue<T>>
+	public static <T> ListConverter_1<ParameterizedValue<T>>
 		createListConverter(Converter<T> valueConverter) {
-		return new ListConverter<ParameterizedValue<T>>(
+		return new ListConverter_1<ParameterizedValue<T>>(
 				new ParameterizedValueConverter<T>(valueConverter));
 	}
 }

@@ -23,9 +23,8 @@ import java.util.Optional;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
-import org.jdrupes.httpcodec.protocols.http.fields.HttpContentLengthField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
+import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
 
 /**
@@ -56,6 +55,15 @@ public class HttpResponse extends HttpMessageHeader {
 	@Override
 	public HttpResponse setField(HttpField<?> value) {
 		super.setField(value);
+		return this;
+	}
+	
+	/* (non-Javadoc)
+	 * @see HttpMessageHeader#setField(java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public <T> HttpResponse setField(String name, T value) {
+		super.setField(name, value);
 		return this;
 	}
 
@@ -123,8 +131,8 @@ public class HttpResponse extends HttpMessageHeader {
 	 */
 	public HttpResponse setContentType(String type, String subtype) 
 			throws ParseException {
-		return setField(new HttpMediaTypeField(
-				HttpField.CONTENT_TYPE, new MediaType(type, subtype)));
+		setField(HttpField.CONTENT_TYPE, new MediaType(type, subtype));
+		return this;
 	}
 
 	/**
@@ -139,10 +147,10 @@ public class HttpResponse extends HttpMessageHeader {
 	 */
 	public HttpResponse setContentType(String type, String subtype,
 			String charset) throws ParseException {
-		HttpMediaTypeField mt = new HttpMediaTypeField(HttpField.CONTENT_TYPE,
+		setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType(type, subtype)
 				.setParameter("charset", charset).build());
-		return setField(mt);
+		return this;
 	}
 	
 	/**
@@ -152,7 +160,8 @@ public class HttpResponse extends HttpMessageHeader {
 	 * @return the response for easy chaining
   	 */
 	public HttpResponse setContentLength(long length) {
-		return setField(new HttpContentLengthField(length));
+		return setField(new HttpField<>(
+				HttpField.CONTENT_LENGTH, length, Converters.LONG));
 	}
 	
 	/**

@@ -260,7 +260,7 @@ public class ParameterizedValue<U> {
 		 */
 		public ParamValueConverterBase(Converter<U> valueConverter,
 				BiFunction<U, Map<String,String>, P> paramValueConstructor) {
-			this(valueConverter, Converters.UNQUOTED_STRING_CONVERTER,
+			this(valueConverter, Converters.UNQUOTED_STRING,
 					paramValueConstructor);
 		}
 

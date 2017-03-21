@@ -21,6 +21,7 @@ package org.jdrupes.httpcodec.test.fields;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,20 +31,17 @@ import java.util.Locale;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpDateTimeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpIntField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpMediaTypeField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpUriField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedLanguageListField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedMediaRangeListField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedStringListField;
 import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.MediaRange;
+import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
+import org.jdrupes.httpcodec.types.StringList;
+import org.jdrupes.httpcodec.types.WeightedList;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -73,76 +71,79 @@ public class FieldParsingTests {
 	
 	@Test
 	public void testString() throws ParseException {
-		HttpField<?> fv = HttpStringField.fromString("Test", "Hello");
-		assertEquals("Hello", fv.getValue());
+		HttpField<?> fv = new HttpField<String>("Test: Hello", Converters.STRING);
+		assertEquals("Hello", fv.value());
 	}
 
 	@Test
 	public void testStringList() throws ParseException {
-		HttpStringListField fv = HttpStringListField.fromString("Test",
-		        "How, are,you,  out, there");
-		assertEquals("How", fv.get(0));
-		assertEquals("are", fv.get(1));
-		assertEquals("you", fv.get(2));
-		assertEquals("out", fv.get(3));
-		assertEquals("there", fv.get(4));
-		assertEquals(5, fv.size());
+		HttpField<StringList> fv = new HttpField<>(
+				"Test: How, are,you,  out, there", Converters.STRING_LIST);
+		assertEquals("How", fv.value().get(0));
+		assertEquals("are", fv.value().get(1));
+		assertEquals("you", fv.value().get(2));
+		assertEquals("out", fv.value().get(3));
+		assertEquals("there", fv.value().get(4));
+		assertEquals(5, fv.value().size());
 	}
 
 	@Test
 	public void testQuoted() throws ParseException {
-		HttpStringListField fv = HttpStringListField.fromString("Test",
-				"\"How \\\"are\",you,  \"out, there\"");
-		assertEquals("How \"are", fv.get(0));
-		assertEquals("you", fv.get(1));
-		assertEquals("out, there", fv.get(2));
-		assertEquals(3, fv.size());
+		HttpField<StringList> fv = new HttpField<>(
+				"Test: \"How \\\"are\",you,  \"out, there\"",
+				Converters.STRING_LIST);
+		assertEquals("How \"are", fv.value().get(0));
+		assertEquals("you", fv.value().get(1));
+		assertEquals("out, there", fv.value().get(2));
+		assertEquals(3, fv.value().size());
 	}
 
 	@Test
 	public void testUnquote() throws ParseException {
-		HttpField<?> fv = HttpStringField.fromString("Test", "How are you?");
-		assertEquals("How are you?", fv.getValue());
-		fv = HttpStringField.fromString("Test", "\"How \\\"are\"");
-		assertEquals("How \"are", fv.getValue());
+		HttpField<?> fv = new HttpField<String>(
+				"Test: How are you?", Converters.STRING);
+		assertEquals("How are you?", fv.value());
+		fv = new HttpField<String>(
+				"Test: \"How \\\"are\"", Converters.STRING);
+		assertEquals("How \"are", fv.value());
 	}
 	
 	@Test
 	public void testMediaType() throws ParseException {
-		HttpMediaTypeField mt = HttpMediaTypeField.fromString("Test",
-		        "text/html;charset=utf-8");
+		HttpField<MediaType> mt = new HttpField<>(
+				"Test: text/html;charset=utf-8", Converters.MEDIA_TYPE);
 		assertEquals("text/html; charset=utf-8", mt.asFieldValue());
-		mt = HttpMediaTypeField.fromString("Test",
-		        "Text/HTML;Charset=\"utf-8\"");
+		mt = new HttpField<>("Test: Text/HTML;Charset=\"utf-8\"",
+				Converters.MEDIA_TYPE);
 		assertEquals("text/html; charset=utf-8", mt.asFieldValue());
-		mt = HttpMediaTypeField.fromString("Test",
-		        "text/html; charset=\"utf-8\"");
+		mt = new HttpField<>("Test: text/html; charset=\"utf-8\"",
+				Converters.MEDIA_TYPE);
 		assertEquals("text/html; charset=utf-8", mt.asFieldValue());
 	}
 	
 	@Test
 	public void testParseDateType() throws ParseException {
 		String dateTime = "Tue, 15 Nov 1994 08:12:31 GMT";
-		HttpDateTimeField field = HttpDateTimeField
-				.fromString(HttpField.DATE, dateTime);
-		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
+		HttpField<Instant> field = new HttpField<>(
+				HttpField.DATE + ": " + dateTime, Converters.DATE_TIME);
+		ZonedDateTime value = field.value().atZone(ZoneId.of("GMT"));
 		assertEquals(15, value.getDayOfMonth());
 		assertEquals(Month.NOVEMBER, value.getMonth());
 		assertEquals(1994, value.getYear());
 		assertEquals(8, value.getHour());
 		assertEquals(12, value.getMinute());
 		assertEquals(31, value.getSecond());
-		HttpDateTimeField back = new HttpDateTimeField(
-				HttpField.DATE, value.toInstant());
+		HttpField<Instant> back = new HttpField<>(
+				HttpField.DATE, value.toInstant(), Converters.DATE_TIME);
 		assertEquals(dateTime, back.asFieldValue());
 	}
 	
 	@Test
 	public void testParseDateRfc850() throws ParseException {
 		String dateTime = "Sunday, 06-Nov-94 08:49:37 GMT";
-		HttpDateTimeField field = HttpDateTimeField
-				.fromString(HttpField.DATE, dateTime);
-		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
+		HttpField<Instant> field = new HttpField<>(
+				HttpField.DATE + ": " + dateTime, Converters.DATE_TIME);
+		ZonedDateTime value = field.value().atZone(ZoneId.of("GMT"));
 		assertEquals(6, value.getDayOfMonth());
 		assertEquals(Month.NOVEMBER, value.getMonth());
 		assertEquals(1994, value.getYear());
@@ -154,9 +155,9 @@ public class FieldParsingTests {
 	@Test
 	public void testParseDateAnsi() throws ParseException {
 		String dateTime = "Sun Nov  6 08:49:37 1994";
-		HttpDateTimeField field = HttpDateTimeField
-				.fromString(HttpField.DATE, dateTime);
-		ZonedDateTime value = field.getValue().atZone(ZoneId.of("GMT"));
+		HttpField<Instant> field = new HttpField<>(
+				HttpField.DATE + ": " + dateTime, Converters.DATE_TIME);
+		ZonedDateTime value = field.value().atZone(ZoneId.of("GMT"));
 		assertEquals(6, value.getDayOfMonth());
 		assertEquals(Month.NOVEMBER, value.getMonth());
 		assertEquals(1994, value.getYear());
@@ -167,29 +168,30 @@ public class FieldParsingTests {
 	
 	@Test
 	public void testIntFromString() throws ParseException {
-		HttpIntField field = HttpIntField.fromString("test", "42");
-		assertEquals(42, field.getValue().longValue());
+		HttpField<Long> field = new HttpField<>(
+				"test: 42", Converters.LONG);
+		assertEquals(42, field.value().longValue());
 	}
 	
 	@Test
 	public void testAccept() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Accept",
-				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"));
-		HttpWeightedMediaRangeListField field = hdr.getField(
-				HttpWeightedMediaRangeListField.class, "Accept").get();
-		field.sortByWeightDesc();
-		Iterator<MediaRange> itr = field.iterator();
+		hdr.setField(HttpField.ACCEPT,
+				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
+		WeightedList<MediaRange> value = hdr.getValue(
+				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get();
+		value.sortByWeightDesc();
+		Iterator<MediaRange> itr = value.iterator();
 		assertEquals("text/html", itr.next().toString());
 		assertEquals("text/x-c", itr.next().toString());
 		assertEquals("text/x-dvi; q=0.8", itr.next().toString());
 		assertEquals("text/plain; q=0.5", itr.next().toString());
 		// Second
-		hdr.setField(new HttpStringField("Accept", "audio/*; q=0.2, audio/basic"));
-		field = hdr.getField(
-				HttpWeightedMediaRangeListField.class, "Accept").get();
-		itr = field.iterator();
+		hdr.setField(HttpField.ACCEPT, "audio/*; q=0.2, audio/basic");
+		value = hdr.getValue(
+				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
+		itr = value.iterator();
 		assertEquals("audio/*; q=0.2", itr.next().toString());
 		assertEquals("audio/basic", itr.next().toString());
 	}	
@@ -198,8 +200,7 @@ public class FieldParsingTests {
 	public void testAcceptCharset() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField(
-				"Accept-Charset", "iso-8859-5, unicode-1-1;q=0.8"));
+		hdr.setField(HttpField.ACCEPT_CHARSET, "iso-8859-5, unicode-1-1;q=0.8");
 		HttpWeightedStringListField field = hdr.getField(
 				HttpWeightedStringListField.class, "Accept-Charset").get();
 		field.sortByWeightDesc();
@@ -212,14 +213,16 @@ public class FieldParsingTests {
 	public void testAcceptLocale() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField(
-				"Accept-Language", "da, en-gb;q=0.8, *; q=0.1, en;q=0.7"));
-		HttpWeightedLanguageListField field = hdr.getField(
-				HttpWeightedLanguageListField.class, "Accept-Language").get();
-		field.sortByWeightDesc();
+		hdr.setField(HttpField.ACCEPT_LANGUAGE,
+				"da, en-gb;q=0.8, *; q=0.1, en;q=0.7");
+		HttpField<WeightedList<ParameterizedValue<Locale>>> field = hdr.getField(
+				HttpField.ACCEPT_LANGUAGE, Converters.LANGUAGE_LIST).get();
+		field.value().sortByWeightDesc();
+		@SuppressWarnings("unchecked")
 		Converter<ParameterizedValue<Locale>> itemConverter 
-			= field.getConverter().getItemConverter();
-		Iterator<ParameterizedValue<Locale>> itr = field.iterator();
+			= ((ListConverter<WeightedList<ParameterizedValue<Locale>>, 
+					ParameterizedValue<Locale>>)field.converter()).getItemConverter();
+		Iterator<ParameterizedValue<Locale>> itr = field.value().iterator();
 		assertEquals("da", itemConverter.asFieldValue(itr.next()));
 		assertEquals("en-GB; q=0.8", 
 				itemConverter.asFieldValue(itr.next()));
@@ -233,9 +236,9 @@ public class FieldParsingTests {
 	public void testAllow() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Allow", "GET, HEAD, PUT"));
-		HttpStringListField field = hdr.getField(
-				HttpStringListField.class, "Allow").get();
+		hdr.setField(HttpField.ALLOW, "GET, HEAD, PUT");
+		StringList field = hdr.getValue(
+				HttpField.ALLOW, Converters.STRING_LIST).get();
 		assertEquals("GET", field.get(0));
 		assertEquals("HEAD", field.get(1));
 		assertEquals("PUT", field.get(2));
@@ -263,20 +266,21 @@ public class FieldParsingTests {
 	public void testContentLocation() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Content-Location", "test/index.html"));
-		HttpUriField field = hdr.getField(
-				HttpUriField.class, "Content-Location").get();
-		assertEquals("test/index.html", field.getValue().getPath());
+		hdr.setField(HttpField.CONTENT_LOCATION, "test/index.html");
+		HttpField<URI> field = hdr.getField(
+				HttpField.CONTENT_LOCATION, Converters.URI_CONV).get();
+		assertEquals("test/index.html", field.value().getPath());
 	}
 	
 	@Test
 	public void testMaxForwards() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpStringField("Max-Forwards", "10"));
-		HttpIntField field = hdr.getField(
-				HttpIntField.class, "Max-Forwards").get();
-		assertEquals(10, field.getValue().intValue());
+		hdr.setField(new HttpField<Long>(
+				"Max-Forwards: 10", Converters.LONG));
+		HttpField<Long> field = hdr.getField(
+				HttpField.MAX_FORWARDS, Converters.LONG).get();
+		assertEquals(10, field.value().intValue());
 	}
 
 }

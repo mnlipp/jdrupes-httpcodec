@@ -33,8 +33,8 @@ import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 /**
  * A decoder for HTTP requests that accepts data from a sequence of
@@ -59,7 +59,7 @@ public class HttpRequestDecoder
 
 	// RFC 7230 3.1.1
 	private static final Pattern requestLinePatter = Pattern
-	        .compile("^(" + TOKEN + ")" + SP + "([^ \\t]+)" + SP + "("
+	        .compile("^(" + TOKEN_REGEXP + ")" + SP + "([^ \\t]+)" + SP + "("
 	                + HTTP_VERSION + ")$");
 	private final Result.Factory resultFactory	= new Result.Factory(this);
 	
@@ -83,8 +83,8 @@ public class HttpRequestDecoder
 		} catch (HttpProtocolException e) {
 			HttpResponse response = new HttpResponse(e.getHttpVersion(), 
 					e.getStatusCode(), e.getReasonPhrase(), false);
-			response.setField(
-			        new HttpStringListField(HttpField.CONNECTION, "close"));
+			response.setField(new HttpField<>(HttpField.CONNECTION,
+					new StringList("close"), Converters.STRING_LIST));
 			return resultFactory().newResult(false, false, false, response, true);
 		}
 	}
@@ -149,11 +149,11 @@ public class HttpRequestDecoder
 			throws HttpProtocolException {
 		reportHeaderReceived = true;
 		// Handle field of special interest
-		Optional<HttpStringField> host = message.getField(
-				HttpStringField.class, HttpField.HOST);
+		Optional<HttpField<String>> host = message.getField(
+				HttpField.HOST, Converters.STRING);
 		if (host.isPresent()) {
 			try {
-				URI parsed = new URI("http://" + host.get().getValue());
+				URI parsed = new URI("http://" + host.get().value());
 				message.setHostAndPort(parsed.getHost(), parsed.getPort());
 			} catch (URISyntaxException e) {
 				throw new HttpProtocolException(protocolVersion,
@@ -168,19 +168,20 @@ public class HttpRequestDecoder
 				        "HTTP 1.1 request must have a Host field.");
 			}
 		}
-		if (message.getField(HttpStringListField.class, HttpField.CONNECTION)
+		if (message.getField(HttpField.CONNECTION, 
+				Converters.STRING_LIST).map(h -> h.value())
 				.map(f -> f.containsIgnoreCase("close")).orElse(false)) {
 			// RFC 7230 6.6.
-			message.getResponse().get().setField(new HttpStringListField(
-			        HttpField.CONNECTION, "close"));
+			message.getResponse().get().setField(new HttpField<>(
+			        HttpField.CONNECTION, new StringList("close"), 
+			        Converters.STRING_LIST));
 		}
 
 		// Find out about body
-		HttpStringListField transEncs = message.getField(
-		        HttpStringListField.class, HttpField.TRANSFER_ENCODING)
-				.orElse(null);
-		if (transEncs != null) {
-			List<String> tecs = transEncs.getValue();
+		Optional<HttpField<StringList>> transEncs = message.getField(
+		        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);
+		if (transEncs.isPresent()) {
+			List<String> tecs = transEncs.get().value();
 			// RFC 7230 3.3.1, currently only chunked is supported
 			if (tecs.stream().anyMatch(s -> !s.equalsIgnoreCase(
 							TransferCoding.CHUNKED.toString()))) {

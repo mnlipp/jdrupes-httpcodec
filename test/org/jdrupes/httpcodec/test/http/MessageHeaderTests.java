@@ -24,7 +24,8 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 import static org.junit.Assert.*;
 
@@ -39,8 +40,8 @@ public class MessageHeaderTests {
 	public void testClose() throws ParseException {
 		HttpMessageHeader msgHdr = new HttpResponse(
 				HttpProtocol.HTTP_1_1, 400, "", false);
-		msgHdr.setField(HttpStringListField.fromString(
-				HttpField.CONNECTION, "close"));
+		msgHdr.setField(new HttpField<>(HttpField.CONNECTION,
+				new StringList("close"), Converters.STRING_LIST));
 		assertTrue(msgHdr.isFinal());
 	}
 

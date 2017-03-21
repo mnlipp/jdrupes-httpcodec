@@ -21,20 +21,22 @@ package org.jdrupes.httpcodec.protocols.http;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.jdrupes.httpcodec.MessageHeader;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpStringListField;
+import org.jdrupes.httpcodec.types.Converter;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 /**
  * Represents an HTTP message header (either request or response).
@@ -77,22 +79,37 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	}
 	
 	/**
-	 * Set a header field for the message.
+	 * Sets a header field for the message.
 	 * 
 	 * @param value the header field's value
 	 * @return the message header for easy chaining
 	 */
 	public HttpMessageHeader setField(HttpField<?> value) {
-		headers.put(value.getName(), value);
+		headers.put(value.name(), value);
 		// Check some consistency rules
-		if (value.getName().equalsIgnoreCase(HttpField.UPGRADE)) {
-			computeIfAbsent(HttpStringListField.class, HttpField.CONNECTION,
-					n -> new HttpStringListField(n))
-				.appendIfNotContained(HttpField.UPGRADE);
+		if (value.name().equalsIgnoreCase(HttpField.UPGRADE)) {
+			computeIfAbsent(HttpField.CONNECTION,
+					Converters.STRING_LIST, StringList::new)
+			.value().appendIfNotContained(HttpField.UPGRADE);
 		}
 		return this;
 	}
 
+	/**
+	 * Sets a header field for the message. The converter for the
+	 * field is lookup using {@link HttpField#lookupConverter(String)}.
+	 * 
+	 * @param name the field name
+	 * @param value the header field's value
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> HttpMessageHeader setField(String name, T value) {
+		setField(new HttpField<T>(
+				name, value, (Converter<T>)HttpField.lookupConverter(name)));
+		return this;
+	}
+	
 	/**
 	 * Clear all headers.
 	 * 
@@ -141,15 +158,16 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * @param name the field name
 	 * @return the header field if it exists
 	 */
-	public <T extends HttpField<?>> Optional<T> 
+	public <T extends HttpField<?>> Optional<T>
 		getField(Class<T> type, String name) {
 		HttpField<?> field = headers.get(name);
 		// Not found or type matches
 		if (field == null || type.isAssignableFrom(field.getClass()) ) {
 			return Optional.ofNullable(type.cast(field));
 		}
+		Object value = field.value();
 		// Not a string field
-		if (!(field instanceof HttpStringField)) {
+		if (!(value instanceof String)) {
 			return Optional.empty();
 		}
 		// Try conversion...
@@ -183,12 +201,12 @@ public abstract class HttpMessageHeader implements MessageHeader {
 			if (fromString.getParameterTypes().length == 1) {
 				@SuppressWarnings("unchecked")
 				T result = (T)fromString.invoke(
-						null, ((HttpStringField)field).getValue());
+						null, ((HttpField<String>)field).value());
 				newField = result;
 			} else {
 				@SuppressWarnings("unchecked")
 				T result = (T)fromString.invoke(
-						null, name, ((HttpStringField)field).getValue());
+						null, name, ((HttpField<String>)field).value());
 				newField = result;
 			}
 			removeField(name);
@@ -201,34 +219,111 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	}
 
 	/**
-	 * Convenience method for getting a field with a string value.
+	 * Returns the header field with the given type if it exists.
 	 * 
+	 * Header fields are provisionally parsed as 
+	 * {@link HttpStringField}s. When an attempt is made to
+	 * retrieve such a string field with its real type,
+	 * it is automatically converted to the real type.
+	 * 
+	 * In order for the automatic conversion to take place,
+	 * the requested type must declare a static method `fromString`
+	 * with one or two parameters of type `String`. A method with
+	 * one parameter is assumed to return a concrete field type,
+	 * i.e. a type that has a predefined field name. It is invoked
+	 * with the text to be parsed. A `fromString` method with two 
+	 * parameters is invoked with the requested field name as first,
+	 * and the text to be parsed as second parameter.
+	 * 
+	 * If the conversion fails, the field is considered ill-formatted 
+	 * and handled as if it didn't exist.
+	 * 
+	 * Note that field type conversion may already occur while doing internal
+	 * checks. This implies that not all fields can initially be
+	 * accessed as {@link HttpStringField}s.   
+	 * 
+	 * @param <T> the type of the value in the header field
 	 * @param name the field name
+	 * @param converter the converter for the value type
 	 * @return the header field if it exists
-	 * @see #getField(Class, String)
 	 */
-	public Optional<HttpStringField> getStringField(String name) {
-		return getField(HttpStringField.class, name);
+	public <T> Optional<HttpField<T>> 
+		getField(String name, Converter<T> converter) {
+		HttpField<?> field = headers.get(name);
+		// Not found
+		if (field == null) {
+			return Optional.ofNullable(null);
+		}
+		Object value = field.value();
+		Class<?> valueType = value.getClass();
+		Class<?> expectedType = null;
+		try {
+			expectedType = converter.getClass().getMethod(
+				"fromFieldValue", String.class).getReturnType();
+		} catch (NoSuchMethodException e) {
+			// Known to exists
+		}
+		// Match already?
+		if (expectedType.isAssignableFrom(valueType)) {
+			@SuppressWarnings("unchecked")
+			HttpField<T> result = (HttpField<T>)field;
+			return Optional.of(result);
+		}
+		// String field?
+		if (!(value instanceof String)) {
+			return Optional.empty();
+		}
+		// Try conversion...
+		try {
+			return Optional.ofNullable(new HttpField<>(
+					name, converter.fromFieldValue((String)value), converter));
+		} catch (ParseException e) {
+			return Optional.empty();
+		}
+	}
+
+	/**
+	 * Convenience method for getting the value of a header field.
+	 * 
+	 * @param <T> the type of the value in the header field
+	 * @param name the field name
+	 * @param converter the converter for the value type
+	 * @return the value if the header field exists
+	 */
+	public <T> Optional<T> getValue(String name, Converter<T> converter) {
+		return getField(name, converter).map(HttpField<T>::value);
 	}
 	
 	/**
-	 * Returns the header field with the given type, computing 
+	 * Convenience method for getting the value of a string field.
+	 * 
+	 * @param name the field name
+	 * @return the value if the header field exists
+	 * @see #getField(String, Converter)
+	 */
+	public Optional<String> getStringValue(String name) {
+		return getValue(name, Converters.STRING);
+	}
+	
+	/**
+	 * Returns the header field with the given name, computing 
 	 * and adding it if it doesn't exist.
 	 * 
-	 * @param <T> the header field class
-	 * @param type the header field type
+	 * @param <T> the type of the header field's value
 	 * @param name the field name
-	 * @param computeFunction the function that computes the filed if
-	 * it doesn't exist
-	 * @return the header field if it exists
+	 * @param converter the converter for the value type
+	 * @param supplier the function that computes a value for
+	 * a new field.
+	 * @return the header field
 	 */
-	public <T extends HttpField<?>> T computeIfAbsent(
-			Class<T> type, String name, Function<String, T> computeFunction) {
-		Optional<T> result = getField(type, name);
+	public <T> HttpField<T> computeIfAbsent(String name, 
+			Converter<T> converter, Supplier<T> supplier) {
+		Optional<HttpField<T>> result = getField(name, converter);
 		if (result.isPresent()) {
 			return result.get();
 		}
-		T value = computeFunction.apply(name);
+		HttpField<T> value = new HttpField<>(name, supplier.get(), converter);
+		
 		setField(value);
 		return value;
 	}
@@ -261,7 +356,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * @return the result
 	 */
 	public boolean isFinal() {
-		return getField(HttpStringListField.class, HttpField.CONNECTION)
-				.map(f -> f.contains("close")).orElse(false);
+		return getField(HttpField.CONNECTION, Converters.STRING_LIST)
+				.map(h -> h.value()).map(f -> f.contains("close")).orElse(false);
 	}
 }
