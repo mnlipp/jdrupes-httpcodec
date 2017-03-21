@@ -175,7 +175,7 @@ public interface Decoder<T extends MessageHeader,
 			if (!super.equals(obj)) {
 				return false;
 			}
-			if (getClass() != obj.getClass()) {
+			if (!(obj instanceof Result)) {
 				return false;
 			}
 			@SuppressWarnings("rawtypes")

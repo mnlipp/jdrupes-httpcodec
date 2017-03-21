@@ -286,7 +286,7 @@ public class HttpResponseDecoder
 			if (!super.equals(obj)) {
 				return false;
 			}
-			if (getClass() != obj.getClass()) {
+			if (!(obj instanceof Result)) {
 				return false;
 			}
 			Result other = (Result) obj;
