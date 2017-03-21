@@ -19,7 +19,6 @@
 package org.jdrupes.httpcodec.protocols.http;
 
 import org.jdrupes.httpcodec.Codec;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.types.Converters;
 
 /**

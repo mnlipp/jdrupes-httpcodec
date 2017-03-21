@@ -20,8 +20,7 @@ package org.jdrupes.httpcodec.test.fields;
 
 import java.text.ParseException;
 
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
+import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.CookieList;
 
@@ -53,16 +52,16 @@ public class CookiesTests {
 		String header = "set-cookie:autorf=deleted; "
 				+ "expires=Sun, 26-Jul-2015 12:32:17 GMT; "
 				+ "path=/; domain=www.test.com";
-		HttpSetCookieListField field 
-			= new HttpSetCookieListField(header);
+		HttpField<CookieList> field 
+			= new HttpField<>(header, Converters.SET_COOKIE);
 		header = "Set-Cookie:SRCHUID=V=2&GUID=2853211950;"
 				+ " expires=Wed, 25-Jul-2018 12:42:14 GMT; path=/";
-		HttpSetCookieListField field2
-			= new HttpSetCookieListField(header);
+		HttpField<CookieList> field2
+			= new HttpField<>(header, Converters.SET_COOKIE);
 		field.value().addAll(field2.value());
 		header = "Set-Cookie:MUIDB=13BEF4C6DC68E5; path=/; "
 				+ "httponly; expires=Wed, 25-Jul-2018 12:42:14 GMT";
-		field2 = new HttpSetCookieListField(header);
+		field2 = new HttpField<>(header, Converters.SET_COOKIE);
 		field.value().addAll(field2.value());
 		assertEquals(3, field.value().size());
 		assertEquals("deleted", field.value().valueForName("autorf").get());
@@ -74,21 +73,29 @@ public class CookiesTests {
 	public void testRfcExamples() throws ParseException {
 		// Simple
 		String header = "Set-Cookie: SID=31d4d96e407aad42";
-		HttpField<CookieList> setField = new HttpSetCookieListField(header);
+		HttpField<CookieList> setField = new HttpField<>(
+				header, Converters.SET_COOKIE);
 		HttpField<CookieList> cookieField = new HttpField<>(
 				HttpField.COOKIE, setField.value(), 
 				Converters.COOKIE_LIST);
 		assertEquals("Cookie: SID=31d4d96e407aad42", cookieField.asHeaderField());
-		// Two with attributes
+		
+		// Second: two with attributes
 		header = "Set-Cookie: SID=31d4d96e407aad42; Path=/; Secure; HttpOnly";
-		setField = new HttpSetCookieListField(header);
+		setField = new HttpField<>(header, Converters.SET_COOKIE);
 		header = "Set-Cookie: lang=en-US; Path=/; Domain=example.com";
-		setField.value().add((new HttpSetCookieListField(header)).value().get(0));
+		setField.value().add((new HttpField<>(header,
+				Converters.SET_COOKIE)).value().get(0));
 		assertEquals("/", setField.value().get(0).getPath());
 		assertTrue(setField.value().get(0).getSecure());
 		assertTrue(setField.value().get(0).isHttpOnly());
 		assertEquals("/", setField.value().get(1).getPath());
 		assertEquals("example.com", setField.value().get(1).getDomain());
+		assertEquals("Set-Cookie: SID=31d4d96e407aad42; Path=/; Secure; HttpOnly\r\n"
+				+ "Set-Cookie: lang=en-US; Domain=example.com; Path=/",
+				setField.asHeaderField());
+
+		// Convert to Cookie:
 		cookieField = new HttpField<>(
 				HttpField.COOKIE, setField.value(), 
 				Converters.COOKIE_LIST);
@@ -96,7 +103,7 @@ public class CookiesTests {
 				cookieField.asHeaderField());
 		// Expires
 		header = "Set-Cookie: lang=en-US; Expires=Wed, 09 Jun 2001 10:18:14 GMT";
-		setField = new HttpSetCookieListField(header);
+		setField = new HttpField<>(header, Converters.SET_COOKIE);
 		cookieField = new HttpField<>(
 				HttpField.COOKIE, setField.value(), 
 				Converters.COOKIE_LIST);

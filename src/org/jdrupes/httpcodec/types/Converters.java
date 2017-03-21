@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
@@ -133,12 +133,44 @@ public final class Converters {
 	public static final Converter<Instant> DATE_TIME 
 		= new InstantConverter();
 
-
 	/**
-	 * A converter for cookies.
+	 * A converter for set cookies.
 	 */
 	public static final ListConverter<CookieList, HttpCookie> SET_COOKIE 
-		= new ListConverter<CookieList, HttpCookie>(CookieList::new, null) {
+		= new ListConverter<CookieList, HttpCookie>(
+				CookieList::new, new Converter<HttpCookie>() {
+					
+					@Override
+					public String asFieldValue(HttpCookie value) {
+						StringBuilder result = new StringBuilder();
+						result.append(value.toString());
+						if (value.getMaxAge() > 0) {
+							result.append("; Max-Age=");
+							result.append(Long.toString(value.getMaxAge()));
+						}
+						if (value.getDomain() != null) {
+							result.append("; Domain=");
+							result.append(value.getDomain());
+						}
+						if (value.getPath() != null) {
+							result.append("; Path=");
+							result.append(value.getPath());
+						}
+						if (value.getSecure()) {
+							result.append("; Secure");
+						}
+						if (value.isHttpOnly()) {
+							result.append("; HttpOnly");
+						}
+						return result.toString();
+					}
+
+					@Override
+					public HttpCookie fromFieldValue(String text)
+							throws ParseException {
+						throw new UnsupportedOperationException();
+					}
+				}, ",", true) {
 
 		@Override
 		public CookieList fromFieldValue(String text)
@@ -163,20 +195,20 @@ public final class Converters {
 		= new ListConverter<CookieList, HttpCookie>(CookieList::new,
 				new Converter<HttpCookie>() {
 	
-		@Override
-		public String asFieldValue(HttpCookie value) {
-			return value.toString();
-		}
-
-		@Override
-		public HttpCookie fromFieldValue(String text)
-				throws ParseException {
-			try {
-				return HttpCookie.parse(text).get(0);
-			} catch (IllegalArgumentException e) {
-				throw new ParseException(text, 0);
+			@Override
+			public String asFieldValue(HttpCookie value) {
+				return value.toString();
 			}
-		}
+
+			@Override
+			public HttpCookie fromFieldValue(String text)
+					throws ParseException {
+				try {
+					return HttpCookie.parse(text).get(0);
+				} catch (IllegalArgumentException e) {
+					throw new ParseException(text, 0);
+				}
+			}
 		}, ";");
 
 	/**

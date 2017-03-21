@@ -43,6 +43,7 @@ public class ListConverter<L extends List<I>, I>
 	private Converter<I> itemConverter;
 	// Used by default in RFC 7230, see section 7.
 	private String delimiters = ",";
+	private boolean separateItems = false;
 	
 	/**
 	 * Creates a new list converter with the given converter for the items
@@ -72,6 +73,34 @@ public class ListConverter<L extends List<I>, I>
 		this.listCreator = listCreator;
 		this.itemConverter = itemConverter;
 		this.delimiters = delimiters;
+	}
+
+	/**
+	 * Create a new converter 
+	 * like {@link #ListConverter(Supplier, Converter, String). In addition,
+	 * the parameter `splitItems` can be set to indicate that the
+	 * values from the list should be converted to individual
+	 * header fields.
+	 * 
+	 * @param listCreator a function that creates a new empty list
+	 * @param itemConverter the converter for the items
+	 * @param delimiters the delimiters
+	 * @param separateItems indicates that each value should be represented
+	 * by a header field of its own in a message header
+	 */
+	public ListConverter(Supplier<L> listCreator, Converter<I> itemConverter, 
+			String delimiters, boolean separateItems) {
+		this.listCreator = listCreator;
+		this.itemConverter = itemConverter;
+		this.delimiters = delimiters;
+		this.separateItems = separateItems;
+	}
+
+	/**
+	 * @return the separateItems
+	 */
+	public boolean isSeparateItems() {
+		return separateItems;
 	}
 
 	/**

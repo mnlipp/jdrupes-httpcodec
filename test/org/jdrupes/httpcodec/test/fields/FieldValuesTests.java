@@ -21,7 +21,7 @@ package org.jdrupes.httpcodec.test.fields;
 import java.text.ParseException;
 import java.util.Iterator;
 
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.Converters;

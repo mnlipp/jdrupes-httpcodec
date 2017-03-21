@@ -33,9 +33,9 @@ import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.MessageHeader;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
+
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.CookieList;
 import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
@@ -421,7 +421,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
 		}
 		if (field.name().equalsIgnoreCase(HttpField.SET_COOKIE)) {
-			field = new HttpSetCookieListField(headerLine);
+			field = new HttpField<CookieList>(headerLine, Converters.SET_COOKIE);
 		}
 		switch (field.name()) {
 		case HttpField.CONTENT_LENGTH:

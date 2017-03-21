@@ -16,19 +16,21 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jdrupes.httpcodec.protocols.http.fields;
+package org.jdrupes.httpcodec.protocols.http;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
-import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.ListConverter;
 
 /**
  * A base class for all kinds of header field values.
@@ -300,7 +302,20 @@ public class HttpField<T> {
 	 * @return the field as it occurs in a header
 	 */
 	public String asHeaderField() {
-		return name() + ": " + asFieldValue();
+		if (!(converter instanceof ListConverter)
+				|| !((ListConverter<?,?>)converter).isSeparateItems()) {
+			return name() + ": " + asFieldValue();
+		}
+		// Convert list of items to seperate fields
+		@SuppressWarnings("unchecked")
+		ListConverter <List<Object>,Object> listConverter
+			= (ListConverter <List<Object>,Object>)converter;
+		Converter<Object> itemConverter	= listConverter.getItemConverter();
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>)value();
+		return list.stream().map(
+				item -> name() + ": " + itemConverter.asFieldValue(item))
+				.collect(Collectors.joining("\r\n"));
 	}
 	
 	/* (non-Javadoc)

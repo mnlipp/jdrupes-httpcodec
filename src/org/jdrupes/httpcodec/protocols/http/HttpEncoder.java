@@ -36,7 +36,7 @@ import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Encoder;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.StringList;

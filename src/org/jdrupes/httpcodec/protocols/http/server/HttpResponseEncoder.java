@@ -37,8 +37,8 @@ import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
+import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.types.Converters;
 
 /**

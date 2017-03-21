@@ -23,7 +23,6 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 
 /**
  * Represents an HTTP request header.

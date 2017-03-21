@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
-import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
 
