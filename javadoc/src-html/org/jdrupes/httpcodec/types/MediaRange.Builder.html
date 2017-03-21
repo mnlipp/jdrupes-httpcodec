@@ -84,7 +84,7 @@
 <span class="sourceLineNo">076</span>         */<a name="line.76"></a>
 <span class="sourceLineNo">077</span>        public static MediaRange fromString(String text) <a name="line.77"></a>
 <span class="sourceLineNo">078</span>                        throws ParseException {<a name="line.78"></a>
-<span class="sourceLineNo">079</span>                return Converters.MEDIA_RANGE_CONVERTER.fromFieldValue(text);<a name="line.79"></a>
+<span class="sourceLineNo">079</span>                return Converters.MEDIA_RANGE.fromFieldValue(text);<a name="line.79"></a>
 <span class="sourceLineNo">080</span>        }<a name="line.80"></a>
 <span class="sourceLineNo">081</span>        <a name="line.81"></a>
 <span class="sourceLineNo">082</span>        /**<a name="line.82"></a>
@@ -139,7 +139,7 @@
 <span class="sourceLineNo">131</span>                                        return super.fromFieldValue(text);<a name="line.131"></a>
 <span class="sourceLineNo">132</span>                                }<a name="line.132"></a>
 <span class="sourceLineNo">133</span>                        },<a name="line.133"></a>
-<span class="sourceLineNo">134</span>                        Converters.UNQUOTE_ONLY_CONVERTER, MediaRange::new);<a name="line.134"></a>
+<span class="sourceLineNo">134</span>                        Converters.UNQUOTE_ONLY, MediaRange::new);<a name="line.134"></a>
 <span class="sourceLineNo">135</span>                }<a name="line.135"></a>
 <span class="sourceLineNo">136</span>        }<a name="line.136"></a>
 <span class="sourceLineNo">137</span><a name="line.137"></a>
