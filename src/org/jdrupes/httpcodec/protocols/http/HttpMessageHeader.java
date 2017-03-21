@@ -35,6 +35,37 @@ import org.jdrupes.httpcodec.types.StringList;
 
 /**
  * Represents an HTTP message header (either request or response).
+ * 
+ * ![Classes](header.svg)
+ * 
+ * @startuml header.svg
+ * abstract class HttpMessageHeader {
+ * 	+HttpProtocol getProtocol()
+ * 	+Map<String,HttpField<?>> fields()
+ * 	+HttpMessageHeader setField(HttpField<?> value)
+ * 	+HttpMessageHeader setField(String name, T value)
+ * 	+HttpMessageHeader clearHeaders()
+ * 	+HttpMessageHeader removeField(String name)
+ * 	+Optional<HttpField<T>> getField(String name, Converter<T> converter)
+ * 	+Optional<T> getValue(String name, Converter<T> converter)
+ * 	+Optional<String> getStringValue(String name)
+ * 	+HttpField<T> computeIfAbsent(String name, Converter<T> converter, Supplier<T> supplier)
+ * 	+MessageHeader setMessageHasBody(boolean messageHasBody)
+ * 	+boolean messageHasBody()
+ * 	+boolean isFinal()
+ * }
+ * class MessageHeader {
+ * }
+ * MessageHeader <|-- HttpMessageHeader
+ * 
+ * class HttpField<T> {
+ * 	+String name()
+ * 	+T value()
+ * }
+ * 
+ * class HttpMessageHeader *-right- HttpField
+ * 
+ * @enduml
  */
 public abstract class HttpMessageHeader implements MessageHeader {
 
@@ -119,9 +150,11 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * Removes a header field from the message.
 	 * 
 	 * @param name the header field's name
+	 * @return the message header for easy chaining
 	 */
-	public void removeField(String name) {
+	public HttpMessageHeader removeField(String name) {
 		headers.remove(name);
+		return this;
 	}
 
 	/**
