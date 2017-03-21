@@ -34,6 +34,7 @@ public class Basic {
 	public void testBasicResult() {
 		Codec.Result res1 = new Codec.Result(false, false, false) {
 		};
+		assertTrue(res1.toString().length() > 0);
 		Codec.Result res2 = new Codec.Result(false, false, false) {
 		};
 		assertEquals(res1, res2);
@@ -54,6 +55,7 @@ public class Basic {
 		Decoder.Result<HttpRequest> res1 = new Decoder.Result<HttpRequest>(
 				false, false, false, false, null, false) {
 		};
+		assertTrue(res1.toString().length() > 0);
 		Decoder.Result<HttpRequest> res2 = new Decoder.Result<HttpRequest>(
 				false, false, false, false, null, false) {
 		};
