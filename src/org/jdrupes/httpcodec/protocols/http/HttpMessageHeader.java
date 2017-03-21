@@ -93,9 +93,10 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * Sets a header field for the message. The converter for the
 	 * field is lookup using {@link HttpField#lookupConverter(String)}.
 	 * 
+	 * @param <T> the type of the value
 	 * @param name the field name
 	 * @param value the header field's value
-	 * @return
+	 * @return the message header for easy chaining
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> HttpMessageHeader setField(String name, T value) {
@@ -127,8 +128,8 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * Returns the header field with the given type if it exists.
 	 * 
 	 * Header fields are provisionally parsed as 
-	 * {@link HttpStringField}s. When an attempt is made to
-	 * retrieve such a string field with its real type,
+	 * {@link HttpField}s with value type `String`. When an attempt is 
+	 * made to retrieve such a string field with its real type,
 	 * it is automatically converted to the real type.
 	 * 
 	 * In order for the automatic conversion to take place,
@@ -145,7 +146,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * 
 	 * Note that field type conversion may already occur while doing internal
 	 * checks. This implies that not all fields can initially be
-	 * accessed as {@link HttpStringField}s.   
+	 * accessed as {@link HttpField}s with a `String` value.   
 	 * 
 	 * @param <T> the type of the value in the header field
 	 * @param name the field name

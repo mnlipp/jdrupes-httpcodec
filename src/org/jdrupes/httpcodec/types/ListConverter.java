@@ -77,7 +77,7 @@ public class ListConverter<L extends List<I>, I>
 
 	/**
 	 * Create a new converter 
-	 * like {@link #ListConverter(Supplier, Converter, String). In addition,
+	 * like {@link #ListConverter(Supplier, Converter, String)}. In addition,
 	 * the parameter `splitItems` can be set to indicate that the
 	 * values from the list should be converted to individual
 	 * header fields.
