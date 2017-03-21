@@ -36,6 +36,7 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.DynamicByteArray;
@@ -478,13 +479,17 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		// RFC 7230 3.2.2
 		HttpField<?> existing = header.fields().get(field.name());
 		if (existing != null) {
-			if (!List.class.isAssignableFrom(existing.value().getClass())
-			        || !List.class.isAssignableFrom(field.value().getClass())) {
+			if (!(existing.converter() instanceof ListConverter)
+					|| !existing.converter().equals(field.converter())) {
 				throw new HttpProtocolException(protocolVersion,
 				        HttpStatus.BAD_REQUEST.getStatusCode(),
 				        "Multiple occurences of field " + field.name());
 			}
-			((List)existing.value()).addAll((List)field.value());
+			@SuppressWarnings("unchecked")
+			List<Object> existingList = (List<Object>)existing.value();
+			@SuppressWarnings("unchecked")
+			List<Object> fieldList = (List<Object>)field.value();
+			existingList.addAll(fieldList);
 		} else {
 			header.setField(field);
 		}

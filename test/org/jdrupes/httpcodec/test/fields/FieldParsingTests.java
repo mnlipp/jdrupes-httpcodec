@@ -26,14 +26,14 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpWeightedStringListField;
+import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.ListConverter;
@@ -201,10 +201,10 @@ public class FieldParsingTests {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT_CHARSET, "iso-8859-5, unicode-1-1;q=0.8");
-		HttpWeightedStringListField field = hdr.getField(
-				HttpWeightedStringListField.class, "Accept-Charset").get();
-		field.sortByWeightDesc();
-		Iterator<ParameterizedValue<String>> itr = field.iterator();
+		WeightedList<ParameterizedValue<String>> value = hdr.getValue(
+				HttpField.ACCEPT_CHARSET, Converters.WEIGHTED_STRINGS).get();
+		value.sortByWeightDesc();
+		Iterator<ParameterizedValue<String>> itr = value.iterator();
 		assertEquals("iso-8859-5", itr.next().toString());
 		assertEquals("unicode-1-1; q=0.8", itr.next().toString());
 	}
@@ -245,21 +245,25 @@ public class FieldParsingTests {
 	}
 	
 	@Test public void testUserAgent() throws ParseException {
-		HttpProductsDescriptionField field = HttpProductsDescriptionField
-				.fromString("User-Agent", "CERN-LineMode/2.15 libwww/2.17b3");
-		assertEquals("CERN-LineMode/2.15", field.get(0).getValue());
-		assertEquals("libwww/2.17b3", field.get(1).getValue());
+		HttpField<List<CommentedValue<String>>> field 
+			= new HttpField<>("User-Agent: CERN-LineMode/2.15 libwww/2.17b3",
+					Converters.PRODUCT_DESCRIPTIONS);
+		assertEquals("CERN-LineMode/2.15", field.value().get(0).getValue());
+		assertEquals("libwww/2.17b3", field.value().get(1).getValue());
 		
-		field = HttpProductsDescriptionField.fromString("User-Agent", "Client");
-		assertEquals("Client", field.get(0).getValue());
+		field = new HttpField<>("User-Agent: Client",
+				Converters.PRODUCT_DESCRIPTIONS);
+		assertEquals("Client", field.value().get(0).getValue());
 		
-		field = HttpProductsDescriptionField.fromString("User-Agent", 
-				"CERN-LineMode/2.15 (deprecated) (I think) libwww/2.17b3 (very old)");
-		assertEquals("CERN-LineMode/2.15", field.get(0).getValue());
-		assertEquals("deprecated", field.get(0).getComments()[0]);
-		assertEquals("I think", field.get(0).getComments()[1]);
-		assertEquals("libwww/2.17b3", field.get(1).getValue());
-		assertEquals("very old", field.get(1).getComments()[0]);
+		field = new HttpField<>(
+				"User-Agent: CERN-LineMode/2.15 (deprecated) "
+				+ "(I think) libwww/2.17b3 (very old)",
+				Converters.PRODUCT_DESCRIPTIONS);
+		assertEquals("CERN-LineMode/2.15", field.value().get(0).getValue());
+		assertEquals("deprecated", field.value().get(0).getComments()[0]);
+		assertEquals("I think", field.value().get(0).getComments()[1]);
+		assertEquals("libwww/2.17b3", field.value().get(1).getValue());
+		assertEquals("very old", field.value().get(1).getComments()[0]);
 	}
 	
 	@Test

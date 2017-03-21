@@ -21,6 +21,7 @@ package org.jdrupes.httpcodec.test.http;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.ResponseDecoder;
@@ -28,7 +29,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpProductsDescriptionField;
+import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.CookieList;
 
@@ -80,10 +81,10 @@ public class ResponseDecoderTests {
 				"Sat, 23 Jul 2016 16:56:54 GMT"),
 				decoder.getHeader().get().getField(HttpField.RETRY_AFTER,
 						Converters.DATE_TIME).get().value());
-		HttpProductsDescriptionField server = decoder.getHeader().get().getField(
-				HttpProductsDescriptionField.class, HttpField.SERVER).get();
-		assertEquals("Apache/2.4.18", server.value().get(0).getValue());
-		assertEquals("Ubuntu", server.value().get(0).getComments()[0]);
+		List<CommentedValue<String>> server = decoder.getHeader().get()
+				.getValue(HttpField.SERVER, Converters.PRODUCT_DESCRIPTIONS).get();
+		assertEquals("Apache/2.4.18", server.get(0).getValue());
+		assertEquals("Ubuntu", server.get(0).getComments()[0]);
 		body.flip();
 		String bodyText = new String(body.array(), body.position(),
 		        body.limit());

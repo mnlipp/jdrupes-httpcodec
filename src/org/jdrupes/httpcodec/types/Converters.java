@@ -22,9 +22,13 @@ import java.net.HttpCookie;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
+import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
+import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
 import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
@@ -94,9 +98,6 @@ public final class Converters {
 		}
 	};
 	
-	public static final ListConverter_1<String> STRING_LIST_CONVERTER_1 
-		= new ListConverter_1<String>(Converters.STRING);
-
 	public static final Converter<StringList> STRING_LIST 
 		= new ListConverter<>(StringList::new, STRING);
 
@@ -123,8 +124,8 @@ public final class Converters {
 	/**
 	 * An integer list converter.
 	 */
-	public static final ListConverter_1<Long> LONG_LIST 
-		= new ListConverter_1<Long>(LONG);
+	public static final ListConverter<List<Long>, Long> LONG_LIST 
+		= new ListConverter<>(ArrayList<Long>::new, LONG);
 
 	/**
 	 * A date/time converter.
@@ -199,7 +200,7 @@ public final class Converters {
 	};
 	
 	/**
-	 * A converter for a list of languages.
+	 * A converter for a weighted list of languages.
 	 */
 	public static final ListConverter<WeightedList<ParameterizedValue<Locale>>,
 		ParameterizedValue<Locale>> LANGUAGE_LIST 
@@ -208,6 +209,18 @@ public final class Converters {
 							new ParamValueConverterBase
 								<ParameterizedValue<Locale>, Locale>(
 										LANGUAGE, ParameterizedValue<Locale>::new) {
+					});
+
+	/**
+	 * A converter for a weighted list of strings.
+	 */
+	public static final ListConverter<WeightedList<ParameterizedValue<String>>,
+		ParameterizedValue<String>> WEIGHTED_STRINGS 
+			= new ListConverter<WeightedList<ParameterizedValue<String>>,
+					ParameterizedValue<String>>(WeightedList::new,
+							new ParamValueConverterBase
+								<ParameterizedValue<String>, String>(
+										STRING, ParameterizedValue<String>::new) {
 					});
 
 	/**
@@ -257,7 +270,13 @@ public final class Converters {
 		}
 	};
 
-	
+	/**
+	 * A converter for product descriptions as used in the `User-Agent`
+	 * and `Server` header fields.
+	 */
+	public static final ProductDescriptionConverter PRODUCT_DESCRIPTIONS 
+		= new ProductDescriptionConverter(); 
+		
 	private Converters() {
 	}
 
@@ -364,5 +383,67 @@ public final class Converters {
 			result.append(ch);
 		}
 		return result.toString();
+	}
+	
+	private static class ProductDescriptionConverter 
+		extends ListConverter<List<CommentedValue<String>>, CommentedValue<String>> {
+		
+		public ProductDescriptionConverter() {
+			super(ArrayList<CommentedValue<String>>::new, 
+				new CommentedValueConverter<>(Converters.STRING));
+		}
+
+		/* (non-Javadoc)
+		 * @see Converter#fromFieldValue(java.lang.String)
+		 */
+		@Override
+		public List<CommentedValue<String>> fromFieldValue(String text)
+				throws ParseException {
+			List<CommentedValue<String>> result = new ArrayList<>();
+			int pos = 0;
+			while (pos < text.length()) {
+				int length = HttpField.tokenLength(text, pos);
+				if (length == 0) {
+					throw new ParseException(
+							"Must start with token: " + text, pos);
+				}
+				String product = text.substring(pos, pos + length);
+				pos += length;
+				if (pos < text.length() && text.charAt(pos) == '/') {
+					pos += 1;
+					length = HttpField.tokenLength(text, pos);
+					if (length == 0) {
+						throw new ParseException(
+								"Token expected: " + text, pos);
+					}
+					product = product + text.substring(pos - 1, pos + length);
+					pos += length;
+				}
+				List<String> comments = new ArrayList<>();
+				while (pos < text.length()) {
+					length = HttpField.whiteSpaceLength(text, pos);
+					if (length == 0) {
+						throw new ParseException(
+								"Whitespace expected: " + text, pos);
+					}
+					pos += length;
+					if (text.charAt(pos) != '(') {
+						break;
+					}
+					length = HttpField.commentLength(text, pos);
+					if (text.charAt(pos + length - 1) != ')') {
+						throw new ParseException(
+								"Comment end expected: " + text, pos + length - 1);
+					}
+					comments.add(text.substring(pos + 1, pos + length - 1));
+					pos += length;
+				}
+				result.add(new CommentedValue<String>(product, 
+						comments.size() == 0 ? null
+								: comments.toArray(new String[comments.size()])));
+			}
+			return result;
+		}
+
 	}
 }

@@ -28,8 +28,9 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.fields.HttpField;
-import org.jdrupes.httpcodec.protocols.http.fields.HttpSetCookieListField;
 import org.jdrupes.httpcodec.test.Common;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.CookieList;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -127,9 +128,9 @@ public class DecoderContentLengthTests {
 		        body.limit());
 		assertEquals("Hello World!", bodyText);
 		// Set-Cookies
-		Optional<HttpSetCookieListField> field = decoder.getHeader()
-		        .flatMap(h -> h.getField(
-		        		HttpSetCookieListField.class, HttpField.SET_COOKIE));
+		Optional<HttpField<CookieList>> field = decoder.getHeader()
+		        .flatMap(h -> h.getField(HttpField.SET_COOKIE,
+		        		Converters.SET_COOKIE));
 		assertTrue(field.isPresent());
 		assertEquals(2, field.get().value().size());
 		assertEquals("deleted", field.get().value().valueForName("autorf").get());
@@ -178,9 +179,9 @@ public class DecoderContentLengthTests {
 		        body.limit());
 		assertEquals("Hello World!", bodyText);
 		// Set-Cookies
-		Optional<HttpSetCookieListField> field = decoder.getHeader()
-		        .flatMap(f -> f.getField(
-		        		HttpSetCookieListField.class, HttpField.SET_COOKIE));
+		Optional<HttpField<CookieList>> field = decoder.getHeader()
+		        .flatMap(f -> f.getField(HttpField.SET_COOKIE,
+		        		Converters.SET_COOKIE));
 		assertEquals(2, field.get().value().size());
 		assertEquals("deleted", field.get().value().valueForName("autorf").get());
 		assertEquals("13BEF4C6DC68E5", field.get().value().valueForName("MUIDB").get());

@@ -28,6 +28,11 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  * Used by by classes that convert field values which consist
  * of lists of values.
  * 
+ * This class uses an extra type parameter `L` instead of
+ * simply using `List<I>` to allow the convertion to special
+ * lists, i.e. types derived from `List<T>` with additional
+ * methods.
+ * 
  * @param <L> the type of the list
  * @param <I> the type of the items
  */

@@ -227,7 +227,7 @@ public class HttpField<T> {
 		case RETRY_AFTER:
 			return Converters.DATE_TIME;
 		case SERVER:
-			return HttpProductsDescriptionField.DESCRIPTIONS_CONVERTER;
+			return Converters.PRODUCT_DESCRIPTIONS;
 		case SET_COOKIE:
 			return Converters.SET_COOKIE;
 		case TRAILER:
@@ -237,7 +237,7 @@ public class HttpField<T> {
 		case UPGRADE:
 			return Converters.STRING_LIST;
 		case USER_AGENT:
-			return HttpProductsDescriptionField.DESCRIPTIONS_CONVERTER;
+			return Converters.PRODUCT_DESCRIPTIONS;
 		case VIA:
 			return Converters.STRING_LIST;
 		default:
