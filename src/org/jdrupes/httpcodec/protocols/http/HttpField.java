@@ -53,8 +53,12 @@ public class HttpField<T> {
 	public static final String ACCEPT_ENCODING = "Accept-Encoding";
 	/** @see "[RFC 7231, 5.3.5](https://tools.ietf.org/html/rfc7231#section-5.3.5)" */
 	public static final String ACCEPT_LANGUAGE = "Accept-Language";
+	/** @see "[RFC 7234, 5.1](https://tools.ietf.org/html/rfc7234#section-5.1)" */
+	public static final String AGE = "Age";
 	/** @see "[RFC 7231, 7.4.1](https://tools.ietf.org/html/rfc7231#section-7.4.1)" */
 	public static final String ALLOW = "Allow";
+	/** @see "[RFC 7234, 5.2](https://tools.ietf.org/html/rfc7234#section-5.2)" */
+	public static final String CACHE_CONTROL = "Cache-Control";
 	public static final String COOKIE = "Cookie";
 	/** @see "[RFC 7230, 6.1](https://tools.ietf.org/html/rfc7230#section-6.1)" */
 	public static final String CONNECTION = "Connection";
@@ -69,6 +73,8 @@ public class HttpField<T> {
 	public static final String ETAG = "ETag";
 	/** @see "[RFC 7231, 5.1.1](https://tools.ietf.org/html/rfc7231#section-5.1.1)" */
 	public static final String EXPECT = "Expect";
+	/** @see "[RFC 7234, 5.3](https://tools.ietf.org/html/rfc7234#section-5.3)" */
+	public static final String EXPIRES = "Expires";
 	/** @see "[RFC 7231, 5.5.1](https://tools.ietf.org/html/rfc7231#section-5.5.1)" */
 	public static final String FROM = "From";
 	/** @see "[RFC 7230, 5.4](https://tools.ietf.org/html/rfc7230#section-5.4)" */
@@ -82,6 +88,8 @@ public class HttpField<T> {
 	public static final String LOCATION = "Location";
 	/** @see "[RFC 7231, 5.1.2](https://tools.ietf.org/html/rfc7231#section-5.1.2)" */
 	public static final String MAX_FORWARDS = "Max-Forwards";
+	/** @see "[RFC 7234, 5.4](https://tools.ietf.org/html/rfc7234#section-5.4)" */
+	public static final String PRAGMA = "Pragma";
 	/** @see "[RFC 7231, 7.1.3](https://tools.ietf.org/html/rfc7231#section-7.1.3)" */
 	public static final String RETRY_AFTER = "Retry-After";
 	/** @see "[RFC 7231, 7.4.2](https://tools.ietf.org/html/rfc7231#section-7.4.2)" */
@@ -99,8 +107,10 @@ public class HttpField<T> {
 	public static final String USER_AGENT = "User-Agent";
 	/** @see "[RFC 7231, 7.1.4](https://tools.ietf.org/html/rfc7231#section-7.1.4)" */
 	public static final String VARY = "Vary";
-	/** @see "[RFC 7230,5.7.1](https://tools.ietf.org/html/rfc7230#section-5.7.1)" */
+	/** @see "[RFC 7230, 5.7.1](https://tools.ietf.org/html/rfc7230#section-5.7.1)" */
 	public static final String VIA = "Via";
+	/** @see "[RFC 7234, 5.5](https://tools.ietf.org/html/rfc7234#section-5.5)" */
+	public static final String WARNING = "Warning";
 	
 	private static Map<String, String> fieldNameMap = new TreeMap<>(
 	        String.CASE_INSENSITIVE_ORDER);
@@ -110,7 +120,9 @@ public class HttpField<T> {
 		fieldNameMap.put(ACCEPT_CHARSET, ACCEPT_CHARSET);
 		fieldNameMap.put(ACCEPT_ENCODING, ACCEPT_ENCODING);
 		fieldNameMap.put(ACCEPT_LANGUAGE, ACCEPT_LANGUAGE);
+		fieldNameMap.put(AGE, AGE);
 		fieldNameMap.put(ALLOW, ALLOW);
+		fieldNameMap.put(CACHE_CONTROL, CACHE_CONTROL);
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
 		fieldNameMap.put(CONTENT_LENGTH, CONTENT_LENGTH);
@@ -119,6 +131,7 @@ public class HttpField<T> {
 		fieldNameMap.put(DATE, DATE);
 		fieldNameMap.put(ETAG, ETAG);
 		fieldNameMap.put(EXPECT, EXPECT);
+		fieldNameMap.put(EXPIRES, EXPIRES);
 		fieldNameMap.put(FROM, FROM);
 		fieldNameMap.put(HOST, HOST);
 		fieldNameMap.put(IF_MATCH, IF_MATCH);
@@ -128,6 +141,7 @@ public class HttpField<T> {
 		fieldNameMap.put(LAST_MODIFIED, LAST_MODIFIED);
 		fieldNameMap.put(LOCATION, LOCATION);
 		fieldNameMap.put(MAX_FORWARDS, MAX_FORWARDS);
+		fieldNameMap.put(PRAGMA, PRAGMA);
 		fieldNameMap.put(RETRY_AFTER, RETRY_AFTER);
 		fieldNameMap.put(SERVER, SERVER);
 		fieldNameMap.put(SET_COOKIE, SET_COOKIE);
@@ -138,6 +152,7 @@ public class HttpField<T> {
 		fieldNameMap.put(USER_AGENT, USER_AGENT);
 		fieldNameMap.put(VARY, VARY);
 		fieldNameMap.put(VIA, VIA);
+		fieldNameMap.put(WARNING, WARNING);
 	}
 	
 	private final String name;
@@ -198,8 +213,12 @@ public class HttpField<T> {
 			return Converters.MEDIA_RANGE;
 		case ACCEPT_LANGUAGE:
 			return Converters.LANGUAGE;
+		case AGE:
+			return Converters.LONG;
 		case ALLOW:
 			return Converters.STRING_LIST;
+		case CACHE_CONTROL:
+			return Converters.DIRECTIVE_LIST;
 		case COOKIE:
 			return Converters.COOKIE_LIST;
 		case CONNECTION:
@@ -211,6 +230,8 @@ public class HttpField<T> {
 		case CONTENT_TYPE:
 			return Converters.MEDIA_TYPE;
 		case DATE:
+			return Converters.DATE_TIME;
+		case EXPIRES:
 			return Converters.DATE_TIME;
 		case IF_MATCH:
 			return Converters.STRING_LIST;
@@ -226,6 +247,8 @@ public class HttpField<T> {
 			return Converters.URI_CONV; 
 		case MAX_FORWARDS:
 			return Converters.LONG; 
+		case PRAGMA:
+			return Converters.DIRECTIVE_LIST;
 		case RETRY_AFTER:
 			return Converters.DATE_TIME;
 		case SERVER:
@@ -242,6 +265,8 @@ public class HttpField<T> {
 			return Converters.PRODUCT_DESCRIPTIONS;
 		case VIA:
 			return Converters.STRING_LIST;
+		case WARNING:
+			return Converters.STRING;
 		default:
 			return Converters.STRING;
 		}

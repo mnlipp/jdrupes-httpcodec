@@ -29,6 +29,7 @@ import java.util.Locale;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
+import org.jdrupes.httpcodec.types.Directive.DirectiveConverter;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
 import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
@@ -281,6 +282,19 @@ public final class Converters {
 	public static final Converter<MediaType> MEDIA_TYPE 
 		= new MediaTypeConverter();
 
+	/**
+	 * A converter for a directive.
+	 */
+	public static final DirectiveConverter DIRECTIVE
+		= new DirectiveConverter();
+
+	/**
+	 * A converter for a list of directives.
+	 */
+	public static final ListConverter<List<Directive>, Directive>
+		DIRECTIVE_LIST = new ListConverter<List<Directive>, Directive>(
+				ArrayList::new, DIRECTIVE);
+	
 	/**
 	 * A converter for a URI.
 	 */

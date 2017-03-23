@@ -37,6 +37,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.Directive;
 import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
@@ -261,6 +262,22 @@ public class FieldParsingTests {
 		HttpField<Long> field = hdr.getField(
 				HttpField.MAX_FORWARDS, Converters.LONG).get();
 		assertEquals(10, field.value().intValue());
+	}
+
+	@Test
+	public void testCacheControl() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpField<List<Directive>>(
+				"Cache-Control: private, community=\"UCI\"", 
+				Converters.DIRECTIVE_LIST));
+		HttpField<List<Directive>> field = hdr.getField(
+				HttpField.CACHE_CONTROL, Converters.DIRECTIVE_LIST).get();
+		assertEquals("private", field.value().get(0).getName());
+		assertFalse(field.value().get(0).getValue().isPresent());
+		assertEquals("community", field.value().get(1).getName());
+		assertTrue(field.value().get(1).getValue().isPresent());
+		assertEquals("UCI", field.value().get(1).getValue().get());
 	}
 
 }
