@@ -142,7 +142,7 @@
 <span class="sourceLineNo">134</span>                        if (obj == null) {<a name="line.134"></a>
 <span class="sourceLineNo">135</span>                                return false;<a name="line.135"></a>
 <span class="sourceLineNo">136</span>                        }<a name="line.136"></a>
-<span class="sourceLineNo">137</span>                        if (getClass() != obj.getClass()) {<a name="line.137"></a>
+<span class="sourceLineNo">137</span>                        if (!(obj instanceof Result)) {<a name="line.137"></a>
 <span class="sourceLineNo">138</span>                                return false;<a name="line.138"></a>
 <span class="sourceLineNo">139</span>                        }<a name="line.139"></a>
 <span class="sourceLineNo">140</span>                        Result other = (Result) obj;<a name="line.140"></a>
