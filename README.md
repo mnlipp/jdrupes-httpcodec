@@ -5,6 +5,7 @@ JDrupes non-blocking HTTP Codec
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d9e648d1d904ec6a1f0ca713ca30c5c)](https://www.codacy.com/app/mnlipp/jdrupes-httpcodec?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mnlipp/jdrupes-httpcodec&amp;utm_campaign=Badge_Grade)
 [![Code Climate](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec/badges/gpa.svg)](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec)
 [![Release](https://jitpack.io/v/mnlipp/jdrupes-httpcodec.svg)](https://jitpack.io/#mnlipp/jdrupes-httpcodec)
+[![Maven Central](https://img.shields.io/maven-central/v/org.jdrupes.httpcodec/httpcodec.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jdrupes.httpcodec%22)
 
 The goal of this package is to provide easy to use HTTP 
 encoders and decoders for non-blocking I/O
@@ -22,20 +23,20 @@ An implementation that comes very close to what I needed is
 [HTTP Kit](https://github.com/http-kit/http-kit), which has, however,
 dependencies on Clojure, that prohibit its usage for my purpose.
 
-This library can be used with Java 8 SE. Binaries are currently made
-available as snapshots.
+This library requires Java 8 SE. Binaries are currently made
+available at maven central.
 
 ```gradle
 repositories {
-	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+	mavenCentral()
 }
 
 dependencies {
-	compile 'org.jdrupes.httpcodec:httpcodec:0.9.X-SNAPSHOT'
+	compile 'org.jdrupes.httpcodec:httpcodec:X.Y.Z'
 }
 ```
 
-(You can lookup the latest patch version [here](https://oss.sonatype.org/content/repositories/snapshots/org/jdrupes/httpcodec/httpcodec/)). 
+(See badge above for the latest version.) 
 
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
