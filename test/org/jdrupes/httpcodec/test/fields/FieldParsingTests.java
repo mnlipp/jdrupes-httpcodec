@@ -196,7 +196,6 @@ public class FieldParsingTests {
 		assertEquals("audio/basic", itr.next().toString());
 		assertEquals("audio/*; q=0.2", itr.next().toString());
 		// Third
-		// Second
 		hdr.setField(HttpField.ACCEPT, 
 				"text/*, text/plain, text/plain;format=flowed, */*");
 		value = hdr.getValue(
