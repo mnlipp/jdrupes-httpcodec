@@ -30,6 +30,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.Directive.DirectiveConverter;
+import org.jdrupes.httpcodec.types.Etag.EtagConverter;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePair;
 import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
 import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
@@ -101,6 +102,26 @@ public final class Converters {
 	
 	public static final Converter<StringList> STRING_LIST 
 		= new ListConverter<>(StringList::new, STRING);
+
+	/**
+	 * A converter that quotes strings.
+	 */
+	public static final Converter<String> QUOTED_STRING 
+		= new Converter<String>() {
+	
+		@Override
+		public String asFieldValue(String value) {
+			return quoteString(value);
+		}
+	
+		@Override
+		public String fromFieldValue(String text) throws ParseException {
+			return unquoteString(text.trim());
+		}
+	};
+	
+	public static final Converter<StringList> QUOTED_STRING_LIST 
+		= new ListConverter<>(StringList::new, QUOTED_STRING);
 
 	/**
 	 * An integer converter.
@@ -323,6 +344,24 @@ public final class Converters {
 	public static final ProductDescriptionConverter PRODUCT_DESCRIPTIONS 
 		= new ProductDescriptionConverter(); 
 		
+	/**
+	 * Used by the {@link EtagConverter} to unambiguously denote
+	 * a decoded wildcard. If the result of `fromFieldValue` == 
+	 * `WILDCARD`, the field value was an unquoted asterisk.
+	 * If the result `equals("*")`, it may also have been
+	 * a quoted asterisk.
+	 */
+	public static final String WILDCARD = "*";
+	
+	/**
+	 * A converter for an ETag header.
+	 */
+	public static final EtagConverter ETAG = new EtagConverter();
+	
+	public static final Converter<List<Etag>> ETAG_LIST 
+		= new ListConverter<>(ArrayList::new, ETAG);
+
+	
 	private Converters() {
 	}
 
@@ -409,6 +448,31 @@ public final class Converters {
 			return result.toString();
 		}
 		return value;
+	}
+	
+	/**
+	 * Returns the given string as double quoted string.
+	 * 
+	 * @param value the value to quote
+	 * @return the result
+	 */
+	public static String quoteString(String value) {
+		StringBuilder result = new StringBuilder();
+		result.append('"');
+		for (char ch: value.toCharArray()) {
+			switch(ch) {
+			case '"':
+				// fall through
+			case '\\':
+				result.append('\\');
+				// fall through
+			default:
+				result.append(ch);
+				break;
+			}
+		}
+		result.append('\"');
+		return result.toString();
 	}
 	
 	/**

@@ -59,6 +59,7 @@ public class HttpField<T> {
 	public static final String ALLOW = "Allow";
 	/** @see "[RFC 7234, 5.2](https://tools.ietf.org/html/rfc7234#section-5.2)" */
 	public static final String CACHE_CONTROL = "Cache-Control";
+	/** @see "[RFC 6265, 5.4](https://tools.ietf.org/html/rfc6265#section-5.4)" */
 	public static final String COOKIE = "Cookie";
 	/** @see "[RFC 7230, 6.1](https://tools.ietf.org/html/rfc7230#section-6.1)" */
 	public static final String CONNECTION = "Connection";
@@ -70,6 +71,7 @@ public class HttpField<T> {
 	public static final String CONTENT_TYPE = "Content-Type";
 	/** @see "[RFC 7231, 7.1.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.1.2)" */
 	public static final String DATE = "Date";
+	/** @see "[RFC 7232, 2.3](https://tools.ietf.org/html/rfc7232#section-2.3)" */
 	public static final String ETAG = "ETag";
 	/** @see "[RFC 7231, 5.1.1](https://tools.ietf.org/html/rfc7231#section-5.1.1)" */
 	public static final String EXPECT = "Expect";
@@ -79,10 +81,15 @@ public class HttpField<T> {
 	public static final String FROM = "From";
 	/** @see "[RFC 7230, 5.4](https://tools.ietf.org/html/rfc7230#section-5.4)" */
 	public static final String HOST = "Host";
+	/** @see "[RFC 7232, 3.1](https://tools.ietf.org/html/rfc7232#section-3.1)" */
 	public static final String IF_MATCH = "If-Match";
+	/** @see "[RFC 7232, 3.2](https://tools.ietf.org/html/rfc7232#section-3.2)" */
 	public static final String IF_NONE_MATCH = "If-None-Match";
+	/** @see "[RFC 7232, 3.3](https://tools.ietf.org/html/rfc7232#section-3.3)" */
 	public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	/** @see "[RFC 7232, 3.4](https://tools.ietf.org/html/rfc7232#section-3.4)" */
 	public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+	/** @see "[RFC 7232, 2.2](https://tools.ietf.org/html/rfc7232#section-2.2)" */
 	public static final String LAST_MODIFIED = "Last-Modified";
 	/** @see "[RFC 7231, 7.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.2)" */
 	public static final String LOCATION = "Location";
@@ -94,6 +101,7 @@ public class HttpField<T> {
 	public static final String RETRY_AFTER = "Retry-After";
 	/** @see "[RFC 7231, 7.4.2](https://tools.ietf.org/html/rfc7231#section-7.4.2)" */
 	public static final String SERVER = "Server";
+	/** @see "[RFC 6265, 4.1.1](https://tools.ietf.org/html/rfc6265#section-4.1.1)" */
 	public static final String SET_COOKIE = "Set-Cookie";
 	/** @see "[RFC 7230, 4.3](https://tools.ietf.org/html/rfc7230#section-4.3)" */
 	public static final String TE = "TE";
@@ -234,11 +242,11 @@ public class HttpField<T> {
 		case EXPIRES:
 			return Converters.DATE_TIME;
 		case IF_MATCH:
-			return Converters.STRING_LIST;
+			return Converters.ETAG_LIST;
 		case IF_MODIFIED_SINCE:
 			return Converters.DATE_TIME;
 		case IF_NONE_MATCH:
-			return Converters.STRING_LIST;
+			return Converters.ETAG_LIST;
 		case IF_UNMODIFIED_SINCE:
 			return Converters.DATE_TIME;
 		case LAST_MODIFIED:

@@ -38,6 +38,7 @@ import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.Directive;
+import org.jdrupes.httpcodec.types.Etag;
 import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
@@ -278,6 +279,59 @@ public class FieldParsingTests {
 		assertEquals("community", field.value().get(1).getName());
 		assertTrue(field.value().get(1).getValue().isPresent());
 		assertEquals("UCI", field.value().get(1).getValue().get());
+		
+		assertEquals("Cache-Control: private, community=UCI", 
+				field.asHeaderField());
+	}
+
+	@Test
+	public void testETag() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpField<Etag>("ETag: W/\"xyzzy\"", 
+				Converters.ETAG));
+		HttpField<Etag> field = hdr.getField(
+				HttpField.ETAG, Converters.ETAG).get();
+		assertTrue(field.value().isWeak());
+		assertEquals("xyzzy", field.value().getTag());
+		
+		hdr.setField(new HttpField<Etag>("ETag: \"xyzzy\"", 
+				Converters.ETAG));
+		field = hdr.getField(HttpField.ETAG, Converters.ETAG).get();
+		assertFalse(field.value().isWeak());
+		assertEquals("xyzzy", field.value().getTag());
+	}
+
+	@Test
+	public void testIfMatch() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(new HttpField<String>(
+				"If-Match: \"xyzzy\", \"r2d2xxxx\", \"c3piozzzz\"", 
+				Converters.UNQUOTED_STRING));
+		HttpField<List<Etag>> field = hdr.getField(
+				HttpField.IF_MATCH, Converters.ETAG_LIST).get();
+		assertEquals("xyzzy", field.value().get(0).getTag());
+		assertEquals("r2d2xxxx", field.value().get(1).getTag());
+		assertEquals("c3piozzzz", field.value().get(2).getTag());
+		
+		hdr.setField(new HttpField<String>(
+				"If-Match: *", Converters.UNQUOTED_STRING));
+		field = hdr.getField(
+				HttpField.IF_MATCH, Converters.ETAG_LIST).get();
+		assertEquals(Converters.WILDCARD, field.value().get(0).getTag());
+		
+		hdr.setField(new HttpField<String>(
+				"If-None-Match: W/\"xyzzy\", W/\"r2d2xxxx\", W/\"c3piozzzz\"",
+				Converters.UNQUOTED_STRING));
+		field = hdr.getField(
+				HttpField.IF_NONE_MATCH, Converters.ETAG_LIST).get();
+		assertEquals("xyzzy", field.value().get(0).getTag());
+		assertTrue(field.value().get(0).isWeak());
+		assertEquals("r2d2xxxx", field.value().get(1).getTag());
+		assertTrue(field.value().get(1).isWeak());
+		assertEquals("c3piozzzz", field.value().get(2).getTag());
+		assertTrue(field.value().get(2).isWeak());
 	}
 
 }
