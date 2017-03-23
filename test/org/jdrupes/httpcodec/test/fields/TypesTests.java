@@ -2,6 +2,7 @@ package org.jdrupes.httpcodec.test.fields;
 
 import java.text.ParseException;
 
+import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
 
 import static org.junit.Assert.*;
@@ -17,7 +18,7 @@ public class TypesTests {
 		assertEquals("html", media.getSubtype());
 		assertEquals("utf-8", media.getParameter("charset"));
 		// from string
-		media = MediaType.fromString("text/html; charset=utf-8");
+		media = Converters.MEDIA_TYPE.fromFieldValue("text/html; charset=utf-8");
 		assertEquals("text", media.getTopLevelType());
 		assertEquals("html", media.getSubtype());
 		assertEquals("utf-8", media.getParameter("charset"));

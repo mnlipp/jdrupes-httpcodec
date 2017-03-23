@@ -162,17 +162,10 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * 
 	 * Header fields are provisionally parsed as 
 	 * {@link HttpField}s with value type `String`. When an attempt is 
-	 * made to retrieve such a string field with its real type,
-	 * it is automatically converted to the real type.
-	 * 
-	 * In order for the automatic conversion to take place,
-	 * the requested type must declare a static method `fromString`
-	 * with one or two parameters of type `String`. A method with
-	 * one parameter is assumed to return a concrete field type,
-	 * i.e. a type that has a predefined field name. It is invoked
-	 * with the text to be parsed. A `fromString` method with two 
-	 * parameters is invoked with the requested field name as first,
-	 * and the text to be parsed as second parameter.
+	 * made to retrieve such a string field with this method,
+	 * it is automatically converted to the type indicated by the converter.
+	 * The conversion is permanent, i.e. the field instance is replaced
+	 * by a properly typed instance.
 	 * 
 	 * If the conversion fails, the field is considered ill-formatted 
 	 * and handled as if it didn't exist.

@@ -18,7 +18,6 @@
 
 package org.jdrupes.httpcodec.types;
 
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,19 +55,6 @@ public class MediaType extends MediaBase {
 		super(type, parameters);
 	}
 
-	/**
-	 * Creates a new instance with values obtained from parsing
-	 * the given text.
-	 * 
-	 * @param text the text
-	 * @return the mime type
-	 * @throws ParseException if the text is not well-formed
-	 */
-	public static MediaType fromString(String text) 
-			throws ParseException {
-		return Converters.MEDIA_TYPE.fromFieldValue(text);
-	}
-	
 	/**
 	 * Creates a new builder for a media type.
 	 * 

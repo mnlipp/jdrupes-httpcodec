@@ -66,19 +66,6 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 		super(ALL_MEDIA.getValue(), Collections.emptyMap());
 	}
 	
-	/**
-	 * Creates a new instance with values obtained from parsing
-	 * the given text.
-	 * 
-	 * @param text the text
-	 * @return the mime type
-	 * @throws ParseException if the text is not well-formed
-	 */
-	public static MediaRange fromString(String text) 
-			throws ParseException {
-		return Converters.MEDIA_RANGE.fromFieldValue(text);
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
