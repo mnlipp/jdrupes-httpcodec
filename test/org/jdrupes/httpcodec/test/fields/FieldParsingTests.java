@@ -191,9 +191,22 @@ public class FieldParsingTests {
 		hdr.setField(HttpField.ACCEPT, "audio/*; q=0.2, audio/basic");
 		value = hdr.getValue(
 				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
+		Collections.sort(value);
 		itr = value.iterator();
-		assertEquals("audio/*; q=0.2", itr.next().toString());
 		assertEquals("audio/basic", itr.next().toString());
+		assertEquals("audio/*; q=0.2", itr.next().toString());
+		// Third
+		// Second
+		hdr.setField(HttpField.ACCEPT, 
+				"text/*, text/plain, text/plain;format=flowed, */*");
+		value = hdr.getValue(
+				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
+		Collections.sort(value);
+		itr = value.iterator();
+		assertEquals("text/plain; format=flowed", itr.next().toString());
+		assertEquals("text/plain", itr.next().toString());
+		assertEquals("text/*", itr.next().toString());
+		assertEquals("*/*", itr.next().toString());
 	}	
 	
 	@Test

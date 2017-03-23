@@ -71,9 +71,45 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 	 */
 	@Override
 	public int compareTo(MediaRange other) {
-		return ParameterizedValue.WEIGHT_COMPARATOR.compare(this, other);
+		float myQuality = 1;
+		String param = getParameter("q");
+		if (param != null) {
+			myQuality = Float.parseFloat(param);
+		}
+		float otherQuality = 1;
+		param = other.getParameter("q");
+		if (param != null) {
+			otherQuality = Float.parseFloat(param);
+		}
+		if (myQuality != otherQuality) {
+			return -(int)Math.signum(myQuality - otherQuality);
+		}
+		
+		// Same or no quality, look for wildcards
+		if (!getSubtype().equals("*") && other.getSubtype().equals("*")) {
+			return -1;
+		}
+		if (getSubtype().equals("*") && !other.getSubtype().equals("*")) {
+			return 1;
+		}
+		if (!getTopLevelType().equals("*") 
+				&& other.getTopLevelType().equals("*")) {
+			return -1;
+		}
+		if (getTopLevelType().equals("*")
+				&& !other.getTopLevelType().equals("*")) {
+			return 1;
+		}
+		
+		// No wildcards or same type, look for number of parameters
+		return countParameters(other)- countParameters(this);
 	}
 
+	private static int countParameters(ParameterizedValue<?> value) {
+		return (int)value.getParameters().keySet().stream()
+				.filter(k -> !k.equals("q")).count();
+	}
+	
 	/**
 	 * Creates a new builder for a media type.
 	 * 
