@@ -19,7 +19,6 @@
 package org.jdrupes.httpcodec.types;
 
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,13 +58,6 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 		super(type, parameters);
 	}
 
-	/**
-	 * For builder.
-	 */
-	private MediaRange() {
-		super(ALL_MEDIA.getValue(), Collections.emptyMap());
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -108,6 +100,37 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 	private static int countParameters(ParameterizedValue<?> value) {
 		return (int)value.getParameters().keySet().stream()
 				.filter(k -> !k.equals("q")).count();
+	}
+	
+	/**
+	 * Checks if the given media type falls within this range.
+	 * 
+	 * @param type the type to check
+	 * @return the result
+	 */
+	public boolean matches(MediaType type) {
+		if (!("*".equals(getTopLevelType()) 
+				|| getTopLevelType().equals(type.getTopLevelType()))) {
+			// Top level is neither * nor match
+			return false;
+		}
+		if (!("*".equals(getSubtype())
+				|| getSubtype().equals(type.getSubtype()))) {
+			// Subtype is neither * nor match
+			return false;
+		}
+		for (Map.Entry<String,String> e: getParameters().entrySet()) {
+			if ("q".equals(e.getKey())) {
+				continue;
+			}
+			if (!type.getParameters().containsKey(e.getKey())) {
+				return false;
+			}
+			if (!type.getParameter(e.getKey()).equals(e.getValue())) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**

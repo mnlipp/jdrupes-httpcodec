@@ -38,7 +38,6 @@ import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.ListConverter;
-import org.jdrupes.httpcodec.types.MediaRange;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
 import org.jdrupes.httpcodec.types.StringList;
@@ -172,41 +171,6 @@ public class FieldParsingTests {
 				"test: 42", Converters.LONG);
 		assertEquals(42, field.value().longValue());
 	}
-	
-	@Test
-	public void testAccept() throws ParseException, URISyntaxException {
-		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
-		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(HttpField.ACCEPT,
-				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
-		List<MediaRange> value = hdr.getValue(
-				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get();
-		Collections.sort(value);
-		Iterator<MediaRange> itr = value.iterator();
-		assertEquals("text/html", itr.next().toString());
-		assertEquals("text/x-c", itr.next().toString());
-		assertEquals("text/x-dvi; q=0.8", itr.next().toString());
-		assertEquals("text/plain; q=0.5", itr.next().toString());
-		// Second
-		hdr.setField(HttpField.ACCEPT, "audio/*; q=0.2, audio/basic");
-		value = hdr.getValue(
-				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
-		Collections.sort(value);
-		itr = value.iterator();
-		assertEquals("audio/basic", itr.next().toString());
-		assertEquals("audio/*; q=0.2", itr.next().toString());
-		// Third
-		hdr.setField(HttpField.ACCEPT, 
-				"text/*, text/plain, text/plain;format=flowed, */*");
-		value = hdr.getValue(
-				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
-		Collections.sort(value);
-		itr = value.iterator();
-		assertEquals("text/plain; format=flowed", itr.next().toString());
-		assertEquals("text/plain", itr.next().toString());
-		assertEquals("text/*", itr.next().toString());
-		assertEquals("*/*", itr.next().toString());
-	}	
 	
 	@Test
 	public void testAcceptCharset() throws ParseException, URISyntaxException {
