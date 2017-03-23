@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.types;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,6 +36,13 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  */
 public class ParameterizedValue<U> {
 
+	public static Comparator<ParameterizedValue<?>> WEIGHT_COMPARATOR 
+		= Comparator.nullsFirst(
+			Comparator.comparing(mt -> mt.getParameter("q"),
+					Comparator.nullsFirst(
+							Comparator.comparing(Float::parseFloat)
+							.reversed())));
+	
 	private U value;
 	private Map<String, String> params;
 	

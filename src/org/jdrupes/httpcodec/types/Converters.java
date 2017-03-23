@@ -234,10 +234,10 @@ public final class Converters {
 	/**
 	 * A converter for a weighted list of languages.
 	 */
-	public static final ListConverter<WeightedList<ParameterizedValue<Locale>>,
+	public static final ListConverter<List<ParameterizedValue<Locale>>,
 		ParameterizedValue<Locale>> LANGUAGE_LIST 
-			= new ListConverter<WeightedList<ParameterizedValue<Locale>>,
-					ParameterizedValue<Locale>>(WeightedList::new,
+			= new ListConverter<List<ParameterizedValue<Locale>>,
+					ParameterizedValue<Locale>>(ArrayList::new,
 							new ParamValueConverterBase
 								<ParameterizedValue<Locale>, Locale>(
 										LANGUAGE, ParameterizedValue<Locale>::new) {
@@ -246,10 +246,10 @@ public final class Converters {
 	/**
 	 * A converter for a weighted list of strings.
 	 */
-	public static final ListConverter<WeightedList<ParameterizedValue<String>>,
+	public static final ListConverter<List<ParameterizedValue<String>>,
 		ParameterizedValue<String>> WEIGHTED_STRINGS 
-			= new ListConverter<WeightedList<ParameterizedValue<String>>,
-					ParameterizedValue<String>>(WeightedList::new,
+			= new ListConverter<List<ParameterizedValue<String>>,
+					ParameterizedValue<String>>(ArrayList::new,
 							new ParamValueConverterBase
 								<ParameterizedValue<String>, String>(
 										STRING, ParameterizedValue<String>::new) {
@@ -270,10 +270,10 @@ public final class Converters {
 	/**
 	 * A converter for a list of media ranges.
 	 */
-	public static final ListConverter<WeightedList<MediaRange>,
+	public static final ListConverter<List<MediaRange>,
 		MediaRange> MEDIA_RANGE_LIST 
-			= new ListConverter<WeightedList<MediaRange>,
-				MediaRange>(WeightedList::new, MEDIA_RANGE);
+			= new ListConverter<List<MediaRange>,
+				MediaRange>(ArrayList::new, MEDIA_RANGE);
 
 	/**
 	 * A converter for a media type pair with parameters.

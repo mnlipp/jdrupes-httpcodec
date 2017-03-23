@@ -23,10 +23,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MediaRange extends MediaBase {
+public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 
 	public static final MediaRange ALL_MEDIA = new MediaRange("*", "*");
-	
+
 	/**
 	 * Create a new object with the given type and subtype.
 	 * 
@@ -79,6 +79,14 @@ public class MediaRange extends MediaBase {
 		return Converters.MEDIA_RANGE.fromFieldValue(text);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(MediaRange other) {
+		return ParameterizedValue.WEIGHT_COMPARATOR.compare(this, other);
+	}
+
 	/**
 	 * Creates a new builder for a media type.
 	 * 

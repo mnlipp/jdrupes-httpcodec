@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -41,7 +42,6 @@ import org.jdrupes.httpcodec.types.MediaRange;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
 import org.jdrupes.httpcodec.types.StringList;
-import org.jdrupes.httpcodec.types.WeightedList;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -179,9 +179,9 @@ public class FieldParsingTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT,
 				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
-		WeightedList<MediaRange> value = hdr.getValue(
+		List<MediaRange> value = hdr.getValue(
 				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get();
-		value.sortByWeightDesc();
+		Collections.sort(value);
 		Iterator<MediaRange> itr = value.iterator();
 		assertEquals("text/html", itr.next().toString());
 		assertEquals("text/x-c", itr.next().toString());
@@ -201,9 +201,9 @@ public class FieldParsingTests {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT_CHARSET, "iso-8859-5, unicode-1-1;q=0.8");
-		WeightedList<ParameterizedValue<String>> value = hdr.getValue(
+		List<ParameterizedValue<String>> value = hdr.getValue(
 				HttpField.ACCEPT_CHARSET, Converters.WEIGHTED_STRINGS).get();
-		value.sortByWeightDesc();
+		Collections.sort(value, ParameterizedValue.WEIGHT_COMPARATOR);
 		Iterator<ParameterizedValue<String>> itr = value.iterator();
 		assertEquals("iso-8859-5", itr.next().toString());
 		assertEquals("unicode-1-1; q=0.8", itr.next().toString());
@@ -215,12 +215,12 @@ public class FieldParsingTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT_LANGUAGE,
 				"da, en-gb;q=0.8, *; q=0.1, en;q=0.7");
-		HttpField<WeightedList<ParameterizedValue<Locale>>> field = hdr.getField(
+		HttpField<List<ParameterizedValue<Locale>>> field = hdr.getField(
 				HttpField.ACCEPT_LANGUAGE, Converters.LANGUAGE_LIST).get();
-		field.value().sortByWeightDesc();
+		Collections.sort(field.value(), ParameterizedValue.WEIGHT_COMPARATOR);
 		@SuppressWarnings("unchecked")
 		Converter<ParameterizedValue<Locale>> itemConverter 
-			= ((ListConverter<WeightedList<ParameterizedValue<Locale>>, 
+			= ((ListConverter<List<ParameterizedValue<Locale>>, 
 					ParameterizedValue<Locale>>)field.converter()).getItemConverter();
 		Iterator<ParameterizedValue<Locale>> itr = field.value().iterator();
 		assertEquals("da", itemConverter.asFieldValue(itr.next()));
