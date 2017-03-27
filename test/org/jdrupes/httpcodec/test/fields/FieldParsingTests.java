@@ -54,19 +54,19 @@ public class FieldParsingTests {
 
 	@Test
 	public void testTokenLength() {
-		assertEquals(5, HttpField.tokenLength("Hello? ", 0));
+		assertEquals(5, Converters.tokenLength("Hello? ", 0));
 	}
 	
 	@Test
 	public void testWhiteSpaceLength() {
-		assertEquals(4, HttpField.whiteSpaceLength(" \t  Hallo? ", 0));
+		assertEquals(4, Converters.whiteSpaceLength(" \t  Hallo? ", 0));
 	}
 
 	@Test
 	public void testCommentLength() {
-		assertEquals(30, HttpField.commentLength(
+		assertEquals(30, Converters.commentLength(
 				"(Leading comment (as example)) Value", 0));
-		assertEquals(23, HttpField.commentLength(
+		assertEquals(23, Converters.commentLength(
 				"Value (Comment: \\), strange?) Rest", 6));
 	}
 	

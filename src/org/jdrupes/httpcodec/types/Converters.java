@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
-import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.Directive.DirectiveConverter;
 import org.jdrupes.httpcodec.types.Etag.EtagConverter;
@@ -512,7 +511,7 @@ public final class Converters {
 			List<CommentedValue<String>> result = new ArrayList<>();
 			int pos = 0;
 			while (pos < text.length()) {
-				int length = HttpField.tokenLength(text, pos);
+				int length = Converters.tokenLength(text, pos);
 				if (length == 0) {
 					throw new ParseException(
 							"Must start with token: " + text, pos);
@@ -521,7 +520,7 @@ public final class Converters {
 				pos += length;
 				if (pos < text.length() && text.charAt(pos) == '/') {
 					pos += 1;
-					length = HttpField.tokenLength(text, pos);
+					length = Converters.tokenLength(text, pos);
 					if (length == 0) {
 						throw new ParseException(
 								"Token expected: " + text, pos);
@@ -531,7 +530,7 @@ public final class Converters {
 				}
 				List<String> comments = new ArrayList<>();
 				while (pos < text.length()) {
-					length = HttpField.whiteSpaceLength(text, pos);
+					length = Converters.whiteSpaceLength(text, pos);
 					if (length == 0) {
 						throw new ParseException(
 								"Whitespace expected: " + text, pos);
@@ -540,7 +539,7 @@ public final class Converters {
 					if (text.charAt(pos) != '(') {
 						break;
 					}
-					length = HttpField.commentLength(text, pos);
+					length = Converters.commentLength(text, pos);
 					if (text.charAt(pos + length - 1) != ')') {
 						throw new ParseException(
 								"Comment end expected: " + text, pos + length - 1);
@@ -555,5 +554,80 @@ public final class Converters {
 			return result;
 		}
 
+	}
+
+	/**
+	 * Determines the length of a token in a header field
+	 * 
+	 * @param text the text to parse
+	 * @param startPos the start position
+	 * @return the length of the token
+	 * @see "[RFC 7230, Section 3.2.6](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+	 */
+	public static int tokenLength(String text, int startPos) {
+		int pos = startPos;
+		while (pos < text.length()
+				&& HttpConstants.TOKEN_CHARS.indexOf(text.charAt(pos)) >= 0) {
+			pos += 1;
+		}
+		return pos - startPos;
+	}
+
+	/**
+	 * Determines the length of a white space sequence in a header field. 
+	 * 
+	 * @param text the test to parse 
+	 * @param startPos the start position
+	 * @return the length of the white space sequence
+	 * @see "[RFC 7230, Section 3.2.3](https://tools.ietf.org/html/rfc7230#section-3.2.3)"
+	 */
+	public static int whiteSpaceLength(String text, int startPos) {
+		int pos = startPos;
+		while (pos < text.length()) {
+			switch (text.charAt(pos)) {
+			case ' ':
+				// fall through
+			case '\t':
+				pos += 1;
+				continue;
+				
+			default:
+				break;
+			}
+			break;
+		}
+		return pos - startPos;
+	}
+
+	/**
+	 * Determines the length of a comment in a header field.
+	 * 
+	 * @param text the text to parse
+	 * @param startPos the starting position (must be the position of the
+	 * opening brace)
+	 * @return the length of the comment
+	 * @see "[RFC 7230, Section 3.2.6](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+	 */
+	public static int commentLength(String text, int startPos) {
+		int pos = startPos + 1;
+		while (pos < text.length()) {
+			switch(text.charAt(pos)) {
+			case ')':
+				return pos - startPos + 1;
+				
+			case '(':
+				pos += commentLength(text, pos);
+				break;
+				
+			case '\\':
+				pos = Math.min(pos + 2, text.length());
+				break;
+				
+			default:
+				pos += 1;
+				break;
+			}
+		}
+		return pos - startPos;
 	}
 }
