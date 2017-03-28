@@ -83,7 +83,7 @@ public class ListItemizer {
 				char ch = unparsedValue.charAt(position);
 				if (delimiters.indexOf(ch) >= 0) {
 					String result = unparsedValue
-					        .substring(startPosition, position);
+					        .substring(startPosition, position).trim();
 					position += 1; // Skip delimiter
 					while (true) { // Skip optional white space
 						ch = unparsedValue.charAt(position);
