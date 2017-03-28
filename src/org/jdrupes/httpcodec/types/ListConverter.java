@@ -108,7 +108,7 @@ public class ListConverter<L extends List<I>, I>
 	 * 
 	 * @return the itemConverter
 	 */
-	public Converter<I> getItemConverter() {
+	public Converter<I> itemConverter() {
 		return itemConverter;
 	}
 

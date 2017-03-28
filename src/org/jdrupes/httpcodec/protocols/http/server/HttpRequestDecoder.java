@@ -81,8 +81,8 @@ public class HttpRequestDecoder
 		try {
 			return (Result)super.decode(in, out, endOfInput);
 		} catch (HttpProtocolException e) {
-			HttpResponse response = new HttpResponse(e.getHttpVersion(), 
-					e.getStatusCode(), e.getReasonPhrase(), false);
+			HttpResponse response = new HttpResponse(e.httpVersion(), 
+					e.statusCode(), e.reasonPhrase(), false);
 			response.setField(new HttpField<>(HttpField.CONNECTION,
 					new StringList("close"), Converters.STRING_LIST));
 			return resultFactory().newResult(false, false, false, response, true);
@@ -106,7 +106,7 @@ public class HttpRequestDecoder
 		if (!requestMatcher.matches()) {
 			// RFC 7230 3.1.1
 			throw new HttpProtocolException(protocolVersion,
-			        HttpStatus.BAD_REQUEST.getStatusCode(),
+			        HttpStatus.BAD_REQUEST.statusCode(),
 			        "Illegal request line");
 		}
 		String httpVersion = requestMatcher.group(3);
@@ -131,7 +131,7 @@ public class HttpRequestDecoder
 				uri = new URI(uriGroup);
 			} catch (URISyntaxException e) {
 				throw new HttpProtocolException(protocolVersion,
-				        HttpStatus.BAD_REQUEST.getStatusCode(), e.getMessage());
+				        HttpStatus.BAD_REQUEST.statusCode(), e.getMessage());
 			}
 		}
 		HttpRequest request = new HttpRequest(
@@ -149,7 +149,7 @@ public class HttpRequestDecoder
 			throws HttpProtocolException {
 		reportHeaderReceived = true;
 		// Handle field of special interest
-		Optional<HttpField<String>> host = message.getField(
+		Optional<HttpField<String>> host = message.findField(
 				HttpField.HOST, Converters.STRING);
 		if (host.isPresent()) {
 			try {
@@ -157,28 +157,28 @@ public class HttpRequestDecoder
 				message.setHostAndPort(parsed.getHost(), parsed.getPort());
 			} catch (URISyntaxException e) {
 				throw new HttpProtocolException(protocolVersion,
-				        HttpStatus.BAD_REQUEST.getStatusCode(),
+				        HttpStatus.BAD_REQUEST.statusCode(),
 				        "Invalid Host port.");
 			}
 		} else {
 			// RFC 7230 5.4.
-			if (message.getProtocol().compareTo(HttpProtocol.HTTP_1_1) >= 0) {
+			if (message.protocol().compareTo(HttpProtocol.HTTP_1_1) >= 0) {
 				throw new HttpProtocolException(protocolVersion,
-				        HttpStatus.BAD_REQUEST.getStatusCode(),
+				        HttpStatus.BAD_REQUEST.statusCode(),
 				        "HTTP 1.1 request must have a Host field.");
 			}
 		}
-		if (message.getField(HttpField.CONNECTION, 
+		if (message.findField(HttpField.CONNECTION, 
 				Converters.STRING_LIST).map(h -> h.value())
 				.map(f -> f.containsIgnoreCase("close")).orElse(false)) {
 			// RFC 7230 6.6.
-			message.getResponse().get().setField(new HttpField<>(
+			message.response().get().setField(new HttpField<>(
 			        HttpField.CONNECTION, new StringList("close"), 
 			        Converters.STRING_LIST));
 		}
 
 		// Find out about body
-		Optional<HttpField<StringList>> transEncs = message.getField(
+		Optional<HttpField<StringList>> transEncs = message.findField(
 		        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);
 		if (transEncs.isPresent()) {
 			List<String> tecs = transEncs.get().value();

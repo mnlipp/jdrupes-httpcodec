@@ -114,7 +114,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 * 
 	 * @return the maxHeaderLength
 	 */
-	public long getMaxHeaderLength() {
+	public long maxHeaderLength() {
 		return maxHeaderLength;
 	}
 
@@ -123,7 +123,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 * 
 	 * @return the result
 	 */
-	public Optional<T> getHeader() {
+	public Optional<T> header() {
 		return Optional.ofNullable(messageHeader);
 	}
 
@@ -182,7 +182,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				return uncheckedDecode(in, out, endOfInput);
 			} catch (ParseException | NumberFormatException e) {
 				throw new HttpProtocolException(protocolVersion,
-					HttpStatus.BAD_REQUEST.getStatusCode(), e.getMessage());
+					HttpStatus.BAD_REQUEST.statusCode(), e.getMessage());
 			}
 		} catch (HttpProtocolException e) {
 			states.clear();
@@ -211,7 +211,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				// RFC 7230 3.2.5
 				if (headerLength + lineBuilder.position() > maxHeaderLength) {
 					throw new HttpProtocolException(protocolVersion,
-					        HttpStatus.BAD_REQUEST.getStatusCode(),
+					        HttpStatus.BAD_REQUEST.statusCode(),
 					        "Maximum header size exceeded");
 				}
 				break;
@@ -235,7 +235,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					break;
 				}
 				throw new HttpProtocolException(protocolVersion,
-				        HttpStatus.BAD_REQUEST.getStatusCode(),
+				        HttpStatus.BAD_REQUEST.statusCode(),
 				        "CR not followed by LF");
 			}
 			// Waiting for the initial request line
@@ -317,7 +317,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				// next chunk
 				if (receivedLine.length() != 0) {
 					throw new HttpProtocolException(protocolVersion,
-					        HttpStatus.BAD_REQUEST.getStatusCode(),
+					        HttpStatus.BAD_REQUEST.statusCode(),
 					        "No CRLF after chunk data.");
 				}
 				states.pop();
@@ -418,7 +418,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			field = new HttpField<>(headerLine, Converters.STRING);
 		} catch (ParseException e) {
 			throw new HttpProtocolException(protocolVersion,
-			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
+			        HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");
 		}
 		if (field.name().equalsIgnoreCase(HttpField.SET_COOKIE)) {
 			field = new HttpField<CookieList>(headerLine, Converters.SET_COOKIE);
@@ -432,7 +432,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				break;
 			}
 			// RFC 7230 3.3.3 (4.)
-			Optional<HttpField<Long>> existing = building.getField(
+			Optional<HttpField<Long>> existing = building.findField(
 			        HttpField.CONTENT_LENGTH, Converters.LONG);
 			if (existing.isPresent()) {
 				@SuppressWarnings("unchecked")
@@ -462,7 +462,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			field = new HttpField<>(headerLine, Converters.STRING);
 		} catch (ParseException e) {
 			throw new HttpProtocolException(protocolVersion,
-			        HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid header");
+			        HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");
 		}
 		// RFC 7230 4.4
 		HttpField<StringList> trailerField = messageHeader
@@ -482,7 +482,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			if (!(existing.converter() instanceof ListConverter)
 					|| !existing.converter().equals(field.converter())) {
 				throw new HttpProtocolException(protocolVersion,
-				        HttpStatus.BAD_REQUEST.getStatusCode(),
+				        HttpStatus.BAD_REQUEST.statusCode(),
 				        "Multiple occurences of field " + field.name());
 			}
 			@SuppressWarnings("unchecked")
@@ -507,7 +507,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			states.push(State.RECEIVE_LINE);
 			break;
 		case LENGTH:
-			HttpField<Long> clf = building.getField(
+			HttpField<Long> clf = building.findField(
 			        HttpField.CONTENT_LENGTH, Converters.LONG).get();
 			leftToRead = clf.value();
 			if (leftToRead > 0) {
@@ -549,13 +549,13 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private void adjustToEndOfMessage() {
 		// RFC 7230 6.3
 		Optional<HttpField<StringList>> connection = messageHeader
-		        .getField(HttpField.CONNECTION, Converters.STRING_LIST);
+		        .findField(HttpField.CONNECTION, Converters.STRING_LIST);
 		if (connection.isPresent() && connection.get().value()
 				.stream().anyMatch(s -> s.equalsIgnoreCase("close"))) {
 			states.push(State.CLOSED);
 			return;
 		}
-		if (messageHeader.getProtocol().compareTo(HttpProtocol.HTTP_1_1) >= 0) {
+		if (messageHeader.protocol().compareTo(HttpProtocol.HTTP_1_1) >= 0) {
 			states.push(State.AWAIT_MESSAGE_START);
 			states.push(State.RECEIVE_LINE);
 			return;
@@ -590,7 +590,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			/**
 			 * Create a new result. Implementing classes can
 			 * obtain the value for 
-			 * {@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection()}
+			 * {@link org.jdrupes.httpcodec.Codec.Result#closeConnection()}
 			 * from {@link HttpDecoder#isClosed()}.
 			 * 
 			 * @param overflow

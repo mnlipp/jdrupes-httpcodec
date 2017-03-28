@@ -61,10 +61,10 @@ public class DecoderContentLengthTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().get().messageHasBody());
-		assertFalse(result.getCloseConnection());
-		assertEquals(HttpStatus.OK.getStatusCode(),
-		        decoder.getHeader().get().getStatusCode());
+		assertTrue(decoder.header().get().messageHasBody());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
@@ -104,10 +104,10 @@ public class DecoderContentLengthTests {
 		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		Decoder.Result<?> result = decoder.decode(in, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().get().messageHasBody());
-		assertFalse(result.getCloseConnection());
-		assertEquals(HttpStatus.OK.getStatusCode(),
-		        decoder.getHeader().get().getStatusCode());
+		assertTrue(decoder.header().get().messageHasBody());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
 		assertTrue(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertTrue(in.hasRemaining());
@@ -115,10 +115,10 @@ public class DecoderContentLengthTests {
 		// Decode body
 		result = decoder.decode(in, body, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().get().messageHasBody());
-		assertFalse(result.getCloseConnection());
-		assertEquals(HttpStatus.OK.getStatusCode(),
-		        decoder.getHeader().get().getStatusCode());
+		assertTrue(decoder.header().get().messageHasBody());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
@@ -128,8 +128,8 @@ public class DecoderContentLengthTests {
 		        body.limit());
 		assertEquals("Hello World!", bodyText);
 		// Set-Cookies
-		Optional<HttpField<CookieList>> field = decoder.getHeader()
-		        .flatMap(h -> h.getField(HttpField.SET_COOKIE,
+		Optional<HttpField<CookieList>> field = decoder.header()
+		        .flatMap(h -> h.findField(HttpField.SET_COOKIE,
 		        		Converters.SET_COOKIE));
 		assertTrue(field.isPresent());
 		assertEquals(2, field.get().value().size());
@@ -167,10 +167,10 @@ public class DecoderContentLengthTests {
 		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = Common.tinyDecodeLoop(decoder, in, body);
-		assertTrue(decoder.getHeader().get().messageHasBody());
-		assertEquals(HttpStatus.OK.getStatusCode(),
-		        decoder.getHeader().get().getStatusCode());
-		assertFalse(result.getCloseConnection());
+		assertTrue(decoder.header().get().messageHasBody());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
+		assertFalse(result.closeConnection());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
@@ -179,8 +179,8 @@ public class DecoderContentLengthTests {
 		        body.limit());
 		assertEquals("Hello World!", bodyText);
 		// Set-Cookies
-		Optional<HttpField<CookieList>> field = decoder.getHeader()
-		        .flatMap(f -> f.getField(HttpField.SET_COOKIE,
+		Optional<HttpField<CookieList>> field = decoder.header()
+		        .flatMap(f -> f.findField(HttpField.SET_COOKIE,
 		        		Converters.SET_COOKIE));
 		assertEquals(2, field.get().value().size());
 		assertEquals("deleted", field.get().value().valueForName("autorf").get());

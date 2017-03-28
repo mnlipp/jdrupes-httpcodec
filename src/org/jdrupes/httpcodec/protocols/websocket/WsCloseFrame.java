@@ -43,14 +43,14 @@ public class WsCloseFrame extends WsFrameHeader {
 	/**
 	 * @return the statusCode
 	 */
-	public Integer getStatusCode() {
+	public Integer statusCode() {
 		return statusCode;
 	}
 	
 	/**
 	 * @return the reason
 	 */
-	public CharBuffer getReason() {
+	public CharBuffer reason() {
 		return reason;
 	}
 

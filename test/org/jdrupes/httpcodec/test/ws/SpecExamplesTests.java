@@ -50,11 +50,11 @@ public class SpecExamplesTests {
 		txt.flip();
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().isPresent());
-		assertTrue(decoder.getHeader().get() instanceof WsMessageHeader);
-		WsMessageHeader hdr = (WsMessageHeader)decoder.getHeader().get();
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsMessageHeader);
+		WsMessageHeader hdr = (WsMessageHeader)decoder.header().get();
 		assertTrue(hdr.isTextMode());
 		assertTrue(hdr.hasPayload());
 		assertEquals("Hello", txt.toString());
@@ -74,7 +74,7 @@ public class SpecExamplesTests {
 		msg.flip();
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertEquals(expectedBytes.length, msg.remaining());
 		byte[] msgBytes = new byte[msg.remaining()];
 		msg.get(msgBytes);
@@ -95,11 +95,11 @@ public class SpecExamplesTests {
 		txt.flip();
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().isPresent());
-		assertTrue(decoder.getHeader().get() instanceof WsMessageHeader);
-		WsMessageHeader hdr = (WsMessageHeader)decoder.getHeader().get();
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsMessageHeader);
+		WsMessageHeader hdr = (WsMessageHeader)decoder.header().get();
 		assertTrue(hdr.isTextMode());
 		assertTrue(hdr.hasPayload());
 		assertEquals("Hello", txt.toString());
@@ -118,11 +118,11 @@ public class SpecExamplesTests {
 		Decoder.Result<?> result = decoder.decode(msg, txt, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().isPresent());
-		assertTrue(decoder.getHeader().get() instanceof WsMessageHeader);
-		WsMessageHeader hdr = (WsMessageHeader)decoder.getHeader().get();
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsMessageHeader);
+		WsMessageHeader hdr = (WsMessageHeader)decoder.header().get();
 		assertTrue(hdr.isTextMode());
 		assertTrue(hdr.hasPayload());
 		msg.clear();
@@ -150,7 +150,7 @@ public class SpecExamplesTests {
 		msg.flip();
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertEquals(msgBytes1.length, msg.remaining());
 		byte[] msgBytes = new byte[msg.remaining()];
 		msg.get(msgBytes);		
@@ -165,7 +165,7 @@ public class SpecExamplesTests {
 		msg.flip();
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());			
+		assertFalse(result.closeConnection());			
 		assertEquals(msgBytes2.length, msg.remaining());
 		msgBytes = new byte[msg.remaining()];
 		msg.get(msgBytes);
@@ -183,18 +183,18 @@ public class SpecExamplesTests {
 		Decoder.Result<?> result = decoder.decode(msg, null, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().isPresent());
-		assertTrue(decoder.getHeader().get() instanceof WsPingFrame);
-		WsPingFrame pingHdr = (WsPingFrame)decoder.getHeader().get();
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsPingFrame);
+		WsPingFrame pingHdr = (WsPingFrame)decoder.header().get();
 		CharBuffer txt = Charset.forName("utf-8")
-				.decode(pingHdr.getApplicationData());
+				.decode(pingHdr.applicationData());
 		assertEquals("Hello", txt.toString());
-		assertNotNull(result.getResponse());
-		WsPongFrame pongHdr = (WsPongFrame)result.getResponse().get();
+		assertNotNull(result.response());
+		WsPongFrame pongHdr = (WsPongFrame)result.response().get();
 		txt = Charset.forName("utf-8")
-				.decode(pongHdr.getApplicationData());
+				.decode(pongHdr.applicationData());
 		assertEquals("Hello", txt.toString());
 	}
 	
@@ -213,7 +213,7 @@ public class SpecExamplesTests {
 		msg.flip();
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertEquals(pingBytes.length, msg.remaining());
 		byte[] msgBytes = new byte[msg.remaining()];
 		msg.get(msgBytes);
@@ -232,13 +232,13 @@ public class SpecExamplesTests {
 		Decoder.Result<?> result = decoder.decode(msg, null, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().isPresent());
-		assertTrue(decoder.getHeader().get() instanceof WsPongFrame);
-		WsPongFrame hdr = (WsPongFrame)decoder.getHeader().get();
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsPongFrame);
+		WsPongFrame hdr = (WsPongFrame)decoder.header().get();
 		CharBuffer txt = Charset.forName("utf-8")
-				.decode(hdr.getApplicationData());
+				.decode(hdr.applicationData());
 		assertEquals("Hello", txt.toString());
 	}
 	

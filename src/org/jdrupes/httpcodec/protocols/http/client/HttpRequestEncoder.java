@@ -62,11 +62,11 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 	@Override
 	protected void startMessage(HttpRequest messageHeader, Writer writer)
 	        throws IOException {
-		writer.write(messageHeader.getMethod());
+		writer.write(messageHeader.method());
 		writer.write(" ");
-		writer.write(messageHeader.getRequestUri().toString());
+		writer.write(messageHeader.requestUri().toString());
 		writer.write(" ");
-		writer.write(messageHeader.getProtocol().toString());
+		writer.write(messageHeader.protocol().toString());
 		writer.write("\r\n");
 	}
 	

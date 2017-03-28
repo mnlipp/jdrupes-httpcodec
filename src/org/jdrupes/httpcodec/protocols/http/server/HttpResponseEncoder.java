@@ -93,8 +93,8 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	 */
 	@Override
 	public void encode(HttpResponse messageHeader) {
-		if (messageHeader.getStatusCode()
-					== HttpStatus.SWITCHING_PROTOCOLS.getStatusCode()) {
+		if (messageHeader.statusCode()
+					== HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {
 			switchingTo = prepareSwitchProtocol(messageHeader);
 		}
 		
@@ -116,7 +116,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 				&& !result.isUnderflow() && !result.isOverflow()) {
 			// Last invocation of encode
 			return resultFactory().newResult(false, false, 
-					result.getCloseConnection(), switchingTo, 
+					result.closeConnection(), switchingTo, 
 					protocolPlugin.createRequestDecoder(switchingTo), 
 					protocolPlugin.createResponseEncoder(switchingTo));
 		}
@@ -127,13 +127,13 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		// RFC 7230 3.3.2 
 		boolean forbidden = messageHeader.fields()
 				.containsKey(HttpField.TRANSFER_ENCODING)
-				|| messageHeader.getStatusCode() % 100 == 1
-				|| messageHeader.getStatusCode() 
-						== HttpStatus.NO_CONTENT.getStatusCode()
-				|| (messageHeader.getRequest().map(
-						r -> r.getMethod().equalsIgnoreCase("CONNECT"))
+				|| messageHeader.statusCode() % 100 == 1
+				|| messageHeader.statusCode() 
+						== HttpStatus.NO_CONTENT.statusCode()
+				|| (messageHeader.request().map(
+						r -> r.method().equalsIgnoreCase("CONNECT"))
 						.orElse(false)
-					&& messageHeader.getStatusCode() % 100 == 2);
+					&& messageHeader.statusCode() % 100 == 2);
 		if (messageHeader.fields().containsKey(HttpField.CONTENT_LENGTH)) {
 			if (forbidden) {
 				messageHeader.removeField(HttpField.CONTENT_LENGTH);
@@ -146,11 +146,11 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			return;
 		}
 		// Don't add header if optional
-		if (messageHeader.getRequest().map(
-				r -> r.getMethod().equalsIgnoreCase("HEAD"))
+		if (messageHeader.request().map(
+				r -> r.method().equalsIgnoreCase("HEAD"))
 				.orElse(false)
-			|| messageHeader.getStatusCode() 
-					== HttpStatus.NOT_MODIFIED.getStatusCode()) {
+			|| messageHeader.statusCode() 
+					== HttpStatus.NOT_MODIFIED.statusCode()) {
 			return;
 		}
 		// Add 0 content length
@@ -160,7 +160,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 
 	private String prepareSwitchProtocol(HttpResponse response) {
 		Optional<String> protocol = response
-				.getField(HttpField.UPGRADE, Converters.STRING_LIST)
+				.findField(HttpField.UPGRADE, Converters.STRING_LIST)
 				.map(l -> l.value().get(0));
 		if (!protocol.isPresent()) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
@@ -184,8 +184,8 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			return null;
 		}
 		protocolPlugin.augmentInitialResponse(response);
-		if (response.getStatusCode() 
-				!= HttpStatus.SWITCHING_PROTOCOLS.getStatusCode()) {
+		if (response.statusCode() 
+				!= HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {
 			// Not switching after all
 			return null;
 		}
@@ -198,11 +198,11 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	@Override
 	protected void startMessage(HttpResponse response, Writer writer)
 	        throws IOException {
-		writer.write(response.getProtocol().toString());
+		writer.write(response.protocol().toString());
 		writer.write(" ");
-		writer.write(Integer.toString(response.getStatusCode()));
+		writer.write(Integer.toString(response.statusCode()));
 		writer.write(" ");
-		writer.write(response.getReasonPhrase());
+		writer.write(response.reasonPhrase());
 		writer.write("\r\n");
 	}
 
@@ -322,7 +322,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			builder.append(", underflow=");
 			builder.append(isUnderflow());
 			builder.append(", closeConnection=");
-			builder.append(getCloseConnection());
+			builder.append(closeConnection());
 			builder.append(", ");
 			if (newProtocol != null) {
 				builder.append("newProtocol=");

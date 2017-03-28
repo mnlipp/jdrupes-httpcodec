@@ -97,7 +97,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	 * @see org.jdrupes.httpcodec.Decoder#getHeader()
 	 */
 	@Override
-	public Optional<WsFrameHeader> getHeader() {
+	public Optional<WsFrameHeader> header() {
 		return Optional.ofNullable(receivedHeader);
 	}
 

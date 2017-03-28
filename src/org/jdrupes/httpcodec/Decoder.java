@@ -27,7 +27,7 @@ import java.util.Optional;
  * 
  * @param <T> the type of message decoded by this decoder
  * @param <R> the type of message that may be generated as response
- * (see {@link Decoder.Result#getResponse()})
+ * (see {@link Decoder.Result#response()})
  */
 public interface Decoder<T extends MessageHeader,
 	R extends MessageHeader> extends Codec {
@@ -68,7 +68,7 @@ public interface Decoder<T extends MessageHeader,
 	 * 
 	 * @return the result
 	 */
-	public Optional<T> getHeader();
+	public Optional<T> header();
 	
 	/**
 	 * The result from decoding. In addition to the common codec result, this
@@ -133,12 +133,12 @@ public interface Decoder<T extends MessageHeader,
 		 * 
 		 * @return the response
 		 */
-		public Optional<R> getResponse() {
+		public Optional<R> response() {
 			return response;
 		}
 
 		/**
-		 * If the result includes a response (see {@link #getResponse()})
+		 * If the result includes a response (see {@link #response()})
 		 * and this method returns {@code true} then no
 		 * further processing of the received data is required. After sending
 		 * the response data, the decode method should be invoked 
@@ -207,7 +207,7 @@ public interface Decoder<T extends MessageHeader,
 			builder.append(", underflow=");
 			builder.append(isUnderflow());
 			builder.append(", closeConnection=");
-			builder.append(getCloseConnection());
+			builder.append(closeConnection());
 			builder.append(", headerCompleted=");
 			builder.append(headerCompleted);
 			builder.append(", ");

@@ -78,7 +78,7 @@ public class HttpResponse extends HttpMessageHeader {
 	/**
 	 * @return the responseCode
 	 */
-	public int getStatusCode() {
+	public int statusCode() {
 		return statusCode;
 	}
 
@@ -94,7 +94,7 @@ public class HttpResponse extends HttpMessageHeader {
 	/**
 	 * @return the reason phrase
 	 */
-	public String getReasonPhrase() {
+	public String reasonPhrase() {
 		return reasonPhrase;
 	}
 
@@ -115,8 +115,8 @@ public class HttpResponse extends HttpMessageHeader {
 	 * @return the response for easy chaining
 	 */
 	public HttpResponse setStatus(HttpStatus status) {
-		statusCode = status.getStatusCode();
-		reasonPhrase = status.getReasonPhrase();
+		statusCode = status.statusCode();
+		reasonPhrase = status.reasonPhrase();
 		return this;
 	}
 	
@@ -186,7 +186,7 @@ public class HttpResponse extends HttpMessageHeader {
 	 * @return the request
 	 * @see #setRequest(HttpRequest)
 	 */
-	public Optional<HttpRequest> getRequest() {
+	public Optional<HttpRequest> request() {
 		return Optional.ofNullable(request);
 	}
 }

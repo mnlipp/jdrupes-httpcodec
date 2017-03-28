@@ -50,11 +50,11 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertFalse(result.getResponse().isPresent());
-		assertFalse(decoder.getHeader().get().messageHasBody());
-		assertEquals("GET", decoder.getHeader().get().getMethod());
-		assertEquals("localhost", decoder.getHeader().get().getHost());
-		assertEquals(8888, decoder.getHeader().get().getPort());
+		assertFalse(result.response().isPresent());
+		assertFalse(decoder.header().get().messageHasBody());
+		assertEquals("GET", decoder.header().get().method());
+		assertEquals("localhost", decoder.header().get().host());
+		assertEquals(8888, decoder.header().get().port());
 	}
 
 	@Test
@@ -67,8 +67,8 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(result.getResponse().isPresent());
-		assertEquals(505, result.getResponse().get().getStatusCode());
+		assertTrue(result.response().isPresent());
+		assertEquals(505, result.response().get().statusCode());
 	}
 
 	/**
@@ -87,8 +87,8 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(result.getResponse().isPresent());
-		assertEquals(400, result.getResponse().get().getStatusCode());
+		assertTrue(result.response().isPresent());
+		assertEquals(400, result.response().get().statusCode());
 	}
 
 	/**
@@ -107,8 +107,8 @@ public class BasicProtocolTests {
 		HttpRequestDecoder decoder = new HttpRequestDecoder();
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(result.getResponse().isPresent());
-		assertEquals(400, result.getResponse().get().getStatusCode());
+		assertTrue(result.response().isPresent());
+		assertEquals(400, result.response().get().statusCode());
 	}
 
 

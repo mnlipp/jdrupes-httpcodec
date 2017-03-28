@@ -49,8 +49,8 @@ public abstract class MediaBase
 	 * 
 	 * @return the type
 	 */
-	public String getTopLevelType() {
-		return getValue().topLevelType;
+	public String topLevelType() {
+		return value().topLevelType;
 	}
 	
 	/**
@@ -58,8 +58,8 @@ public abstract class MediaBase
 	 * 
 	 * @return the subtype
 	 */
-	public String getSubtype() {
-		return getValue().subtype;
+	public String subtype() {
+		return value().subtype;
 	}
 
 	/**
@@ -111,7 +111,7 @@ public abstract class MediaBase
 		 * 
 		 * @return the type
 		 */
-		public String getTopLevelType() {
+		public String topLevelType() {
 			return topLevelType;
 		}
 		
@@ -120,7 +120,7 @@ public abstract class MediaBase
 		 * 
 		 * @return the subtype
 		 */
-		public String getSubtype() {
+		public String subtype() {
 			return subtype;
 		}
 

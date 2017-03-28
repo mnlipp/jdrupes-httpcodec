@@ -73,15 +73,15 @@ public class WsProtocolProvider extends ProtocolProvider {
 	 */
 	@Override
 	public void augmentInitialResponse(HttpResponse response) {
-		Optional<String> wsKey = response.getRequest()
-			.flatMap(r -> r.getStringValue("Sec-WebSocket-Key"));
+		Optional<String> wsKey = response.request()
+			.flatMap(r -> r.findStringValue("Sec-WebSocket-Key"));
 		if (!wsKey.isPresent()) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setMessageHasBody(false).clearHeaders();
 			return;
 		}
 		// RFC 6455 4.1
-		if(response.getRequest().flatMap(r -> r.getField(
+		if(response.request().flatMap(r -> r.findField(
 				"Sec-WebSocket-Version", Converters.LONG))
 				.map(HttpField<Long>::value).orElse(-1L) != 13) {
 			response.setStatus(HttpStatus.BAD_REQUEST)

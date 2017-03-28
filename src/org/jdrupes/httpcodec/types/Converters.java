@@ -706,9 +706,9 @@ public final class Converters {
 				@Override
 				public String asFieldValue(ParameterizedValue<String> value) {
 					StringBuilder result = new StringBuilder();
-					result.append(value.getValue());
+					result.append(value.value());
 					boolean first = true;
-					for (Map.Entry<String, String> e: value.getParameters().entrySet()) {
+					for (Map.Entry<String, String> e: value.parameters().entrySet()) {
 						if (first) {
 							first = false;
 						} else {

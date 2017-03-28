@@ -145,7 +145,7 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 */
 	@SuppressWarnings("unchecked")
 	public Optional<Q> currentRequest() {
-		return (Optional<Q>)requestDecoder.getHeader();
+		return (Optional<Q>)requestDecoder.header();
 	}
 	
 }

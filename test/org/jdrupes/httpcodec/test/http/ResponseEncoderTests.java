@@ -44,7 +44,7 @@ public class ResponseEncoderTests {
 		Encoder.Result result = encoder.encode(out);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		String encoded = new String(out.array(), 0, out.position());
 		assertTrue(encoded.contains("HTTP/1.1 200 OK\r\n"));
 		assertTrue(encoded.contains("Content-Length: 0\r\n"));
@@ -62,7 +62,7 @@ public class ResponseEncoderTests {
 		while (true) {
 			Encoder.Result result = encoder.encode(tinyOut);
 			assertFalse(result.isUnderflow());
-			assertFalse(result.getCloseConnection());
+			assertFalse(result.closeConnection());
 			tinyOut.flip();
 			if (tinyOut.hasRemaining()) {
 				out.put(tinyOut);

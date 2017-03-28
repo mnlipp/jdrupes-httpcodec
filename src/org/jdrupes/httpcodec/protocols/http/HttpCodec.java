@@ -33,8 +33,8 @@ public abstract class HttpCodec<T extends HttpMessageHeader>
 	
 	protected String bodyCharset() {
 		return messageHeader
-			.getField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE)
-			.map(f -> f.value().getParameter("charset")).orElse("utf-8");
+			.findField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE)
+			.map(f -> f.value().parameter("charset")).orElse("utf-8");
 	}
 	
 }

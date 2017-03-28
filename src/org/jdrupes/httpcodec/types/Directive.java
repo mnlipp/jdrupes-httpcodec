@@ -55,14 +55,14 @@ public class Directive {
 	/**
 	 * @return the name
 	 */
-	public String getName() {
+	public String name() {
 		return name;
 	}
 
 	/**
 	 * @return the value
 	 */
-	public Optional<String> getValue() {
+	public Optional<String> value() {
 		return value;
 	}
 	
@@ -70,11 +70,11 @@ public class Directive {
 
 		@Override
 		public String asFieldValue(Directive value) {
-			if (!value.getValue().isPresent()) {
+			if (!value.value().isPresent()) {
 				return value.name;
 			}
 			return value.name + "=" 
-				+ Converters.quoteIfNecessary(value.getValue().get());
+				+ Converters.quoteIfNecessary(value.value().get());
 		}
 
 		@Override

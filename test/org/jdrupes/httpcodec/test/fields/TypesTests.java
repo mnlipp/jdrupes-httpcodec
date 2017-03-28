@@ -25,14 +25,14 @@ public class TypesTests {
 	public void testMediaTypeCreation() throws ParseException {
 		MediaType media = MediaType.builder().setType("text", "html")
 				.setParameter("charset", "utf-8").build();
-		assertEquals("text", media.getTopLevelType());
-		assertEquals("html", media.getSubtype());
-		assertEquals("utf-8", media.getParameter("charset"));
+		assertEquals("text", media.topLevelType());
+		assertEquals("html", media.subtype());
+		assertEquals("utf-8", media.parameter("charset"));
 		// from string
 		media = Converters.MEDIA_TYPE.fromFieldValue("text/html; charset=utf-8");
-		assertEquals("text", media.getTopLevelType());
-		assertEquals("html", media.getSubtype());
-		assertEquals("utf-8", media.getParameter("charset"));
+		assertEquals("text", media.topLevelType());
+		assertEquals("html", media.subtype());
+		assertEquals("utf-8", media.parameter("charset"));
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class TypesTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT,
 				"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
-		List<MediaRange> value = hdr.getValue(
+		List<MediaRange> value = hdr.findValue(
 				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get();
 		Collections.sort(value);
 		Iterator<MediaRange> itr = value.iterator();
@@ -91,7 +91,7 @@ public class TypesTests {
 
 		// Second
 		hdr.setField(HttpField.ACCEPT, "audio/*; q=0.2, audio/basic");
-		value = hdr.getValue(
+		value = hdr.findValue(
 				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
 		Collections.sort(value);
 		itr = value.iterator();
@@ -101,7 +101,7 @@ public class TypesTests {
 		// Third
 		hdr.setField(HttpField.ACCEPT, 
 				"text/*, text/plain, text/plain;format=flowed, */*");
-		value = hdr.getValue(
+		value = hdr.findValue(
 				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
 		Collections.sort(value);
 		itr = value.iterator();
@@ -114,7 +114,7 @@ public class TypesTests {
 		hdr.setField(HttpField.ACCEPT, 
 				"text/plain; q=1; format=flowed, text/plain;format=flowed, "
 				+ "*/*, */*, audio/*");
-		value = hdr.getValue(
+		value = hdr.findValue(
 				HttpField.ACCEPT, Converters.MEDIA_RANGE_LIST).get(); 
 		Collections.sort(value);
 		itr = value.iterator();
@@ -132,23 +132,23 @@ public class TypesTests {
 		hdr.setField(HttpField.WWW_AUTHENTICATE,
 				"Newauth realm=\"apps\", type=1, "
 				+ "title=\"Login to \\\"apps\\\"\", Basic realm=\"simple\"");
-		List<ParameterizedValue<String>> value = hdr.getValue(
+		List<ParameterizedValue<String>> value = hdr.findValue(
 				HttpField.WWW_AUTHENTICATE, Converters.CHALLENGE_LIST).get();
 
-		assertEquals("Newauth", value.get(0).getValue());
-		assertEquals("apps", value.get(0).getParameter("realm"));
-		assertEquals("1", value.get(0).getParameter("type"));
-		assertEquals("Login to \"apps\"", value.get(0).getParameter("title"));
+		assertEquals("Newauth", value.get(0).value());
+		assertEquals("apps", value.get(0).parameter("realm"));
+		assertEquals("1", value.get(0).parameter("type"));
+		assertEquals("Login to \"apps\"", value.get(0).parameter("title"));
 		
-		assertEquals("Basic", value.get(1).getValue());
-		assertEquals("simple", value.get(1).getParameter("realm"));
+		assertEquals("Basic", value.get(1).value());
+		assertEquals("simple", value.get(1).parameter("realm"));
 		
 		// Second
 		hdr.setField(HttpField.AUTHORIZATION, "Basic aHR0cHdhdGNoOmY=");
-		ParameterizedValue<String> value2 = hdr.getValue(
+		ParameterizedValue<String> value2 = hdr.findValue(
 				HttpField.AUTHORIZATION, Converters.CREDENTIALS).get();
-		assertEquals("Basic", value2.getValue());
-		assertEquals("aHR0cHdhdGNoOmY=", value2.getParameter(null));
+		assertEquals("Basic", value2.value());
+		assertEquals("aHR0cHdhdGNoOmY=", value2.parameter(null));
 	}	
 	
 }

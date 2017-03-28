@@ -40,7 +40,7 @@ public class WsDefaultControlFrame extends WsFrameHeader {
 	 * 
 	 * @return the application data
 	 */
-	public ByteBuffer getApplicationData() {
+	public ByteBuffer applicationData() {
 		return applicationData;
 	}
 }

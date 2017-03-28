@@ -56,7 +56,7 @@ public class EncoderContentLengthTests {
 		// Check result
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		String encoded = new String(out.array(), 0, out.position());
 		assertTrue(encoded.contains("HTTP/1.1 200 OK\r\n"));
 		assertTrue(encoded.endsWith("\r\n\r\nHello World!"));
@@ -78,7 +78,7 @@ public class EncoderContentLengthTests {
 		Encoder.Result result = encoder.encode(Codec.EMPTY_IN, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		String encoded = new String(out.array(), 0, out.position());
 		assertTrue(encoded.contains("HTTP/1.1 200 OK\r\n"));
 		assertTrue(encoded.endsWith("\r\n\r\n"));
@@ -87,12 +87,12 @@ public class EncoderContentLengthTests {
 		result = encoder.encode(in, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// "Encode" end of input
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		encoded = new String(out.array(), 0, out.position());
 		assertTrue(encoded.contains("HTTP/1.1 200 OK\r\n"));
 		assertTrue(encoded.endsWith("\r\n\r\nHello World!"));

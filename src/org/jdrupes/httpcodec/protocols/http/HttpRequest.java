@@ -99,7 +99,7 @@ public class HttpRequest extends HttpMessageHeader {
 	 * 
 	 * @return the method
 	 */
-	public String getMethod() {
+	public String method() {
 		return method;
 	}
 
@@ -108,7 +108,7 @@ public class HttpRequest extends HttpMessageHeader {
 	 * 
 	 * @return the requestUri
 	 */
-	public URI getRequestUri() {
+	public URI requestUri() {
 		return requestUri;
 	}
 
@@ -128,14 +128,14 @@ public class HttpRequest extends HttpMessageHeader {
 	/**
 	 * @return the host
 	 */
-	public String getHost() {
+	public String host() {
 		return host;
 	}
 
 	/**
 	 * @return the port
 	 */
-	public int getPort() {
+	public int port() {
 		return port;
 	}
 
@@ -163,7 +163,7 @@ public class HttpRequest extends HttpMessageHeader {
 	 * @return the prepared response
 	 * @see #setResponse(HttpResponse)
 	 */
-	public Optional<HttpResponse> getResponse() {
+	public Optional<HttpResponse> response() {
 		return Optional.ofNullable(response);
 	}
 	
@@ -184,9 +184,9 @@ public class HttpRequest extends HttpMessageHeader {
 			builder.append(requestUri);
 			builder.append(", ");
 		}
-		if (getProtocol() != null) {
+		if (protocol() != null) {
 			builder.append("httpVersion=");
-			builder.append(getProtocol());
+			builder.append(protocol());
 		}
 		builder.append("]");
 		return builder.toString();

@@ -80,9 +80,9 @@ public class Connection extends Thread {
 				while (in.hasRemaining()) {
 					Decoder.Result<?> decoderResult 
 						= engine.decode(in, null, false);
-					if (decoderResult.getResponse().isPresent()) {
+					if (decoderResult.response().isPresent()) {
 						sendResponseWithoutBody(
-								decoderResult.getResponse().get());
+								decoderResult.response().get());
 						if (!channel.isOpen()) {
 							break;
 						}
@@ -105,24 +105,24 @@ public class Connection extends Thread {
 	}
 
 	private void handleHttpRequest(HttpRequest request) throws IOException {
-		if (request.getMethod().equalsIgnoreCase("GET")) {
-			if (request.getRequestUri().getPath().equals("/form")) {
+		if (request.method().equalsIgnoreCase("GET")) {
+			if (request.requestUri().getPath().equals("/form")) {
 				handleGetForm(request);
 				return;
 			}
-			if (request.getRequestUri().getPath().equals("/echo")
-					|| request.getRequestUri().getPath().startsWith("/echo/")) {
+			if (request.requestUri().getPath().equals("/echo")
+					|| request.requestUri().getPath().startsWith("/echo/")) {
 				handleEcho(request);
 				return;
 			}
 		}
-		if (request.getMethod().equalsIgnoreCase("POST")
-				&& request.getRequestUri().getPath().equals("/form")) {
+		if (request.method().equalsIgnoreCase("POST")
+				&& request.requestUri().getPath().equals("/form")) {
 			handlePostForm(request);
 			return;
 		}
 		// fall back
-		HttpResponse response = request.getResponse().get()
+		HttpResponse response = request.response().get()
 				.setStatus(HttpStatus.NOT_FOUND).setMessageHasBody(true);
 		try {
 			HttpField<MediaType> media = new HttpField<MediaType>(
@@ -137,7 +137,7 @@ public class Connection extends Thread {
 	}
 
 	private void handleGetForm(HttpRequest request) throws IOException {
-		HttpResponse response = request.getResponse().get()
+		HttpResponse response = request.response().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
 		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "html")
@@ -152,7 +152,7 @@ public class Connection extends Thread {
 	}
 
 	private void handlePostForm(HttpRequest request) throws IOException {
-		HttpResponse response = request.getResponse().get();
+		HttpResponse response = request.response().get();
 		FormUrlDecoder fieldDecoder = new FormUrlDecoder();
 		while (true) {
 			out.clear();
@@ -180,22 +180,22 @@ public class Connection extends Thread {
 		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "plain")
 				.setParameter("charset", "utf-8").build());
-		String data = "First name: " + fieldDecoder.getFields().get("firstname")
+		String data = "First name: " + fieldDecoder.fields().get("firstname")
 		        + "\r\n" + "Last name: "
-		        + fieldDecoder.getFields().get("lastname");
+		        + fieldDecoder.fields().get("lastname");
 		ByteBuffer body = ByteBuffer.wrap(data.getBytes("utf-8"));
 		sendResponse(response, body, true);
 	}
 
 	private void handleEcho(HttpRequest request) throws IOException {
-		if (request.getField(
+		if (request.findField(
 				HttpField.UPGRADE, Converters.STRING_LIST)
 				.map(f -> f.value().containsIgnoreCase("websocket"))
 				.orElse(false)) {
 			upgradeEcho(request);
 			return;
 		}
-		HttpResponse response = request.getResponse().get()
+		HttpResponse response = request.response().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
 		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "html")
@@ -210,7 +210,7 @@ public class Connection extends Thread {
 	}
 
 	private void upgradeEcho(HttpRequest request) throws IOException {
-		HttpResponse response = request.getResponse().get()
+		HttpResponse response = request.response().get()
 			.setStatus(HttpStatus.SWITCHING_PROTOCOLS)
 			.setField(HttpField.UPGRADE, new StringList("websocket"));
 		sendResponse(response, null, true);
@@ -233,7 +233,7 @@ public class Connection extends Thread {
 			if (encoderResult.isOverflow()) {
 				continue;
 			}
-			if (encoderResult.getCloseConnection()) {
+			if (encoderResult.closeConnection()) {
 				channel.close();
 			}
 			break;
@@ -257,7 +257,7 @@ public class Connection extends Thread {
 			if (encoderResult.isOverflow()) {
 				continue;
 			}
-			if (encoderResult.getCloseConnection()) {
+			if (encoderResult.closeConnection()) {
 				channel.close();
 			}
 			break;

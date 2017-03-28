@@ -70,28 +70,28 @@ public class ResponseDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		ResponseDecoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.getHeader().get().messageHasBody());
-		assertFalse(result.getCloseConnection());
-		assertEquals(HttpStatus.OK.getStatusCode(),
-		        decoder.getHeader().get().getStatusCode());
+		assertTrue(decoder.header().get().messageHasBody());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
 		assertEquals(Converters.DATE_TIME.fromFieldValue(
 				"Sat, 23 Jul 2016 16:56:54 GMT"),
-				decoder.getHeader().get().getField(HttpField.RETRY_AFTER,
+				decoder.header().get().findField(HttpField.RETRY_AFTER,
 						Converters.DATE_TIME).get().value());
-		List<CommentedValue<String>> server = decoder.getHeader().get()
-				.getValue(HttpField.SERVER, Converters.PRODUCT_DESCRIPTIONS).get();
-		assertEquals("Apache/2.4.18", server.get(0).getValue());
-		assertEquals("Ubuntu", server.get(0).getComments()[0]);
+		List<CommentedValue<String>> server = decoder.header().get()
+				.findValue(HttpField.SERVER, Converters.PRODUCT_DESCRIPTIONS).get();
+		assertEquals("Apache/2.4.18", server.get(0).value());
+		assertEquals("Ubuntu", server.get(0).comments()[0]);
 		body.flip();
 		String bodyText = new String(body.array(), body.position(),
 		        body.limit());
 		assertEquals("Hello World!", bodyText);
 		// Set-Cookies
-		Optional<HttpField<CookieList>> field = decoder.getHeader().get()
-				.getField(HttpField.SET_COOKIE, Converters.SET_COOKIE);
+		Optional<HttpField<CookieList>> field = decoder.header().get()
+				.findField(HttpField.SET_COOKIE, Converters.SET_COOKIE);
 		assertEquals(2, field.get().value().size());
 		assertEquals("deleted", field.get().value().valueForName("autorf").get());
 		assertEquals("13BEF4C6DC68E5", field.get().value().valueForName("MUIDB").get());

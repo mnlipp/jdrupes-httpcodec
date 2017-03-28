@@ -97,7 +97,7 @@ public class HttpResponseDecoder
 	 *            the request
 	 */
 	public void decodeResponseTo(HttpRequest request) {
-		this.requestMethod = request.getMethod();
+		this.requestMethod = request.method();
 	}
 
 	/* (non-Javadoc)
@@ -125,7 +125,7 @@ public class HttpResponseDecoder
 		Matcher responseMatcher = responseLinePatter.matcher(startLine);
 		if (!responseMatcher.matches()) {
 			throw new HttpProtocolException(protocolVersion,
-			        HttpStatus.BAD_REQUEST.getStatusCode(),
+			        HttpStatus.BAD_REQUEST.statusCode(),
 			        "Illegal request line");
 		}
 		String httpVersion = responseMatcher.group(1);
@@ -163,7 +163,7 @@ public class HttpResponseDecoder
 			if (String.class.isAssignableFrom(hdr.value().getClass())) {
 				String value = (String)hdr.value();
 				if (Character.isDigit(value.charAt(0))) {
-					Instant base = message.getField(
+					Instant base = message.findField(
 							HttpField.DATE, Converters.DATE_TIME)
 							.map(HttpField<Instant>::value).orElse(Instant.now());
 					message.setField(new HttpField<>(HttpField.RETRY_AFTER,
@@ -173,7 +173,7 @@ public class HttpResponseDecoder
 			}
 		}
 		// RFC 7230 3.3.3 (1. & 2.)
-		int statusCode = message.getStatusCode();
+		int statusCode = message.statusCode();
 		if (requestMethod.equalsIgnoreCase("HEAD")
 		        || (statusCode % 100) == 1
 		        || statusCode == 204
@@ -182,7 +182,7 @@ public class HttpResponseDecoder
 		                && (statusCode % 100 == 2))) {
 			return BodyMode.NO_BODY;
 		}
-		Optional<HttpField<StringList>> transEncs = message.getField(
+		Optional<HttpField<StringList>> transEncs = message.findField(
 		        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);
 		// RFC 7230 3.3.3 (3.)
 		if (transEncs.isPresent()) {
@@ -325,13 +325,13 @@ public class HttpResponseDecoder
 			builder.append(", underflow=");
 			builder.append(isUnderflow());
 			builder.append(", closeConnection=");
-			builder.append(getCloseConnection());
+			builder.append(closeConnection());
 			builder.append(", headerCompleted=");
 			builder.append(isHeaderCompleted());
 			builder.append(", ");
-			if (getResponse() != null) {
+			if (response() != null) {
 				builder.append("response=");
-				builder.append(getResponse());
+				builder.append(response());
 				builder.append(", ");
 			}
 			builder.append("responseOnly=");

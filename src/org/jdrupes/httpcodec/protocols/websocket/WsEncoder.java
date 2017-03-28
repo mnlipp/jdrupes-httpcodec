@@ -204,9 +204,9 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 			// Prepare payload
 			if (hdr instanceof WsCloseFrame) {
 				payloadSize = 0;
-				if (((WsCloseFrame)hdr).getStatusCode() != null) {
+				if (((WsCloseFrame)hdr).statusCode() != null) {
 					convData.clear();
-					int code = ((WsCloseFrame)hdr).getStatusCode();
+					int code = ((WsCloseFrame)hdr).statusCode();
 					try {
 						convData.write(code >> 8);
 						convData.write(code & 0xff);
@@ -214,13 +214,13 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 					} catch (IOException e) {
 						// Formally thrown, cannot happen
 					}
-					if (((WsCloseFrame)hdr).getReason() != null) {
-						convTextData(((WsCloseFrame)hdr).getReason());
+					if (((WsCloseFrame)hdr).reason() != null) {
+						convTextData(((WsCloseFrame)hdr).reason());
 					}
 				}
 			} else if (hdr instanceof WsDefaultControlFrame) {
 				payloadSize = ((WsDefaultControlFrame)hdr)
-						.getApplicationData().remaining();
+						.applicationData().remaining();
 			}
 		}
 		
@@ -301,7 +301,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		} else {
 			// Take data from in
 			if (hdr instanceof WsDefaultControlFrame) {
-				in = ((WsDefaultControlFrame)hdr).getApplicationData();
+				in = ((WsDefaultControlFrame)hdr).applicationData();
 			}
 			if (!doMask) {
 				ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) in);

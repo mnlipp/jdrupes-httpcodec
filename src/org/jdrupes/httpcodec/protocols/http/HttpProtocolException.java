@@ -57,11 +57,11 @@ public class HttpProtocolException extends ProtocolException {
 	 * @param status the status
 	 */
 	public HttpProtocolException(HttpProtocol httpProtocol, HttpStatus status) {
-		super(String.format("%03d %s", status.getStatusCode(),
-				status.getReasonPhrase()));
+		super(String.format("%03d %s", status.statusCode(),
+				status.reasonPhrase()));
 		this.httpProtocol = httpProtocol;
-		this.statusCode = status.getStatusCode();
-		this.reasonPhrase = status.getReasonPhrase();
+		this.statusCode = status.statusCode();
+		this.reasonPhrase = status.reasonPhrase();
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public class HttpProtocolException extends ProtocolException {
 	 * 
 	 * @return the HTTP Version
 	 */
-	public HttpProtocol getHttpVersion() {
+	public HttpProtocol httpVersion() {
 		return httpProtocol;
 	}
 	
@@ -78,7 +78,7 @@ public class HttpProtocolException extends ProtocolException {
 	 * 
 	 * @return the statusCode
 	 */
-	public int getStatusCode() {
+	public int statusCode() {
 		return statusCode;
 	}
 
@@ -87,7 +87,7 @@ public class HttpProtocolException extends ProtocolException {
 	 * 
 	 * @return the reasonPhrase
 	 */
-	public String getReasonPhrase() {
+	public String reasonPhrase() {
 		return reasonPhrase;
 	}
 	

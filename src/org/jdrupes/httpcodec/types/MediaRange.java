@@ -64,12 +64,12 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 	@Override
 	public int compareTo(MediaRange other) {
 		float myQuality = 1;
-		String param = getParameter("q");
+		String param = parameter("q");
 		if (param != null) {
 			myQuality = Float.parseFloat(param);
 		}
 		float otherQuality = 1;
-		param = other.getParameter("q");
+		param = other.parameter("q");
 		if (param != null) {
 			otherQuality = Float.parseFloat(param);
 		}
@@ -78,18 +78,18 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 		}
 		
 		// Same or no quality, look for wildcards
-		if (!getSubtype().equals("*") && other.getSubtype().equals("*")) {
+		if (!subtype().equals("*") && other.subtype().equals("*")) {
 			return -1;
 		}
-		if (getSubtype().equals("*") && !other.getSubtype().equals("*")) {
+		if (subtype().equals("*") && !other.subtype().equals("*")) {
 			return 1;
 		}
-		if (!getTopLevelType().equals("*") 
-				&& other.getTopLevelType().equals("*")) {
+		if (!topLevelType().equals("*") 
+				&& other.topLevelType().equals("*")) {
 			return -1;
 		}
-		if (getTopLevelType().equals("*")
-				&& !other.getTopLevelType().equals("*")) {
+		if (topLevelType().equals("*")
+				&& !other.topLevelType().equals("*")) {
 			return 1;
 		}
 		
@@ -98,7 +98,7 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 	}
 
 	private static int countParameters(ParameterizedValue<?> value) {
-		return (int)value.getParameters().keySet().stream()
+		return (int)value.parameters().keySet().stream()
 				.filter(k -> !k.equals("q")).count();
 	}
 	
@@ -109,24 +109,24 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 	 * @return the result
 	 */
 	public boolean matches(MediaType type) {
-		if (!("*".equals(getTopLevelType()) 
-				|| getTopLevelType().equals(type.getTopLevelType()))) {
+		if (!("*".equals(topLevelType()) 
+				|| topLevelType().equals(type.topLevelType()))) {
 			// Top level is neither * nor match
 			return false;
 		}
-		if (!("*".equals(getSubtype())
-				|| getSubtype().equals(type.getSubtype()))) {
+		if (!("*".equals(subtype())
+				|| subtype().equals(type.subtype()))) {
 			// Subtype is neither * nor match
 			return false;
 		}
-		for (Map.Entry<String,String> e: getParameters().entrySet()) {
+		for (Map.Entry<String,String> e: parameters().entrySet()) {
 			if ("q".equals(e.getKey())) {
 				continue;
 			}
-			if (!type.getParameters().containsKey(e.getKey())) {
+			if (!type.parameters().containsKey(e.getKey())) {
 				return false;
 			}
-			if (!type.getParameter(e.getKey()).equals(e.getValue())) {
+			if (!type.parameter(e.getKey()).equals(e.getValue())) {
 				return false;
 			}
 		}

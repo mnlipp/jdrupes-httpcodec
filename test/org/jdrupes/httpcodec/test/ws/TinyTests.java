@@ -52,9 +52,9 @@ public class TinyTests {
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		txt.flip();
-		assertTrue(decoder.getHeader().isPresent());
-		assertTrue(decoder.getHeader().get() instanceof WsMessageHeader);
-		WsMessageHeader hdr = (WsMessageHeader)decoder.getHeader().get();
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsMessageHeader);
+		WsMessageHeader hdr = (WsMessageHeader)decoder.header().get();
 		assertTrue(hdr.isTextMode());
 		assertTrue(hdr.hasPayload());
 		assertEquals("Hello", txt.toString());

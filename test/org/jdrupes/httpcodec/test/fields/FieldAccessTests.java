@@ -42,7 +42,7 @@ public class FieldAccessTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(new HttpField<>("Test: 42", Converters.STRING));
 		Optional<HttpField<Long>> field 
-			= hdr.getField("Test", Converters.LONG);
+			= hdr.findField("Test", Converters.LONG);
 		assertTrue(field.isPresent());
 		assertEquals(42, field.get().value().intValue());
 	}
@@ -53,7 +53,7 @@ public class FieldAccessTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(new HttpField<>("Test", "one, two", Converters.STRING));
 		Optional<HttpField<StringList>> field = hdr
-		        .getField("Test", Converters.STRING_LIST);
+		        .findField("Test", Converters.STRING_LIST);
 		assertTrue(field.isPresent());
 		assertEquals(2, field.get().value().size());
 		assertEquals("one", field.get().value().get(0));
@@ -66,7 +66,7 @@ public class FieldAccessTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(new HttpField<>("Test", "1, 2, 3", Converters.STRING));
 		Optional<HttpField<List<Long>>> field = hdr
-		        .getField("Test", Converters.LONG_LIST);
+		        .findField("Test", Converters.LONG_LIST);
 		assertTrue(field.isPresent());
 		assertEquals(3, field.get().value().size());
 		assertEquals(1, field.get().value().get(0).longValue());

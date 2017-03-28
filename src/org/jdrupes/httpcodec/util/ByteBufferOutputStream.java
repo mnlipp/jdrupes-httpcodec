@@ -65,7 +65,7 @@ public class ByteBufferOutputStream extends OutputStream {
 	 *
 	 * @return the allocation size for the overflow buffers
 	 */
-	public int getOverflowBufferSize() {
+	public int overflowBufferSize() {
 		return overflowBufferSize;
 	}
 

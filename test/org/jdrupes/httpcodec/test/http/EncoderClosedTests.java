@@ -57,7 +57,7 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -82,18 +82,18 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(Codec.EMPTY_IN, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Encode body
 		ByteBuffer in = ByteBuffer.wrap("Hello World!".getBytes("ascii"));
 		result = encoder.encode(in, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// "Encode" end of input
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -145,7 +145,7 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.getCloseConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -171,18 +171,18 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(Codec.EMPTY_IN, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Encode body
 		ByteBuffer in = ByteBuffer.wrap("Hello World!".getBytes("ascii"));
 		result = encoder.encode(in, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// "Encode" end of input
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.getCloseConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -211,7 +211,7 @@ public class EncoderClosedTests {
 		// Check result
 		assertFalse(lastResult.isOverflow());
 		assertFalse(lastResult.isUnderflow());
-		assertTrue(lastResult.getCloseConnection());
+		assertTrue(lastResult.closeConnection());
 		// assertTrue(lastResult.getCloseConnection());
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -238,7 +238,7 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -263,18 +263,18 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(Codec.EMPTY_IN, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Encode body
 		CharBuffer in = CharBuffer.wrap("äöü€ Hello World! ÄÖÜß");
 		result = encoder.encode(in, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// "Encode" end of input
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -326,7 +326,7 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.getCloseConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -352,18 +352,18 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(Codec.EMPTY_IN, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// Encode body
 		CharBuffer in = CharBuffer.wrap("äöü€ Hello World! ÄÖÜß");
 		result = encoder.encode(in, out, false);
 		assertFalse(result.isOverflow());
 		assertTrue(result.isUnderflow());
-		assertFalse(result.getCloseConnection());
+		assertFalse(result.closeConnection());
 		// "Encode" end of input
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.getCloseConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),

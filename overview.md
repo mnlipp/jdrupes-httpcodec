@@ -49,14 +49,14 @@ provide the headers that precede this (payload) data. The successful decoding
 of a header is indicated in the result by
 {@link org.jdrupes.httpcodec.Decoder.Result#isHeaderCompleted}. The 
 decoded header can be retrieved with
-{@link org.jdrupes.httpcodec.Decoder#getHeader}. Of course, if the
+{@link org.jdrupes.httpcodec.Decoder#header}. Of course, if the
 receive buffer is rather small and the header rather big, it may
 take several decoder invocations before a header becomes available.
 
 Sometimes, HTTP requires a provisional feedback to be sent after receiving
 the message header. Because the decoder cannot send this feedback
 itself, it provides the message to be sent in such cases
-with {@link org.jdrupes.httpcodec.Decoder.Result#getResponse}.
+with {@link org.jdrupes.httpcodec.Decoder.Result#response()}.
 
 If a received message violates the protocol or represents
 some kind of "ping" message, sending back the prepared response message 
@@ -81,7 +81,7 @@ can be called.
 
 The result of the encode method is a `Codec.Result` that indicates
 whether the output buffer is full and/or further body data is required.
-In addition, {@link org.jdrupes.httpcodec.Codec.Result#getCloseConnection} 
+In addition, {@link org.jdrupes.httpcodec.Codec.Result#closeConnection} 
 may indicate that the connection, to which the message is sent, should 
 be closed after sending the message. This indication 
 is needed because closing the connection is sometimes required by HTTP to
@@ -105,7 +105,7 @@ HTTP Codecs
 
 An HTTP decoder is a special decoder that returns 
 {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}s
-in its {@link org.jdrupes.httpcodec.protocols.http.HttpDecoder#getHeader()} 
+in its {@link org.jdrupes.httpcodec.protocols.http.HttpDecoder#header()} 
 method (type parameter `T`). Of course, if
 the result of the `decode` method  includes a response,
 it's also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
@@ -124,7 +124,7 @@ The HTTP encoder is derived in a similar way.
 
 ![HTTP Decoder](http-encoder.svg)
 
-See the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#getPendingLimit 
+See the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#pendingLimit 
 getter description} for the meaning of "pending limit". 
 
 As you can see, we still have'nt reached the goal yet to get concrete
@@ -229,7 +229,7 @@ can be found in the [JGrapes project](http://mnlipp.github.io/jgrapes/).
 ' ========== Decoder Hierarchy =========
 interface Decoder<T extends MessageHeader, R extends MessageHeader> {
     Result<R> decode(ByteBuffer in, Buffer out, boolean endOfInput)
-    Optional<T> getHeader()
+    Optional<T> header()
 }
 interface Codec {
 }
@@ -241,12 +241,12 @@ Codec <|-- Decoder
 class Codec::Result {
     +isOverflow(): boolean
     +isUnderflow(): boolean
-    +getCloseConnection(): boolean
+    +closeConnection(): boolean
 }
 
 class Decoder::Result<R extends MessageHeader> {
     +isHeaderCompleted() : boolean
-    +getResponse() : Optional<R>
+    +response() : Optional<R>
     +boolean isResponseOnly()
 }
 
@@ -325,9 +325,9 @@ interface Decoder<T, R> {
 abstract class HttpDecoder<T extends HttpMessageHeader, R extends HttpMessageHeader> {
     +HttpDecoder()
     +Decoder.Result<R> decode(ByteBuffer in, Buffer out, boolean endOfInput)
-    +Optional<T> getHeader()
+    +Optional<T> header()
     +void setMaxHeaderLength(long maxHeaderLength)
-    +long getMaxHeaderLength()
+    +long maxHeaderLength()
     +boolean isClosed()
 }
 
@@ -356,7 +356,7 @@ abstract class HttpEncoder<T extends HttpMessageHeader> {
     +HttpEncoder()
     +void encode(T messageHeader)
     +Encoder.Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
-    +int getPendingLimit()
+    +int pendingLimit()
     +void setPendingLimit(int pendingLimit)
     +boolean isClosed()
 }

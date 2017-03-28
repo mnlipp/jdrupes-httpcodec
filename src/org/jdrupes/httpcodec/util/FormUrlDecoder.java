@@ -74,7 +74,7 @@ public class FormUrlDecoder {
 		}
 	}
 	
-	public Map<String,String> getFields() {
+	public Map<String,String> fields() {
 		split(rest, 0, rest.length());
 		rest = "";
 		return fields;

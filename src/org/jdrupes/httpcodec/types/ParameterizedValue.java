@@ -38,7 +38,7 @@ public class ParameterizedValue<U> {
 
 	public static Comparator<ParameterizedValue<?>> WEIGHT_COMPARATOR 
 		= Comparator.nullsFirst(
-			Comparator.comparing(mt -> mt.getParameter("q"),
+			Comparator.comparing(mt -> mt.parameter("q"),
 					Comparator.nullsFirst(
 							Comparator.comparing(Float::parseFloat)
 							.reversed())));
@@ -69,7 +69,7 @@ public class ParameterizedValue<U> {
 	 * 
 	 * @return the value
 	 */
-	public U getValue() {
+	public U value() {
 		return value;
 	}
 
@@ -78,7 +78,7 @@ public class ParameterizedValue<U> {
 	 * 
 	 * @return the parameters as unmodifiable map 
 	 */
-	public Map<String, String> getParameters() {
+	public Map<String, String> parameters() {
 		return Collections.unmodifiableMap(params);
 	}
 	
@@ -88,7 +88,7 @@ public class ParameterizedValue<U> {
 	 * @param name the name
 	 * @return the value or `null` if there is no parameter with this name
 	 */
-	public String getParameter(String name) {
+	public String parameter(String name) {
 		return params.get(name);
 	}
 	
@@ -188,10 +188,10 @@ public class ParameterizedValue<U> {
 		 * @return the builder for easy chaining
 		 */
 		public Builder<R, T> from(ParameterizedValue<T> existing) {
-			((ParameterizedValue<T>)value).value = existing.getValue();
+			((ParameterizedValue<T>)value).value = existing.value();
 			((ParameterizedValue<T>)value).params.clear();
 			((ParameterizedValue<T>)value).params
-				.putAll(existing.getParameters());
+				.putAll(existing.parameters());
 			return this;
 		}
 
@@ -296,8 +296,8 @@ public class ParameterizedValue<U> {
 
 		public String asFieldValue(P value) {
 			StringBuilder result = new StringBuilder();
-			result.append(valueConverter.asFieldValue(value.getValue()));
-			for (Entry<String, String> e: value.getParameters().entrySet()) {
+			result.append(valueConverter.asFieldValue(value.value()));
+			for (Entry<String, String> e: value.parameters().entrySet()) {
 				result.append("; ");
 				result.append(e.getKey());
 				result.append('=');

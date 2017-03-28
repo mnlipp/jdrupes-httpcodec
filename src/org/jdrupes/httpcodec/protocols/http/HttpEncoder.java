@@ -109,7 +109,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 *
 	 * @return the limit
 	 */
-	public int getPendingLimit() {
+	public int pendingLimit() {
 		return pendingLimit;
 	}
 
@@ -325,11 +325,11 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	private void startEncoding() {
 		// Complete content type
 		Optional<HttpField<MediaType>> contentField = messageHeader
-				.getField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE);
+				.findField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE);
 		if (contentField.isPresent()) {
 			MediaType type = contentField.get().value();
-			if ("text".equals(type.getTopLevelType())
-					&& type.getParameter("charset") == null) {
+			if ("text".equals(type.topLevelType())
+					&& type.parameter("charset") == null) {
 				messageHeader.setField(HttpField.CONTENT_TYPE,
 						MediaType.builder().from(type)
 						.setParameter("charset", "utf-8").build());
@@ -350,7 +350,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		states.push(State.DONE);
 		// Get a default for closeAfterBody from the header fields
 		closeAfterBody = messageHeader
-		        .getField(HttpField.CONNECTION, Converters.STRING_LIST)
+		        .findField(HttpField.CONNECTION, Converters.STRING_LIST)
 		        .map(h -> h.value()).map(f -> f.containsIgnoreCase("close"))
 		        .orElse(false);
 		// If there's no body, start outputting header fields
@@ -364,7 +364,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	private void configureBodyHandling() {
 		// Message has a body, find out how to handle it
 		Optional<HttpField<Long>> cl = messageHeader
-				.getField(HttpField.CONTENT_LENGTH, Converters.LONG);
+				.findField(HttpField.CONTENT_LENGTH, Converters.LONG);
 		leftToStream = (!cl.isPresent() ? -1 : cl.get().value());
 		if (leftToStream >= 0) {
 			// Easiest: we have a content length, works always
@@ -372,10 +372,10 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			states.push(State.HEADERS);
 			return;
 		} 
-		if (messageHeader.getProtocol()
+		if (messageHeader.protocol()
 		        .compareTo(HttpProtocol.HTTP_1_0) > 0) {
 			// At least 1.1, use chunked
-			Optional<HttpField<StringList>> transEnc = messageHeader.getField(
+			Optional<HttpField<StringList>> transEnc = messageHeader.findField(
 			        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);
 			if (!transEnc.isPresent()) {
 				messageHeader.setField(HttpField.TRANSFER_ENCODING,

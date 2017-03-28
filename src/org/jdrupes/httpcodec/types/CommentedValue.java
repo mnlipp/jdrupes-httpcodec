@@ -68,7 +68,7 @@ public class CommentedValue<U> {
 	 * 
 	 * @return the value
 	 */
-	public U getValue() {
+	public U value() {
 		return value;
 	}
 
@@ -77,7 +77,7 @@ public class CommentedValue<U> {
 	 * 
 	 * @return the comments 
 	 */
-	public String[] getComments() {
+	public String[] comments() {
 		if (comments == null) {
 			return NO_COMMENTS;
 		}
@@ -163,8 +163,8 @@ public class CommentedValue<U> {
 		@Override
 		public String asFieldValue(CommentedValue<U> value) {
 			StringBuilder result = new StringBuilder();
-			result.append(valueConverter.asFieldValue(value.getValue()));
-			for (String comment: value.getComments()) {
+			result.append(valueConverter.asFieldValue(value.value()));
+			for (String comment: value.comments()) {
 				result.append(" (");
 				result.append(Converters.quote(comment, "()\\"));
 				result.append(')');

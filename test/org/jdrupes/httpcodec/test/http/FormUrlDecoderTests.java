@@ -40,7 +40,7 @@ public class FormUrlDecoderTests {
 		        + URLEncoder.encode("ValueÜ", "utf-8"))
 		                .getBytes("utf-8"));
 		decoder.addData(in);
-		Map<String, String> fields = decoder.getFields();
+		Map<String, String> fields = decoder.fields();
 		assertEquals(3, fields.size());
 		assertEquals("ValueÄ", fields.get("first"));
 		assertEquals("ValueÖ", fields.get("second"));

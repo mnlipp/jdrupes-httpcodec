@@ -40,15 +40,15 @@ import org.jdrupes.httpcodec.types.StringList;
  * 
  * @startuml header.svg
  * abstract class HttpMessageHeader {
- * 	+HttpProtocol getProtocol()
+ * 	+HttpProtocol protocol()
  * 	+Map<String,HttpField<?>> fields()
  * 	+HttpMessageHeader setField(HttpField<?> value)
  * 	+HttpMessageHeader setField(String name, T value)
  * 	+HttpMessageHeader clearHeaders()
  * 	+HttpMessageHeader removeField(String name)
- * 	+Optional<HttpField<T>> getField(String name, Converter<T> converter)
- * 	+Optional<T> getValue(String name, Converter<T> converter)
- * 	+Optional<String> getStringValue(String name)
+ * 	+Optional<HttpField<T>> findField(String name, Converter<T> converter)
+ * 	+Optional<T> findValue(String name, Converter<T> converter)
+ * 	+Optional<String> findStringValue(String name)
  * 	+HttpField<T> computeIfAbsent(String name, Converter<T> converter, Supplier<T> supplier)
  * 	+MessageHeader setMessageHasBody(boolean messageHasBody)
  * 	+boolean messageHasBody()
@@ -90,7 +90,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * 
 	 * @return the HTTP protocol
 	 */
-	public HttpProtocol getProtocol() {
+	public HttpProtocol protocol() {
 		return httpProtocol;
 	}
 
@@ -180,7 +180,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * @return the header field if it exists
 	 */
 	public <T> Optional<HttpField<T>> 
-		getField(String name, Converter<T> converter) {
+		findField(String name, Converter<T> converter) {
 		HttpField<?> field = headers.get(name);
 		// Not found
 		if (field == null) {
@@ -222,8 +222,8 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * @param converter the converter for the value type
 	 * @return the value if the header field exists
 	 */
-	public <T> Optional<T> getValue(String name, Converter<T> converter) {
-		return getField(name, converter).map(HttpField<T>::value);
+	public <T> Optional<T> findValue(String name, Converter<T> converter) {
+		return findField(name, converter).map(HttpField<T>::value);
 	}
 	
 	/**
@@ -231,10 +231,10 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * 
 	 * @param name the field name
 	 * @return the value if the header field exists
-	 * @see #getField(String, Converter)
+	 * @see #findField(String, Converter)
 	 */
-	public Optional<String> getStringValue(String name) {
-		return getValue(name, Converters.STRING);
+	public Optional<String> findStringValue(String name) {
+		return findValue(name, Converters.STRING);
 	}
 	
 	/**
@@ -250,7 +250,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 */
 	public <T> HttpField<T> computeIfAbsent(String name, 
 			Converter<T> converter, Supplier<T> supplier) {
-		Optional<HttpField<T>> result = getField(name, converter);
+		Optional<HttpField<T>> result = findField(name, converter);
 		if (result.isPresent()) {
 			return result.get();
 		}
@@ -288,7 +288,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * @return the result
 	 */
 	public boolean isFinal() {
-		return getField(HttpField.CONNECTION, Converters.STRING_LIST)
+		return findField(HttpField.CONNECTION, Converters.STRING_LIST)
 				.map(h -> h.value()).map(f -> f.contains("close")).orElse(false);
 	}
 }

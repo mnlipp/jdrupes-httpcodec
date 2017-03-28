@@ -179,7 +179,7 @@ public class FieldParsingTests {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT_CHARSET, "iso-8859-5, unicode-1-1;q=0.8");
-		List<ParameterizedValue<String>> value = hdr.getValue(
+		List<ParameterizedValue<String>> value = hdr.findValue(
 				HttpField.ACCEPT_CHARSET, Converters.WEIGHTED_STRINGS).get();
 		Collections.sort(value, ParameterizedValue.WEIGHT_COMPARATOR);
 		Iterator<ParameterizedValue<String>> itr = value.iterator();
@@ -193,13 +193,13 @@ public class FieldParsingTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ACCEPT_LANGUAGE,
 				"da, en-gb;q=0.8, *; q=0.1, en;q=0.7");
-		HttpField<List<ParameterizedValue<Locale>>> field = hdr.getField(
+		HttpField<List<ParameterizedValue<Locale>>> field = hdr.findField(
 				HttpField.ACCEPT_LANGUAGE, Converters.LANGUAGE_LIST).get();
 		Collections.sort(field.value(), ParameterizedValue.WEIGHT_COMPARATOR);
 		@SuppressWarnings("unchecked")
 		Converter<ParameterizedValue<Locale>> itemConverter 
 			= ((ListConverter<List<ParameterizedValue<Locale>>, 
-					ParameterizedValue<Locale>>)field.converter()).getItemConverter();
+					ParameterizedValue<Locale>>)field.converter()).itemConverter();
 		Iterator<ParameterizedValue<Locale>> itr = field.value().iterator();
 		assertEquals("da", itemConverter.asFieldValue(itr.next()));
 		assertEquals("en-GB; q=0.8", 
@@ -215,7 +215,7 @@ public class FieldParsingTests {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.ALLOW, "GET, HEAD, PUT");
-		StringList field = hdr.getValue(
+		StringList field = hdr.findValue(
 				HttpField.ALLOW, Converters.STRING_LIST).get();
 		assertEquals("GET", field.get(0));
 		assertEquals("HEAD", field.get(1));
@@ -226,22 +226,22 @@ public class FieldParsingTests {
 		HttpField<List<CommentedValue<String>>> field 
 			= new HttpField<>("User-Agent: CERN-LineMode/2.15 libwww/2.17b3",
 					Converters.PRODUCT_DESCRIPTIONS);
-		assertEquals("CERN-LineMode/2.15", field.value().get(0).getValue());
-		assertEquals("libwww/2.17b3", field.value().get(1).getValue());
+		assertEquals("CERN-LineMode/2.15", field.value().get(0).value());
+		assertEquals("libwww/2.17b3", field.value().get(1).value());
 		
 		field = new HttpField<>("User-Agent: Client",
 				Converters.PRODUCT_DESCRIPTIONS);
-		assertEquals("Client", field.value().get(0).getValue());
+		assertEquals("Client", field.value().get(0).value());
 		
 		field = new HttpField<>(
 				"User-Agent: CERN-LineMode/2.15 (deprecated) "
 				+ "(I think) libwww/2.17b3 (very old)",
 				Converters.PRODUCT_DESCRIPTIONS);
-		assertEquals("CERN-LineMode/2.15", field.value().get(0).getValue());
-		assertEquals("deprecated", field.value().get(0).getComments()[0]);
-		assertEquals("I think", field.value().get(0).getComments()[1]);
-		assertEquals("libwww/2.17b3", field.value().get(1).getValue());
-		assertEquals("very old", field.value().get(1).getComments()[0]);
+		assertEquals("CERN-LineMode/2.15", field.value().get(0).value());
+		assertEquals("deprecated", field.value().get(0).comments()[0]);
+		assertEquals("I think", field.value().get(0).comments()[1]);
+		assertEquals("libwww/2.17b3", field.value().get(1).value());
+		assertEquals("very old", field.value().get(1).comments()[0]);
 	}
 	
 	@Test
@@ -249,7 +249,7 @@ public class FieldParsingTests {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(HttpField.CONTENT_LOCATION, "test/index.html");
-		HttpField<URI> field = hdr.getField(
+		HttpField<URI> field = hdr.findField(
 				HttpField.CONTENT_LOCATION, Converters.URI_CONV).get();
 		assertEquals("test/index.html", field.value().getPath());
 	}
@@ -260,7 +260,7 @@ public class FieldParsingTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(new HttpField<Long>(
 				"Max-Forwards: 10", Converters.LONG));
-		HttpField<Long> field = hdr.getField(
+		HttpField<Long> field = hdr.findField(
 				HttpField.MAX_FORWARDS, Converters.LONG).get();
 		assertEquals(10, field.value().intValue());
 	}
@@ -272,13 +272,13 @@ public class FieldParsingTests {
 		hdr.setField(new HttpField<List<Directive>>(
 				"Cache-Control: private, community=\"UCI\"", 
 				Converters.DIRECTIVE_LIST));
-		HttpField<List<Directive>> field = hdr.getField(
+		HttpField<List<Directive>> field = hdr.findField(
 				HttpField.CACHE_CONTROL, Converters.DIRECTIVE_LIST).get();
-		assertEquals("private", field.value().get(0).getName());
-		assertFalse(field.value().get(0).getValue().isPresent());
-		assertEquals("community", field.value().get(1).getName());
-		assertTrue(field.value().get(1).getValue().isPresent());
-		assertEquals("UCI", field.value().get(1).getValue().get());
+		assertEquals("private", field.value().get(0).name());
+		assertFalse(field.value().get(0).value().isPresent());
+		assertEquals("community", field.value().get(1).name());
+		assertTrue(field.value().get(1).value().isPresent());
+		assertEquals("UCI", field.value().get(1).value().get());
 		
 		assertEquals("Cache-Control: private, community=UCI", 
 				field.asHeaderField());
@@ -290,16 +290,16 @@ public class FieldParsingTests {
 		        HttpProtocol.HTTP_1_1, false);
 		hdr.setField(new HttpField<Etag>("ETag: W/\"xyzzy\"", 
 				Converters.ETAG));
-		HttpField<Etag> field = hdr.getField(
+		HttpField<Etag> field = hdr.findField(
 				HttpField.ETAG, Converters.ETAG).get();
 		assertTrue(field.value().isWeak());
-		assertEquals("xyzzy", field.value().getTag());
+		assertEquals("xyzzy", field.value().tag());
 		
 		hdr.setField(new HttpField<Etag>("ETag: \"xyzzy\"", 
 				Converters.ETAG));
-		field = hdr.getField(HttpField.ETAG, Converters.ETAG).get();
+		field = hdr.findField(HttpField.ETAG, Converters.ETAG).get();
 		assertFalse(field.value().isWeak());
-		assertEquals("xyzzy", field.value().getTag());
+		assertEquals("xyzzy", field.value().tag());
 	}
 
 	@Test
@@ -309,28 +309,28 @@ public class FieldParsingTests {
 		hdr.setField(new HttpField<String>(
 				"If-Match: \"xyzzy\", \"r2d2xxxx\", \"c3piozzzz\"", 
 				Converters.UNQUOTED_STRING));
-		HttpField<List<Etag>> field = hdr.getField(
+		HttpField<List<Etag>> field = hdr.findField(
 				HttpField.IF_MATCH, Converters.ETAG_LIST).get();
-		assertEquals("xyzzy", field.value().get(0).getTag());
-		assertEquals("r2d2xxxx", field.value().get(1).getTag());
-		assertEquals("c3piozzzz", field.value().get(2).getTag());
+		assertEquals("xyzzy", field.value().get(0).tag());
+		assertEquals("r2d2xxxx", field.value().get(1).tag());
+		assertEquals("c3piozzzz", field.value().get(2).tag());
 		
 		hdr.setField(new HttpField<String>(
 				"If-Match: *", Converters.UNQUOTED_STRING));
-		field = hdr.getField(
+		field = hdr.findField(
 				HttpField.IF_MATCH, Converters.ETAG_LIST).get();
-		assertEquals(Converters.WILDCARD, field.value().get(0).getTag());
+		assertEquals(Converters.WILDCARD, field.value().get(0).tag());
 		
 		hdr.setField(new HttpField<String>(
 				"If-None-Match: W/\"xyzzy\", W/\"r2d2xxxx\", W/\"c3piozzzz\"",
 				Converters.UNQUOTED_STRING));
-		field = hdr.getField(
+		field = hdr.findField(
 				HttpField.IF_NONE_MATCH, Converters.ETAG_LIST).get();
-		assertEquals("xyzzy", field.value().get(0).getTag());
+		assertEquals("xyzzy", field.value().get(0).tag());
 		assertTrue(field.value().get(0).isWeak());
-		assertEquals("r2d2xxxx", field.value().get(1).getTag());
+		assertEquals("r2d2xxxx", field.value().get(1).tag());
 		assertTrue(field.value().get(1).isWeak());
-		assertEquals("c3piozzzz", field.value().get(2).getTag());
+		assertEquals("c3piozzzz", field.value().get(2).tag());
 		assertTrue(field.value().get(2).isWeak());
 	}
 

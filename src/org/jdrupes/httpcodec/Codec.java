@@ -106,7 +106,7 @@ public interface Codec {
 		 * 
 		 * @return the value
 		 */
-		public boolean getCloseConnection() {
+		public boolean closeConnection() {
 			return closeConnection;
 		}
 

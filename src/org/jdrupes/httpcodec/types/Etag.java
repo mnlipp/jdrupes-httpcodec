@@ -42,7 +42,7 @@ public class Etag {
 	/**
 	 * @return the tag
 	 */
-	public String getTag() {
+	public String tag() {
 		return tag;
 	}
 
@@ -58,12 +58,12 @@ public class Etag {
 		@Override
 		public String asFieldValue(Etag value) {
 			if (value.isWeak()) {
-				return "W/" + Converters.quoteString(value.getTag());
+				return "W/" + Converters.quoteString(value.tag());
 			}
 			if ("*".equals(value)) {
 				return Converters.WILDCARD;
 			}
-			return Converters.quoteString(value.getTag());
+			return Converters.quoteString(value.tag());
 		}
 
 		@Override

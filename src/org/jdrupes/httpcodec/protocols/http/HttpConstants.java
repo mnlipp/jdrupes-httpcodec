@@ -93,14 +93,14 @@ public interface HttpConstants {
 		/**
 		 * @return the status code
 		 */
-		public int getStatusCode() {
+		public int statusCode() {
 			return statusCode;
 		}
 
 		/**
 		 * @return the reason phrase
 		 */
-		public String getReasonPhrase() {
+		public String reasonPhrase() {
 			return reasonPhrase;
 		}
     }

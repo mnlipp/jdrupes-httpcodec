@@ -363,7 +363,7 @@ public class HttpField<T> {
 		@SuppressWarnings("unchecked")
 		ListConverter <List<Object>,Object> listConverter
 			= (ListConverter <List<Object>,Object>)converter;
-		Converter<Object> itemConverter	= listConverter.getItemConverter();
+		Converter<Object> itemConverter	= listConverter.itemConverter();
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>)value();
 		return list.stream().map(
