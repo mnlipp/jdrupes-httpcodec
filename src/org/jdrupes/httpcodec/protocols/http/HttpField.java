@@ -57,6 +57,8 @@ public class HttpField<T> {
 	public static final String AGE = "Age";
 	/** @see "[RFC 7231, 7.4.1](https://tools.ietf.org/html/rfc7231#section-7.4.1)" */
 	public static final String ALLOW = "Allow";
+	/** @see "[RFC 7235, 4.2](https://tools.ietf.org/html/rfc7235#section-4.2)" */
+	public static final String AUTHORIZATION = "Authorization";
 	/** @see "[RFC 7234, 5.2](https://tools.ietf.org/html/rfc7234#section-5.2)" */
 	public static final String CACHE_CONTROL = "Cache-Control";
 	/** @see "[RFC 6265, 5.4](https://tools.ietf.org/html/rfc6265#section-5.4)" */
@@ -97,6 +99,10 @@ public class HttpField<T> {
 	public static final String MAX_FORWARDS = "Max-Forwards";
 	/** @see "[RFC 7234, 5.4](https://tools.ietf.org/html/rfc7234#section-5.4)" */
 	public static final String PRAGMA = "Pragma";
+	/** @see "[RFC 7235, 4.3](https://tools.ietf.org/html/rfc7235#section-4.3)" */
+	public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
+	/** @see "[RFC 7235, 4.4](https://tools.ietf.org/html/rfc7235#section-4.4)" */
+	public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
 	/** @see "[RFC 7231, 7.1.3](https://tools.ietf.org/html/rfc7231#section-7.1.3)" */
 	public static final String RETRY_AFTER = "Retry-After";
 	/** @see "[RFC 7231, 7.4.2](https://tools.ietf.org/html/rfc7231#section-7.4.2)" */
@@ -119,6 +125,8 @@ public class HttpField<T> {
 	public static final String VIA = "Via";
 	/** @see "[RFC 7234, 5.5](https://tools.ietf.org/html/rfc7234#section-5.5)" */
 	public static final String WARNING = "Warning";
+	/** @see "[RFC 7235, 4.1](https://tools.ietf.org/html/rfc7235#section-4.1)" */
+	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 	
 	private static Map<String, String> fieldNameMap = new TreeMap<>(
 	        String.CASE_INSENSITIVE_ORDER);
@@ -130,6 +138,7 @@ public class HttpField<T> {
 		fieldNameMap.put(ACCEPT_LANGUAGE, ACCEPT_LANGUAGE);
 		fieldNameMap.put(AGE, AGE);
 		fieldNameMap.put(ALLOW, ALLOW);
+		fieldNameMap.put(AUTHORIZATION, AUTHORIZATION);
 		fieldNameMap.put(CACHE_CONTROL, CACHE_CONTROL);
 		fieldNameMap.put(COOKIE, COOKIE);
 		fieldNameMap.put(CONNECTION, CONNECTION);
@@ -150,6 +159,8 @@ public class HttpField<T> {
 		fieldNameMap.put(LOCATION, LOCATION);
 		fieldNameMap.put(MAX_FORWARDS, MAX_FORWARDS);
 		fieldNameMap.put(PRAGMA, PRAGMA);
+		fieldNameMap.put(PROXY_AUTHENTICATE, PROXY_AUTHENTICATE);
+		fieldNameMap.put(PROXY_AUTHORIZATION, PROXY_AUTHORIZATION);
 		fieldNameMap.put(RETRY_AFTER, RETRY_AFTER);
 		fieldNameMap.put(SERVER, SERVER);
 		fieldNameMap.put(SET_COOKIE, SET_COOKIE);
@@ -161,6 +172,7 @@ public class HttpField<T> {
 		fieldNameMap.put(VARY, VARY);
 		fieldNameMap.put(VIA, VIA);
 		fieldNameMap.put(WARNING, WARNING);
+		fieldNameMap.put(WWW_AUTHENTICATE, WWW_AUTHENTICATE);
 	}
 	
 	private final String name;
@@ -225,6 +237,8 @@ public class HttpField<T> {
 			return Converters.LONG;
 		case ALLOW:
 			return Converters.STRING_LIST;
+		case AUTHORIZATION:
+			return Converters.CREDENTIALS;
 		case CACHE_CONTROL:
 			return Converters.DIRECTIVE_LIST;
 		case COOKIE:
@@ -257,6 +271,10 @@ public class HttpField<T> {
 			return Converters.LONG; 
 		case PRAGMA:
 			return Converters.DIRECTIVE_LIST;
+		case PROXY_AUTHENTICATE:
+			return Converters.CHALLENGE_LIST;
+		case PROXY_AUTHORIZATION:
+			return Converters.CREDENTIALS;
 		case RETRY_AFTER:
 			return Converters.DATE_TIME;
 		case SERVER:
@@ -275,6 +293,8 @@ public class HttpField<T> {
 			return Converters.STRING_LIST;
 		case WARNING:
 			return Converters.STRING;
+		case WWW_AUTHENTICATE:
+			return Converters.CHALLENGE_LIST;
 		default:
 			return Converters.STRING;
 		}

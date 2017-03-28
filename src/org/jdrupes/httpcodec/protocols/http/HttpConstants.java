@@ -124,6 +124,13 @@ public interface HttpConstants {
 		= "!#$%&'*+-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 			+ "^`abcdefghijklmnopqrstuvwxyz|~";
 
+	public static final String TOKEN68_CHARS 
+		= "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			+ "abcdefghijklmnopqrstuvwxyz-._~+/=";
+
 	public static final String TOKEN_REGEXP 
 		= "[" + Pattern.quote(TOKEN_CHARS) + "]+";
+
+	public static final String TOKEN68_REGEXP 
+		= "[" + Pattern.quote(TOKEN68_CHARS) + "]+";
 }

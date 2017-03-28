@@ -14,6 +14,7 @@ import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaRange;
 import org.jdrupes.httpcodec.types.MediaType;
+import org.jdrupes.httpcodec.types.ParameterizedValue;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -122,6 +123,32 @@ public class TypesTests {
 		assertEquals("audio/*", itr.next().toString());
 		assertEquals("*/*", itr.next().toString());
 		assertEquals("*/*", itr.next().toString());
+	}	
+	
+	@Test
+	public void testAuthInfo() throws ParseException, URISyntaxException {
+		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
+		        HttpProtocol.HTTP_1_1, false);
+		hdr.setField(HttpField.WWW_AUTHENTICATE,
+				"Newauth realm=\"apps\", type=1, "
+				+ "title=\"Login to \\\"apps\\\"\", Basic realm=\"simple\"");
+		List<ParameterizedValue<String>> value = hdr.getValue(
+				HttpField.WWW_AUTHENTICATE, Converters.CHALLENGE_LIST).get();
+
+		assertEquals("Newauth", value.get(0).getValue());
+		assertEquals("apps", value.get(0).getParameter("realm"));
+		assertEquals("1", value.get(0).getParameter("type"));
+		assertEquals("Login to \"apps\"", value.get(0).getParameter("title"));
+		
+		assertEquals("Basic", value.get(1).getValue());
+		assertEquals("simple", value.get(1).getParameter("realm"));
+		
+		// Second
+		hdr.setField(HttpField.AUTHORIZATION, "Basic aHR0cHdhdGNoOmY=");
+		ParameterizedValue<String> value2 = hdr.getValue(
+				HttpField.AUTHORIZATION, Converters.CREDENTIALS).get();
+		assertEquals("Basic", value2.getValue());
+		assertEquals("aHR0cHdhdGNoOmY=", value2.getParameter(null));
 	}	
 	
 }

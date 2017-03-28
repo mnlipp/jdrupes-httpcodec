@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
@@ -35,6 +36,7 @@ import org.jdrupes.httpcodec.types.MediaBase.MediaTypePairConverter;
 import org.jdrupes.httpcodec.types.MediaRange.MediaRangeConverter;
 import org.jdrupes.httpcodec.types.MediaType.MediaTypeConverter;
 import org.jdrupes.httpcodec.types.ParameterizedValue.ParamValueConverterBase;
+import org.jdrupes.httpcodec.util.ListItemizer;
 
 /**
  * Utility methods and singletons for converters.
@@ -360,6 +362,29 @@ public final class Converters {
 	public static final Converter<List<Etag>> ETAG_LIST 
 		= new ListConverter<>(ArrayList::new, ETAG);
 
+	/**
+	 * A converter for a list of challenges.
+	 */
+	public static final Converter<List<ParameterizedValue<String>>>
+		CHALLENGE_LIST	= new AuthInfoConverter();
+
+	public static final Converter<ParameterizedValue<String>>
+		CREDENTIALS = new Converter<ParameterizedValue<String>>() {
+
+			@Override
+			public String asFieldValue(ParameterizedValue<String> value) {
+				List<ParameterizedValue<String>> tmp = new ArrayList<>();
+				tmp.add(value);
+				return CHALLENGE_LIST.asFieldValue(tmp);
+			}
+
+			@Override
+			public ParameterizedValue<String> fromFieldValue(String text)
+			        throws ParseException {
+				return CHALLENGE_LIST.fromFieldValue(text).get(0);
+			}
+		
+	};
 	
 	private Converters() {
 	}
@@ -494,68 +519,6 @@ public final class Converters {
 		return result.toString();
 	}
 	
-	private static class ProductDescriptionConverter 
-		extends ListConverter<List<CommentedValue<String>>, CommentedValue<String>> {
-		
-		public ProductDescriptionConverter() {
-			super(ArrayList<CommentedValue<String>>::new, 
-				new CommentedValueConverter<>(Converters.STRING));
-		}
-
-		/* (non-Javadoc)
-		 * @see Converter#fromFieldValue(java.lang.String)
-		 */
-		@Override
-		public List<CommentedValue<String>> fromFieldValue(String text)
-				throws ParseException {
-			List<CommentedValue<String>> result = new ArrayList<>();
-			int pos = 0;
-			while (pos < text.length()) {
-				int length = Converters.tokenLength(text, pos);
-				if (length == 0) {
-					throw new ParseException(
-							"Must start with token: " + text, pos);
-				}
-				String product = text.substring(pos, pos + length);
-				pos += length;
-				if (pos < text.length() && text.charAt(pos) == '/') {
-					pos += 1;
-					length = Converters.tokenLength(text, pos);
-					if (length == 0) {
-						throw new ParseException(
-								"Token expected: " + text, pos);
-					}
-					product = product + text.substring(pos - 1, pos + length);
-					pos += length;
-				}
-				List<String> comments = new ArrayList<>();
-				while (pos < text.length()) {
-					length = Converters.whiteSpaceLength(text, pos);
-					if (length == 0) {
-						throw new ParseException(
-								"Whitespace expected: " + text, pos);
-					}
-					pos += length;
-					if (text.charAt(pos) != '(') {
-						break;
-					}
-					length = Converters.commentLength(text, pos);
-					if (text.charAt(pos + length - 1) != ')') {
-						throw new ParseException(
-								"Comment end expected: " + text, pos + length - 1);
-					}
-					comments.add(text.substring(pos + 1, pos + length - 1));
-					pos += length;
-				}
-				result.add(new CommentedValue<String>(product, 
-						comments.size() == 0 ? null
-								: comments.toArray(new String[comments.size()])));
-			}
-			return result;
-		}
-
-	}
-
 	/**
 	 * Determines the length of a token in a header field
 	 * 
@@ -568,6 +531,23 @@ public final class Converters {
 		int pos = startPos;
 		while (pos < text.length()
 				&& HttpConstants.TOKEN_CHARS.indexOf(text.charAt(pos)) >= 0) {
+			pos += 1;
+		}
+		return pos - startPos;
+	}
+
+	/**
+	 * Determines the length of a token68 in a header field
+	 * 
+	 * @param text the text to parse
+	 * @param startPos the start position
+	 * @return the length of the token
+	 * @see "[RFC 7235, Section 2.1](https://tools.ietf.org/html/rfc7235#section-2.1)"
+	 */
+	public static int token68Length(String text, int startPos) {
+		int pos = startPos;
+		while (pos < text.length()
+				&& HttpConstants.TOKEN68_CHARS.indexOf(text.charAt(pos)) >= 0) {
 			pos += 1;
 		}
 		return pos - startPos;
@@ -630,4 +610,189 @@ public final class Converters {
 		}
 		return pos - startPos;
 	}
+
+	/**
+	 * Returns the length up to one of the match chars or end of string.
+	 * 
+	 * @param text the text
+	 * @param startPos the start position
+	 * @param matches the chars to match
+	 * @return the length
+	 */
+	public int unmatchedLength(String text, int startPos, String matches) {
+		int pos = startPos;
+		while (pos < text.length()) {
+			if (matches.indexOf(text.charAt(pos)) >= 0) {
+				return pos - startPos;
+			}
+			pos += 1;
+		}
+		return pos - startPos;
+	}
+	
+	private static class ProductDescriptionConverter 
+		extends ListConverter<List<CommentedValue<String>>, CommentedValue<String>> {
+	
+		public ProductDescriptionConverter() {
+			super(ArrayList<CommentedValue<String>>::new,
+			        new CommentedValueConverter<>(Converters.STRING));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see Converter#fromFieldValue(java.lang.String)
+		 */
+		@Override
+		public List<CommentedValue<String>> fromFieldValue(String text)
+		        throws ParseException {
+			List<CommentedValue<String>> result = new ArrayList<>();
+			int pos = 0;
+			while (pos < text.length()) {
+				int length = Converters.tokenLength(text, pos);
+				if (length == 0) {
+					throw new ParseException(
+					        "Must start with token: " + text, pos);
+				}
+				String product = text.substring(pos, pos + length);
+				pos += length;
+				if (pos < text.length() && text.charAt(pos) == '/') {
+					pos += 1;
+					length = Converters.tokenLength(text, pos);
+					if (length == 0) {
+						throw new ParseException(
+						        "Token expected: " + text, pos);
+					}
+					product = product + text.substring(pos - 1, pos + length);
+					pos += length;
+				}
+				List<String> comments = new ArrayList<>();
+				while (pos < text.length()) {
+					length = Converters.whiteSpaceLength(text, pos);
+					if (length == 0) {
+						throw new ParseException(
+						        "Whitespace expected: " + text, pos);
+					}
+					pos += length;
+					if (text.charAt(pos) != '(') {
+						break;
+					}
+					length = Converters.commentLength(text, pos);
+					if (text.charAt(pos + length - 1) != ')') {
+						throw new ParseException(
+						        "Comment end expected: " + text,
+						        pos + length - 1);
+					}
+					comments.add(text.substring(pos + 1, pos + length - 1));
+					pos += length;
+				}
+				result.add(new CommentedValue<String>(product,
+				        comments.size() == 0 ? null
+				                : comments
+				                        .toArray(new String[comments.size()])));
+			}
+			return result;
+		}
+
+	}
+
+	private static class AuthInfoConverter extends
+	        ListConverter<List<ParameterizedValue<String>>, ParameterizedValue<String>> {
+
+		public AuthInfoConverter() {
+			super(ArrayList<ParameterizedValue<String>>::new, 
+				new Converter<ParameterizedValue<String>>() {
+
+				@Override
+				public String asFieldValue(ParameterizedValue<String> value) {
+					StringBuilder result = new StringBuilder();
+					result.append(value.getValue());
+					boolean first = true;
+					for (Map.Entry<String, String> e: value.getParameters().entrySet()) {
+						if (first) {
+							first = false;
+						} else {
+							result.append(',');
+						}
+						result.append(' ');
+						if (e.getKey() == null) {
+							result.append(e.getValue());
+						} else {
+							result.append(e.getKey());
+							result.append("=");
+							result.append(quoteIfNecessary(e.getValue()));
+						}
+					}
+					return result.toString();
+				}
+
+				@Override
+				public ParameterizedValue<String> fromFieldValue(
+						String text) throws ParseException {
+					throw new UnsupportedOperationException();
+				}
+			}, ",");
+		}
+
+		@Override
+		public List<ParameterizedValue<String>> fromFieldValue(String text)
+		        throws ParseException {
+			List<ParameterizedValue<String>> result = new ArrayList<>();
+			ListItemizer itemizer = new ListItemizer(text, ",");
+			ParameterizedValue.Builder<ParameterizedValue<String>, String>
+				builder = null;
+			String itemRepr = null;
+			while (true) {
+				// New auth scheme may have left over the parameter part as itemRepr
+				if (itemRepr == null) {
+					itemRepr = itemizer.nextItem();
+					if (itemRepr == null) {
+						if (builder != null) {
+							result.add(builder.build());
+						}
+						break;
+					}
+				}
+				if (builder != null) {
+					// itemRepr may be new auth scheme or parameter
+					ListItemizer paramItemizer = new ListItemizer(itemRepr, "=");
+					String name = paramItemizer.nextItem();
+					String value = paramItemizer.nextItem();
+					if (value != null && name.indexOf(" ") < 0) {
+						// Really parameter
+						builder.setParameter(name, unquoteString(value));
+						itemRepr = null;
+						continue;
+					}
+					// new challenge or credentials
+					result.add(builder.build());
+					builder = null;
+					// fall through
+				}
+				// New challenge or credentials, space used as separator
+				ListItemizer schemeItemizer = new ListItemizer(itemRepr, " ");
+				String authScheme = schemeItemizer.nextItem();
+				if (authScheme == null) {
+					throw new ParseException(itemRepr, 0);
+				}
+				builder = ParameterizedValue.builder();
+				builder.setValue(authScheme);
+				itemRepr = schemeItemizer.nextItem();
+				if (itemRepr == null
+				        || (token68Length(itemRepr, 0) == itemRepr.length())) {
+					if (itemRepr != null) {
+						builder.setParameter(null, itemRepr);
+					}
+					result.add(builder.build());
+					builder = null;
+					// Fully processed
+					itemRepr = null;
+					continue;
+				}
+			}
+			return result;
+		}
+
+	}
+
 }
