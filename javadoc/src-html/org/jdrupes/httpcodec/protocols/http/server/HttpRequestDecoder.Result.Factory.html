@@ -89,8 +89,8 @@
 <span class="sourceLineNo">081</span>                try {<a name="line.81"></a>
 <span class="sourceLineNo">082</span>                        return (Result)super.decode(in, out, endOfInput);<a name="line.82"></a>
 <span class="sourceLineNo">083</span>                } catch (HttpProtocolException e) {<a name="line.83"></a>
-<span class="sourceLineNo">084</span>                        HttpResponse response = new HttpResponse(e.getHttpVersion(), <a name="line.84"></a>
-<span class="sourceLineNo">085</span>                                        e.getStatusCode(), e.getReasonPhrase(), false);<a name="line.85"></a>
+<span class="sourceLineNo">084</span>                        HttpResponse response = new HttpResponse(e.httpVersion(), <a name="line.84"></a>
+<span class="sourceLineNo">085</span>                                        e.statusCode(), e.reasonPhrase(), false);<a name="line.85"></a>
 <span class="sourceLineNo">086</span>                        response.setField(new HttpField&lt;&gt;(HttpField.CONNECTION,<a name="line.86"></a>
 <span class="sourceLineNo">087</span>                                        new StringList("close"), Converters.STRING_LIST));<a name="line.87"></a>
 <span class="sourceLineNo">088</span>                        return resultFactory().newResult(false, false, false, response, true);<a name="line.88"></a>
@@ -114,7 +114,7 @@
 <span class="sourceLineNo">106</span>                if (!requestMatcher.matches()) {<a name="line.106"></a>
 <span class="sourceLineNo">107</span>                        // RFC 7230 3.1.1<a name="line.107"></a>
 <span class="sourceLineNo">108</span>                        throw new HttpProtocolException(protocolVersion,<a name="line.108"></a>
-<span class="sourceLineNo">109</span>                                HttpStatus.BAD_REQUEST.getStatusCode(),<a name="line.109"></a>
+<span class="sourceLineNo">109</span>                                HttpStatus.BAD_REQUEST.statusCode(),<a name="line.109"></a>
 <span class="sourceLineNo">110</span>                                "Illegal request line");<a name="line.110"></a>
 <span class="sourceLineNo">111</span>                }<a name="line.111"></a>
 <span class="sourceLineNo">112</span>                String httpVersion = requestMatcher.group(3);<a name="line.112"></a>
@@ -139,7 +139,7 @@
 <span class="sourceLineNo">131</span>                                uri = new URI(uriGroup);<a name="line.131"></a>
 <span class="sourceLineNo">132</span>                        } catch (URISyntaxException e) {<a name="line.132"></a>
 <span class="sourceLineNo">133</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.133"></a>
-<span class="sourceLineNo">134</span>                                        HttpStatus.BAD_REQUEST.getStatusCode(), e.getMessage());<a name="line.134"></a>
+<span class="sourceLineNo">134</span>                                        HttpStatus.BAD_REQUEST.statusCode(), e.getMessage());<a name="line.134"></a>
 <span class="sourceLineNo">135</span>                        }<a name="line.135"></a>
 <span class="sourceLineNo">136</span>                }<a name="line.136"></a>
 <span class="sourceLineNo">137</span>                HttpRequest request = new HttpRequest(<a name="line.137"></a>
@@ -157,7 +157,7 @@
 <span class="sourceLineNo">149</span>                        throws HttpProtocolException {<a name="line.149"></a>
 <span class="sourceLineNo">150</span>                reportHeaderReceived = true;<a name="line.150"></a>
 <span class="sourceLineNo">151</span>                // Handle field of special interest<a name="line.151"></a>
-<span class="sourceLineNo">152</span>                Optional&lt;HttpField&lt;String&gt;&gt; host = message.getField(<a name="line.152"></a>
+<span class="sourceLineNo">152</span>                Optional&lt;HttpField&lt;String&gt;&gt; host = message.findField(<a name="line.152"></a>
 <span class="sourceLineNo">153</span>                                HttpField.HOST, Converters.STRING);<a name="line.153"></a>
 <span class="sourceLineNo">154</span>                if (host.isPresent()) {<a name="line.154"></a>
 <span class="sourceLineNo">155</span>                        try {<a name="line.155"></a>
@@ -165,28 +165,28 @@
 <span class="sourceLineNo">157</span>                                message.setHostAndPort(parsed.getHost(), parsed.getPort());<a name="line.157"></a>
 <span class="sourceLineNo">158</span>                        } catch (URISyntaxException e) {<a name="line.158"></a>
 <span class="sourceLineNo">159</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.159"></a>
-<span class="sourceLineNo">160</span>                                        HttpStatus.BAD_REQUEST.getStatusCode(),<a name="line.160"></a>
+<span class="sourceLineNo">160</span>                                        HttpStatus.BAD_REQUEST.statusCode(),<a name="line.160"></a>
 <span class="sourceLineNo">161</span>                                        "Invalid Host port.");<a name="line.161"></a>
 <span class="sourceLineNo">162</span>                        }<a name="line.162"></a>
 <span class="sourceLineNo">163</span>                } else {<a name="line.163"></a>
 <span class="sourceLineNo">164</span>                        // RFC 7230 5.4.<a name="line.164"></a>
-<span class="sourceLineNo">165</span>                        if (message.getProtocol().compareTo(HttpProtocol.HTTP_1_1) &gt;= 0) {<a name="line.165"></a>
+<span class="sourceLineNo">165</span>                        if (message.protocol().compareTo(HttpProtocol.HTTP_1_1) &gt;= 0) {<a name="line.165"></a>
 <span class="sourceLineNo">166</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.166"></a>
-<span class="sourceLineNo">167</span>                                        HttpStatus.BAD_REQUEST.getStatusCode(),<a name="line.167"></a>
+<span class="sourceLineNo">167</span>                                        HttpStatus.BAD_REQUEST.statusCode(),<a name="line.167"></a>
 <span class="sourceLineNo">168</span>                                        "HTTP 1.1 request must have a Host field.");<a name="line.168"></a>
 <span class="sourceLineNo">169</span>                        }<a name="line.169"></a>
 <span class="sourceLineNo">170</span>                }<a name="line.170"></a>
-<span class="sourceLineNo">171</span>                if (message.getField(HttpField.CONNECTION, <a name="line.171"></a>
+<span class="sourceLineNo">171</span>                if (message.findField(HttpField.CONNECTION, <a name="line.171"></a>
 <span class="sourceLineNo">172</span>                                Converters.STRING_LIST).map(h -&gt; h.value())<a name="line.172"></a>
 <span class="sourceLineNo">173</span>                                .map(f -&gt; f.containsIgnoreCase("close")).orElse(false)) {<a name="line.173"></a>
 <span class="sourceLineNo">174</span>                        // RFC 7230 6.6.<a name="line.174"></a>
-<span class="sourceLineNo">175</span>                        message.getResponse().get().setField(new HttpField&lt;&gt;(<a name="line.175"></a>
+<span class="sourceLineNo">175</span>                        message.response().get().setField(new HttpField&lt;&gt;(<a name="line.175"></a>
 <span class="sourceLineNo">176</span>                                HttpField.CONNECTION, new StringList("close"), <a name="line.176"></a>
 <span class="sourceLineNo">177</span>                                Converters.STRING_LIST));<a name="line.177"></a>
 <span class="sourceLineNo">178</span>                }<a name="line.178"></a>
 <span class="sourceLineNo">179</span><a name="line.179"></a>
 <span class="sourceLineNo">180</span>                // Find out about body<a name="line.180"></a>
-<span class="sourceLineNo">181</span>                Optional&lt;HttpField&lt;StringList&gt;&gt; transEncs = message.getField(<a name="line.181"></a>
+<span class="sourceLineNo">181</span>                Optional&lt;HttpField&lt;StringList&gt;&gt; transEncs = message.findField(<a name="line.181"></a>
 <span class="sourceLineNo">182</span>                        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);<a name="line.182"></a>
 <span class="sourceLineNo">183</span>                if (transEncs.isPresent()) {<a name="line.183"></a>
 <span class="sourceLineNo">184</span>                        List&lt;String&gt; tecs = transEncs.get().value();<a name="line.184"></a>

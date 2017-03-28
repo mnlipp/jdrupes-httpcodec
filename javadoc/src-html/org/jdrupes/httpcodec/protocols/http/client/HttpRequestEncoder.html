@@ -70,11 +70,11 @@
 <span class="sourceLineNo">062</span>        @Override<a name="line.62"></a>
 <span class="sourceLineNo">063</span>        protected void startMessage(HttpRequest messageHeader, Writer writer)<a name="line.63"></a>
 <span class="sourceLineNo">064</span>                throws IOException {<a name="line.64"></a>
-<span class="sourceLineNo">065</span>                writer.write(messageHeader.getMethod());<a name="line.65"></a>
+<span class="sourceLineNo">065</span>                writer.write(messageHeader.method());<a name="line.65"></a>
 <span class="sourceLineNo">066</span>                writer.write(" ");<a name="line.66"></a>
-<span class="sourceLineNo">067</span>                writer.write(messageHeader.getRequestUri().toString());<a name="line.67"></a>
+<span class="sourceLineNo">067</span>                writer.write(messageHeader.requestUri().toString());<a name="line.67"></a>
 <span class="sourceLineNo">068</span>                writer.write(" ");<a name="line.68"></a>
-<span class="sourceLineNo">069</span>                writer.write(messageHeader.getProtocol().toString());<a name="line.69"></a>
+<span class="sourceLineNo">069</span>                writer.write(messageHeader.protocol().toString());<a name="line.69"></a>
 <span class="sourceLineNo">070</span>                writer.write("\r\n");<a name="line.70"></a>
 <span class="sourceLineNo">071</span>        }<a name="line.71"></a>
 <span class="sourceLineNo">072</span>        <a name="line.72"></a>

@@ -117,7 +117,7 @@
 <span class="sourceLineNo">109</span>         *<a name="line.109"></a>
 <span class="sourceLineNo">110</span>         * @return the limit<a name="line.110"></a>
 <span class="sourceLineNo">111</span>         */<a name="line.111"></a>
-<span class="sourceLineNo">112</span>        public int getPendingLimit() {<a name="line.112"></a>
+<span class="sourceLineNo">112</span>        public int pendingLimit() {<a name="line.112"></a>
 <span class="sourceLineNo">113</span>                return pendingLimit;<a name="line.113"></a>
 <span class="sourceLineNo">114</span>        }<a name="line.114"></a>
 <span class="sourceLineNo">115</span><a name="line.115"></a>
@@ -333,11 +333,11 @@
 <span class="sourceLineNo">325</span>        private void startEncoding() {<a name="line.325"></a>
 <span class="sourceLineNo">326</span>                // Complete content type<a name="line.326"></a>
 <span class="sourceLineNo">327</span>                Optional&lt;HttpField&lt;MediaType&gt;&gt; contentField = messageHeader<a name="line.327"></a>
-<span class="sourceLineNo">328</span>                                .getField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE);<a name="line.328"></a>
+<span class="sourceLineNo">328</span>                                .findField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE);<a name="line.328"></a>
 <span class="sourceLineNo">329</span>                if (contentField.isPresent()) {<a name="line.329"></a>
 <span class="sourceLineNo">330</span>                        MediaType type = contentField.get().value();<a name="line.330"></a>
-<span class="sourceLineNo">331</span>                        if ("text".equals(type.getTopLevelType())<a name="line.331"></a>
-<span class="sourceLineNo">332</span>                                        &amp;&amp; type.getParameter("charset") == null) {<a name="line.332"></a>
+<span class="sourceLineNo">331</span>                        if ("text".equals(type.topLevelType())<a name="line.331"></a>
+<span class="sourceLineNo">332</span>                                        &amp;&amp; type.parameter("charset") == null) {<a name="line.332"></a>
 <span class="sourceLineNo">333</span>                                messageHeader.setField(HttpField.CONTENT_TYPE,<a name="line.333"></a>
 <span class="sourceLineNo">334</span>                                                MediaType.builder().from(type)<a name="line.334"></a>
 <span class="sourceLineNo">335</span>                                                .setParameter("charset", "utf-8").build());<a name="line.335"></a>
@@ -358,7 +358,7 @@
 <span class="sourceLineNo">350</span>                states.push(State.DONE);<a name="line.350"></a>
 <span class="sourceLineNo">351</span>                // Get a default for closeAfterBody from the header fields<a name="line.351"></a>
 <span class="sourceLineNo">352</span>                closeAfterBody = messageHeader<a name="line.352"></a>
-<span class="sourceLineNo">353</span>                        .getField(HttpField.CONNECTION, Converters.STRING_LIST)<a name="line.353"></a>
+<span class="sourceLineNo">353</span>                        .findField(HttpField.CONNECTION, Converters.STRING_LIST)<a name="line.353"></a>
 <span class="sourceLineNo">354</span>                        .map(h -&gt; h.value()).map(f -&gt; f.containsIgnoreCase("close"))<a name="line.354"></a>
 <span class="sourceLineNo">355</span>                        .orElse(false);<a name="line.355"></a>
 <span class="sourceLineNo">356</span>                // If there's no body, start outputting header fields<a name="line.356"></a>
@@ -372,7 +372,7 @@
 <span class="sourceLineNo">364</span>        private void configureBodyHandling() {<a name="line.364"></a>
 <span class="sourceLineNo">365</span>                // Message has a body, find out how to handle it<a name="line.365"></a>
 <span class="sourceLineNo">366</span>                Optional&lt;HttpField&lt;Long&gt;&gt; cl = messageHeader<a name="line.366"></a>
-<span class="sourceLineNo">367</span>                                .getField(HttpField.CONTENT_LENGTH, Converters.LONG);<a name="line.367"></a>
+<span class="sourceLineNo">367</span>                                .findField(HttpField.CONTENT_LENGTH, Converters.LONG);<a name="line.367"></a>
 <span class="sourceLineNo">368</span>                leftToStream = (!cl.isPresent() ? -1 : cl.get().value());<a name="line.368"></a>
 <span class="sourceLineNo">369</span>                if (leftToStream &gt;= 0) {<a name="line.369"></a>
 <span class="sourceLineNo">370</span>                        // Easiest: we have a content length, works always<a name="line.370"></a>
@@ -380,10 +380,10 @@
 <span class="sourceLineNo">372</span>                        states.push(State.HEADERS);<a name="line.372"></a>
 <span class="sourceLineNo">373</span>                        return;<a name="line.373"></a>
 <span class="sourceLineNo">374</span>                } <a name="line.374"></a>
-<span class="sourceLineNo">375</span>                if (messageHeader.getProtocol()<a name="line.375"></a>
+<span class="sourceLineNo">375</span>                if (messageHeader.protocol()<a name="line.375"></a>
 <span class="sourceLineNo">376</span>                        .compareTo(HttpProtocol.HTTP_1_0) &gt; 0) {<a name="line.376"></a>
 <span class="sourceLineNo">377</span>                        // At least 1.1, use chunked<a name="line.377"></a>
-<span class="sourceLineNo">378</span>                        Optional&lt;HttpField&lt;StringList&gt;&gt; transEnc = messageHeader.getField(<a name="line.378"></a>
+<span class="sourceLineNo">378</span>                        Optional&lt;HttpField&lt;StringList&gt;&gt; transEnc = messageHeader.findField(<a name="line.378"></a>
 <span class="sourceLineNo">379</span>                                HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);<a name="line.379"></a>
 <span class="sourceLineNo">380</span>                        if (!transEnc.isPresent()) {<a name="line.380"></a>
 <span class="sourceLineNo">381</span>                                messageHeader.setField(HttpField.TRANSFER_ENCODING,<a name="line.381"></a>

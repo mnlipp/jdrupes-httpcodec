@@ -101,8 +101,8 @@
 <span class="sourceLineNo">093</span>         */<a name="line.93"></a>
 <span class="sourceLineNo">094</span>        @Override<a name="line.94"></a>
 <span class="sourceLineNo">095</span>        public void encode(HttpResponse messageHeader) {<a name="line.95"></a>
-<span class="sourceLineNo">096</span>                if (messageHeader.getStatusCode()<a name="line.96"></a>
-<span class="sourceLineNo">097</span>                                        == HttpStatus.SWITCHING_PROTOCOLS.getStatusCode()) {<a name="line.97"></a>
+<span class="sourceLineNo">096</span>                if (messageHeader.statusCode()<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                                        == HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {<a name="line.97"></a>
 <span class="sourceLineNo">098</span>                        switchingTo = prepareSwitchProtocol(messageHeader);<a name="line.98"></a>
 <span class="sourceLineNo">099</span>                }<a name="line.99"></a>
 <span class="sourceLineNo">100</span>                <a name="line.100"></a>
@@ -124,7 +124,7 @@
 <span class="sourceLineNo">116</span>                                &amp;&amp; !result.isUnderflow() &amp;&amp; !result.isOverflow()) {<a name="line.116"></a>
 <span class="sourceLineNo">117</span>                        // Last invocation of encode<a name="line.117"></a>
 <span class="sourceLineNo">118</span>                        return resultFactory().newResult(false, false, <a name="line.118"></a>
-<span class="sourceLineNo">119</span>                                        result.getCloseConnection(), switchingTo, <a name="line.119"></a>
+<span class="sourceLineNo">119</span>                                        result.closeConnection(), switchingTo, <a name="line.119"></a>
 <span class="sourceLineNo">120</span>                                        protocolPlugin.createRequestDecoder(switchingTo), <a name="line.120"></a>
 <span class="sourceLineNo">121</span>                                        protocolPlugin.createResponseEncoder(switchingTo));<a name="line.121"></a>
 <span class="sourceLineNo">122</span>                }<a name="line.122"></a>
@@ -135,13 +135,13 @@
 <span class="sourceLineNo">127</span>                // RFC 7230 3.3.2 <a name="line.127"></a>
 <span class="sourceLineNo">128</span>                boolean forbidden = messageHeader.fields()<a name="line.128"></a>
 <span class="sourceLineNo">129</span>                                .containsKey(HttpField.TRANSFER_ENCODING)<a name="line.129"></a>
-<span class="sourceLineNo">130</span>                                || messageHeader.getStatusCode() % 100 == 1<a name="line.130"></a>
-<span class="sourceLineNo">131</span>                                || messageHeader.getStatusCode() <a name="line.131"></a>
-<span class="sourceLineNo">132</span>                                                == HttpStatus.NO_CONTENT.getStatusCode()<a name="line.132"></a>
-<span class="sourceLineNo">133</span>                                || (messageHeader.getRequest().map(<a name="line.133"></a>
-<span class="sourceLineNo">134</span>                                                r -&gt; r.getMethod().equalsIgnoreCase("CONNECT"))<a name="line.134"></a>
+<span class="sourceLineNo">130</span>                                || messageHeader.statusCode() % 100 == 1<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                                || messageHeader.statusCode() <a name="line.131"></a>
+<span class="sourceLineNo">132</span>                                                == HttpStatus.NO_CONTENT.statusCode()<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                                || (messageHeader.request().map(<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                                                r -&gt; r.method().equalsIgnoreCase("CONNECT"))<a name="line.134"></a>
 <span class="sourceLineNo">135</span>                                                .orElse(false)<a name="line.135"></a>
-<span class="sourceLineNo">136</span>                                        &amp;&amp; messageHeader.getStatusCode() % 100 == 2);<a name="line.136"></a>
+<span class="sourceLineNo">136</span>                                        &amp;&amp; messageHeader.statusCode() % 100 == 2);<a name="line.136"></a>
 <span class="sourceLineNo">137</span>                if (messageHeader.fields().containsKey(HttpField.CONTENT_LENGTH)) {<a name="line.137"></a>
 <span class="sourceLineNo">138</span>                        if (forbidden) {<a name="line.138"></a>
 <span class="sourceLineNo">139</span>                                messageHeader.removeField(HttpField.CONTENT_LENGTH);<a name="line.139"></a>
@@ -154,11 +154,11 @@
 <span class="sourceLineNo">146</span>                        return;<a name="line.146"></a>
 <span class="sourceLineNo">147</span>                }<a name="line.147"></a>
 <span class="sourceLineNo">148</span>                // Don't add header if optional<a name="line.148"></a>
-<span class="sourceLineNo">149</span>                if (messageHeader.getRequest().map(<a name="line.149"></a>
-<span class="sourceLineNo">150</span>                                r -&gt; r.getMethod().equalsIgnoreCase("HEAD"))<a name="line.150"></a>
+<span class="sourceLineNo">149</span>                if (messageHeader.request().map(<a name="line.149"></a>
+<span class="sourceLineNo">150</span>                                r -&gt; r.method().equalsIgnoreCase("HEAD"))<a name="line.150"></a>
 <span class="sourceLineNo">151</span>                                .orElse(false)<a name="line.151"></a>
-<span class="sourceLineNo">152</span>                        || messageHeader.getStatusCode() <a name="line.152"></a>
-<span class="sourceLineNo">153</span>                                        == HttpStatus.NOT_MODIFIED.getStatusCode()) {<a name="line.153"></a>
+<span class="sourceLineNo">152</span>                        || messageHeader.statusCode() <a name="line.152"></a>
+<span class="sourceLineNo">153</span>                                        == HttpStatus.NOT_MODIFIED.statusCode()) {<a name="line.153"></a>
 <span class="sourceLineNo">154</span>                        return;<a name="line.154"></a>
 <span class="sourceLineNo">155</span>                }<a name="line.155"></a>
 <span class="sourceLineNo">156</span>                // Add 0 content length<a name="line.156"></a>
@@ -168,7 +168,7 @@
 <span class="sourceLineNo">160</span><a name="line.160"></a>
 <span class="sourceLineNo">161</span>        private String prepareSwitchProtocol(HttpResponse response) {<a name="line.161"></a>
 <span class="sourceLineNo">162</span>                Optional&lt;String&gt; protocol = response<a name="line.162"></a>
-<span class="sourceLineNo">163</span>                                .getField(HttpField.UPGRADE, Converters.STRING_LIST)<a name="line.163"></a>
+<span class="sourceLineNo">163</span>                                .findField(HttpField.UPGRADE, Converters.STRING_LIST)<a name="line.163"></a>
 <span class="sourceLineNo">164</span>                                .map(l -&gt; l.value().get(0));<a name="line.164"></a>
 <span class="sourceLineNo">165</span>                if (!protocol.isPresent()) {<a name="line.165"></a>
 <span class="sourceLineNo">166</span>                        response.setStatus(HttpStatus.BAD_REQUEST)<a name="line.166"></a>
@@ -192,8 +192,8 @@
 <span class="sourceLineNo">184</span>                        return null;<a name="line.184"></a>
 <span class="sourceLineNo">185</span>                }<a name="line.185"></a>
 <span class="sourceLineNo">186</span>                protocolPlugin.augmentInitialResponse(response);<a name="line.186"></a>
-<span class="sourceLineNo">187</span>                if (response.getStatusCode() <a name="line.187"></a>
-<span class="sourceLineNo">188</span>                                != HttpStatus.SWITCHING_PROTOCOLS.getStatusCode()) {<a name="line.188"></a>
+<span class="sourceLineNo">187</span>                if (response.statusCode() <a name="line.187"></a>
+<span class="sourceLineNo">188</span>                                != HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {<a name="line.188"></a>
 <span class="sourceLineNo">189</span>                        // Not switching after all<a name="line.189"></a>
 <span class="sourceLineNo">190</span>                        return null;<a name="line.190"></a>
 <span class="sourceLineNo">191</span>                }<a name="line.191"></a>
@@ -206,11 +206,11 @@
 <span class="sourceLineNo">198</span>        @Override<a name="line.198"></a>
 <span class="sourceLineNo">199</span>        protected void startMessage(HttpResponse response, Writer writer)<a name="line.199"></a>
 <span class="sourceLineNo">200</span>                throws IOException {<a name="line.200"></a>
-<span class="sourceLineNo">201</span>                writer.write(response.getProtocol().toString());<a name="line.201"></a>
+<span class="sourceLineNo">201</span>                writer.write(response.protocol().toString());<a name="line.201"></a>
 <span class="sourceLineNo">202</span>                writer.write(" ");<a name="line.202"></a>
-<span class="sourceLineNo">203</span>                writer.write(Integer.toString(response.getStatusCode()));<a name="line.203"></a>
+<span class="sourceLineNo">203</span>                writer.write(Integer.toString(response.statusCode()));<a name="line.203"></a>
 <span class="sourceLineNo">204</span>                writer.write(" ");<a name="line.204"></a>
-<span class="sourceLineNo">205</span>                writer.write(response.getReasonPhrase());<a name="line.205"></a>
+<span class="sourceLineNo">205</span>                writer.write(response.reasonPhrase());<a name="line.205"></a>
 <span class="sourceLineNo">206</span>                writer.write("\r\n");<a name="line.206"></a>
 <span class="sourceLineNo">207</span>        }<a name="line.207"></a>
 <span class="sourceLineNo">208</span><a name="line.208"></a>
@@ -330,7 +330,7 @@
 <span class="sourceLineNo">322</span>                        builder.append(", underflow=");<a name="line.322"></a>
 <span class="sourceLineNo">323</span>                        builder.append(isUnderflow());<a name="line.323"></a>
 <span class="sourceLineNo">324</span>                        builder.append(", closeConnection=");<a name="line.324"></a>
-<span class="sourceLineNo">325</span>                        builder.append(getCloseConnection());<a name="line.325"></a>
+<span class="sourceLineNo">325</span>                        builder.append(closeConnection());<a name="line.325"></a>
 <span class="sourceLineNo">326</span>                        builder.append(", ");<a name="line.326"></a>
 <span class="sourceLineNo">327</span>                        if (newProtocol != null) {<a name="line.327"></a>
 <span class="sourceLineNo">328</span>                                builder.append("newProtocol=");<a name="line.328"></a>

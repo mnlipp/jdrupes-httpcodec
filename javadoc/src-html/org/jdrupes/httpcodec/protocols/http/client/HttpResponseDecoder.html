@@ -105,7 +105,7 @@
 <span class="sourceLineNo">097</span>         *            the request<a name="line.97"></a>
 <span class="sourceLineNo">098</span>         */<a name="line.98"></a>
 <span class="sourceLineNo">099</span>        public void decodeResponseTo(HttpRequest request) {<a name="line.99"></a>
-<span class="sourceLineNo">100</span>                this.requestMethod = request.getMethod();<a name="line.100"></a>
+<span class="sourceLineNo">100</span>                this.requestMethod = request.method();<a name="line.100"></a>
 <span class="sourceLineNo">101</span>        }<a name="line.101"></a>
 <span class="sourceLineNo">102</span><a name="line.102"></a>
 <span class="sourceLineNo">103</span>        /* (non-Javadoc)<a name="line.103"></a>
@@ -133,7 +133,7 @@
 <span class="sourceLineNo">125</span>                Matcher responseMatcher = responseLinePatter.matcher(startLine);<a name="line.125"></a>
 <span class="sourceLineNo">126</span>                if (!responseMatcher.matches()) {<a name="line.126"></a>
 <span class="sourceLineNo">127</span>                        throw new HttpProtocolException(protocolVersion,<a name="line.127"></a>
-<span class="sourceLineNo">128</span>                                HttpStatus.BAD_REQUEST.getStatusCode(),<a name="line.128"></a>
+<span class="sourceLineNo">128</span>                                HttpStatus.BAD_REQUEST.statusCode(),<a name="line.128"></a>
 <span class="sourceLineNo">129</span>                                "Illegal request line");<a name="line.129"></a>
 <span class="sourceLineNo">130</span>                }<a name="line.130"></a>
 <span class="sourceLineNo">131</span>                String httpVersion = responseMatcher.group(1);<a name="line.131"></a>
@@ -171,7 +171,7 @@
 <span class="sourceLineNo">163</span>                        if (String.class.isAssignableFrom(hdr.value().getClass())) {<a name="line.163"></a>
 <span class="sourceLineNo">164</span>                                String value = (String)hdr.value();<a name="line.164"></a>
 <span class="sourceLineNo">165</span>                                if (Character.isDigit(value.charAt(0))) {<a name="line.165"></a>
-<span class="sourceLineNo">166</span>                                        Instant base = message.getField(<a name="line.166"></a>
+<span class="sourceLineNo">166</span>                                        Instant base = message.findField(<a name="line.166"></a>
 <span class="sourceLineNo">167</span>                                                        HttpField.DATE, Converters.DATE_TIME)<a name="line.167"></a>
 <span class="sourceLineNo">168</span>                                                        .map(HttpField&lt;Instant&gt;::value).orElse(Instant.now());<a name="line.168"></a>
 <span class="sourceLineNo">169</span>                                        message.setField(new HttpField&lt;&gt;(HttpField.RETRY_AFTER,<a name="line.169"></a>
@@ -181,7 +181,7 @@
 <span class="sourceLineNo">173</span>                        }<a name="line.173"></a>
 <span class="sourceLineNo">174</span>                }<a name="line.174"></a>
 <span class="sourceLineNo">175</span>                // RFC 7230 3.3.3 (1. &amp; 2.)<a name="line.175"></a>
-<span class="sourceLineNo">176</span>                int statusCode = message.getStatusCode();<a name="line.176"></a>
+<span class="sourceLineNo">176</span>                int statusCode = message.statusCode();<a name="line.176"></a>
 <span class="sourceLineNo">177</span>                if (requestMethod.equalsIgnoreCase("HEAD")<a name="line.177"></a>
 <span class="sourceLineNo">178</span>                        || (statusCode % 100) == 1<a name="line.178"></a>
 <span class="sourceLineNo">179</span>                        || statusCode == 204<a name="line.179"></a>
@@ -190,7 +190,7 @@
 <span class="sourceLineNo">182</span>                                &amp;&amp; (statusCode % 100 == 2))) {<a name="line.182"></a>
 <span class="sourceLineNo">183</span>                        return BodyMode.NO_BODY;<a name="line.183"></a>
 <span class="sourceLineNo">184</span>                }<a name="line.184"></a>
-<span class="sourceLineNo">185</span>                Optional&lt;HttpField&lt;StringList&gt;&gt; transEncs = message.getField(<a name="line.185"></a>
+<span class="sourceLineNo">185</span>                Optional&lt;HttpField&lt;StringList&gt;&gt; transEncs = message.findField(<a name="line.185"></a>
 <span class="sourceLineNo">186</span>                        HttpField.TRANSFER_ENCODING, Converters.STRING_LIST);<a name="line.186"></a>
 <span class="sourceLineNo">187</span>                // RFC 7230 3.3.3 (3.)<a name="line.187"></a>
 <span class="sourceLineNo">188</span>                if (transEncs.isPresent()) {<a name="line.188"></a>
@@ -333,13 +333,13 @@
 <span class="sourceLineNo">325</span>                        builder.append(", underflow=");<a name="line.325"></a>
 <span class="sourceLineNo">326</span>                        builder.append(isUnderflow());<a name="line.326"></a>
 <span class="sourceLineNo">327</span>                        builder.append(", closeConnection=");<a name="line.327"></a>
-<span class="sourceLineNo">328</span>                        builder.append(getCloseConnection());<a name="line.328"></a>
+<span class="sourceLineNo">328</span>                        builder.append(closeConnection());<a name="line.328"></a>
 <span class="sourceLineNo">329</span>                        builder.append(", headerCompleted=");<a name="line.329"></a>
 <span class="sourceLineNo">330</span>                        builder.append(isHeaderCompleted());<a name="line.330"></a>
 <span class="sourceLineNo">331</span>                        builder.append(", ");<a name="line.331"></a>
-<span class="sourceLineNo">332</span>                        if (getResponse() != null) {<a name="line.332"></a>
+<span class="sourceLineNo">332</span>                        if (response() != null) {<a name="line.332"></a>
 <span class="sourceLineNo">333</span>                                builder.append("response=");<a name="line.333"></a>
-<span class="sourceLineNo">334</span>                                builder.append(getResponse());<a name="line.334"></a>
+<span class="sourceLineNo">334</span>                                builder.append(response());<a name="line.334"></a>
 <span class="sourceLineNo">335</span>                                builder.append(", ");<a name="line.335"></a>
 <span class="sourceLineNo">336</span>                        }<a name="line.336"></a>
 <span class="sourceLineNo">337</span>                        builder.append("responseOnly=");<a name="line.337"></a>

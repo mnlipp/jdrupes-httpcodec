@@ -46,7 +46,7 @@
 <span class="sourceLineNo">038</span><a name="line.38"></a>
 <span class="sourceLineNo">039</span>        public static Comparator&lt;ParameterizedValue&lt;?&gt;&gt; WEIGHT_COMPARATOR <a name="line.39"></a>
 <span class="sourceLineNo">040</span>                = Comparator.nullsFirst(<a name="line.40"></a>
-<span class="sourceLineNo">041</span>                        Comparator.comparing(mt -&gt; mt.getParameter("q"),<a name="line.41"></a>
+<span class="sourceLineNo">041</span>                        Comparator.comparing(mt -&gt; mt.parameter("q"),<a name="line.41"></a>
 <span class="sourceLineNo">042</span>                                        Comparator.nullsFirst(<a name="line.42"></a>
 <span class="sourceLineNo">043</span>                                                        Comparator.comparing(Float::parseFloat)<a name="line.43"></a>
 <span class="sourceLineNo">044</span>                                                        .reversed())));<a name="line.44"></a>
@@ -77,7 +77,7 @@
 <span class="sourceLineNo">069</span>         * <a name="line.69"></a>
 <span class="sourceLineNo">070</span>         * @return the value<a name="line.70"></a>
 <span class="sourceLineNo">071</span>         */<a name="line.71"></a>
-<span class="sourceLineNo">072</span>        public U getValue() {<a name="line.72"></a>
+<span class="sourceLineNo">072</span>        public U value() {<a name="line.72"></a>
 <span class="sourceLineNo">073</span>                return value;<a name="line.73"></a>
 <span class="sourceLineNo">074</span>        }<a name="line.74"></a>
 <span class="sourceLineNo">075</span><a name="line.75"></a>
@@ -86,7 +86,7 @@
 <span class="sourceLineNo">078</span>         * <a name="line.78"></a>
 <span class="sourceLineNo">079</span>         * @return the parameters as unmodifiable map <a name="line.79"></a>
 <span class="sourceLineNo">080</span>         */<a name="line.80"></a>
-<span class="sourceLineNo">081</span>        public Map&lt;String, String&gt; getParameters() {<a name="line.81"></a>
+<span class="sourceLineNo">081</span>        public Map&lt;String, String&gt; parameters() {<a name="line.81"></a>
 <span class="sourceLineNo">082</span>                return Collections.unmodifiableMap(params);<a name="line.82"></a>
 <span class="sourceLineNo">083</span>        }<a name="line.83"></a>
 <span class="sourceLineNo">084</span>        <a name="line.84"></a>
@@ -96,7 +96,7 @@
 <span class="sourceLineNo">088</span>         * @param name the name<a name="line.88"></a>
 <span class="sourceLineNo">089</span>         * @return the value or `null` if there is no parameter with this name<a name="line.89"></a>
 <span class="sourceLineNo">090</span>         */<a name="line.90"></a>
-<span class="sourceLineNo">091</span>        public String getParameter(String name) {<a name="line.91"></a>
+<span class="sourceLineNo">091</span>        public String parameter(String name) {<a name="line.91"></a>
 <span class="sourceLineNo">092</span>                return params.get(name);<a name="line.92"></a>
 <span class="sourceLineNo">093</span>        }<a name="line.93"></a>
 <span class="sourceLineNo">094</span>        <a name="line.94"></a>
@@ -196,10 +196,10 @@
 <span class="sourceLineNo">188</span>                 * @return the builder for easy chaining<a name="line.188"></a>
 <span class="sourceLineNo">189</span>                 */<a name="line.189"></a>
 <span class="sourceLineNo">190</span>                public Builder&lt;R, T&gt; from(ParameterizedValue&lt;T&gt; existing) {<a name="line.190"></a>
-<span class="sourceLineNo">191</span>                        ((ParameterizedValue&lt;T&gt;)value).value = existing.getValue();<a name="line.191"></a>
+<span class="sourceLineNo">191</span>                        ((ParameterizedValue&lt;T&gt;)value).value = existing.value();<a name="line.191"></a>
 <span class="sourceLineNo">192</span>                        ((ParameterizedValue&lt;T&gt;)value).params.clear();<a name="line.192"></a>
 <span class="sourceLineNo">193</span>                        ((ParameterizedValue&lt;T&gt;)value).params<a name="line.193"></a>
-<span class="sourceLineNo">194</span>                                .putAll(existing.getParameters());<a name="line.194"></a>
+<span class="sourceLineNo">194</span>                                .putAll(existing.parameters());<a name="line.194"></a>
 <span class="sourceLineNo">195</span>                        return this;<a name="line.195"></a>
 <span class="sourceLineNo">196</span>                }<a name="line.196"></a>
 <span class="sourceLineNo">197</span><a name="line.197"></a>
@@ -304,8 +304,8 @@
 <span class="sourceLineNo">296</span><a name="line.296"></a>
 <span class="sourceLineNo">297</span>                public String asFieldValue(P value) {<a name="line.297"></a>
 <span class="sourceLineNo">298</span>                        StringBuilder result = new StringBuilder();<a name="line.298"></a>
-<span class="sourceLineNo">299</span>                        result.append(valueConverter.asFieldValue(value.getValue()));<a name="line.299"></a>
-<span class="sourceLineNo">300</span>                        for (Entry&lt;String, String&gt; e: value.getParameters().entrySet()) {<a name="line.300"></a>
+<span class="sourceLineNo">299</span>                        result.append(valueConverter.asFieldValue(value.value()));<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                        for (Entry&lt;String, String&gt; e: value.parameters().entrySet()) {<a name="line.300"></a>
 <span class="sourceLineNo">301</span>                                result.append("; ");<a name="line.301"></a>
 <span class="sourceLineNo">302</span>                                result.append(e.getKey());<a name="line.302"></a>
 <span class="sourceLineNo">303</span>                                result.append('=');<a name="line.303"></a>
