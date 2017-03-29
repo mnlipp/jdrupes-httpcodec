@@ -24,6 +24,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -36,10 +37,12 @@ import org.jdrupes.httpcodec.plugin.ProtocolProvider;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
+import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.Directive;
 
 /**
  * An encoder for HTTP responses that accepts a header and optional
@@ -51,9 +54,18 @@ import org.jdrupes.httpcodec.types.Converters;
  * Headers
  * -------
  * 
+ * ### Date ###
+ * 
  * The encoder automatically adds a `Date` header as specified
  * in [RFC 7231, Section 7.1.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.1.2).
  * Any existing `Date` header will be overwritten. 
+ * 
+ * ### Expires ###
+ * 
+ * If the protocol is HTTP 1.0 and the response includes a `Cache-Control`
+ * header field with a `max-age` directive, an `Expires` header field
+ * with the same information is generated (see
+ * [RFC 7234, Section 5.3](https://tools.ietf.org/html/rfc7234#section-5.3)).
  * 
  * @startuml httpresponseencoder.svg
  * class HttpResponseEncoder {
@@ -100,9 +112,29 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		
 		// Make sure we have an up-to-date Date, RFC 7231 7.1.1.2
 		messageHeader.setField(HttpField.DATE, Instant.now());
-		
+
+		// ensure backward compatibility
+		if (messageHeader.protocol().compareTo(HttpProtocol.HTTP_1_1) < 0) {
+			// Create Expires
+			Optional<HttpField<List<Directive>>> cacheCtrl = messageHeader
+					.findField(HttpField.CACHE_CONTROL, Converters.DIRECTIVE_LIST);
+			if (cacheCtrl.isPresent() 
+					&& !messageHeader.fields().containsKey(HttpField.EXPIRES)) {
+				Optional<Long> maxAge = cacheCtrl.get().value().stream()
+						.filter(d -> "max-age".equalsIgnoreCase(d.name()))
+						.map(d -> d.value()).map(v -> Long.parseLong(v.get()))
+						.findFirst();
+				if (maxAge.isPresent()) {
+					messageHeader.setField(HttpField.EXPIRES, 
+							Instant.now().plusSeconds(maxAge.get()));
+				}
+			}
+		}
+
+		// Check the content length rules
 		checkContentLength(messageHeader);
 		
+		// Finally encode
 		super.encode(messageHeader);
 	}
 

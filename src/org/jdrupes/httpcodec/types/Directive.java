@@ -42,6 +42,19 @@ public class Directive {
 	}
 	
 	/**
+	 * Convenience constructor for a directive that has a number
+	 * as value. The given value is converted to a string.
+	 * 
+	 * @param name the name
+	 * @param value the value
+	 */
+	public Directive(String name, Number value) {
+		super();
+		this.name = name;
+		this.value = Optional.of(value.toString());
+	}
+	
+	/**
 	 * Creates a new directive.
 	 * 
 	 * @param name the name
