@@ -173,8 +173,8 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 			super(new MediaTypePairConverter() {
 				
 				/**
-				 * Work around faulty clients, notably
-				 * `HttpUrlConnection`.
+				 * Work around buggy clients, notably `HttpUrlConnection` (see
+				 * [JDK-8163921](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=8163921))
 				 */
 				@Override
 				public MediaTypePair fromFieldValue(String text)
