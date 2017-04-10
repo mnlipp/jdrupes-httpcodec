@@ -31,7 +31,13 @@ public class FormUrlDecoder {
 
 	private Map<String,String> fields = new HashMap<>();
 	private String rest = "";
-	
+
+	/**
+	 * Add the data in the buffer to the form data. May be invoked
+	 * several times if the form data is split across several buffers.
+	 * 
+	 * @param buf the buffer with the data
+	 */
 	public void addData(ByteBuffer buf) {
 		try {
 			String data;
@@ -43,6 +49,7 @@ public class FormUrlDecoder {
 				buf.get(bc);
 				data = rest + new String(bc, "ascii");
 			}
+			buf.position(buf.limit()); // for consistency
 			int oldPos = 0;
 			while (true) {
 				int newPos = data.indexOf('&', oldPos);
@@ -73,7 +80,15 @@ public class FormUrlDecoder {
 			// Using only built-in encodings
 		}
 	}
-	
+
+	/**
+	 * Return the fields decoded from the data that has been added
+	 * by {@link #addData(ByteBuffer)}. Invoking this method terminates
+	 * the decoding, i.e. {@link #addData(ByteBuffer)} should not be
+	 * called again after this method has been invoked.
+	 * 
+	 * @return the decoded fields
+	 */
 	public Map<String,String> fields() {
 		split(rest, 0, rest.length());
 		rest = "";
