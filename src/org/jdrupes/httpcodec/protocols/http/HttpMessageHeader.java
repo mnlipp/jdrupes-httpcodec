@@ -122,7 +122,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 
 	/**
 	 * Sets a header field for the message. The converter for the
-	 * field is lookup using {@link HttpField#lookupConverter(String)}.
+	 * field is looked up using {@link HttpField#lookupConverter(String)}.
 	 * 
 	 * @param <T> the type of the value
 	 * @param name the field name
