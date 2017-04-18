@@ -207,8 +207,11 @@ public abstract class HttpMessageHeader implements MessageHeader {
 		}
 		// Try conversion...
 		try {
-			return Optional.ofNullable(new HttpField<>(
-					name, converter.fromFieldValue((String)value), converter));
+			HttpField<T> converted = new HttpField<>(
+					name, converter.fromFieldValue((String)value), converter);
+			// Replace if conversion was successful
+			headers.put(name, converted);
+			return Optional.ofNullable(converted);
 		} catch (ParseException e) {
 			return Optional.empty();
 		}
