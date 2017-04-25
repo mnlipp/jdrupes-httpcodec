@@ -181,8 +181,8 @@
 <span class="sourceLineNo">173</span>                        super(new MediaTypePairConverter() {<a name="line.173"></a>
 <span class="sourceLineNo">174</span>                                <a name="line.174"></a>
 <span class="sourceLineNo">175</span>                                /**<a name="line.175"></a>
-<span class="sourceLineNo">176</span>                                 * Work around faulty clients, notably<a name="line.176"></a>
-<span class="sourceLineNo">177</span>                                 * `HttpUrlConnection`.<a name="line.177"></a>
+<span class="sourceLineNo">176</span>                                 * Work around buggy clients, notably `HttpUrlConnection` (see<a name="line.176"></a>
+<span class="sourceLineNo">177</span>                                 * [JDK-8163921](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=8163921))<a name="line.177"></a>
 <span class="sourceLineNo">178</span>                                 */<a name="line.178"></a>
 <span class="sourceLineNo">179</span>                                @Override<a name="line.179"></a>
 <span class="sourceLineNo">180</span>                                public MediaTypePair fromFieldValue(String text)<a name="line.180"></a>
