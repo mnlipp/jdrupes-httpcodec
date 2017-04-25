@@ -102,7 +102,7 @@ public final class Converters {
 	};
 	
 	public static final Converter<StringList> STRING_LIST 
-		= new ListConverter<>(StringList::new, STRING);
+		= new DefaultMultiValueConverter<>(StringList::new, STRING);
 
 	/**
 	 * A converter that quotes strings.
@@ -122,7 +122,7 @@ public final class Converters {
 	};
 	
 	public static final Converter<StringList> QUOTED_STRING_LIST 
-		= new ListConverter<>(StringList::new, QUOTED_STRING);
+		= new DefaultMultiValueConverter<>(StringList::new, QUOTED_STRING);
 
 	/**
 	 * An integer converter.
@@ -147,8 +147,8 @@ public final class Converters {
 	/**
 	 * An integer list converter.
 	 */
-	public static final ListConverter<List<Long>, Long> LONG_LIST 
-		= new ListConverter<>(ArrayList<Long>::new, LONG);
+	public static final MultiValueConverter<List<Long>, Long> LONG_LIST 
+		= new DefaultMultiValueConverter<>(ArrayList<Long>::new, LONG);
 
 	/**
 	 * A date/time converter.
@@ -159,9 +159,9 @@ public final class Converters {
 	/**
 	 * A converter for set cookies.
 	 */
-	public static final ListConverter<CookieList, HttpCookie> SET_COOKIE 
-		= new ListConverter<CookieList, HttpCookie>(
-				CookieList::new, new Converter<HttpCookie>() {
+	public static final Converter<CookieList> SET_COOKIE 
+		= new DefaultMultiValueConverter<CookieList, HttpCookie>(
+				CookieList::new, CookieList::add, new Converter<HttpCookie>() {
 					
 					@Override
 					public String asFieldValue(HttpCookie value) {
@@ -214,9 +214,9 @@ public final class Converters {
 	/**
 	 * A converter for a list of cookies.
 	 */
-	public static final ListConverter<CookieList, HttpCookie> COOKIE_LIST 
-		= new ListConverter<CookieList, HttpCookie>(CookieList::new,
-				new Converter<HttpCookie>() {
+	public static final MultiValueConverter<CookieList, HttpCookie> COOKIE_LIST 
+		= new DefaultMultiValueConverter<CookieList, HttpCookie>(CookieList::new,
+				CookieList::add, new Converter<HttpCookie>() {
 	
 			@Override
 			public String asFieldValue(HttpCookie value) {
@@ -232,7 +232,7 @@ public final class Converters {
 					throw new ParseException(text, 0);
 				}
 			}
-		}, ";");
+		}, ";", false);
 
 	/**
 	 * A converter for a language or language range. 
@@ -257,9 +257,9 @@ public final class Converters {
 	/**
 	 * A converter for a weighted list of languages.
 	 */
-	public static final ListConverter<List<ParameterizedValue<Locale>>,
+	public static final MultiValueConverter<List<ParameterizedValue<Locale>>,
 		ParameterizedValue<Locale>> LANGUAGE_LIST 
-			= new ListConverter<List<ParameterizedValue<Locale>>,
+			= new DefaultMultiValueConverter<List<ParameterizedValue<Locale>>,
 					ParameterizedValue<Locale>>(ArrayList::new,
 							new ParamValueConverterBase
 								<ParameterizedValue<Locale>, Locale>(
@@ -269,9 +269,9 @@ public final class Converters {
 	/**
 	 * A converter for a weighted list of strings.
 	 */
-	public static final ListConverter<List<ParameterizedValue<String>>,
+	public static final MultiValueConverter<List<ParameterizedValue<String>>,
 		ParameterizedValue<String>> WEIGHTED_STRINGS 
-			= new ListConverter<List<ParameterizedValue<String>>,
+			= new DefaultMultiValueConverter<List<ParameterizedValue<String>>,
 					ParameterizedValue<String>>(ArrayList::new,
 							new ParamValueConverterBase
 								<ParameterizedValue<String>, String>(
@@ -293,9 +293,8 @@ public final class Converters {
 	/**
 	 * A converter for a list of media ranges.
 	 */
-	public static final ListConverter<List<MediaRange>,
-		MediaRange> MEDIA_RANGE_LIST 
-			= new ListConverter<List<MediaRange>,
+	public static final MultiValueConverter<List<MediaRange>, MediaRange> MEDIA_RANGE_LIST 
+			= new DefaultMultiValueConverter<List<MediaRange>,
 				MediaRange>(ArrayList::new, MEDIA_RANGE);
 
 	/**
@@ -313,8 +312,8 @@ public final class Converters {
 	/**
 	 * A converter for a list of directives.
 	 */
-	public static final ListConverter<List<Directive>, Directive>
-		DIRECTIVE_LIST = new ListConverter<List<Directive>, Directive>(
+	public static final MultiValueConverter<List<Directive>, Directive>
+		DIRECTIVE_LIST = new DefaultMultiValueConverter<List<Directive>, Directive>(
 				ArrayList::new, DIRECTIVE);
 	
 	/**
@@ -360,7 +359,7 @@ public final class Converters {
 	public static final EtagConverter ETAG = new EtagConverter();
 	
 	public static final Converter<List<Etag>> ETAG_LIST 
-		= new ListConverter<>(ArrayList::new, ETAG);
+		= new DefaultMultiValueConverter<>(ArrayList::new, ETAG);
 
 	/**
 	 * A converter for a list of challenges.
@@ -631,7 +630,7 @@ public final class Converters {
 	}
 	
 	private static class ProductDescriptionConverter 
-		extends ListConverter<List<CommentedValue<String>>, CommentedValue<String>> {
+		extends DefaultMultiValueConverter<List<CommentedValue<String>>, CommentedValue<String>> {
 	
 		public ProductDescriptionConverter() {
 			super(ArrayList<CommentedValue<String>>::new,
@@ -697,7 +696,8 @@ public final class Converters {
 	}
 
 	private static class AuthInfoConverter extends
-	        ListConverter<List<ParameterizedValue<String>>, ParameterizedValue<String>> {
+	        DefaultMultiValueConverter<List<ParameterizedValue<String>>, 
+	        ParameterizedValue<String>> {
 
 		public AuthInfoConverter() {
 			super(ArrayList<ParameterizedValue<String>>::new, 

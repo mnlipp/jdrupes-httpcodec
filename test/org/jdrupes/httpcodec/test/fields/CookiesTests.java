@@ -58,11 +58,11 @@ public class CookiesTests {
 				+ " expires=Wed, 25-Jul-2018 12:42:14 GMT; path=/";
 		HttpField<CookieList> field2
 			= new HttpField<>(header, Converters.SET_COOKIE);
-		field.value().addAll(field2.value());
+		field2.value().forEach(field.value()::add);
 		header = "Set-Cookie:MUIDB=13BEF4C6DC68E5; path=/; "
 				+ "httponly; expires=Wed, 25-Jul-2018 12:42:14 GMT";
 		field2 = new HttpField<>(header, Converters.SET_COOKIE);
-		field.value().addAll(field2.value());
+		field2.value().forEach(field.value()::add);
 		assertEquals(3, field.value().size());
 		assertEquals("deleted", field.value().valueForName("autorf").get());
 		assertEquals("V=2&GUID=2853211950", field.value().valueForName("SRCHUID").get());
@@ -85,12 +85,14 @@ public class CookiesTests {
 		setField = new HttpField<>(header, Converters.SET_COOKIE);
 		header = "Set-Cookie: lang=en-US; Path=/; Domain=example.com";
 		setField.value().add((new HttpField<>(header,
-				Converters.SET_COOKIE)).value().get(0));
-		assertEquals("/", setField.value().get(0).getPath());
-		assertTrue(setField.value().get(0).getSecure());
-		assertTrue(setField.value().get(0).isHttpOnly());
-		assertEquals("/", setField.value().get(1).getPath());
-		assertEquals("example.com", setField.value().get(1).getDomain());
+				Converters.SET_COOKIE)).value().iterator().next());
+		assertEquals("/", setField.value().iterator().next().getPath());
+		assertTrue(setField.value().iterator().next().getSecure());
+		assertTrue(setField.value().iterator().next().isHttpOnly());
+		assertEquals("/", setField.value().stream()
+				.skip(1).findFirst().get().getPath());
+		assertEquals("example.com", setField.value().stream()
+				.skip(1).findFirst().get().getDomain());
 		assertEquals("Set-Cookie: SID=31d4d96e407aad42; Path=/; Secure; HttpOnly\r\n"
 				+ "Set-Cookie: lang=en-US; Domain=example.com; Path=/",
 				setField.asHeaderField());

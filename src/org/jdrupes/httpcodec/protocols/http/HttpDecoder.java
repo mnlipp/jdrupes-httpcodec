@@ -25,9 +25,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CoderResult;
 import java.text.ParseException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.function.BiConsumer;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.MessageHeader;
@@ -36,7 +36,7 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.CookieList;
-import org.jdrupes.httpcodec.types.ListConverter;
+import org.jdrupes.httpcodec.types.MultiValueConverter;
 import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.DynamicByteArray;
@@ -479,17 +479,21 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		// RFC 7230 3.2.2
 		HttpField<?> existing = header.fields().get(field.name());
 		if (existing != null) {
-			if (!(existing.converter() instanceof ListConverter)
+			if (!(existing.converter() instanceof MultiValueConverter)
 					|| !existing.converter().equals(field.converter())) {
 				throw new HttpProtocolException(protocolVersion,
 				        HttpStatus.BAD_REQUEST.statusCode(),
 				        "Multiple occurences of field " + field.name());
 			}
 			@SuppressWarnings("unchecked")
-			List<Object> existingList = (List<Object>)existing.value();
+			BiConsumer<Iterable<Object>, Object> adder 
+				= ((MultiValueConverter<Iterable<Object>, Object>)
+						existing.converter()).valueAdder();
 			@SuppressWarnings("unchecked")
-			List<Object> fieldList = (List<Object>)field.value();
-			existingList.addAll(fieldList);
+			Iterable<Object> source = (Iterable<Object>)field.value();
+			@SuppressWarnings("unchecked")
+			Iterable<Object> target = (Iterable<Object>)existing.value();
+			source.forEach(item -> adder.accept(target, item));
 		} else {
 			header.setField(field);
 		}

@@ -39,8 +39,8 @@ import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.Directive;
 import org.jdrupes.httpcodec.types.Etag;
-import org.jdrupes.httpcodec.types.ListConverter;
 import org.jdrupes.httpcodec.types.MediaType;
+import org.jdrupes.httpcodec.types.MultiValueConverter;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
 import org.jdrupes.httpcodec.types.StringList;
 
@@ -198,8 +198,8 @@ public class FieldParsingTests {
 		Collections.sort(field.value(), ParameterizedValue.WEIGHT_COMPARATOR);
 		@SuppressWarnings("unchecked")
 		Converter<ParameterizedValue<Locale>> itemConverter 
-			= ((ListConverter<List<ParameterizedValue<Locale>>, 
-					ParameterizedValue<Locale>>)field.converter()).itemConverter();
+			= ((MultiValueConverter<List<ParameterizedValue<Locale>>, 
+					ParameterizedValue<Locale>>)field.converter()).valueConverter();
 		Iterator<ParameterizedValue<Locale>> itr = field.value().iterator();
 		assertEquals("da", itemConverter.asFieldValue(itr.next()));
 		assertEquals("en-GB; q=0.8", 
