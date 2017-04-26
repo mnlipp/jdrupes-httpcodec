@@ -264,6 +264,30 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	}
 	
 	/**
+	 * Returns the header field with the given name, computing 
+	 * and adding it if it doesn't exist. The converter for the
+	 * field is looked up using {@link HttpField#lookupConverter(String)}.
+	 * 
+	 * @param <T> the type of the header field's value
+	 * @param name the field name
+	 * @param supplier the function that computes a value for
+	 * a new field.
+	 * @return the header field
+	 */
+	public <T> HttpField<T> computeIfAbsent(String name, Supplier<T> supplier) {
+		@SuppressWarnings("unchecked")
+		Converter<T> converter = (Converter<T>)HttpField.lookupConverter(name);
+		Optional<HttpField<T>> result = findField(name, converter);
+		if (result.isPresent()) {
+			return result.get();
+		}
+		HttpField<T> value = new HttpField<>(name, supplier.get(), converter);
+		
+		setField(value);
+		return value;
+	}
+		
+	/**
 	 * Set the flag that indicates whether this header is followed by a body.
 	 * 
 	 * @param messageHasBody new value
