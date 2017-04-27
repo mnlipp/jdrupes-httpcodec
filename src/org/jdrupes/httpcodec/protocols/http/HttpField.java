@@ -240,7 +240,7 @@ public class HttpField<T> {
 		case AUTHORIZATION:
 			return Converters.CREDENTIALS;
 		case CACHE_CONTROL:
-			return Converters.DIRECTIVE_LIST;
+			return Converters.CACHE_CONTROL_LIST;
 		case COOKIE:
 			return Converters.COOKIE_LIST;
 		case CONNECTION:

@@ -317,6 +317,14 @@ public final class Converters {
 				ArrayList::new, DIRECTIVE);
 	
 	/**
+	 * A converter for cache control directives.
+	 */
+	public static final MultiValueConverter<CacheControlDirectives, Directive>
+		CACHE_CONTROL_LIST = new DefaultMultiValueConverter
+			<CacheControlDirectives, Directive>(
+					CacheControlDirectives::new, DIRECTIVE);
+	
+	/**
 	 * A converter for a URI.
 	 */
 	public static final Converter<URI> URI_CONV 

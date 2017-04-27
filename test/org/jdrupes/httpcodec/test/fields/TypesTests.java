@@ -6,12 +6,16 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
+import org.jdrupes.httpcodec.types.CacheControlDirectives;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.Directive;
 import org.jdrupes.httpcodec.types.MediaRange;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.ParameterizedValue;
@@ -151,4 +155,34 @@ public class TypesTests {
 		assertEquals("aHR0cHdhdGNoOmY=", value2.parameter(null));
 	}	
 	
+	@Test
+	public void testCacheControl() {
+		CacheControlDirectives dirs = new CacheControlDirectives();
+		dirs.add(new Directive("no-store"));
+		dirs.add(new Directive("no-cache", "Set-Cookie"));
+		dirs.add(new Directive("no-cache", "Set-Cookie2"));
+		HttpField<CacheControlDirectives> field = new HttpField<>(
+				HttpField.CACHE_CONTROL, dirs, Converters.CACHE_CONTROL_LIST);
+		assertTrue(field.asHeaderField().startsWith(
+				"Cache-Control: no-store, no-cache=\"Set-Cookie"));
+		Iterator<Directive> iter = dirs.iterator();
+		Directive dir = iter.next();
+		while (!"no-cache".equals(dir.name())) {
+			dir = iter.next();
+		}
+		List<String> vals = Pattern.compile(", *").splitAsStream(
+				dir.value().get()).collect(Collectors.toList());
+		assertEquals(2,  vals.size());
+		assertTrue(vals.contains("Set-Cookie"));
+		assertTrue(vals.contains("Set-Cookie2"));
+		
+		// Overwrite selective
+		dirs.add(new Directive("no-cache"));
+		iter = dirs.iterator();
+		dir = iter.next();
+		while (!"no-cache".equals(dir.name())) {
+			dir = iter.next();
+		}
+		assertEquals(false, dir.value().isPresent());
+	}
 }
