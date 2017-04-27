@@ -37,7 +37,7 @@ public class Directive {
 	 */
 	public Directive(String name, String value) {
 		super();
-		this.name = name;
+		this.name = name.toLowerCase();
 		this.value = Optional.of(value);
 	}
 	
@@ -49,9 +49,7 @@ public class Directive {
 	 * @param value the value
 	 */
 	public Directive(String name, Number value) {
-		super();
-		this.name = name;
-		this.value = Optional.of(value.toString());
+		this(name, value.toString());
 	}
 	
 	/**
@@ -60,8 +58,7 @@ public class Directive {
 	 * @param name the name
 	 */
 	public Directive(String name) {
-		super();
-		this.name = name;
+		this.name = name.toLowerCase();
 		this.value = Optional.empty();
 	}
 

@@ -158,12 +158,9 @@ public class DefaultMultiValueConverter<T extends Iterable<V>, V>
 	public T fromFieldValue(String text) throws ParseException {
 		T result = containerSupplier.get();
 		ListItemizer itemizer = new ListItemizer(text, delimiters);
-		while (true) {
-			String nextRepr = itemizer.nextItem();
-			if (nextRepr == null) {
-				break;
-			}
-			valueAdder.accept(result, valueConverter.fromFieldValue(nextRepr));
+		while (itemizer.hasNext()) {
+			valueAdder.accept(
+					result, valueConverter.fromFieldValue(itemizer.next()));
 		}
 		return result;
 	}

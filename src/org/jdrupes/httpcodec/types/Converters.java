@@ -745,22 +745,22 @@ public final class Converters {
 			while (true) {
 				// New auth scheme may have left over the parameter part as itemRepr
 				if (itemRepr == null) {
-					itemRepr = itemizer.nextItem();
-					if (itemRepr == null) {
+					if (!itemizer.hasNext()) {
 						if (builder != null) {
 							result.add(builder.build());
 						}
 						break;
-					}
+					} 
+					itemRepr = itemizer.next();
 				}
 				if (builder != null) {
 					// itemRepr may be new auth scheme or parameter
 					ListItemizer paramItemizer = new ListItemizer(itemRepr, "=");
-					String name = paramItemizer.nextItem();
-					String value = paramItemizer.nextItem();
-					if (value != null && name.indexOf(" ") < 0) {
+					String name = paramItemizer.next();
+					if (paramItemizer.hasNext() && name.indexOf(" ") < 0) {
 						// Really parameter
-						builder.setParameter(name, unquoteString(value));
+						builder.setParameter(name, unquoteString(
+								paramItemizer.next()));
 						itemRepr = null;
 						continue;
 					}
@@ -771,13 +771,13 @@ public final class Converters {
 				}
 				// New challenge or credentials, space used as separator
 				ListItemizer schemeItemizer = new ListItemizer(itemRepr, " ");
-				String authScheme = schemeItemizer.nextItem();
+				String authScheme = schemeItemizer.next();
 				if (authScheme == null) {
 					throw new ParseException(itemRepr, 0);
 				}
 				builder = ParameterizedValue.builder();
 				builder.setValue(authScheme);
-				itemRepr = schemeItemizer.nextItem();
+				itemRepr = schemeItemizer.next();
 				if (itemRepr == null
 				        || (token68Length(itemRepr, 0) == itemRepr.length())) {
 					if (itemRepr != null) {

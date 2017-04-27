@@ -308,25 +308,21 @@ public class ParameterizedValue<U> {
 
 		public P fromFieldValue(String text) throws ParseException {
 			ListItemizer li = new ListItemizer(text, ";");
-			String valueRepr = li.nextItem();
+			String valueRepr = li.next();
 			if (valueRepr == null) {
 				throw new ParseException("Value may not be empty", 0);
 			}
 			U value = valueConverter.fromFieldValue(valueRepr);
 			Map<String,String> params = new HashMap<>();
-			while (true) {
-				String param = li.nextItem();
-				if (param == null) {
-					break;
-				}
-				ListItemizer pi = new ListItemizer(param, "=");
-				String paramKey = pi.nextItem().trim().toLowerCase();
-				if (paramKey == null) {
+			while (li.hasNext()) {
+				ListItemizer pi = new ListItemizer(li.next(), "=");
+				if (!pi.hasNext()) {
 					throw new ParseException("parameter may not be empty", 0);
 				}
-				String paramValue = pi.nextItem();
-				if (paramValue != null) {
-					paramValue = paramValueConverter.fromFieldValue(paramValue);
+				String paramKey = pi.next().trim().toLowerCase();
+				String paramValue = null;
+				if (pi.hasNext()) {
+					paramValue = paramValueConverter.fromFieldValue(pi.next());
 				}
 				params.put(paramKey, paramValue);
 			}

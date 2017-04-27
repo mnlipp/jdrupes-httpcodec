@@ -19,16 +19,20 @@
 package org.jdrupes.httpcodec.util;
 
 import java.text.ParseException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Splits a list of items. Delimiters are escaped if they are in
  * double quotes.
  */
-public class ListItemizer {
+public class ListItemizer implements Iterator<String> {
 
 	private String unparsedValue;
 	private int position = 0;
 	private String delimiters;
+	private String pendingItem = null;
+	private ParseException pendingException = null;
 	
 	/**
 	 * Generates a new itemizer.
@@ -46,6 +50,11 @@ public class ListItemizer {
 			}
 			position += 1;
 		}
+		try {
+			pendingItem = nextItem();
+		} catch (ParseException e) {
+			pendingException = e;
+		}
 	}
 
 	/**
@@ -54,7 +63,7 @@ public class ListItemizer {
 	 * @return the next item or {@code null} if no items remain
 	 * @throws ParseException if the input violates the field format
 	 */
-	public String nextItem() throws ParseException {
+	private String nextItem() throws ParseException {
 		// RFC 7230 3.2.6
 		boolean inDquote = false;
 		int startPosition = position;
@@ -107,4 +116,39 @@ public class ListItemizer {
 			throw new ParseException(unparsedValue, position);
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see java.util.Iterator#hasNext()
+	 */
+	@Override
+	public boolean hasNext() {
+		return pendingItem != null;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.Iterator#next()
+	 */
+	@Override
+	public String next() {
+		if (pendingException != null) {
+			NoSuchElementException exc = new NoSuchElementException();
+			exc.initCause(pendingException);
+			throw exc;
+		}
+		if (pendingItem == null) {
+			throw new NoSuchElementException("No elements left.");
+		}
+		String result = pendingItem;
+		pendingItem = null;
+		try {
+			pendingItem = nextItem();
+		} catch (ParseException e) {
+			pendingException = e;
+			NoSuchElementException exc = new NoSuchElementException();
+			exc.initCause(pendingException);
+			throw exc;
+		}
+		return result;
+	}
+	
 }
