@@ -166,17 +166,14 @@
 <span class="sourceLineNo">158</span>        public T fromFieldValue(String text) throws ParseException {<a name="line.158"></a>
 <span class="sourceLineNo">159</span>                T result = containerSupplier.get();<a name="line.159"></a>
 <span class="sourceLineNo">160</span>                ListItemizer itemizer = new ListItemizer(text, delimiters);<a name="line.160"></a>
-<span class="sourceLineNo">161</span>                while (true) {<a name="line.161"></a>
-<span class="sourceLineNo">162</span>                        String nextRepr = itemizer.nextItem();<a name="line.162"></a>
-<span class="sourceLineNo">163</span>                        if (nextRepr == null) {<a name="line.163"></a>
-<span class="sourceLineNo">164</span>                                break;<a name="line.164"></a>
-<span class="sourceLineNo">165</span>                        }<a name="line.165"></a>
-<span class="sourceLineNo">166</span>                        valueAdder.accept(result, valueConverter.fromFieldValue(nextRepr));<a name="line.166"></a>
-<span class="sourceLineNo">167</span>                }<a name="line.167"></a>
-<span class="sourceLineNo">168</span>                return result;<a name="line.168"></a>
-<span class="sourceLineNo">169</span>        }<a name="line.169"></a>
-<span class="sourceLineNo">170</span><a name="line.170"></a>
-<span class="sourceLineNo">171</span>}<a name="line.171"></a>
+<span class="sourceLineNo">161</span>                while (itemizer.hasNext()) {<a name="line.161"></a>
+<span class="sourceLineNo">162</span>                        valueAdder.accept(<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                                        result, valueConverter.fromFieldValue(itemizer.next()));<a name="line.163"></a>
+<span class="sourceLineNo">164</span>                }<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                return result;<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        }<a name="line.166"></a>
+<span class="sourceLineNo">167</span><a name="line.167"></a>
+<span class="sourceLineNo">168</span>}<a name="line.168"></a>
 
 
 
