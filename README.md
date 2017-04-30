@@ -40,9 +40,11 @@ dependencies {
 (See badge above for the latest version.) 
 
 I plan to improve documentation over time. For now, the best starting
-point is to have a look at the 
-[JavaDoc](https://www.javadoc.io/doc/org.jdrupes.httpcodec/httpcodec/) 
-and at the source code in the 
+point is to have a look at the Javadoc (either 
+[properly versioned](https://www.javadoc.io/doc/org.jdrupes.httpcodec/httpcodec/)
+or [close to master](https://mnlipp.github.io/jdrupes-httpcodec/javadoc/index.html)).
+Make sure to read the "Overview" section, it provides a good overview of
+the architecture of the library. In addition, have a look  at the source code in the 
 [`demo`](https://github.com/mnlipp/jdrupes-httpcodec/tree/master/demo/org/jdrupes/httpcodec/demo) folder.
 
 Contributions and bug reports are welcome. Please provide them as
