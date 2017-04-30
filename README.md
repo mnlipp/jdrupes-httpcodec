@@ -6,6 +6,7 @@ JDrupes non-blocking HTTP Codec
 [![Code Climate](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec/badges/gpa.svg)](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec)
 [![Release](https://jitpack.io/v/mnlipp/jdrupes-httpcodec.svg)](https://jitpack.io/#mnlipp/jdrupes-httpcodec)
 [![Maven Central](https://img.shields.io/maven-central/v/org.jdrupes.httpcodec/httpcodec.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jdrupes.httpcodec%22)
+[![Javadocs](https://www.javadoc.io/badge/org.jdrupes.httpcodec/httpcodec.svg)](https://www.javadoc.io/doc/org.jdrupes.httpcodec/httpcodec)
 
 The goal of this package is to provide easy to use HTTP 
 encoders and decoders for non-blocking I/O
@@ -40,7 +41,7 @@ dependencies {
 
 I plan to improve documentation over time. For now, the best starting
 point is to have a look at the 
-[JavaDoc](https://mnlipp.github.io/jdrupes-httpcodec/javadoc/index.html) 
+[JavaDoc](https://www.javadoc.io/doc/org.jdrupes.httpcodec/httpcodec/) 
 and at the source code in the 
 [`demo`](https://github.com/mnlipp/jdrupes-httpcodec/tree/master/demo/org/jdrupes/httpcodec/demo) folder.
 
