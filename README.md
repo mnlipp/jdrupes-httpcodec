@@ -22,7 +22,7 @@ frameworks, which didn't go well with my intention to write my own
 [event driven framework](http://mnlipp.github.io/jgrapes/). 
 An implementation that comes very close to what I needed is 
 [HTTP Kit](https://github.com/http-kit/http-kit), which has, however,
-dependencies on Clojure, that prohibit its usage for my purpose.
+dependencies on Clojure, which prohibit its usage for my purpose.
 
 This library requires Java 8 SE. Binaries are currently made
 available at maven central.
@@ -44,7 +44,7 @@ point is to have a look at the Javadoc (either
 [properly versioned](https://www.javadoc.io/doc/org.jdrupes.httpcodec/httpcodec/)
 or [close to master](https://mnlipp.github.io/jdrupes-httpcodec/javadoc/index.html)).
 Make sure to read the "Overview" section, it provides a good overview of
-the architecture of the library. In addition, have a look  at the source code in the 
+the library's architecture. In addition, have a look  at the source code in the 
 [`demo`](https://github.com/mnlipp/jdrupes-httpcodec/tree/master/demo/org/jdrupes/httpcodec/demo) folder.
 
 Contributions and bug reports are welcome. Please provide them as
