@@ -49,6 +49,14 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 	};
 	
 	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Encoder#encoding()
+	 */
+	@Override
+	public Class<HttpRequest> encoding() {
+		return HttpRequest.class;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
 	 */
 	@Override

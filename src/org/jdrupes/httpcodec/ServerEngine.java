@@ -70,6 +70,24 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	}
 
 	/**
+	 * Returns the type of the messages decoded by this server.
+	 * 
+	 * @return the value
+	 */
+	public Class<? extends MessageHeader> decoding() {
+		return requestDecoder.decoding();
+	}
+	
+	/**
+	 * Returns the type of the messages encoded by this server.
+	 * 
+	 * @return the value
+	 */
+	public Class<? extends MessageHeader> encoding() {
+		return responseEncoder.encoding();
+	}
+	
+	/**
 	 * Decodes a request sent to the server.
 	 * 
 	 * @param in the data to decode

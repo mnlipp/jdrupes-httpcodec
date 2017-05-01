@@ -86,6 +86,14 @@ public class HttpResponseDecoder
 	protected Result.Factory resultFactory() {
 		return resultFactory;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Decoder#decoding()
+	 */
+	@Override
+	public Class<HttpResponse> decoding() {
+		return HttpResponse.class;
+	}
 
 	/**
 	 * Starts decoding a new response to a given request.

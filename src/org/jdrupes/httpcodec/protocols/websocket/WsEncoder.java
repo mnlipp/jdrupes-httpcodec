@@ -77,6 +77,14 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		return resultFactory;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Encoder#encoding()
+	 */
+	@Override
+	public Class<WsFrameHeader> encoding() {
+		return WsFrameHeader.class;
+	}
+
 	private Result frameFinished(boolean endOfInput) {
 		final boolean close = (messageHeaders.peek() instanceof WsCloseFrame);
 		if (!(messageHeaders.peek() instanceof WsMessageHeader) 

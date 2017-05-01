@@ -29,6 +29,13 @@ import java.nio.ByteBuffer;
 public interface Encoder<T extends MessageHeader> extends Codec {
 
 	/**
+	 * Returns the type of the messages encoded by this encoder.
+	 * 
+	 * @return the value
+	 */
+	Class<T> encoding();
+	
+	/**
 	 * Set the header of the message that is to be encoded. Must be invoked
 	 * before the first invocation to any {@code encode} method for a given
 	 * message.

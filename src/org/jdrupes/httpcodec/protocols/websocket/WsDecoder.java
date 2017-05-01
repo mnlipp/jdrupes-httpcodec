@@ -79,6 +79,14 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return resultFactory;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Decoder#decoding()
+	 */
+	@Override
+	public Class<WsFrameHeader> decoding() {
+		return WsFrameHeader.class;
+	}
+
 	private Decoder.Result<WsFrameHeader> frameFinished() {
 		state = State.READING_HEADER;
 		bytesExpected = 2;

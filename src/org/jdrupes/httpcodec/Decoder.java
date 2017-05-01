@@ -33,6 +33,13 @@ public interface Decoder<T extends MessageHeader,
 	R extends MessageHeader> extends Codec {
 
 	/**
+	 * Returns the type of the messages decoded by this decoder.
+	 * 
+	 * @return the value
+	 */
+	Class<T> decoding();
+	
+	/**
 	 * Decodes the next chunk of data. This method will never leave
 	 * remaining data in the `in` buffer unless a header has been
 	 * decoded completely and/or the `out` buffer is full. In either case, 

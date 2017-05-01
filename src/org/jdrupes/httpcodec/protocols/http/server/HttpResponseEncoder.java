@@ -101,6 +101,14 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Encoder#encoding()
+	 */
+	@Override
+	public Class<HttpResponse> encoding() {
+		return HttpResponse.class;
+	}
+
+	/* (non-Javadoc)
 	 * @see HttpEncoder#encode(HttpMessageHeader)
 	 */
 	@Override

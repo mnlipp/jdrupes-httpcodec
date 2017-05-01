@@ -74,6 +74,14 @@ public class HttpRequestDecoder
 	}
 
 	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Decoder#decoding()
+	 */
+	@Override
+	public Class<HttpRequest> decoding() {
+		return HttpRequest.class;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.HttpDecoder#decode(java.nio.ByteBuffer)
 	 */
 	@Override
