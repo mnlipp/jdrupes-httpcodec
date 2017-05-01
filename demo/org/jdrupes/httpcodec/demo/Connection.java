@@ -85,7 +85,7 @@ public class Connection extends Thread {
 
 	private void processInput(SocketChannel channel)
 	        throws ProtocolException, IOException {
-		// Get data fron client.
+		// Get data from client.
 		in.clear();
 		channel.read(in);
 		in.flip();
@@ -151,10 +151,10 @@ public class Connection extends Thread {
 
 	private void handleGetForm(HttpRequest request) throws IOException {
 		HttpResponse response = request.response().get()
-				.setStatus(HttpStatus.OK).setMessageHasBody(true);
-		response.setField(HttpField.CONTENT_TYPE,
-				MediaType.builder().setType("text", "html")
-				.setParameter("charset", "utf-8").build());
+				.setStatus(HttpStatus.OK).setMessageHasBody(true)
+				.setField(HttpField.CONTENT_TYPE,
+						MediaType.builder().setType("text", "html")
+						.setParameter("charset", "utf-8").build());
 		String form = "";
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(
 		        getClass().getResourceAsStream("form.html"), "utf-8"))) {
@@ -164,10 +164,18 @@ public class Connection extends Thread {
 		sendResponse(response, body, true);
 	}
 
+	/**
+	 * Handle Post request. This is an example of a request with body.
+	 * 
+	 * @param request
+	 * @throws IOException
+	 */
 	private void handlePostForm(HttpRequest request) throws IOException {
 		HttpResponse response = request.response().get();
 		FormUrlDecoder fieldDecoder = new FormUrlDecoder();
 		while (true) {
+			// Header has been decoded already. Provide an out buffer
+			// and continue decoding.
 			out.clear();
 			Decoder.Result<?> decoderResult = null;
 			try {
@@ -175,12 +183,15 @@ public class Connection extends Thread {
 			} catch (ProtocolException e) {
 				return;
 			}
+			// Handle decoded body data.
 			out.flip();
 			fieldDecoder.addData(out);
 			if (decoderResult.isOverflow()) {
+				// More data left.
 				continue;
 			}
 			if (decoderResult.isUnderflow()) {
+				// More data from client expected.
 				in.clear();
 				channel.read(in);
 				in.flip();
@@ -188,11 +199,11 @@ public class Connection extends Thread {
 			}
 			break;
 		}
-		response.setStatus(HttpStatus.OK);
-		response.setMessageHasBody(true);
-		response.setField(HttpField.CONTENT_TYPE,
-				MediaType.builder().setType("text", "plain")
-				.setParameter("charset", "utf-8").build());
+		// Got all body data, provide response.
+		response.setStatus(HttpStatus.OK).setMessageHasBody(true)
+			.setField(HttpField.CONTENT_TYPE,
+					MediaType.builder().setType("text", "plain")
+					.setParameter("charset", "utf-8").build());
 		String data = "First name: " + fieldDecoder.fields().get("firstname")
 		        + "\r\n" + "Last name: "
 		        + fieldDecoder.fields().get("lastname");
@@ -201,13 +212,16 @@ public class Connection extends Thread {
 	}
 
 	private void handleEcho(HttpRequest request) throws IOException {
+		// Upgrade request (with URL "/echo")?
 		if (request.findField(
 				HttpField.UPGRADE, Converters.STRING_LIST)
 				.map(f -> f.value().containsIgnoreCase("websocket"))
 				.orElse(false)) {
-			upgradeEcho(request);
+			// Do upgrade
+			upgradeToWs(request);
 			return;
 		}
+		// If it's not the upgrade request, page was requested.
 		HttpResponse response = request.response().get()
 				.setStatus(HttpStatus.OK).setMessageHasBody(true);
 		response.setField(HttpField.CONTENT_TYPE,
@@ -222,7 +236,7 @@ public class Connection extends Thread {
 		sendResponse(response, body, true);
 	}
 
-	private void upgradeEcho(HttpRequest request) throws IOException {
+	private void upgradeToWs(HttpRequest request) throws IOException {
 		HttpResponse response = request.response().get()
 			.setStatus(HttpStatus.SWITCHING_PROTOCOLS)
 			.setField(HttpField.UPGRADE, new StringList("websocket"));
@@ -304,6 +318,12 @@ public class Connection extends Thread {
 		}
 	}
 
+	/**
+	 * Handle received WebSocket header.
+	 * 
+	 * @param header
+	 * @throws IOException
+	 */
 	private void handleWsFrame(WsFrameHeader header) throws IOException {
 		if (!(header instanceof WsMessageHeader)) {
 			return;
@@ -312,25 +332,29 @@ public class Connection extends Thread {
 		if (!hdr.hasPayload()) {
 			return;
 		}
+		// We expect (short) message to be sent
 		CharBuffer out = CharBuffer.allocate(100);
 		while (true) {
-			out.clear();
+			// Decode payload into "out" buffer
 			Decoder.Result<?> decoderResult = null;
 			try {
 				decoderResult = engine.decode(in, out, false);
 			} catch (ProtocolException e) {
 				return;
 			}
-			out.flip();
+			// If message is longer than 100 chars, discard beginning.
 			if (decoderResult.isOverflow()) {
+				out.clear();
 				continue;
 			}
+			// If more data from client is expected, get it.
 			if (decoderResult.isUnderflow() && channel.isOpen()) {
 				in.clear();
 				channel.read(in);
 				in.flip();
 				continue;
 			}
+			out.flip();
 			break;
 		}
 		sendResponse(new WsMessageHeader(true, true), out, true);
