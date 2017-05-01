@@ -50,8 +50,8 @@ import org.jdrupes.httpcodec.types.StringList;
  * 	+Optional<T> findValue(String name, Converter<T> converter)
  * 	+Optional<String> findStringValue(String name)
  * 	+HttpField<T> computeIfAbsent(String name, Converter<T> converter, Supplier<T> supplier)
- * 	+MessageHeader setMessageHasBody(boolean messageHasBody)
- * 	+boolean messageHasBody()
+ * 	+MessageHeader setHasPayload(boolean hasPayload)
+ * 	+boolean hasPayload()
  * 	+boolean isFinal()
  * }
  * class MessageHeader {
@@ -72,17 +72,17 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	private HttpProtocol httpProtocol;
 	private Map<String,HttpField<?>> headers 
 		= new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-	private boolean messageHasBody;
+	private boolean hasPayload;
 
 	/**
 	 * Creates a new message header.
 	 * 
 	 * @param httpProtocol the HTTP protocol
-	 * @param messageHasBody indicates that a body is expected after the header
+	 * @param hasPayload indicates that a body is expected after the header
 	 */
-	public HttpMessageHeader(HttpProtocol httpProtocol, boolean messageHasBody) {
+	public HttpMessageHeader(HttpProtocol httpProtocol, boolean hasPayload) {
 		this.httpProtocol = httpProtocol;
-		this.messageHasBody = messageHasBody;
+		this.hasPayload = hasPayload;
 	}
 
 	/**
@@ -290,21 +290,22 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	/**
 	 * Set the flag that indicates whether this header is followed by a body.
 	 * 
-	 * @param messageHasBody new value
+	 * @param hasPayload new value
 	 * @return the message for easy chaining
 	 */
-	public MessageHeader setMessageHasBody(boolean messageHasBody) {
-		this.messageHasBody = messageHasBody;
+	public MessageHeader setHasPayload(boolean hasPayload) {
+		this.hasPayload = hasPayload;
 		return this;
 	}
 	
 	/**
-	 * Returns {@code true} if the header is followed by a body.
+	 * Returns {@code true} if the header is followed by a payload body.
 	 * 
-	 * @return {@code true} if body data follows
+	 * @return {@code true} if payload body data follows
 	 */
-	public boolean messageHasBody() {
-		return messageHasBody;
+	@Override
+	public boolean hasPayload() {
+		return hasPayload;
 	}
 
 	/**
@@ -314,6 +315,7 @@ public abstract class HttpMessageHeader implements MessageHeader {
 	 * 
 	 * @return the result
 	 */
+	@Override
 	public boolean isFinal() {
 		return findField(HttpField.CONNECTION, Converters.STRING_LIST)
 				.map(h -> h.value()).map(f -> f.contains("close")).orElse(false);

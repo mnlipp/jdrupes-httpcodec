@@ -354,7 +354,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		        .map(h -> h.value()).map(f -> f.containsIgnoreCase("close"))
 		        .orElse(false);
 		// If there's no body, start outputting header fields
-		if (!messageHeader.messageHasBody()) {
+		if (!messageHeader.hasPayload()) {
 			states.push(State.HEADERS);
 			return;
 		}

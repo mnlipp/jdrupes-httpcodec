@@ -77,7 +77,7 @@ public class WsProtocolProvider extends ProtocolProvider {
 			.flatMap(r -> r.findStringValue("Sec-WebSocket-Key"));
 		if (!wsKey.isPresent()) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
-				.setMessageHasBody(false).clearHeaders();
+				.setHasPayload(false).clearHeaders();
 			return;
 		}
 		// RFC 6455 4.1
@@ -85,7 +85,7 @@ public class WsProtocolProvider extends ProtocolProvider {
 				"Sec-WebSocket-Version", Converters.LONG))
 				.map(HttpField<Long>::value).orElse(-1L) != 13) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
-				.setMessageHasBody(false).clearHeaders();
+				.setHasPayload(false).clearHeaders();
 			// RFC 6455 4.4
 			response.setField(new HttpField<>(
 					"Sec-WebSocket-Version", 13L, Converters.LONG));
@@ -101,7 +101,7 @@ public class WsProtocolProvider extends ProtocolProvider {
 					"Sec-WebSocket-Accept", accept, Converters.UNQUOTED_STRING));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-				.setMessageHasBody(false).clearHeaders();
+				.setHasPayload(false).clearHeaders();
 			return;
 		}
  	}

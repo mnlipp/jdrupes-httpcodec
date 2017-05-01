@@ -45,7 +45,7 @@ public class EncoderContentLengthTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		response.setContentLength(12);
 		ByteBuffer in = ByteBuffer.wrap("Hello World!".getBytes("ascii"));
@@ -68,7 +68,7 @@ public class EncoderContentLengthTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		response.setContentLength(12);
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
@@ -104,7 +104,7 @@ public class EncoderContentLengthTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		response.setContentLength(12);
 		ByteBuffer in = ByteBuffer.wrap("Hello World!".getBytes("ascii"));

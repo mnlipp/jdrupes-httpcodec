@@ -46,7 +46,7 @@ public class EncoderChunkedTests {
 		// Prepare Response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		ByteBuffer in = ByteBuffer.wrap("Hello World!".getBytes("ascii"));
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
@@ -72,7 +72,7 @@ public class EncoderChunkedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.encode(response);
@@ -112,7 +112,7 @@ public class EncoderChunkedTests {
 		// Prepare Response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		ByteBuffer in = ByteBuffer.wrap("Hello World!".getBytes("ascii"));
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
@@ -135,7 +135,7 @@ public class EncoderChunkedTests {
 		// Prepare Response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.encode(response);
@@ -161,7 +161,7 @@ public class EncoderChunkedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.encode(response);
@@ -201,7 +201,7 @@ public class EncoderChunkedTests {
 		// Prepare Response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		CharBuffer in = CharBuffer.wrap("äöü€ Hello World! ÄÖÜß");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();

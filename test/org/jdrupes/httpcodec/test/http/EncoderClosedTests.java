@@ -46,7 +46,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		// Encode header
@@ -73,7 +73,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		// Encode header
@@ -109,7 +109,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		// Encode header
@@ -133,7 +133,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.setPendingLimit(4);
@@ -161,7 +161,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.setPendingLimit(4);
@@ -198,7 +198,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.setPendingLimit(4);
@@ -227,7 +227,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		// Encode header
@@ -254,7 +254,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		// Encode header
@@ -290,7 +290,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		// Encode header
@@ -314,7 +314,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.setPendingLimit(4);
@@ -342,7 +342,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.setPendingLimit(4);
@@ -379,7 +379,7 @@ public class EncoderClosedTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		response.setMessageHasBody(true);
+		response.setHasPayload(true);
 		response.setContentType("text", "plain");
 		HttpResponseEncoder encoder = new HttpResponseEncoder();
 		encoder.setPendingLimit(4);

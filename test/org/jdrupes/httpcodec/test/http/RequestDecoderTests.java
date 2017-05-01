@@ -61,7 +61,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertFalse(decoder.header().get().messageHasBody());
+		assertFalse(decoder.header().get().hasPayload());
 		assertEquals("GET", decoder.header().get().method());
 		assertEquals("/test",
 		        decoder.header().get().requestUri().getPath());
@@ -98,7 +98,7 @@ public class RequestDecoderTests {
 		result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertFalse(decoder.header().get().messageHasBody());
+		assertFalse(decoder.header().get().hasPayload());
 		assertEquals("GET", decoder.header().get().method());
 		assertEquals("localhost", decoder.header().get().host());
 		assertEquals(8888, decoder.header().get().port());
@@ -131,7 +131,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals("POST", decoder.header().get().method());
 		assertEquals("/form",
 		        decoder.header().get().requestUri().getPath());
@@ -168,7 +168,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals("POST", decoder.header().get().method());
 		assertEquals("/form",
 		        decoder.header().get().requestUri().getPath());
@@ -213,7 +213,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals("POST", decoder.header().get().method());
 		assertEquals("/form",
 		        decoder.header().get().requestUri().getPath());
@@ -263,7 +263,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals("POST", decoder.header().get().method());
 		assertEquals("/form",
 		        decoder.header().get().requestUri().getPath());
@@ -314,7 +314,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals("POST", decoder.header().get().method());
 		assertEquals("/form",
 		        decoder.header().get().requestUri().getPath());
@@ -357,7 +357,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals("POST", decoder.header().get().method());
 		assertEquals("/form",
 		        decoder.header().get().requestUri().getPath());
@@ -399,7 +399,7 @@ public class RequestDecoderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertFalse(decoder.header().get().messageHasBody());
+		assertFalse(decoder.header().get().hasPayload());
 		assertEquals("GET", decoder.header().get().method());
 		assertEquals("/test%20this",
 		        decoder.header().get().requestUri().getRawPath());

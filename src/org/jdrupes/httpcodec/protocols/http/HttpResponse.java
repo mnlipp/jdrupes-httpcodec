@@ -36,14 +36,14 @@ public class HttpResponse extends HttpMessageHeader {
 	private HttpRequest request;
 	
 	public HttpResponse(HttpProtocol protocol, HttpStatus status, 
-			boolean messageHasBody) {
-		super(protocol, messageHasBody);
+			boolean hasPayload) {
+		super(protocol, hasPayload);
 		setStatus(status);
 	}
 	
 	public HttpResponse(HttpProtocol protocol, int statusCode, 
-			String reasonPhrase, boolean messageHasBody) {
-		super(protocol, messageHasBody);
+			String reasonPhrase, boolean hasPayload) {
+		super(protocol, hasPayload);
 		setStatusCode(statusCode);
 		setReasonPhrase(reasonPhrase);
 	}
@@ -67,11 +67,11 @@ public class HttpResponse extends HttpMessageHeader {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setMessageHasBody(boolean)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setHasPayload(boolean)
 	 */
 	@Override
-	public HttpResponse setMessageHasBody(boolean messageHasBody) {
-		super.setMessageHasBody(messageHasBody);
+	public HttpResponse setHasPayload(boolean hasPayload) {
+		super.setHasPayload(hasPayload);
 		return this;
 	}
 

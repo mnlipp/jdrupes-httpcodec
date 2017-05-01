@@ -23,10 +23,26 @@ import java.nio.ByteBuffer;
 /**
  * Control frames with binary application data.
  */
-public class WsDefaultControlFrame extends WsFrameHeader {
+public abstract class WsDefaultControlFrame extends WsFrameHeader {
 
 	private ByteBuffer applicationData;
 	
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.MessageHeader#isFinal()
+	 */
+	@Override
+	public boolean isFinal() {
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.MessageHeader#hasPayload()
+	 */
+	@Override
+	public boolean hasPayload() {
+		return applicationData != null;
+	}
+
 	/**
 	 * Creates a new frame.
 	 * 

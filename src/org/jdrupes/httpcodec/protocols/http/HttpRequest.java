@@ -58,11 +58,11 @@ public class HttpRequest extends HttpMessageHeader {
 	 * @param method the method
 	 * @param requestUri the requested resource
 	 * @param httpProtocol the HTTP protocol version
-	 * @param messageHasBody indicates that the message has a body
+	 * @param hasPayload indicates that the message has a payload body
 	 */
 	public HttpRequest(String method, URI requestUri, 
-			HttpProtocol httpProtocol, boolean messageHasBody) {
-		super(httpProtocol, messageHasBody);
+			HttpProtocol httpProtocol, boolean hasPayload) {
+		super(httpProtocol, hasPayload);
 		this.method = method;
 		this.requestUri = requestUri;
 	}
@@ -86,11 +86,11 @@ public class HttpRequest extends HttpMessageHeader {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setMessageHasBody(boolean)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setHasPayload(boolean)
 	 */
 	@Override
-	public HttpRequest setMessageHasBody(boolean messageHasBody) {
-		super.setMessageHasBody(messageHasBody);
+	public HttpRequest setHasPayload(boolean hasPayload) {
+		super.setHasPayload(hasPayload);
 		return this;
 	}
 

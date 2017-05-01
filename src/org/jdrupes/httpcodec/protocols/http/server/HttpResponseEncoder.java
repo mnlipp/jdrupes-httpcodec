@@ -181,7 +181,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			return;
 		}
 		// No content length header, maybe we should add one?
-		if (forbidden || messageHeader.messageHasBody()) {
+		if (forbidden || messageHeader.hasPayload()) {
 			// Not needed or data will determine header
 			return;
 		}
@@ -204,7 +204,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 				.map(l -> l.value().get(0));
 		if (!protocol.isPresent()) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
-				.setMessageHasBody(false).clearHeaders();
+				.setHasPayload(false).clearHeaders();
 			return null;
 		}
 		synchronized (pluginLoader) {
@@ -220,7 +220,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		}
 		if (protocolPlugin == null) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
-				.setMessageHasBody(false).clearHeaders();
+				.setHasPayload(false).clearHeaders();
 			return null;
 		}
 		protocolPlugin.augmentInitialResponse(response);

@@ -136,7 +136,7 @@ public class Connection extends Thread {
 		}
 		// fall back
 		HttpResponse response = request.response().get()
-				.setStatus(HttpStatus.NOT_FOUND).setMessageHasBody(true);
+				.setStatus(HttpStatus.NOT_FOUND).setHasPayload(true);
 		try {
 			HttpField<MediaType> media = new HttpField<MediaType>(
 					HttpField.CONTENT_TYPE + ": text/plain; charset=utf-8",
@@ -151,7 +151,7 @@ public class Connection extends Thread {
 
 	private void handleGetForm(HttpRequest request) throws IOException {
 		HttpResponse response = request.response().get()
-				.setStatus(HttpStatus.OK).setMessageHasBody(true)
+				.setStatus(HttpStatus.OK).setHasPayload(true)
 				.setField(HttpField.CONTENT_TYPE,
 						MediaType.builder().setType("text", "html")
 						.setParameter("charset", "utf-8").build());
@@ -200,7 +200,7 @@ public class Connection extends Thread {
 			break;
 		}
 		// Got all body data, provide response.
-		response.setStatus(HttpStatus.OK).setMessageHasBody(true)
+		response.setStatus(HttpStatus.OK).setHasPayload(true)
 			.setField(HttpField.CONTENT_TYPE,
 					MediaType.builder().setType("text", "plain")
 					.setParameter("charset", "utf-8").build());
@@ -223,7 +223,7 @@ public class Connection extends Thread {
 		}
 		// If it's not the upgrade request, page was requested.
 		HttpResponse response = request.response().get()
-				.setStatus(HttpStatus.OK).setMessageHasBody(true);
+				.setStatus(HttpStatus.OK).setHasPayload(true);
 		response.setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType("text", "html")
 				.setParameter("charset", "utf-8").build());

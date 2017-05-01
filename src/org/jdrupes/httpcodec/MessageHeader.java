@@ -25,4 +25,19 @@ package org.jdrupes.httpcodec;
  */
 public interface MessageHeader {
 
+	/**
+	 * Returns {@code true} if the header is followed by a payload.
+	 * 
+	 * @return {@code true} if payload data follows
+	 */
+	boolean hasPayload();
+	
+	/**
+	 * Returns true if this is the final message received or transmitted
+	 * on a connection.
+	 * 
+	 * @return the result
+	 */
+	boolean isFinal();
+
 }

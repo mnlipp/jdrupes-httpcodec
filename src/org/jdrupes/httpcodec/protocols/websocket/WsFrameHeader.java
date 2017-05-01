@@ -23,6 +23,6 @@ import org.jdrupes.httpcodec.MessageHeader;
 /**
  * The base class for all Websocket frame headers.
  */
-public class WsFrameHeader implements MessageHeader {
+public abstract class WsFrameHeader implements MessageHeader {
 
 }

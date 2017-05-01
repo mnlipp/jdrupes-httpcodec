@@ -42,7 +42,7 @@ public class DecoderHeaderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertFalse(decoder.header().get().messageHasBody());
+		assertFalse(decoder.header().get().hasPayload());
 		assertEquals("GET", decoder.header().get().method());
 		assertEquals("localhost", decoder.header().get().host());
 		assertEquals(8888, decoder.header().get().port());
@@ -74,7 +74,7 @@ public class DecoderHeaderTests {
 		result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertFalse(decoder.header().get().messageHasBody());
+		assertFalse(decoder.header().get().hasPayload());
 		assertEquals("GET", decoder.header().get().method());
 		assertEquals("localhost", decoder.header().get().host());
 		assertEquals(8888, decoder.header().get().port());
@@ -94,7 +94,7 @@ public class DecoderHeaderTests {
 		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
 		assertTrue(result.isHeaderCompleted());
 		assertFalse(result.response().isPresent());
-		assertFalse(decoder.header().get().messageHasBody());
+		assertFalse(decoder.header().get().hasPayload());
 		assertEquals("GET", decoder.header().get().method());
 		assertEquals("localhost", decoder.header().get().host());
 		assertEquals(8888, decoder.header().get().port());

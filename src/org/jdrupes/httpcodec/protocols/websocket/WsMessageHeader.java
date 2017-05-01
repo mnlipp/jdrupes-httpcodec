@@ -38,6 +38,14 @@ public class WsMessageHeader extends WsFrameHeader {
 		this.hasPayload = hasPayload;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.MessageHeader#isFinal()
+	 */
+	@Override
+	public boolean isFinal() {
+		return false;
+	}
+
 	/**
 	 * @return whether the data is sent as text
 	 */
@@ -45,9 +53,7 @@ public class WsMessageHeader extends WsFrameHeader {
 		return textMode;
 	}
 
-	/**
-	 * @return whether the message has a payload
-	 */
+	@Override
 	public boolean hasPayload() {
 		return hasPayload;
 	}

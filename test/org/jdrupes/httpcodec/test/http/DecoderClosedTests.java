@@ -61,7 +61,7 @@ public class DecoderClosedTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(buffer, body, true);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertTrue(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(), 
 				decoder.header().get().statusCode());
@@ -95,7 +95,7 @@ public class DecoderClosedTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(buffer, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 				decoder.header().get().statusCode());
@@ -105,7 +105,7 @@ public class DecoderClosedTests {
 		// Close
 		result = decoder.decode(buffer, body, true);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertTrue(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -139,7 +139,7 @@ public class DecoderClosedTests {
 		ByteBuffer out = ByteBuffer.allocate(1024);
 		Common.tinyDecodeLoop(decoder, in, out);
 		Decoder.Result<?> result = decoder.decode(in, out, true);
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertTrue(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -173,7 +173,7 @@ public class DecoderClosedTests {
 		CharBuffer body = CharBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(buffer, body, true);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertTrue(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -204,7 +204,7 @@ public class DecoderClosedTests {
 		CharBuffer body = CharBuffer.allocate(1);
 		Decoder.Result<?> result = decoder.decode(buffer, body, true);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -257,7 +257,7 @@ public class DecoderClosedTests {
 			assertTrue(result.isUnderflow());
 		}
 		result = decoder.decode(Codec.EMPTY_IN, body, true);
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertTrue(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());

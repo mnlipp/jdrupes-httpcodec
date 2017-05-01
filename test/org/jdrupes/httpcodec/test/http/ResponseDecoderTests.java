@@ -70,7 +70,7 @@ public class ResponseDecoderTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		ResponseDecoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());

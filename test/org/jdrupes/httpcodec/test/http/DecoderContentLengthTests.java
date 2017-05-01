@@ -61,7 +61,7 @@ public class DecoderContentLengthTests {
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -104,7 +104,7 @@ public class DecoderContentLengthTests {
 		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		Decoder.Result<?> result = decoder.decode(in, null, false);
 		assertTrue(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -115,7 +115,7 @@ public class DecoderContentLengthTests {
 		// Decode body
 		result = decoder.decode(in, body, false);
 		assertFalse(result.isHeaderCompleted());
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
@@ -167,7 +167,7 @@ public class DecoderContentLengthTests {
 		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
 		Decoder.Result<?> result = Common.tinyDecodeLoop(decoder, in, body);
-		assertTrue(decoder.header().get().messageHasBody());
+		assertTrue(decoder.header().get().hasPayload());
 		assertEquals(HttpStatus.OK.statusCode(),
 		        decoder.header().get().statusCode());
 		assertFalse(result.closeConnection());

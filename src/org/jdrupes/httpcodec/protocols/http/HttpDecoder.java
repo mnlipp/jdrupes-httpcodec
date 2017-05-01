@@ -500,7 +500,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	}
 
 	private void adjustToBodyMode(BodyMode bm) {
-		building.setMessageHasBody(bm != BodyMode.NO_BODY);
+		building.setHasPayload(bm != BodyMode.NO_BODY);
 		states.pop();
 		switch (bm) {
 		case UNTIL_CLOSE:
