@@ -58,8 +58,8 @@
 <span class="sourceLineNo">050</span> *      +Optional&lt;T&gt; findValue(String name, Converter&lt;T&gt; converter)<a name="line.50"></a>
 <span class="sourceLineNo">051</span> *      +Optional&lt;String&gt; findStringValue(String name)<a name="line.51"></a>
 <span class="sourceLineNo">052</span> *      +HttpField&lt;T&gt; computeIfAbsent(String name, Converter&lt;T&gt; converter, Supplier&lt;T&gt; supplier)<a name="line.52"></a>
-<span class="sourceLineNo">053</span> *      +MessageHeader setMessageHasBody(boolean messageHasBody)<a name="line.53"></a>
-<span class="sourceLineNo">054</span> *      +boolean messageHasBody()<a name="line.54"></a>
+<span class="sourceLineNo">053</span> *      +MessageHeader setHasPayload(boolean hasPayload)<a name="line.53"></a>
+<span class="sourceLineNo">054</span> *      +boolean hasPayload()<a name="line.54"></a>
 <span class="sourceLineNo">055</span> *      +boolean isFinal()<a name="line.55"></a>
 <span class="sourceLineNo">056</span> * }<a name="line.56"></a>
 <span class="sourceLineNo">057</span> * class MessageHeader {<a name="line.57"></a>
@@ -80,17 +80,17 @@
 <span class="sourceLineNo">072</span>        private HttpProtocol httpProtocol;<a name="line.72"></a>
 <span class="sourceLineNo">073</span>        private Map&lt;String,HttpField&lt;?&gt;&gt; headers <a name="line.73"></a>
 <span class="sourceLineNo">074</span>                = new TreeMap&lt;&gt;(String.CASE_INSENSITIVE_ORDER);<a name="line.74"></a>
-<span class="sourceLineNo">075</span>        private boolean messageHasBody;<a name="line.75"></a>
+<span class="sourceLineNo">075</span>        private boolean hasPayload;<a name="line.75"></a>
 <span class="sourceLineNo">076</span><a name="line.76"></a>
 <span class="sourceLineNo">077</span>        /**<a name="line.77"></a>
 <span class="sourceLineNo">078</span>         * Creates a new message header.<a name="line.78"></a>
 <span class="sourceLineNo">079</span>         * <a name="line.79"></a>
 <span class="sourceLineNo">080</span>         * @param httpProtocol the HTTP protocol<a name="line.80"></a>
-<span class="sourceLineNo">081</span>         * @param messageHasBody indicates that a body is expected after the header<a name="line.81"></a>
+<span class="sourceLineNo">081</span>         * @param hasPayload indicates that a body is expected after the header<a name="line.81"></a>
 <span class="sourceLineNo">082</span>         */<a name="line.82"></a>
-<span class="sourceLineNo">083</span>        public HttpMessageHeader(HttpProtocol httpProtocol, boolean messageHasBody) {<a name="line.83"></a>
+<span class="sourceLineNo">083</span>        public HttpMessageHeader(HttpProtocol httpProtocol, boolean hasPayload) {<a name="line.83"></a>
 <span class="sourceLineNo">084</span>                this.httpProtocol = httpProtocol;<a name="line.84"></a>
-<span class="sourceLineNo">085</span>                this.messageHasBody = messageHasBody;<a name="line.85"></a>
+<span class="sourceLineNo">085</span>                this.hasPayload = hasPayload;<a name="line.85"></a>
 <span class="sourceLineNo">086</span>        }<a name="line.86"></a>
 <span class="sourceLineNo">087</span><a name="line.87"></a>
 <span class="sourceLineNo">088</span>        /**<a name="line.88"></a>
@@ -298,35 +298,37 @@
 <span class="sourceLineNo">290</span>        /**<a name="line.290"></a>
 <span class="sourceLineNo">291</span>         * Set the flag that indicates whether this header is followed by a body.<a name="line.291"></a>
 <span class="sourceLineNo">292</span>         * <a name="line.292"></a>
-<span class="sourceLineNo">293</span>         * @param messageHasBody new value<a name="line.293"></a>
+<span class="sourceLineNo">293</span>         * @param hasPayload new value<a name="line.293"></a>
 <span class="sourceLineNo">294</span>         * @return the message for easy chaining<a name="line.294"></a>
 <span class="sourceLineNo">295</span>         */<a name="line.295"></a>
-<span class="sourceLineNo">296</span>        public MessageHeader setMessageHasBody(boolean messageHasBody) {<a name="line.296"></a>
-<span class="sourceLineNo">297</span>                this.messageHasBody = messageHasBody;<a name="line.297"></a>
+<span class="sourceLineNo">296</span>        public MessageHeader setHasPayload(boolean hasPayload) {<a name="line.296"></a>
+<span class="sourceLineNo">297</span>                this.hasPayload = hasPayload;<a name="line.297"></a>
 <span class="sourceLineNo">298</span>                return this;<a name="line.298"></a>
 <span class="sourceLineNo">299</span>        }<a name="line.299"></a>
 <span class="sourceLineNo">300</span>        <a name="line.300"></a>
 <span class="sourceLineNo">301</span>        /**<a name="line.301"></a>
-<span class="sourceLineNo">302</span>         * Returns {@code true} if the header is followed by a body.<a name="line.302"></a>
+<span class="sourceLineNo">302</span>         * Returns {@code true} if the header is followed by a payload body.<a name="line.302"></a>
 <span class="sourceLineNo">303</span>         * <a name="line.303"></a>
-<span class="sourceLineNo">304</span>         * @return {@code true} if body data follows<a name="line.304"></a>
+<span class="sourceLineNo">304</span>         * @return {@code true} if payload body data follows<a name="line.304"></a>
 <span class="sourceLineNo">305</span>         */<a name="line.305"></a>
-<span class="sourceLineNo">306</span>        public boolean messageHasBody() {<a name="line.306"></a>
-<span class="sourceLineNo">307</span>                return messageHasBody;<a name="line.307"></a>
-<span class="sourceLineNo">308</span>        }<a name="line.308"></a>
-<span class="sourceLineNo">309</span><a name="line.309"></a>
-<span class="sourceLineNo">310</span>        /**<a name="line.310"></a>
-<span class="sourceLineNo">311</span>         * Returns true if this is a final message. A message is<a name="line.311"></a>
-<span class="sourceLineNo">312</span>         * final if the value of the `Connection` header field<a name="line.312"></a>
-<span class="sourceLineNo">313</span>         * includes the value "`close`".<a name="line.313"></a>
-<span class="sourceLineNo">314</span>         * <a name="line.314"></a>
-<span class="sourceLineNo">315</span>         * @return the result<a name="line.315"></a>
-<span class="sourceLineNo">316</span>         */<a name="line.316"></a>
-<span class="sourceLineNo">317</span>        public boolean isFinal() {<a name="line.317"></a>
-<span class="sourceLineNo">318</span>                return findField(HttpField.CONNECTION, Converters.STRING_LIST)<a name="line.318"></a>
-<span class="sourceLineNo">319</span>                                .map(h -&gt; h.value()).map(f -&gt; f.contains("close")).orElse(false);<a name="line.319"></a>
-<span class="sourceLineNo">320</span>        }<a name="line.320"></a>
-<span class="sourceLineNo">321</span>}<a name="line.321"></a>
+<span class="sourceLineNo">306</span>        @Override<a name="line.306"></a>
+<span class="sourceLineNo">307</span>        public boolean hasPayload() {<a name="line.307"></a>
+<span class="sourceLineNo">308</span>                return hasPayload;<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        }<a name="line.309"></a>
+<span class="sourceLineNo">310</span><a name="line.310"></a>
+<span class="sourceLineNo">311</span>        /**<a name="line.311"></a>
+<span class="sourceLineNo">312</span>         * Returns true if this is a final message. A message is<a name="line.312"></a>
+<span class="sourceLineNo">313</span>         * final if the value of the `Connection` header field<a name="line.313"></a>
+<span class="sourceLineNo">314</span>         * includes the value "`close`".<a name="line.314"></a>
+<span class="sourceLineNo">315</span>         * <a name="line.315"></a>
+<span class="sourceLineNo">316</span>         * @return the result<a name="line.316"></a>
+<span class="sourceLineNo">317</span>         */<a name="line.317"></a>
+<span class="sourceLineNo">318</span>        @Override<a name="line.318"></a>
+<span class="sourceLineNo">319</span>        public boolean isFinal() {<a name="line.319"></a>
+<span class="sourceLineNo">320</span>                return findField(HttpField.CONNECTION, Converters.STRING_LIST)<a name="line.320"></a>
+<span class="sourceLineNo">321</span>                                .map(h -&gt; h.value()).map(f -&gt; f.contains("close")).orElse(false);<a name="line.321"></a>
+<span class="sourceLineNo">322</span>        }<a name="line.322"></a>
+<span class="sourceLineNo">323</span>}<a name="line.323"></a>
 
 
 

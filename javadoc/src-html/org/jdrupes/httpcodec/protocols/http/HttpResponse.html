@@ -44,14 +44,14 @@
 <span class="sourceLineNo">036</span>        private HttpRequest request;<a name="line.36"></a>
 <span class="sourceLineNo">037</span>        <a name="line.37"></a>
 <span class="sourceLineNo">038</span>        public HttpResponse(HttpProtocol protocol, HttpStatus status, <a name="line.38"></a>
-<span class="sourceLineNo">039</span>                        boolean messageHasBody) {<a name="line.39"></a>
-<span class="sourceLineNo">040</span>                super(protocol, messageHasBody);<a name="line.40"></a>
+<span class="sourceLineNo">039</span>                        boolean hasPayload) {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>                super(protocol, hasPayload);<a name="line.40"></a>
 <span class="sourceLineNo">041</span>                setStatus(status);<a name="line.41"></a>
 <span class="sourceLineNo">042</span>        }<a name="line.42"></a>
 <span class="sourceLineNo">043</span>        <a name="line.43"></a>
 <span class="sourceLineNo">044</span>        public HttpResponse(HttpProtocol protocol, int statusCode, <a name="line.44"></a>
-<span class="sourceLineNo">045</span>                        String reasonPhrase, boolean messageHasBody) {<a name="line.45"></a>
-<span class="sourceLineNo">046</span>                super(protocol, messageHasBody);<a name="line.46"></a>
+<span class="sourceLineNo">045</span>                        String reasonPhrase, boolean hasPayload) {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>                super(protocol, hasPayload);<a name="line.46"></a>
 <span class="sourceLineNo">047</span>                setStatusCode(statusCode);<a name="line.47"></a>
 <span class="sourceLineNo">048</span>                setReasonPhrase(reasonPhrase);<a name="line.48"></a>
 <span class="sourceLineNo">049</span>        }<a name="line.49"></a>
@@ -75,11 +75,11 @@
 <span class="sourceLineNo">067</span>        }<a name="line.67"></a>
 <span class="sourceLineNo">068</span><a name="line.68"></a>
 <span class="sourceLineNo">069</span>        /* (non-Javadoc)<a name="line.69"></a>
-<span class="sourceLineNo">070</span>         * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setMessageHasBody(boolean)<a name="line.70"></a>
+<span class="sourceLineNo">070</span>         * @see org.jdrupes.httpcodec.protocols.http.HttpMessageHeader#setHasPayload(boolean)<a name="line.70"></a>
 <span class="sourceLineNo">071</span>         */<a name="line.71"></a>
 <span class="sourceLineNo">072</span>        @Override<a name="line.72"></a>
-<span class="sourceLineNo">073</span>        public HttpResponse setMessageHasBody(boolean messageHasBody) {<a name="line.73"></a>
-<span class="sourceLineNo">074</span>                super.setMessageHasBody(messageHasBody);<a name="line.74"></a>
+<span class="sourceLineNo">073</span>        public HttpResponse setHasPayload(boolean hasPayload) {<a name="line.73"></a>
+<span class="sourceLineNo">074</span>                super.setHasPayload(hasPayload);<a name="line.74"></a>
 <span class="sourceLineNo">075</span>                return this;<a name="line.75"></a>
 <span class="sourceLineNo">076</span>        }<a name="line.76"></a>
 <span class="sourceLineNo">077</span><a name="line.77"></a>

@@ -85,7 +85,7 @@
 <span class="sourceLineNo">077</span>                        .flatMap(r -&gt; r.findStringValue("Sec-WebSocket-Key"));<a name="line.77"></a>
 <span class="sourceLineNo">078</span>                if (!wsKey.isPresent()) {<a name="line.78"></a>
 <span class="sourceLineNo">079</span>                        response.setStatus(HttpStatus.BAD_REQUEST)<a name="line.79"></a>
-<span class="sourceLineNo">080</span>                                .setMessageHasBody(false).clearHeaders();<a name="line.80"></a>
+<span class="sourceLineNo">080</span>                                .setHasPayload(false).clearHeaders();<a name="line.80"></a>
 <span class="sourceLineNo">081</span>                        return;<a name="line.81"></a>
 <span class="sourceLineNo">082</span>                }<a name="line.82"></a>
 <span class="sourceLineNo">083</span>                // RFC 6455 4.1<a name="line.83"></a>
@@ -93,7 +93,7 @@
 <span class="sourceLineNo">085</span>                                "Sec-WebSocket-Version", Converters.LONG))<a name="line.85"></a>
 <span class="sourceLineNo">086</span>                                .map(HttpField&lt;Long&gt;::value).orElse(-1L) != 13) {<a name="line.86"></a>
 <span class="sourceLineNo">087</span>                        response.setStatus(HttpStatus.BAD_REQUEST)<a name="line.87"></a>
-<span class="sourceLineNo">088</span>                                .setMessageHasBody(false).clearHeaders();<a name="line.88"></a>
+<span class="sourceLineNo">088</span>                                .setHasPayload(false).clearHeaders();<a name="line.88"></a>
 <span class="sourceLineNo">089</span>                        // RFC 6455 4.4<a name="line.89"></a>
 <span class="sourceLineNo">090</span>                        response.setField(new HttpField&lt;&gt;(<a name="line.90"></a>
 <span class="sourceLineNo">091</span>                                        "Sec-WebSocket-Version", 13L, Converters.LONG));<a name="line.91"></a>
@@ -109,7 +109,7 @@
 <span class="sourceLineNo">101</span>                                        "Sec-WebSocket-Accept", accept, Converters.UNQUOTED_STRING));<a name="line.101"></a>
 <span class="sourceLineNo">102</span>                } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {<a name="line.102"></a>
 <span class="sourceLineNo">103</span>                        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)<a name="line.103"></a>
-<span class="sourceLineNo">104</span>                                .setMessageHasBody(false).clearHeaders();<a name="line.104"></a>
+<span class="sourceLineNo">104</span>                                .setHasPayload(false).clearHeaders();<a name="line.104"></a>
 <span class="sourceLineNo">105</span>                        return;<a name="line.105"></a>
 <span class="sourceLineNo">106</span>                }<a name="line.106"></a>
 <span class="sourceLineNo">107</span>        }<a name="line.107"></a>
