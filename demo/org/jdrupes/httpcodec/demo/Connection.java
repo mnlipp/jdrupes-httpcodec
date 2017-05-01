@@ -58,10 +58,12 @@ public class Connection extends Thread {
 	
 	public Connection(SocketChannel channel) {
 		this.channel = channel;
+		// Create server with HTTP decoder and encoder
 		ServerEngine<HttpRequest,HttpResponse> 
 			serverEngine = new ServerEngine<>(
 					new HttpRequestDecoder(), new HttpResponseEncoder());
 		engine = serverEngine;
+		// Allocate reusable buffers
 		in = ByteBuffer.allocate(2048);
 		out = ByteBuffer.allocate(2048);
 	}
@@ -74,33 +76,44 @@ public class Connection extends Thread {
 		try (SocketChannel channel = this.channel) {
 			channel.configureBlocking(true);
 			while (channel.isOpen()) {
-				in.clear();
-				channel.read(in);
-				in.flip();
-				while (in.hasRemaining()) {
-					Decoder.Result<?> decoderResult 
-						= engine.decode(in, null, false);
-					if (decoderResult.response().isPresent()) {
-						sendResponseWithoutBody(
-								decoderResult.response().get());
-						if (!channel.isOpen()) {
-							break;
-						}
-					}
-					if (!decoderResult.isResponseOnly()
-					        && decoderResult.isHeaderCompleted()) {
-						MessageHeader hdr = engine.currentRequest().get();
-						if (hdr instanceof HttpRequest) {
-							handleHttpRequest((HttpRequest) hdr);
-						}
-						if (hdr instanceof WsFrameHeader) {
-							handleWsFrame((WsFrameHeader) hdr);
-						}
-					}
-				}
+				processInput(channel);
 			}
 		} catch (IOException | ProtocolException e) {
 			// Just a test
+		}
+	}
+
+	private void processInput(SocketChannel channel)
+	        throws ProtocolException, IOException {
+		// Get data fron client.
+		in.clear();
+		channel.read(in);
+		in.flip();
+		while (in.hasRemaining()) {
+			// Decode. Don't expect output yet, just get header.
+			// (Should there be a body, result will have overflow flag set.)
+			Decoder.Result<?> decoderResult = engine.decode(in, null, false);
+			if (decoderResult.response().isPresent()) {
+				// Decoder wants us to send some urgent feedback
+				sendResponseWithoutBody(decoderResult.response().get());
+				// Sending the response may imply closing the connection 
+				if (!channel.isOpen()) {
+					break;
+				}
+			}
+			if (decoderResult.isResponseOnly()
+					|| !decoderResult.isHeaderCompleted()) {
+				// This one is done or we need more decoding to get header.
+				continue;
+			}
+			// Got message header! Handle as appropriate.
+			MessageHeader hdr = engine.currentRequest().get();
+			if (hdr instanceof HttpRequest) {
+				handleHttpRequest((HttpRequest) hdr);
+			}
+			if (hdr instanceof WsFrameHeader) {
+				handleWsFrame((WsFrameHeader) hdr);
+			}
 		}
 	}
 
@@ -216,23 +229,35 @@ public class Connection extends Thread {
 		sendResponse(response, null, true);
 	}
 	
+	/**
+	 * Send a response without a body.
+	 * 
+	 * @param response
+	 * @throws IOException
+	 */
 	private void sendResponseWithoutBody(MessageHeader response)
 	        throws IOException {
+		// This works for both HTTP and WebSocket
 		@SuppressWarnings("unchecked")
 		ServerEngine<MessageHeader, MessageHeader> genericServer
 			= (ServerEngine<MessageHeader, MessageHeader>)engine; 
+		// Set header to be encoded (produces no output yet)
 		genericServer.encode(response);
 		out.clear();
 		while (true) {
+			// Encode into out buffer.
 			Encoder.Result encoderResult = genericServer.encode(out);
+			// Send to client.
 			out.flip();
 			if (out.hasRemaining()) {
 				channel.write(out);
 				out.clear();
 			}
+			// More data to be encoded?
 			if (encoderResult.isOverflow()) {
 				continue;
 			}
+			// Protocol demands closing the connection?
 			if (encoderResult.closeConnection()) {
 				channel.close();
 			}
@@ -240,23 +265,38 @@ public class Connection extends Thread {
 		}
 	}
 
+	/**
+	 * Send response with body data in buffer "in".
+	 * 
+	 * @param response
+	 * @param in
+	 * @param endOfInput
+	 * @throws IOException
+	 */
 	private void sendResponse(MessageHeader response, Buffer in,
 	        boolean endOfInput) throws IOException {
+		// This works for both HTTP and WebSocket
 		@SuppressWarnings("unchecked")
 		ServerEngine<MessageHeader, MessageHeader> genericEngine
 			= (ServerEngine<MessageHeader, MessageHeader>)engine;
+		// Set header to be encoded (produces no output yet)
 		genericEngine.encode(response);
 		out.clear();
 		while (true) {
+			// Encode header into out buffer and append body (if sufficient
+			// space available).
 			Encoder.Result encoderResult = engine.encode(in, out, endOfInput);
+			// Send to client.
 			out.flip();
 			if (out.hasRemaining()) {
 				channel.write(out);
 				out.clear();
 			}
+			// More data to be encoded?
 			if (encoderResult.isOverflow()) {
 				continue;
 			}
+			// Protocol demands closing the connection?
 			if (encoderResult.closeConnection()) {
 				channel.close();
 			}
