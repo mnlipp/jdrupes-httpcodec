@@ -18,6 +18,8 @@
 
 package org.jdrupes.httpcodec;
 
+import java.nio.Buffer;
+
 /**
  * Represents a message header (either request or response) which preceeds
  * the option payload data. Header and payload together form the complete
@@ -26,7 +28,8 @@ package org.jdrupes.httpcodec;
 public interface MessageHeader {
 
 	/**
-	 * Returns {@code true} if the header is followed by a payload.
+	 * Returns {@code true} if the complete message comprises 
+	 * additional data in {@link Buffer}s when decoded or encoded.
 	 * 
 	 * @return {@code true} if payload data follows
 	 */

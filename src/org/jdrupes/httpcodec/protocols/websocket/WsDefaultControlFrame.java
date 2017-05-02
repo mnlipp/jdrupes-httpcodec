@@ -22,6 +22,9 @@ import java.nio.ByteBuffer;
 
 /**
  * Control frames with binary application data.
+ * 
+ * Note that the application data is modeled as part of the header in the API
+ * although, it is handled like payload by the "wire protocol".
  */
 public abstract class WsDefaultControlFrame extends WsFrameHeader {
 
@@ -40,7 +43,7 @@ public abstract class WsDefaultControlFrame extends WsFrameHeader {
 	 */
 	@Override
 	public boolean hasPayload() {
-		return applicationData != null;
+		return false;
 	}
 
 	/**

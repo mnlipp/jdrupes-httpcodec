@@ -21,7 +21,10 @@ package org.jdrupes.httpcodec.protocols.websocket;
 import java.nio.CharBuffer;
 
 /**
- * Represents a Websocket close frame.
+ * Represents a WebSocket close frame.
+ * 
+ * Note that status code and reason are modeled as part of the header in 
+ * this API although, they are handled like payload by the "wire protocol".
  */
 public class WsCloseFrame extends WsFrameHeader {
 
@@ -45,7 +48,7 @@ public class WsCloseFrame extends WsFrameHeader {
 	 */
 	@Override
 	public boolean hasPayload() {
-		return true;
+		return false;
 	}
 
 	/* (non-Javadoc)
