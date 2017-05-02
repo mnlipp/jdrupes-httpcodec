@@ -87,18 +87,14 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return WsFrameHeader.class;
 	}
 
-	private Decoder.Result<WsFrameHeader> frameFinished() {
+	private void expectNextFrame() {
 		state = State.READING_HEADER;
 		bytesExpected = 2;
 		curHeaderHead = 0;
 		payloadLength = 0;
-		if (!dataMessageFinished) {
-			return null;
-		}
-		if (charDecoder != null) {
+		if (dataMessageFinished && charDecoder != null) {
 			charDecoder.reset();
 		}		
-		return createResult(false, false);
 	}
 	
 	/* (non-Javadoc)
@@ -193,7 +189,10 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			            endOfInput);
 				bytesExpected -= (initiallyAvailable - in.remaining());
 				if (bytesExpected == 0) {
-					result = frameFinished();
+					expectNextFrame();
+					if (dataMessageFinished) {
+						result = createResult(false, false);
+					}
 					break;
 				}
 				return createResult(
@@ -213,11 +212,11 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 						receivedHeader = new WsPingFrame(controlData);
 						result = createResult(false, !dataMessageFinished, 
 							new WsPongFrame(controlData.duplicate()), true);
-						frameFinished();
+						expectNextFrame();
 					} else {
 						receivedHeader = new WsPongFrame(controlData);
 						result = createResult(false, !dataMessageFinished);
-						frameFinished();
+						expectNextFrame();
 					}
 					controlData = null;
 					return result;
@@ -234,7 +233,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 				copyData(controlData, in, (int) bytesExpected, endOfInput);
 				bytesExpected -= (initiallyAvailable - in.remaining());
 				if (bytesExpected == 0) {
-					frameFinished();
+					expectNextFrame();
 					controlData.flip();
 					int status = 0;
 					while (controlData.hasRemaining()) {
@@ -248,7 +247,6 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 							true, receivedHeader, false);
 				}
 				return createResult(false, true);
-				
 			}
 			if (result != null) {
 				return result;
@@ -260,16 +258,19 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	private Decoder.Result<WsFrameHeader> headerComplete() {
 		receivedHeader = null;
 		reportedHeader = null;
+		boolean finalFrame = isFinalFrame();
 		if ((curHeaderHead >> 8 & 0x8) == 0) {
-			dataMessageFinished = isFinalFrame();
+			// Not a control frame, update from FIN bit
+			dataMessageFinished = finalFrame;
 		}
 		bytesExpected = payloadLength;
 		Opcode opcode = Opcode.fromInt(curHeaderHead >> 8 & 0xf);
 		switch (opcode) {
 		case CONT_FRAME:
-			if (payloadLength == 0) {
+			if (bytesExpected == 0) {
 				// kind of ridiculous
-				return createResult(false, !isFinalFrame());
+				expectNextFrame();
+				return createResult(false, !finalFrame);
 			}
 			state = State.READING_PAYLOAD;
 			return null;
@@ -281,6 +282,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			break;
 		case PING:
 			if (bytesExpected == 0) {
+				expectNextFrame();
 				return createResult(false, !dataMessageFinished, 
 						new WsPongFrame(null), true);
 			}
@@ -289,6 +291,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 			return null;
 		case PONG:
 			if (bytesExpected == 0) {
+				expectNextFrame();
 				return createResult(false, !dataMessageFinished);
 			}
 			controlData = ByteBuffer.allocate((int)bytesExpected);
@@ -297,6 +300,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		case CON_CLOSE:
 			if (bytesExpected == 0) {
 				receivedHeader = new WsCloseFrame(null, null);
+				expectNextFrame();
 				return resultFactory().newResult(false, false, true, 
 						true, receivedHeader, false);
 			}
@@ -311,6 +315,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		receivedHeader = new WsMessageHeader(opcode == Opcode.TEXT_FRAME,
 				bytesExpected > 0);
 		if (bytesExpected == 0) {
+			expectNextFrame();
 			return createResult(false, false);
 		}
 		state = State.READING_PAYLOAD;
