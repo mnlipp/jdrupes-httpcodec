@@ -200,11 +200,11 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 				headerHead |= 0x8000;
 			}
 			// Prepare payload
-			if (!((WsMessageHeader)messageHeaders.peek()).isTextMode()) {
-				payloadSize = in.remaining();
-			} else {
+			if (in instanceof CharBuffer) {
 				convData.clear();
 				convTextData(in);
+			} else {
+				payloadSize = in.remaining();
 			}
 		} else {
 			// Control frame
