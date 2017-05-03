@@ -201,134 +201,135 @@
 <span class="sourceLineNo">193</span>                        expectedType = converter.getClass().getMethod(<a name="line.193"></a>
 <span class="sourceLineNo">194</span>                                "fromFieldValue", String.class).getReturnType();<a name="line.194"></a>
 <span class="sourceLineNo">195</span>                } catch (NoSuchMethodException e) {<a name="line.195"></a>
-<span class="sourceLineNo">196</span>                        // Known to exists<a name="line.196"></a>
-<span class="sourceLineNo">197</span>                }<a name="line.197"></a>
-<span class="sourceLineNo">198</span>                // Match already?<a name="line.198"></a>
-<span class="sourceLineNo">199</span>                if (expectedType.isAssignableFrom(valueType)) {<a name="line.199"></a>
-<span class="sourceLineNo">200</span>                        @SuppressWarnings("unchecked")<a name="line.200"></a>
-<span class="sourceLineNo">201</span>                        HttpField&lt;T&gt; result = (HttpField&lt;T&gt;)field;<a name="line.201"></a>
-<span class="sourceLineNo">202</span>                        return Optional.of(result);<a name="line.202"></a>
-<span class="sourceLineNo">203</span>                }<a name="line.203"></a>
-<span class="sourceLineNo">204</span>                // String field?<a name="line.204"></a>
-<span class="sourceLineNo">205</span>                if (!(value instanceof String)) {<a name="line.205"></a>
-<span class="sourceLineNo">206</span>                        return Optional.empty();<a name="line.206"></a>
-<span class="sourceLineNo">207</span>                }<a name="line.207"></a>
-<span class="sourceLineNo">208</span>                // Try conversion...<a name="line.208"></a>
-<span class="sourceLineNo">209</span>                try {<a name="line.209"></a>
-<span class="sourceLineNo">210</span>                        HttpField&lt;T&gt; converted = new HttpField&lt;&gt;(<a name="line.210"></a>
-<span class="sourceLineNo">211</span>                                        name, converter.fromFieldValue((String)value), converter);<a name="line.211"></a>
-<span class="sourceLineNo">212</span>                        // Replace if conversion was successful<a name="line.212"></a>
-<span class="sourceLineNo">213</span>                        headers.put(name, converted);<a name="line.213"></a>
-<span class="sourceLineNo">214</span>                        return Optional.ofNullable(converted);<a name="line.214"></a>
-<span class="sourceLineNo">215</span>                } catch (ParseException e) {<a name="line.215"></a>
-<span class="sourceLineNo">216</span>                        return Optional.empty();<a name="line.216"></a>
-<span class="sourceLineNo">217</span>                }<a name="line.217"></a>
-<span class="sourceLineNo">218</span>        }<a name="line.218"></a>
-<span class="sourceLineNo">219</span><a name="line.219"></a>
-<span class="sourceLineNo">220</span>        /**<a name="line.220"></a>
-<span class="sourceLineNo">221</span>         * Convenience method for getting the value of a header field.<a name="line.221"></a>
-<span class="sourceLineNo">222</span>         * <a name="line.222"></a>
-<span class="sourceLineNo">223</span>         * @param &lt;T&gt; the type of the value in the header field<a name="line.223"></a>
-<span class="sourceLineNo">224</span>         * @param name the field name<a name="line.224"></a>
-<span class="sourceLineNo">225</span>         * @param converter the converter for the value type<a name="line.225"></a>
-<span class="sourceLineNo">226</span>         * @return the value if the header field exists<a name="line.226"></a>
-<span class="sourceLineNo">227</span>         */<a name="line.227"></a>
-<span class="sourceLineNo">228</span>        public &lt;T&gt; Optional&lt;T&gt; findValue(String name, Converter&lt;T&gt; converter) {<a name="line.228"></a>
-<span class="sourceLineNo">229</span>                return findField(name, converter).map(HttpField&lt;T&gt;::value);<a name="line.229"></a>
-<span class="sourceLineNo">230</span>        }<a name="line.230"></a>
-<span class="sourceLineNo">231</span>        <a name="line.231"></a>
-<span class="sourceLineNo">232</span>        /**<a name="line.232"></a>
-<span class="sourceLineNo">233</span>         * Convenience method for getting the value of a string field.<a name="line.233"></a>
-<span class="sourceLineNo">234</span>         * <a name="line.234"></a>
-<span class="sourceLineNo">235</span>         * @param name the field name<a name="line.235"></a>
-<span class="sourceLineNo">236</span>         * @return the value if the header field exists<a name="line.236"></a>
-<span class="sourceLineNo">237</span>         * @see #findField(String, Converter)<a name="line.237"></a>
-<span class="sourceLineNo">238</span>         */<a name="line.238"></a>
-<span class="sourceLineNo">239</span>        public Optional&lt;String&gt; findStringValue(String name) {<a name="line.239"></a>
-<span class="sourceLineNo">240</span>                return findValue(name, Converters.STRING);<a name="line.240"></a>
-<span class="sourceLineNo">241</span>        }<a name="line.241"></a>
-<span class="sourceLineNo">242</span>        <a name="line.242"></a>
-<span class="sourceLineNo">243</span>        /**<a name="line.243"></a>
-<span class="sourceLineNo">244</span>         * Returns the header field with the given name, computing <a name="line.244"></a>
-<span class="sourceLineNo">245</span>         * and adding it if it doesn't exist.<a name="line.245"></a>
-<span class="sourceLineNo">246</span>         * <a name="line.246"></a>
-<span class="sourceLineNo">247</span>         * @param &lt;T&gt; the type of the header field's value<a name="line.247"></a>
-<span class="sourceLineNo">248</span>         * @param name the field name<a name="line.248"></a>
-<span class="sourceLineNo">249</span>         * @param converter the converter for the value type<a name="line.249"></a>
-<span class="sourceLineNo">250</span>         * @param supplier the function that computes a value for<a name="line.250"></a>
-<span class="sourceLineNo">251</span>         * a new field.<a name="line.251"></a>
-<span class="sourceLineNo">252</span>         * @return the header field<a name="line.252"></a>
-<span class="sourceLineNo">253</span>         */<a name="line.253"></a>
-<span class="sourceLineNo">254</span>        public &lt;T&gt; HttpField&lt;T&gt; computeIfAbsent(String name, <a name="line.254"></a>
-<span class="sourceLineNo">255</span>                        Converter&lt;T&gt; converter, Supplier&lt;T&gt; supplier) {<a name="line.255"></a>
-<span class="sourceLineNo">256</span>                Optional&lt;HttpField&lt;T&gt;&gt; result = findField(name, converter);<a name="line.256"></a>
-<span class="sourceLineNo">257</span>                if (result.isPresent()) {<a name="line.257"></a>
-<span class="sourceLineNo">258</span>                        return result.get();<a name="line.258"></a>
-<span class="sourceLineNo">259</span>                }<a name="line.259"></a>
-<span class="sourceLineNo">260</span>                HttpField&lt;T&gt; value = new HttpField&lt;&gt;(name, supplier.get(), converter);<a name="line.260"></a>
-<span class="sourceLineNo">261</span>                <a name="line.261"></a>
-<span class="sourceLineNo">262</span>                setField(value);<a name="line.262"></a>
-<span class="sourceLineNo">263</span>                return value;<a name="line.263"></a>
-<span class="sourceLineNo">264</span>        }<a name="line.264"></a>
-<span class="sourceLineNo">265</span>        <a name="line.265"></a>
-<span class="sourceLineNo">266</span>        /**<a name="line.266"></a>
-<span class="sourceLineNo">267</span>         * Returns the header field with the given name, computing <a name="line.267"></a>
-<span class="sourceLineNo">268</span>         * and adding it if it doesn't exist. The converter for the<a name="line.268"></a>
-<span class="sourceLineNo">269</span>         * field is looked up using {@link HttpField#lookupConverter(String)}.<a name="line.269"></a>
-<span class="sourceLineNo">270</span>         * <a name="line.270"></a>
-<span class="sourceLineNo">271</span>         * @param &lt;T&gt; the type of the header field's value<a name="line.271"></a>
-<span class="sourceLineNo">272</span>         * @param name the field name<a name="line.272"></a>
-<span class="sourceLineNo">273</span>         * @param supplier the function that computes a value for<a name="line.273"></a>
-<span class="sourceLineNo">274</span>         * a new field.<a name="line.274"></a>
-<span class="sourceLineNo">275</span>         * @return the header field<a name="line.275"></a>
-<span class="sourceLineNo">276</span>         */<a name="line.276"></a>
-<span class="sourceLineNo">277</span>        public &lt;T&gt; HttpField&lt;T&gt; computeIfAbsent(String name, Supplier&lt;T&gt; supplier) {<a name="line.277"></a>
-<span class="sourceLineNo">278</span>                @SuppressWarnings("unchecked")<a name="line.278"></a>
-<span class="sourceLineNo">279</span>                Converter&lt;T&gt; converter = (Converter&lt;T&gt;)HttpField.lookupConverter(name);<a name="line.279"></a>
-<span class="sourceLineNo">280</span>                Optional&lt;HttpField&lt;T&gt;&gt; result = findField(name, converter);<a name="line.280"></a>
-<span class="sourceLineNo">281</span>                if (result.isPresent()) {<a name="line.281"></a>
-<span class="sourceLineNo">282</span>                        return result.get();<a name="line.282"></a>
-<span class="sourceLineNo">283</span>                }<a name="line.283"></a>
-<span class="sourceLineNo">284</span>                HttpField&lt;T&gt; value = new HttpField&lt;&gt;(name, supplier.get(), converter);<a name="line.284"></a>
-<span class="sourceLineNo">285</span>                <a name="line.285"></a>
-<span class="sourceLineNo">286</span>                setField(value);<a name="line.286"></a>
-<span class="sourceLineNo">287</span>                return value;<a name="line.287"></a>
-<span class="sourceLineNo">288</span>        }<a name="line.288"></a>
-<span class="sourceLineNo">289</span>                <a name="line.289"></a>
-<span class="sourceLineNo">290</span>        /**<a name="line.290"></a>
-<span class="sourceLineNo">291</span>         * Set the flag that indicates whether this header is followed by a body.<a name="line.291"></a>
-<span class="sourceLineNo">292</span>         * <a name="line.292"></a>
-<span class="sourceLineNo">293</span>         * @param hasPayload new value<a name="line.293"></a>
-<span class="sourceLineNo">294</span>         * @return the message for easy chaining<a name="line.294"></a>
-<span class="sourceLineNo">295</span>         */<a name="line.295"></a>
-<span class="sourceLineNo">296</span>        public MessageHeader setHasPayload(boolean hasPayload) {<a name="line.296"></a>
-<span class="sourceLineNo">297</span>                this.hasPayload = hasPayload;<a name="line.297"></a>
-<span class="sourceLineNo">298</span>                return this;<a name="line.298"></a>
-<span class="sourceLineNo">299</span>        }<a name="line.299"></a>
-<span class="sourceLineNo">300</span>        <a name="line.300"></a>
-<span class="sourceLineNo">301</span>        /**<a name="line.301"></a>
-<span class="sourceLineNo">302</span>         * Returns {@code true} if the header is followed by a payload body.<a name="line.302"></a>
-<span class="sourceLineNo">303</span>         * <a name="line.303"></a>
-<span class="sourceLineNo">304</span>         * @return {@code true} if payload body data follows<a name="line.304"></a>
-<span class="sourceLineNo">305</span>         */<a name="line.305"></a>
-<span class="sourceLineNo">306</span>        @Override<a name="line.306"></a>
-<span class="sourceLineNo">307</span>        public boolean hasPayload() {<a name="line.307"></a>
-<span class="sourceLineNo">308</span>                return hasPayload;<a name="line.308"></a>
-<span class="sourceLineNo">309</span>        }<a name="line.309"></a>
-<span class="sourceLineNo">310</span><a name="line.310"></a>
-<span class="sourceLineNo">311</span>        /**<a name="line.311"></a>
-<span class="sourceLineNo">312</span>         * Returns true if this is a final message. A message is<a name="line.312"></a>
-<span class="sourceLineNo">313</span>         * final if the value of the `Connection` header field<a name="line.313"></a>
-<span class="sourceLineNo">314</span>         * includes the value "`close`".<a name="line.314"></a>
-<span class="sourceLineNo">315</span>         * <a name="line.315"></a>
-<span class="sourceLineNo">316</span>         * @return the result<a name="line.316"></a>
-<span class="sourceLineNo">317</span>         */<a name="line.317"></a>
-<span class="sourceLineNo">318</span>        @Override<a name="line.318"></a>
-<span class="sourceLineNo">319</span>        public boolean isFinal() {<a name="line.319"></a>
-<span class="sourceLineNo">320</span>                return findField(HttpField.CONNECTION, Converters.STRING_LIST)<a name="line.320"></a>
-<span class="sourceLineNo">321</span>                                .map(h -&gt; h.value()).map(f -&gt; f.contains("close")).orElse(false);<a name="line.321"></a>
-<span class="sourceLineNo">322</span>        }<a name="line.322"></a>
-<span class="sourceLineNo">323</span>}<a name="line.323"></a>
+<span class="sourceLineNo">196</span>                        // Known to exists, but make find bugs happy<a name="line.196"></a>
+<span class="sourceLineNo">197</span>                        throw new IllegalStateException();<a name="line.197"></a>
+<span class="sourceLineNo">198</span>                }<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                // Match already?<a name="line.199"></a>
+<span class="sourceLineNo">200</span>                if (expectedType.isAssignableFrom(valueType)) {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>                        @SuppressWarnings("unchecked")<a name="line.201"></a>
+<span class="sourceLineNo">202</span>                        HttpField&lt;T&gt; result = (HttpField&lt;T&gt;)field;<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                        return Optional.of(result);<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                }<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                // String field?<a name="line.205"></a>
+<span class="sourceLineNo">206</span>                if (!(value instanceof String)) {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                        return Optional.empty();<a name="line.207"></a>
+<span class="sourceLineNo">208</span>                }<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                // Try conversion...<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                try {<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                        HttpField&lt;T&gt; converted = new HttpField&lt;&gt;(<a name="line.211"></a>
+<span class="sourceLineNo">212</span>                                        name, converter.fromFieldValue((String)value), converter);<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                        // Replace if conversion was successful<a name="line.213"></a>
+<span class="sourceLineNo">214</span>                        headers.put(name, converted);<a name="line.214"></a>
+<span class="sourceLineNo">215</span>                        return Optional.ofNullable(converted);<a name="line.215"></a>
+<span class="sourceLineNo">216</span>                } catch (ParseException e) {<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                        return Optional.empty();<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                }<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>        /**<a name="line.221"></a>
+<span class="sourceLineNo">222</span>         * Convenience method for getting the value of a header field.<a name="line.222"></a>
+<span class="sourceLineNo">223</span>         * <a name="line.223"></a>
+<span class="sourceLineNo">224</span>         * @param &lt;T&gt; the type of the value in the header field<a name="line.224"></a>
+<span class="sourceLineNo">225</span>         * @param name the field name<a name="line.225"></a>
+<span class="sourceLineNo">226</span>         * @param converter the converter for the value type<a name="line.226"></a>
+<span class="sourceLineNo">227</span>         * @return the value if the header field exists<a name="line.227"></a>
+<span class="sourceLineNo">228</span>         */<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        public &lt;T&gt; Optional&lt;T&gt; findValue(String name, Converter&lt;T&gt; converter) {<a name="line.229"></a>
+<span class="sourceLineNo">230</span>                return findField(name, converter).map(HttpField&lt;T&gt;::value);<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        }<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        <a name="line.232"></a>
+<span class="sourceLineNo">233</span>        /**<a name="line.233"></a>
+<span class="sourceLineNo">234</span>         * Convenience method for getting the value of a string field.<a name="line.234"></a>
+<span class="sourceLineNo">235</span>         * <a name="line.235"></a>
+<span class="sourceLineNo">236</span>         * @param name the field name<a name="line.236"></a>
+<span class="sourceLineNo">237</span>         * @return the value if the header field exists<a name="line.237"></a>
+<span class="sourceLineNo">238</span>         * @see #findField(String, Converter)<a name="line.238"></a>
+<span class="sourceLineNo">239</span>         */<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        public Optional&lt;String&gt; findStringValue(String name) {<a name="line.240"></a>
+<span class="sourceLineNo">241</span>                return findValue(name, Converters.STRING);<a name="line.241"></a>
+<span class="sourceLineNo">242</span>        }<a name="line.242"></a>
+<span class="sourceLineNo">243</span>        <a name="line.243"></a>
+<span class="sourceLineNo">244</span>        /**<a name="line.244"></a>
+<span class="sourceLineNo">245</span>         * Returns the header field with the given name, computing <a name="line.245"></a>
+<span class="sourceLineNo">246</span>         * and adding it if it doesn't exist.<a name="line.246"></a>
+<span class="sourceLineNo">247</span>         * <a name="line.247"></a>
+<span class="sourceLineNo">248</span>         * @param &lt;T&gt; the type of the header field's value<a name="line.248"></a>
+<span class="sourceLineNo">249</span>         * @param name the field name<a name="line.249"></a>
+<span class="sourceLineNo">250</span>         * @param converter the converter for the value type<a name="line.250"></a>
+<span class="sourceLineNo">251</span>         * @param supplier the function that computes a value for<a name="line.251"></a>
+<span class="sourceLineNo">252</span>         * a new field.<a name="line.252"></a>
+<span class="sourceLineNo">253</span>         * @return the header field<a name="line.253"></a>
+<span class="sourceLineNo">254</span>         */<a name="line.254"></a>
+<span class="sourceLineNo">255</span>        public &lt;T&gt; HttpField&lt;T&gt; computeIfAbsent(String name, <a name="line.255"></a>
+<span class="sourceLineNo">256</span>                        Converter&lt;T&gt; converter, Supplier&lt;T&gt; supplier) {<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                Optional&lt;HttpField&lt;T&gt;&gt; result = findField(name, converter);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>                if (result.isPresent()) {<a name="line.258"></a>
+<span class="sourceLineNo">259</span>                        return result.get();<a name="line.259"></a>
+<span class="sourceLineNo">260</span>                }<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                HttpField&lt;T&gt; value = new HttpField&lt;&gt;(name, supplier.get(), converter);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>                <a name="line.262"></a>
+<span class="sourceLineNo">263</span>                setField(value);<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                return value;<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        }<a name="line.265"></a>
+<span class="sourceLineNo">266</span>        <a name="line.266"></a>
+<span class="sourceLineNo">267</span>        /**<a name="line.267"></a>
+<span class="sourceLineNo">268</span>         * Returns the header field with the given name, computing <a name="line.268"></a>
+<span class="sourceLineNo">269</span>         * and adding it if it doesn't exist. The converter for the<a name="line.269"></a>
+<span class="sourceLineNo">270</span>         * field is looked up using {@link HttpField#lookupConverter(String)}.<a name="line.270"></a>
+<span class="sourceLineNo">271</span>         * <a name="line.271"></a>
+<span class="sourceLineNo">272</span>         * @param &lt;T&gt; the type of the header field's value<a name="line.272"></a>
+<span class="sourceLineNo">273</span>         * @param name the field name<a name="line.273"></a>
+<span class="sourceLineNo">274</span>         * @param supplier the function that computes a value for<a name="line.274"></a>
+<span class="sourceLineNo">275</span>         * a new field.<a name="line.275"></a>
+<span class="sourceLineNo">276</span>         * @return the header field<a name="line.276"></a>
+<span class="sourceLineNo">277</span>         */<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        public &lt;T&gt; HttpField&lt;T&gt; computeIfAbsent(String name, Supplier&lt;T&gt; supplier) {<a name="line.278"></a>
+<span class="sourceLineNo">279</span>                @SuppressWarnings("unchecked")<a name="line.279"></a>
+<span class="sourceLineNo">280</span>                Converter&lt;T&gt; converter = (Converter&lt;T&gt;)HttpField.lookupConverter(name);<a name="line.280"></a>
+<span class="sourceLineNo">281</span>                Optional&lt;HttpField&lt;T&gt;&gt; result = findField(name, converter);<a name="line.281"></a>
+<span class="sourceLineNo">282</span>                if (result.isPresent()) {<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                        return result.get();<a name="line.283"></a>
+<span class="sourceLineNo">284</span>                }<a name="line.284"></a>
+<span class="sourceLineNo">285</span>                HttpField&lt;T&gt; value = new HttpField&lt;&gt;(name, supplier.get(), converter);<a name="line.285"></a>
+<span class="sourceLineNo">286</span>                <a name="line.286"></a>
+<span class="sourceLineNo">287</span>                setField(value);<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                return value;<a name="line.288"></a>
+<span class="sourceLineNo">289</span>        }<a name="line.289"></a>
+<span class="sourceLineNo">290</span>                <a name="line.290"></a>
+<span class="sourceLineNo">291</span>        /**<a name="line.291"></a>
+<span class="sourceLineNo">292</span>         * Set the flag that indicates whether this header is followed by a body.<a name="line.292"></a>
+<span class="sourceLineNo">293</span>         * <a name="line.293"></a>
+<span class="sourceLineNo">294</span>         * @param hasPayload new value<a name="line.294"></a>
+<span class="sourceLineNo">295</span>         * @return the message for easy chaining<a name="line.295"></a>
+<span class="sourceLineNo">296</span>         */<a name="line.296"></a>
+<span class="sourceLineNo">297</span>        public MessageHeader setHasPayload(boolean hasPayload) {<a name="line.297"></a>
+<span class="sourceLineNo">298</span>                this.hasPayload = hasPayload;<a name="line.298"></a>
+<span class="sourceLineNo">299</span>                return this;<a name="line.299"></a>
+<span class="sourceLineNo">300</span>        }<a name="line.300"></a>
+<span class="sourceLineNo">301</span>        <a name="line.301"></a>
+<span class="sourceLineNo">302</span>        /**<a name="line.302"></a>
+<span class="sourceLineNo">303</span>         * Returns {@code true} if the header is followed by a payload body.<a name="line.303"></a>
+<span class="sourceLineNo">304</span>         * <a name="line.304"></a>
+<span class="sourceLineNo">305</span>         * @return {@code true} if payload body data follows<a name="line.305"></a>
+<span class="sourceLineNo">306</span>         */<a name="line.306"></a>
+<span class="sourceLineNo">307</span>        @Override<a name="line.307"></a>
+<span class="sourceLineNo">308</span>        public boolean hasPayload() {<a name="line.308"></a>
+<span class="sourceLineNo">309</span>                return hasPayload;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        }<a name="line.310"></a>
+<span class="sourceLineNo">311</span><a name="line.311"></a>
+<span class="sourceLineNo">312</span>        /**<a name="line.312"></a>
+<span class="sourceLineNo">313</span>         * Returns true if this is a final message. A message is<a name="line.313"></a>
+<span class="sourceLineNo">314</span>         * final if the value of the `Connection` header field<a name="line.314"></a>
+<span class="sourceLineNo">315</span>         * includes the value "`close`".<a name="line.315"></a>
+<span class="sourceLineNo">316</span>         * <a name="line.316"></a>
+<span class="sourceLineNo">317</span>         * @return the result<a name="line.317"></a>
+<span class="sourceLineNo">318</span>         */<a name="line.318"></a>
+<span class="sourceLineNo">319</span>        @Override<a name="line.319"></a>
+<span class="sourceLineNo">320</span>        public boolean isFinal() {<a name="line.320"></a>
+<span class="sourceLineNo">321</span>                return findField(HttpField.CONNECTION, Converters.STRING_LIST)<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                                .map(h -&gt; h.value()).map(f -&gt; f.contains("close")).orElse(false);<a name="line.322"></a>
+<span class="sourceLineNo">323</span>        }<a name="line.323"></a>
+<span class="sourceLineNo">324</span>}<a name="line.324"></a>
 
 
 
