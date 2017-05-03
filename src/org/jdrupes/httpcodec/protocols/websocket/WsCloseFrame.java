@@ -24,7 +24,7 @@ import java.nio.CharBuffer;
  * Represents a WebSocket close frame.
  * 
  * Note that status code and reason are modeled as part of the header in 
- * this API although, they are handled like payload by the "wire protocol".
+ * this API although they are handled like payload by the "wire protocol".
  */
 public class WsCloseFrame extends WsFrameHeader {
 
