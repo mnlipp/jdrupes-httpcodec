@@ -60,7 +60,7 @@ public class Etag {
 			if (value.isWeak()) {
 				return "W/" + Converters.quoteString(value.tag());
 			}
-			if ("*".equals(value)) {
+			if ("*".equals(value.tag())) {
 				return Converters.WILDCARD;
 			}
 			return Converters.quoteString(value.tag());

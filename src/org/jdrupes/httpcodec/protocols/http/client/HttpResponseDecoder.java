@@ -167,17 +167,16 @@ public class HttpResponseDecoder
 		reportHeaderReceived = true;
 		// Adjust Retry-After
 		HttpField<?> hdr = message.fields().get(HttpField.RETRY_AFTER);
-		if (hdr != null) {
-			if (String.class.isAssignableFrom(hdr.value().getClass())) {
-				String value = (String)hdr.value();
-				if (Character.isDigit(value.charAt(0))) {
-					Instant base = message.findField(
-							HttpField.DATE, Converters.DATE_TIME)
-							.map(HttpField<Instant>::value).orElse(Instant.now());
-					message.setField(new HttpField<>(HttpField.RETRY_AFTER,
-							base.plusSeconds(Long.parseLong(value)),
-							Converters.DATE_TIME));
-				}
+		if (hdr != null && String.class
+				.isAssignableFrom(hdr.value().getClass())) {
+			String value = (String)hdr.value();
+			if (Character.isDigit(value.charAt(0))) {
+				Instant base = message.findField(
+						HttpField.DATE, Converters.DATE_TIME)
+						.map(HttpField<Instant>::value).orElse(Instant.now());
+				message.setField(new HttpField<>(HttpField.RETRY_AFTER,
+						base.plusSeconds(Long.parseLong(value)),
+						Converters.DATE_TIME));
 			}
 		}
 		// RFC 7230 3.3.3 (1. & 2.)

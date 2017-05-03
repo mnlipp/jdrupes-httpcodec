@@ -193,7 +193,8 @@ public abstract class HttpMessageHeader implements MessageHeader {
 			expectedType = converter.getClass().getMethod(
 				"fromFieldValue", String.class).getReturnType();
 		} catch (NoSuchMethodException e) {
-			// Known to exists
+			// Known to exists, but make find bugs happy
+			throw new IllegalStateException();
 		}
 		// Match already?
 		if (expectedType.isAssignableFrom(valueType)) {

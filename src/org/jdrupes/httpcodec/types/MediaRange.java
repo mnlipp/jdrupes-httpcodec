@@ -99,7 +99,7 @@ public class MediaRange extends MediaBase implements Comparable<MediaRange> {
 
 	private static int countParameters(ParameterizedValue<?> value) {
 		return (int)value.parameters().keySet().stream()
-				.filter(k -> !k.equals("q")).count();
+				.filter(k -> !"q".equals(k)).count();
 	}
 	
 	/**
