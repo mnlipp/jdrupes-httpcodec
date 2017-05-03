@@ -19,6 +19,7 @@
 package org.jdrupes.httpcodec.protocols.websocket;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 /**
  * Control frames with binary application data.
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer;
  */
 public abstract class WsDefaultControlFrame extends WsFrameHeader {
 
-	private ByteBuffer applicationData;
+	private Optional<ByteBuffer> applicationData;
 	
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.MessageHeader#isFinal()
@@ -52,14 +53,14 @@ public abstract class WsDefaultControlFrame extends WsFrameHeader {
 	 * @param applicationData the application data. May be {@code null}.
 	 */
 	public WsDefaultControlFrame(ByteBuffer applicationData) {
-		this.applicationData = applicationData;
+		this.applicationData = Optional.ofNullable(applicationData);
 	}
 
 	/**
 	 * 
 	 * @return the application data
 	 */
-	public ByteBuffer applicationData() {
+	public Optional<ByteBuffer> applicationData() {
 		return applicationData;
 	}
 }

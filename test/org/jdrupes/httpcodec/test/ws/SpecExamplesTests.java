@@ -189,12 +189,12 @@ public class SpecExamplesTests {
 		assertTrue(decoder.header().get() instanceof WsPingFrame);
 		WsPingFrame pingHdr = (WsPingFrame)decoder.header().get();
 		CharBuffer txt = Charset.forName("utf-8")
-				.decode(pingHdr.applicationData());
+				.decode(pingHdr.applicationData().get());
 		assertEquals("Hello", txt.toString());
-		assertNotNull(result.response());
+		assertTrue(result.response().isPresent());
 		WsPongFrame pongHdr = (WsPongFrame)result.response().get();
 		txt = Charset.forName("utf-8")
-				.decode(pongHdr.applicationData());
+				.decode(pongHdr.applicationData().get());
 		assertEquals("Hello", txt.toString());
 	}
 	
@@ -238,9 +238,7 @@ public class SpecExamplesTests {
 		assertTrue(decoder.header().get() instanceof WsPongFrame);
 		WsPongFrame hdr = (WsPongFrame)decoder.header().get();
 		CharBuffer txt = Charset.forName("utf-8")
-				.decode(hdr.applicationData());
+				.decode(hdr.applicationData().get());
 		assertEquals("Hello", txt.toString());
 	}
-	
-	
 }

@@ -227,7 +227,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 				});
 			} else if (hdr instanceof WsDefaultControlFrame) {
 				payloadSize = ((WsDefaultControlFrame)hdr)
-						.applicationData().remaining();
+						.applicationData().map(ByteBuffer::remaining).orElse(0);
 			}
 		}
 		
@@ -308,7 +308,8 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		} else {
 			// Take data from in
 			if (hdr instanceof WsDefaultControlFrame) {
-				in = ((WsDefaultControlFrame)hdr).applicationData();
+				in = ((WsDefaultControlFrame)hdr)
+						.applicationData().orElse(Codec.EMPTY_IN);
 			}
 			if (!doMask) {
 				ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) in);

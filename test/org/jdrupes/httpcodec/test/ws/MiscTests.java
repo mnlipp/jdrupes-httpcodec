@@ -38,6 +38,82 @@ import org.junit.Test;
 public class MiscTests {
 
 	@Test
+	public void testDecodeUnmaskedEmptyPing() throws ProtocolException {
+		byte[] msgBytes = new byte[] {(byte)0x89, 0x00};
+		ByteBuffer msg = ByteBuffer.allocate(msgBytes.length);
+		msg.put(msgBytes);
+		msg.flip();
+		WsDecoder decoder = new WsDecoder();
+		Decoder.Result<?> result = decoder.decode(msg, null, true);
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(result.closeConnection());
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(decoder.header().isPresent());
+		assertEquals(WsPingFrame.class, decoder.header().get().getClass());
+		WsPingFrame pingHdr = (WsPingFrame)decoder.header().get();
+		assertFalse(pingHdr.applicationData().isPresent());
+		assertTrue(result.response().isPresent());
+		WsPongFrame pongHdr = (WsPongFrame)result.response().get();
+		assertFalse(pongHdr.applicationData().isPresent());
+	}
+	
+	@Test
+	public void testEncodeUnmaskedEmptyPing() 
+			throws ProtocolException, UnsupportedEncodingException {
+		final byte[] pingBytes = new byte[] {(byte)0x89, 0x00};
+		WsEncoder encoder = new WsEncoder(false);
+		ByteBuffer msg = ByteBuffer.allocate(100);
+		encoder.encode(new WsPingFrame(null));
+		Encoder.Result result = encoder.encode(null, msg, true);
+		msg.flip();
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(result.closeConnection());
+		assertEquals(pingBytes.length, msg.remaining());
+		byte[] msgBytes = new byte[msg.remaining()];
+		msg.get(msgBytes);
+		assertArrayEquals(pingBytes, msgBytes);
+	}
+	
+	@Test
+	public void testDecodeUnmaskedEmptyPong() throws ProtocolException {
+		byte[] msgBytes = new byte[] {(byte)0x8a, 0x00};
+		ByteBuffer msg = ByteBuffer.allocate(msgBytes.length);
+		msg.put(msgBytes);
+		msg.flip();
+		WsDecoder decoder = new WsDecoder();
+		Decoder.Result<?> result = decoder.decode(msg, null, true);
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(result.closeConnection());
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(decoder.header().isPresent());
+		assertEquals(WsPongFrame.class, decoder.header().get().getClass());
+		WsPongFrame pongHdr = (WsPongFrame)decoder.header().get();
+		assertFalse(pongHdr.applicationData().isPresent());
+		assertFalse(result.response().isPresent());
+	}
+	
+	@Test
+	public void testEncodeUnmaskedEmptyPong() 
+			throws ProtocolException, UnsupportedEncodingException {
+		final byte[] pongBytes = new byte[] {(byte)0x8a, 0x00};
+		WsEncoder encoder = new WsEncoder(false);
+		ByteBuffer msg = ByteBuffer.allocate(100);
+		encoder.encode(new WsPongFrame(null));
+		Encoder.Result result = encoder.encode(null, msg, true);
+		msg.flip();
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(result.closeConnection());
+		assertEquals(pongBytes.length, msg.remaining());
+		byte[] msgBytes = new byte[msg.remaining()];
+		msg.get(msgBytes);
+		assertArrayEquals(pongBytes, msgBytes);
+	}
+	
+	@Test
 	public void testDecodeInsertedPing() throws ProtocolException {
 		// First frame
 		byte[] msgBytes1 = new byte[] {0x01, 0x03, 0x48, 0x65, 0x6c};
@@ -72,12 +148,12 @@ public class MiscTests {
 		assertTrue(decoder.header().get() instanceof WsPingFrame);
 		WsPingFrame pingHdr = (WsPingFrame)decoder.header().get();
 		CharBuffer pingData = Charset.forName("utf-8")
-				.decode(pingHdr.applicationData());
+				.decode(pingHdr.applicationData().get());
 		assertEquals("Hello", pingData.toString());
-		assertNotNull(result.response());
+		assertTrue(result.response().isPresent());
 		WsPongFrame pongHdr = (WsPongFrame)result.response().get();
 		CharBuffer pongData = Charset.forName("utf-8")
-				.decode(pongHdr.applicationData());
+				.decode(pongHdr.applicationData().get());
 		assertEquals("Hello", pongData.toString());
 		
 		// Second frame

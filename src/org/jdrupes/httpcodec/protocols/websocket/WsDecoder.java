@@ -283,6 +283,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		case PING:
 			if (bytesExpected == 0) {
 				expectNextFrame();
+				receivedHeader = new WsPingFrame(null);
 				return createResult(false, !dataMessageFinished, 
 						new WsPongFrame(null), true);
 			}
@@ -292,6 +293,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		case PONG:
 			if (bytesExpected == 0) {
 				expectNextFrame();
+				receivedHeader = new WsPongFrame(null);
 				return createResult(false, !dataMessageFinished);
 			}
 			controlData = ByteBuffer.allocate((int)bytesExpected);
