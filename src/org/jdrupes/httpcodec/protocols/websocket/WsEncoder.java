@@ -212,9 +212,8 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 			// Prepare payload
 			if (hdr instanceof WsCloseFrame) {
 				payloadSize = 0;
-				if (((WsCloseFrame)hdr).statusCode() != null) {
+				((WsCloseFrame)hdr).statusCode().ifPresent(code -> {
 					convData.clear();
-					int code = ((WsCloseFrame)hdr).statusCode();
 					try {
 						convData.write(code >> 8);
 						convData.write(code & 0xff);
@@ -222,10 +221,10 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 					} catch (IOException e) {
 						// Formally thrown, cannot happen
 					}
-					if (((WsCloseFrame)hdr).reason() != null) {
-						convTextData(((WsCloseFrame)hdr).reason());
-					}
-				}
+				});
+				((WsCloseFrame)hdr).reason().ifPresent(reason -> {
+						convTextData(CharBuffer.wrap(reason));
+				});
 			} else if (hdr instanceof WsDefaultControlFrame) {
 				payloadSize = ((WsDefaultControlFrame)hdr)
 						.applicationData().remaining();

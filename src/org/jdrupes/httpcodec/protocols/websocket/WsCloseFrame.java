@@ -19,6 +19,7 @@
 package org.jdrupes.httpcodec.protocols.websocket;
 
 import java.nio.CharBuffer;
+import java.util.Optional;
 
 /**
  * Represents a WebSocket close frame.
@@ -28,19 +29,20 @@ import java.nio.CharBuffer;
  */
 public class WsCloseFrame extends WsFrameHeader {
 
-	private Integer statusCode;
-	private CharBuffer reason;
+	private Optional<Integer> statusCode;
+	private Optional<String> reason;
 	
 	/**
 	 * Creates a new close control frame.
 	 * 
 	 * @param statusCode the status code (if any)
-	 * @param reason the reason
+	 * @param reason the reason (if any)
 	 */
 	public WsCloseFrame(Integer statusCode, CharBuffer reason) {
 		super();
-		this.statusCode = statusCode;
-		this.reason = reason;
+		this.statusCode = Optional.ofNullable(statusCode);
+		this.reason = Optional.ofNullable(
+				reason != null ? reason.toString() : null);
 	}
 	
 	/* (non-Javadoc)
@@ -62,14 +64,14 @@ public class WsCloseFrame extends WsFrameHeader {
 	/**
 	 * @return the statusCode
 	 */
-	public Integer statusCode() {
+	public Optional<Integer> statusCode() {
 		return statusCode;
 	}
 	
 	/**
 	 * @return the reason
 	 */
-	public CharBuffer reason() {
+	public Optional<String> reason() {
 		return reason;
 	}
 
