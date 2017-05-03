@@ -93,7 +93,7 @@ Why Generics?
 
 While the previous sections explain the interfaces and classes with
 reference to HTTP, you don't find "HTTP" in the names or methods
-of the types presented. The reason is that the API presented above
+of the types discussed. The reason is that the API presented above
 can be used to handle any "HTTP like" protocol (header with payload).
 We need such a general interface because modern HTTP provides the 
 upgrade mechanism that allows the client or server to switch to another
@@ -114,7 +114,7 @@ it's also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
 ![HTTP Decoder](http-decoder.svg)
 
 In addition, it is possible to specify a maximum header length to
-avoid that a malicious request fills all your memory. And you can
+prevent a malicious request from filling all your memory. And you can
 {@linkplain org.jdrupes.httpcodec.protocols.http.HttpDecoder#isClosed() query}
 if the decoder has reached the closed state, i.e. won't decode more messages,
 because the connection should be closed (if indicated by the result) or
@@ -125,9 +125,9 @@ The HTTP encoder is derived in a similar way.
 ![HTTP Decoder](http-encoder.svg)
 
 See the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#pendingLimit 
-getter description} for the meaning of "pending limit". 
+method description} for the meaning of "pending limit". 
 
-As you can see, we still have'nt reached the goal yet to get concrete
+As you can see, we still haven't reached the goal yet to get concrete
 HTTP codecs. This is because there is a difference between HTTP request
 messages and HTTP response messages.
 
