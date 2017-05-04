@@ -31,7 +31,7 @@ new Processor().withCloseable { processor ->
 }
 
 group = 'org.jdrupes.httpcodec'
-version = bnd.base_version // + "-SNAPSHOT"
+version = bnd.base_version + "-SNAPSHOT"
 description = "HTTP coders and decoders for non-blocking I/O"
 
 archivesBaseName = 'httpcodec'
