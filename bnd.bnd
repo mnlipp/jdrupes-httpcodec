@@ -1,10 +1,13 @@
 Bundle-Name: JDrupes HTTP Codec
 Bundle-SymbolicName: org.jdrupes.httpcodec
+Bundle-Version: 0.9.13.${tstamp}
 Bundle-Copyright: Michael N. Lipp (c) 2016
 Bundle-License: http://www.gnu.org/licenses/lgpl-3.0.txt
 
--snapshot: ${tstamp}
-
+base_version = ${versionmask;===;${Bundle-Version}}
+# This is used as the general API version for all packages.
+# This being a library, individual API versions for packages don't 
+# really make sense.
 api_version = 0.12.0.${tstamp}
 
 -sources: true
@@ -33,3 +36,10 @@ Export-Package: \
 	org.jdrupes.httpcodec.util
 
 -includeresource: resources
+
+-fixupmessages: \
+	"Found source folder 'resources' that is not on bnd's source path", \
+	"Found source folder 'demo' that is not on bnd's source path", \
+	"The .classpath contains an unknown container: GROOVY_DSL_SUPPORT. This could make your build less portable.", \
+	"The .classpath contains an unknown container: org.eclipse.buildship.core.gradleclasspathcontainer. This could make your build less portable."
+	
