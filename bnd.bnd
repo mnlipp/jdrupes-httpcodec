@@ -24,7 +24,6 @@ Provide-Capability: osgi.serviceloader; \
 
 Export-Package: \
 	org.jdrupes.httpcodec,\
-	org.jdrupes.httpcodec.demo,\
 	org.jdrupes.httpcodec.plugin,\
 	org.jdrupes.httpcodec.protocols.http,\
 	org.jdrupes.httpcodec.protocols.http.client,\
