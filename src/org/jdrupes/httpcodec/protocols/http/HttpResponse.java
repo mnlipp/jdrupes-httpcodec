@@ -19,6 +19,7 @@
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -169,23 +170,22 @@ public class HttpResponse extends HttpMessageHeader {
 	 * the path information of the given request. Also sets 
 	 * the "has payload" flag.
 	 * 
-	 * @param request the request
+	 * @param requestUri the requested resource
 	 * @return the response for easy chaining
 	 */
-	public HttpResponse setContentType(HttpRequest request) {
+	public HttpResponse setContentType(URI requestUri) {
 		// Get content type
 		String mimeTypeName;
 		try {
 			// probeContentType is most advanced, but may fail if it tries
 			// to look at the file's content (which doesn't exist).
 			mimeTypeName = Files.probeContentType(Paths.get(
-					request.requestUri().getPath()));
+					requestUri.getPath()));
 		} catch (IOException e) {
 			mimeTypeName = null;
 		}
 		if (mimeTypeName == null) {
-			mimeTypeName = typesMap.getContentType(
-					request.requestUri().getPath());
+			mimeTypeName = typesMap.getContentType(requestUri.getPath());
 		}
 		MediaType mediaType = null;
 		try {
