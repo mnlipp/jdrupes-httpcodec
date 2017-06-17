@@ -172,7 +172,7 @@ public class HttpResponse extends HttpMessageHeader {
 	 * @param request the request
 	 * @return the response for easy chaining
 	 */
-	public HttpResponse setContentTypeFromRequest(HttpRequest request) {
+	public HttpResponse setContentType(HttpRequest request) {
 		// Get content type
 		String mimeTypeName;
 		try {
