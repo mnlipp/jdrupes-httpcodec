@@ -129,7 +129,8 @@ public class HttpResponse extends HttpMessageHeader {
 	}
 	
 	/**
-	 * A convenience method for setting the "Content-Type" header.
+	 * A convenience method for setting the "Content-Type" header. Also sets 
+	 * the "has payload" flag.
 	 * 
 	 * @param type the type
 	 * @param subtype the subtype
@@ -139,12 +140,14 @@ public class HttpResponse extends HttpMessageHeader {
 	public HttpResponse setContentType(String type, String subtype) 
 			throws ParseException {
 		setField(HttpField.CONTENT_TYPE, new MediaType(type, subtype));
+		setHasPayload(true);
 		return this;
 	}
 
 	/**
 	 * A convenience method for setting the "Content-Type" header (usually
-	 * of type "text") together with its charset parameter.
+	 * of type "text") together with its charset parameter. Also sets 
+	 * the "has payload" flag.
 	 * 
 	 * @param type the type
 	 * @param subtype the subtype
@@ -157,6 +160,48 @@ public class HttpResponse extends HttpMessageHeader {
 		setField(HttpField.CONTENT_TYPE,
 				MediaType.builder().setType(type, subtype)
 				.setParameter("charset", charset).build());
+		setHasPayload(true);
+		return this;
+	}
+	
+	/**
+	 * Convenience method for setting the "Content-Type" header using 
+	 * the path information of the given request. Also sets 
+	 * the "has payload" flag.
+	 * 
+	 * @param request the request
+	 * @return the response for easy chaining
+	 */
+	public HttpResponse setContentTypeFromRequest(HttpRequest request) {
+		// Get content type
+		String mimeTypeName;
+		try {
+			// probeContentType is most advanced, but may fail if it tries
+			// to look at the file's content (which doesn't exist).
+			mimeTypeName = Files.probeContentType(Paths.get(
+					request.requestUri().getPath()));
+		} catch (IOException e) {
+			mimeTypeName = null;
+		}
+		if (mimeTypeName == null) {
+			mimeTypeName = typesMap.getContentType(
+					request.requestUri().getPath());
+		}
+		MediaType mediaType = null;
+		try {
+			mediaType = Converters.MEDIA_TYPE.fromFieldValue(mimeTypeName);
+		} catch (ParseException e) {
+			// Cannot happen
+		}
+		
+		// Send response 
+		if ("text".equals(mediaType.topLevelType())) {
+			mediaType = MediaType.builder().from(mediaType)
+					.setParameter("charset", System.getProperty(
+							"file.encoding", "UTF-8")).build();
+		}
+		setField(HttpField.CONTENT_TYPE, mediaType);
+		setHasPayload(true);
 		return this;
 	}
 	
@@ -198,42 +243,4 @@ public class HttpResponse extends HttpMessageHeader {
 		return Optional.ofNullable(request);
 	}
 
-	/**
-	 * Utility method to set the MIME type of this repsonse using 
-	 * the path information of the given request. Also sets 
-	 * the "has payload" flag.
-	 * 
-	 * @param request the request
-	 */
-	public void setMimeTypeFromRequest(HttpRequest request) {
-		// Get content type
-		String mimeTypeName;
-		try {
-			// probeContentType is most advanced, but may fail if it tries
-			// to look at the file's content (which doesn't exist).
-			mimeTypeName = Files.probeContentType(Paths.get(
-					request.requestUri().getPath()));
-		} catch (IOException e) {
-			mimeTypeName = null;
-		}
-		if (mimeTypeName == null) {
-			mimeTypeName = typesMap.getContentType(
-					request.requestUri().getPath());
-		}
-		MediaType mediaType = null;
-		try {
-			mediaType = Converters.MEDIA_TYPE.fromFieldValue(mimeTypeName);
-		} catch (ParseException e) {
-			// Cannot happen
-		}
-		
-		// Send response 
-		if ("text".equals(mediaType.topLevelType())) {
-			mediaType = MediaType.builder().from(mediaType)
-					.setParameter("charset", System.getProperty(
-							"file.encoding", "UTF-8")).build();
-		}
-		setField(HttpField.CONTENT_TYPE, mediaType);
-		setHasPayload(true);
-	}
 }
