@@ -18,11 +18,17 @@
 
 package org.jdrupes.httpcodec.protocols.http;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.Optional;
 
+import javax.activation.MimetypesFileTypeMap;
+
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
+import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;
 
@@ -31,6 +37,8 @@ import org.jdrupes.httpcodec.types.MediaType;
  */
 public class HttpResponse extends HttpMessageHeader {
 
+	private static MimetypesFileTypeMap typesMap = new MimetypesFileTypeMap();
+	
 	private int statusCode = -1;
 	private String reasonPhrase;
 	private HttpRequest request;
@@ -188,5 +196,44 @@ public class HttpResponse extends HttpMessageHeader {
 	 */
 	public Optional<HttpRequest> request() {
 		return Optional.ofNullable(request);
+	}
+
+	/**
+	 * Utility method to set the MIME type of this repsonse using 
+	 * the path information of the given request. Also sets 
+	 * the "has payload" flag.
+	 * 
+	 * @param request the request
+	 */
+	public void setMimeTypeFromRequest(HttpRequest request) {
+		// Get content type
+		String mimeTypeName;
+		try {
+			// probeContentType is most advanced, but may fail if it tries
+			// to look at the file's content (which doesn't exist).
+			mimeTypeName = Files.probeContentType(Paths.get(
+					request.requestUri().getPath()));
+		} catch (IOException e) {
+			mimeTypeName = null;
+		}
+		if (mimeTypeName == null) {
+			mimeTypeName = typesMap.getContentType(
+					request.requestUri().getPath());
+		}
+		MediaType mediaType = null;
+		try {
+			mediaType = Converters.MEDIA_TYPE.fromFieldValue(mimeTypeName);
+		} catch (ParseException e) {
+			// Cannot happen
+		}
+		
+		// Send response 
+		if ("text".equals(mediaType.topLevelType())) {
+			mediaType = MediaType.builder().from(mediaType)
+					.setParameter("charset", System.getProperty(
+							"file.encoding", "UTF-8")).build();
+		}
+		setField(HttpField.CONTENT_TYPE, mediaType);
+		setHasPayload(true);
 	}
 }
