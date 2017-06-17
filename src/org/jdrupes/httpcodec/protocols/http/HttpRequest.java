@@ -30,7 +30,7 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 public class HttpRequest extends HttpMessageHeader {
 
 	public static final URI ASTERISK_REQUEST 
-		= createUri("http://127.0.0.1/");
+		= URI.create("http://127.0.0.1/");
 	
 	private String method;
 	private URI requestUri;
@@ -38,20 +38,6 @@ public class HttpRequest extends HttpMessageHeader {
 	private int port;
 	private HttpResponse response;
 
-	/**
-	 * Helper for initialization.
-	 * 
-	 * @param uri as string
-	 * @return the URI
-	 */
-	private static URI createUri(String uri) {
-		try {
-			return new URI(uri);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
 	/**
 	 * Creates a new request with basic data. 
 	 * 
