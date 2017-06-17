@@ -19,7 +19,6 @@
 package org.jdrupes.httpcodec.protocols.http;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
