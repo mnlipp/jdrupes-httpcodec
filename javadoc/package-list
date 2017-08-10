@@ -1,1 +1,8 @@
-org.jdrupes.json
+org.jdrupes.httpcodec
+org.jdrupes.httpcodec.plugin
+org.jdrupes.httpcodec.protocols.http
+org.jdrupes.httpcodec.protocols.http.client
+org.jdrupes.httpcodec.protocols.http.server
+org.jdrupes.httpcodec.protocols.websocket
+org.jdrupes.httpcodec.types
+org.jdrupes.httpcodec.util

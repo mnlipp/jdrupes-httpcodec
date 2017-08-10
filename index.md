@@ -1,10 +1,10 @@
 ---
 layout: index
-title: JDrupes JSON Library by mnlipp
+title: JDrupes HTTP codec by mnlipp
 ---
 
-Welcome to JDrupes JSON Library
+Welcome to JDrupes HTTP codec
 =============================
 
-Encoders and decoders for converting Java object graphs to and from
-JSON.
+Easy to use HTTP encoders and decoders for non-blocking I/O that use Java Buffers for handling the data. See the framework's <a href="javadoc/index.html" target="_top">Javadoc</a>
+for a detailed description.
