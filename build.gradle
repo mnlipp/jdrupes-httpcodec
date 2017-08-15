@@ -33,7 +33,7 @@ new Processor().withCloseable { processor ->
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-version = bnd.base_version // + "-SNAPSHOT"
+version = bnd.base_version + "-SNAPSHOT"
 
 archivesBaseName = 'httpcodec'
 
@@ -100,7 +100,7 @@ javadoc {
 	options.stylesheetFile(file("stylesheet.css"))
     options.addStringOption("bottom", file("misc/javadoc.bottom.txt").text)
     options.addStringOption("link", "http://docs.oracle.com/javase/8/docs/api/")
-    destinationDir = file("../jdrupes-httpcodec.gh-pages/javadoc")
+    destinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
 }
 
 task sourcesJar(type: Jar) {
