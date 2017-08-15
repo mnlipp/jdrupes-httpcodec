@@ -8,7 +8,7 @@ base_version = ${versionmask;===;${Bundle-Version}}
 # This is used as the general API version for all packages.
 # This being a library, individual API versions for packages don't 
 # really make sense.
-api_version = 0.12.0.${tstamp}
+api_version = 0.13.0.${tstamp}
 
 -sources: true
 -runee: JavaSE-1.8
