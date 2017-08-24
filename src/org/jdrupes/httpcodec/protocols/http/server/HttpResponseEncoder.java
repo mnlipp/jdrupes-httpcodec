@@ -23,9 +23,7 @@ import java.io.Writer;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
@@ -83,12 +81,9 @@ import org.jdrupes.httpcodec.types.Directive;
  */
 public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 
-	private static ServiceLoader<ProtocolProvider> pluginLoader 
-		= ServiceLoader.load(ProtocolProvider.class);
 	private static Result.Factory resultFactory = new Result.Factory() {
 	};
 	
-	private Map<String,ProtocolProvider> plugins = new HashMap<>();
 	private String switchingTo;
 	private ProtocolProvider protocolPlugin;
 
@@ -207,17 +202,13 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 				.setHasPayload(false).clearHeaders();
 			return null;
 		}
-		synchronized (pluginLoader) {
-			if (plugins.containsKey(protocol.get())) {
-				protocolPlugin = plugins.get(protocol.get());
-			} else {
-				protocolPlugin = StreamSupport
-						.stream(pluginLoader.spliterator(), false)
-						.filter(p -> p.supportsProtocol(protocol.get()))
-						.findFirst().get();
-				plugins.put(protocol.get(), protocolPlugin);
-			}
-		}
+		// Load every time to support dynamic deployment of additional
+		// services in an OSGi environment.
+		protocolPlugin = StreamSupport.stream(
+				ServiceLoader.load(ProtocolProvider.class)
+				.spliterator(), false)
+				.filter(p -> p.supportsProtocol(protocol.get()))
+				.findFirst().get();
 		if (protocolPlugin == null) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setHasPayload(false).clearHeaders();
