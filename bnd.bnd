@@ -1,6 +1,6 @@
 Bundle-Name: JDrupes HTTP Codec
 Bundle-SymbolicName: org.jdrupes.httpcodec
-Bundle-Version: 0.9.14.${tstamp}
+Bundle-Version: 1.0.0.${tstamp}
 Bundle-Copyright: Michael N. Lipp (c) 2016
 Bundle-License: http://www.gnu.org/licenses/lgpl-3.0.txt
 
@@ -8,7 +8,7 @@ base_version = ${versionmask;===;${Bundle-Version}}
 # This is used as the general API version for all packages.
 # This being a library, individual API versions for packages don't 
 # really make sense.
-api_version = 0.13.0.${tstamp}
+api_version = 1.0.0.${tstamp}
 
 -sources: true
 -runee: JavaSE-1.8
@@ -37,6 +37,15 @@ Export-Package: \
 
 -includeresource: resources
 
+-plugin.1.Released:  \
+    aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+        releaseUrls=https://repo1.maven.org/maven2/; \
+        query='q=g=%22org.jdrupes.httpcodec%22'; \
+        name=Released;
+        
+-baseline: *
+-baselinerepository: Released
+  
 -fixupmessages: \
 	"Found source folder 'resources' that is not on bnd's source path", \
 	"Found source folder 'demo' that is not on bnd's source path", \
