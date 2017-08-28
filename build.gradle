@@ -33,7 +33,7 @@ new Processor().withCloseable { processor ->
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-version = bnd.base_version // + "-SNAPSHOT"
+version = bnd.base_version + "-SNAPSHOT"
 
 archivesBaseName = 'httpcodec'
 
@@ -138,6 +138,8 @@ publishing {
 // MavenPublishing (original), still needed for remote 
 
 uploadArchives {
+	dependsOn baseline
+	
 	repositories {
 		mavenDeployer {
 			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
