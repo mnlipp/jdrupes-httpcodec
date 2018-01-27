@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.ProtocolException;
+import org.jdrupes.httpcodec.protocols.websocket.WsCloseFrame;
 import org.jdrupes.httpcodec.protocols.websocket.WsDecoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsEncoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
@@ -225,4 +226,75 @@ public class MiscTests {
 		assertArrayEquals(msgBytes2, msgBytes);
 	}
 	
+	@Test
+	public void testDecodeMaskedSimpleClose() throws ProtocolException {
+		byte[] msgBytes = new byte[] 
+				{(byte)0x88, (byte)0x80, 0, 0, 0, 0 };
+		ByteBuffer msg = ByteBuffer.allocate(msgBytes.length);
+		msg.put(msgBytes);
+		msg.flip();
+		WsDecoder decoder = new WsDecoder();
+		Decoder.Result<?> result = decoder.decode(msg, null, true);
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertTrue(result.closeConnection());
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(result.response().isPresent());
+		assertTrue(result.response().get() instanceof WsCloseFrame);
+		assertFalse(((WsCloseFrame)result.response().get()).statusCode().isPresent());
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsCloseFrame);
+	}
+
+	@Test
+	public void testDecodeMaskedStatusClose() throws ProtocolException {
+		byte[] msgBytes = new byte[] 
+				{(byte)0x88, (byte)0x82, 0, 0, 0, 0, 1, 2 };
+		ByteBuffer msg = ByteBuffer.allocate(msgBytes.length);
+		msg.put(msgBytes);
+		msg.flip();
+		WsDecoder decoder = new WsDecoder();
+		Decoder.Result<?> result = decoder.decode(msg, null, true);
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertTrue(result.closeConnection());
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(result.response().isPresent());
+		assertTrue(result.response().get() instanceof WsCloseFrame);
+		assertTrue(((WsCloseFrame)result.response().get()).statusCode().isPresent());
+		assertEquals(258, ((WsCloseFrame)result.response().get()).statusCode().get().intValue());
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsCloseFrame);
+		WsCloseFrame hdr = (WsCloseFrame)decoder.header().get();
+		assertEquals(258, hdr.statusCode().get().intValue());
+//		CharBuffer txt = Charset.forName("utf-8")
+//				.decode(hdr.applicationData().get());
+//		assertEquals("Hello", txt.toString());
+	}
+
+	@Test
+	public void testDecodeMaskedReasonClose() throws ProtocolException {
+		byte[] msgBytes = new byte[] 
+				{(byte)0x88, (byte)0x87, 0, 0, 0, 0, 1, 2, 
+						(byte)'H', (byte)'e', (byte)'l', (byte)'l', (byte)'o'};
+		ByteBuffer msg = ByteBuffer.allocate(msgBytes.length);
+		msg.put(msgBytes);
+		msg.flip();
+		WsDecoder decoder = new WsDecoder();
+		Decoder.Result<?> result = decoder.decode(msg, null, true);
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertTrue(result.closeConnection());
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(result.response().isPresent());
+		assertTrue(result.response().get() instanceof WsCloseFrame);
+		assertTrue(((WsCloseFrame)result.response().get()).statusCode().isPresent());
+		assertEquals(258, ((WsCloseFrame)result.response().get()).statusCode().get().intValue());
+		assertTrue(decoder.header().isPresent());
+		assertTrue(decoder.header().get() instanceof WsCloseFrame);
+		WsCloseFrame hdr = (WsCloseFrame)decoder.header().get();
+		assertEquals(258, hdr.statusCode().get().intValue());
+		assertEquals("Hello", hdr.reason().get());
+	}
+
 }

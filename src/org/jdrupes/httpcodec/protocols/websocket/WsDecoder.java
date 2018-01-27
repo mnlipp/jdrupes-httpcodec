@@ -227,24 +227,23 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 				if (controlData.position() < 2) {
 					controlData.put(in.get());
 					bytesExpected -= 1;
+					if (bytesExpected == 0) {
+						// Close frame with status code only
+						expectNextFrame();
+						return createCloseResult();
+					}
 					continue;
 				}
+				if (charDecoder == null) {
+					charDecoder = new OptimizedCharsetDecoder(
+					        Charset.forName("UTF-8").newDecoder());
+				}
 				initiallyAvailable = in.remaining();
-				copyData(controlData, in, (int) bytesExpected, endOfInput);
+				copyData(controlChars, in, (int) bytesExpected, endOfInput);
 				bytesExpected -= (initiallyAvailable - in.remaining());
 				if (bytesExpected == 0) {
 					expectNextFrame();
-					controlData.flip();
-					int status = 0;
-					while (controlData.hasRemaining()) {
-						status = (status << 8) | (in.get() & 0xff);
-					}
-					controlChars.flip();
-					receivedHeader = new WsCloseFrame(status, controlChars);
-					controlChars = null;
-					controlData = null;
-					return resultFactory().newResult(false, false, true, 
-							true, receivedHeader, false);
+					return createCloseResult();
 				}
 				return createResult(false, true);
 			}
@@ -324,6 +323,20 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		return null;
 	}
 	
+	private Decoder.Result<WsFrameHeader> createCloseResult() {
+		controlData.flip();
+		int status = 0;
+		while (controlData.hasRemaining()) {
+			status = (status << 8) | (controlData.get() & 0xff);
+		}
+		controlData = null;
+		controlChars.flip();
+		receivedHeader = new WsCloseFrame(status, controlChars);
+		controlChars = null;
+		return resultFactory().newResult(false, false, true, 
+				true, receivedHeader, false);
+	}
+
 	private boolean isFinalFrame() {
 		return (curHeaderHead & 0x8000) != 0;
 	}
