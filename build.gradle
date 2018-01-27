@@ -23,17 +23,12 @@ apply plugin: 'maven'
 // Makes Eclipse-groovy handle *.gradle file properly
 apply plugin:'groovy'
 
-// The builder plugin doesn't provide access to the bnd properties.
-// Provide workaround as properties in extra bnd
-new Processor().withCloseable { processor ->
-    processor.setProperties(project.file('bnd.bnd'))
-    ext.set("bnd", processor.getFlattenedProperties());
-}
-
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-version = bnd.base_version + "-SNAPSHOT"
+ext.releaseVersion = "1.0.1"
+ext.isSnapshot = true
+version = releaseVersion + (isSnapshot ? "-SNAPSHOT" : "")
 
 archivesBaseName = 'httpcodec'
 
@@ -74,9 +69,12 @@ sourceSets {
     }
 }
 
+String bundleVersion = releaseVersion +
+	(isSnapshot ? ".-\${tstamp}-SNAPSHOT" : ".rel")
+		
 jar {
 	manifest {
-		attributes('Bundle-Version': version)
+		attributes('Bundle-Version': bundleVersion)
 	}
     into('META-INF') {
         from 'resources/META-INF'
