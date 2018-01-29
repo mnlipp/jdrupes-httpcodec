@@ -80,7 +80,8 @@ public class WsCloseFrame extends WsFrameHeader {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("WsCloseFrame [");
+		builder.append(this.getClass().getSimpleName());
+		builder.append(" [");
 		if (statusCode != null) {
 			builder.append("statusCode=");
 			builder.append(statusCode);
