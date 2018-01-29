@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2016,2018  Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -29,8 +29,8 @@ import java.util.Optional;
  */
 public class WsCloseFrame extends WsFrameHeader {
 
-	private Optional<Integer> statusCode;
-	private Optional<String> reason;
+	private Integer statusCode;
+	private String reason;
 	
 	/**
 	 * Creates a new close control frame.
@@ -40,9 +40,8 @@ public class WsCloseFrame extends WsFrameHeader {
 	 */
 	public WsCloseFrame(Integer statusCode, CharBuffer reason) {
 		super();
-		this.statusCode = Optional.ofNullable(statusCode);
-		this.reason = Optional.ofNullable(
-				reason != null ? reason.toString() : null);
+		this.statusCode = statusCode;
+		this.reason = reason != null ? reason.toString() : null;
 	}
 	
 	/* (non-Javadoc)
@@ -65,14 +64,14 @@ public class WsCloseFrame extends WsFrameHeader {
 	 * @return the statusCode
 	 */
 	public Optional<Integer> statusCode() {
-		return statusCode;
+		return Optional.ofNullable(statusCode);
 	}
 	
 	/**
 	 * @return the reason
 	 */
 	public Optional<String> reason() {
-		return reason;
+		return Optional.ofNullable(reason);
 	}
 
 	/* (non-Javadoc)

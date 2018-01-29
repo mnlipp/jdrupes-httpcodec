@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2016, 2017  Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -57,6 +57,7 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	private byte[] maskingKey = new byte[4];
 	private int maskIndex;
 	private ByteBufferOutputStream convData = new ByteBufferOutputStream();
+	private boolean closeHasBeenSent = false;
 
 	/**
 	 * Creates new encoder.
@@ -86,7 +87,9 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	}
 
 	private Result frameFinished(boolean endOfInput) {
-		final boolean close = (messageHeaders.peek() instanceof WsCloseFrame);
+		closeHasBeenSent = (messageHeaders.peek() instanceof WsCloseFrame);
+		// If it is the response to a close from the other endpoint, close now.
+		final boolean close = (messageHeaders.peek() instanceof WsCloseResponse);
 		if (!(messageHeaders.peek() instanceof WsMessageHeader) 
 				|| endOfInput) {
 			messageHeaders.pop();
@@ -135,6 +138,9 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 
 	@Override
 	public Result encode(Buffer in, ByteBuffer out, boolean endOfInput) {
+		if (closeHasBeenSent) {
+			return resultFactory().newResult(false, false, true);
+		}
 		Result result = null;
 		while (out.remaining() > 0) {
 			switch(state) {

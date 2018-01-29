@@ -1,6 +1,6 @@
 /*
  * This file is part of the JDrupes non-blocking HTTP Codec
- * Copyright (C) 2016  Michael N. Lipp
+ * Copyright (C) 2016, 2018  Michael N. Lipp
  *
  * This program is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License as published
@@ -303,7 +303,7 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 				receivedHeader = new WsCloseFrame(null, null);
 				expectNextFrame();
 				return resultFactory().newResult(false, false, true, 
-						true, receivedHeader, false);
+						true, new WsCloseResponse(null), false);
 			}
 			controlData = ByteBuffer.allocate(2);
 			// upper limit (reached if each byte becomes a char)
@@ -333,8 +333,8 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 		controlChars.flip();
 		receivedHeader = new WsCloseFrame(status, controlChars);
 		controlChars = null;
-		return resultFactory().newResult(false, false, true, 
-				true, receivedHeader, false);
+		return resultFactory().newResult(false, false, false, 
+				true, new WsCloseResponse(status), false);
 	}
 
 	private boolean isFinalFrame() {

@@ -29,6 +29,7 @@ import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.protocols.websocket.WsCloseFrame;
 import org.jdrupes.httpcodec.protocols.websocket.WsDecoder;
 import org.jdrupes.httpcodec.protocols.websocket.WsEncoder;
+import org.jdrupes.httpcodec.protocols.websocket.WsFrameHeader;
 import org.jdrupes.httpcodec.protocols.websocket.WsMessageHeader;
 import org.jdrupes.httpcodec.protocols.websocket.WsPingFrame;
 import org.jdrupes.httpcodec.protocols.websocket.WsPongFrame;
@@ -244,6 +245,13 @@ public class MiscTests {
 		assertFalse(((WsCloseFrame)result.response().get()).statusCode().isPresent());
 		assertTrue(decoder.header().isPresent());
 		assertTrue(decoder.header().get() instanceof WsCloseFrame);
+		// Subsequent encode must close
+		WsEncoder encoder = new WsEncoder(false);
+		encoder.encode((WsFrameHeader)result.response().get());
+		msg = ByteBuffer.allocate(100);
+		Encoder.Result encRes = encoder.encode(null, msg, true);
+		assertTrue(encRes.closeConnection());
+		assertTrue(msg.position() > 0);
 	}
 
 	@Test
@@ -257,7 +265,7 @@ public class MiscTests {
 		Decoder.Result<?> result = decoder.decode(msg, null, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.closeConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
 		assertTrue(result.response().isPresent());
 		assertTrue(result.response().get() instanceof WsCloseFrame);
@@ -267,9 +275,13 @@ public class MiscTests {
 		assertTrue(decoder.header().get() instanceof WsCloseFrame);
 		WsCloseFrame hdr = (WsCloseFrame)decoder.header().get();
 		assertEquals(258, hdr.statusCode().get().intValue());
-//		CharBuffer txt = Charset.forName("utf-8")
-//				.decode(hdr.applicationData().get());
-//		assertEquals("Hello", txt.toString());
+		// Subsequent encode must close
+		WsEncoder encoder = new WsEncoder(false);
+		encoder.encode((WsFrameHeader)result.response().get());
+		msg = ByteBuffer.allocate(100);
+		Encoder.Result encRes = encoder.encode(null, msg, true);
+		assertTrue(encRes.closeConnection());
+		assertTrue(msg.position() > 0);
 	}
 
 	@Test
@@ -284,7 +296,7 @@ public class MiscTests {
 		Decoder.Result<?> result = decoder.decode(msg, null, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.closeConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
 		assertTrue(result.response().isPresent());
 		assertTrue(result.response().get() instanceof WsCloseFrame);
@@ -295,6 +307,32 @@ public class MiscTests {
 		WsCloseFrame hdr = (WsCloseFrame)decoder.header().get();
 		assertEquals(258, hdr.statusCode().get().intValue());
 		assertEquals("Hello", hdr.reason().get());
+		// Subsequent encode must close
+		WsEncoder encoder = new WsEncoder(false);
+		encoder.encode((WsFrameHeader)result.response().get());
+		msg = ByteBuffer.allocate(100);
+		Encoder.Result encRes = encoder.encode(null, msg, true);
+		assertTrue(encRes.closeConnection());
+		assertTrue(msg.position() > 0);		
+	}
+
+	@Test
+	public void testEncodeClose() throws ProtocolException {
+		WsFrameHeader hdr = new WsCloseFrame(0, CharBuffer.wrap("Test"));
+		WsEncoder encoder = new WsEncoder(false);
+		encoder.encode(hdr);
+		ByteBuffer encoded = ByteBuffer.allocate(100);
+		Encoder.Result encRes = encoder.encode(null, encoded, true);
+		assertFalse(encRes.closeConnection());
+		WsDecoder decoder = new WsDecoder();
+		ByteBuffer decoded = ByteBuffer.allocate(100);
+		encoded.flip();
+		Decoder.Result<?> decRes = decoder.decode(encoded, decoded, true);
+		assertTrue(decRes.response().isPresent());
+		encoder.encode((WsFrameHeader)decRes.response().get());
+		encoded.clear();
+		encRes = encoder.encode(null, encoded, true);
+		assertTrue(encRes.closeConnection());
 	}
 
 }
