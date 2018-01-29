@@ -18,5 +18,5 @@
 /**
  * Classes for handling the Websocket protocol.
  */
-@org.osgi.annotation.versioning.Version("${api_version}")
+@org.osgi.annotation.versioning.Version("1.1.0.${tstamp}")
 package org.jdrupes.httpcodec.protocols.websocket;
