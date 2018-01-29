@@ -41,7 +41,7 @@ The basic information provided by the decoding process (defined in
 known from the Charset codecs. "Underflow" indicates that more input
 data is needed in order to complete the decoding of the message.
 "Overflow" indicates that the output buffer is full. "Close connection"
-is usually only set by encoders and indicates that the connection
+is mostly set by encoders and indicates that the connection
 should be closed. This is explained in more detail in the next section.
 
 Besides streams with body data, decoders such as an HTTP decoder
@@ -53,9 +53,9 @@ decoded header can be retrieved with
 receive buffer is rather small and the header rather big, it may
 take several decoder invocations before a header becomes available.
 
-Sometimes, HTTP requires a provisional feedback to be sent after receiving
-the message header. Because the decoder cannot send this feedback
-itself, it provides the message to be sent in such cases
+Sometimes, a protocol requires a provisional feedback to be sent after 
+receiving the message header. Because the decoder cannot send this 
+feedback itself, it provides the message to be sent in such cases
 with {@link org.jdrupes.httpcodec.Decoder.Result#response()}.
 
 If a received message violates the protocol or represents
@@ -84,8 +84,8 @@ whether the output buffer is full and/or further body data is required.
 In addition, {@link org.jdrupes.httpcodec.Codec.Result#closeConnection} 
 may indicate that the connection, to which the message is sent, should 
 be closed after sending the message. This indication 
-is needed because closing the connection is sometimes required by HTTP to
-complete a message exchange. As an encoder cannot close the connection 
+is needed because closing the connection is sometimes required by protocols
+to complete a message exchange. As an encoder cannot close the connection 
 itself, this must be done by the invoker (the manager of the connection).
 
 Why Generics?
@@ -284,21 +284,26 @@ end
 ' ========== Receive loop =========
 skinparam conditionStyle diamond
 title Handle Decoder Result
+
 start
 if () then ([result has message])
-  :Send response
-  contained in
-  result;
+  :Send protocol level
+  response contained 
+  in result;
+else ([else])
+endif
+if () then ([close connection])
+  :Close connection;
 else ([else])
 endif
 if () then ([!response only
-&& !connection closed
 && header complete])
   :Handle message;
   note
   Includes decoding 
-  any remaining body 
-  data
+  any body data
+  remaining in 
+  received chunk
   end note
   :Send response 
   created while 
