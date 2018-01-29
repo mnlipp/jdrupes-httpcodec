@@ -1,6 +1,6 @@
 Bundle-Name: JDrupes HTTP Codec
 Bundle-SymbolicName: org.jdrupes.httpcodec
-Bundle-Copyright: Michael N. Lipp (c) 2016
+Bundle-Copyright: Michael N. Lipp (c) 2016, 2018
 Bundle-License: http://www.gnu.org/licenses/lgpl-3.0.txt
 
 base_version = ${versionmask;===;${Bundle-Version}}
