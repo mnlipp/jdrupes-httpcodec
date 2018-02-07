@@ -19,7 +19,10 @@
 package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.protocols.http.HttpField;
@@ -73,7 +76,37 @@ public class RequestDecoderTests {
 		assertEquals("", field.get().value().valueForName("gsScrollPos").get());
 	}
 
-	
+	/**
+	 * Simple GET request with query.
+	 * 
+	 * @throws UnsupportedEncodingException
+	 */
+	@Test
+	public void testBasicGetRequestWithQuery()
+	        throws UnsupportedEncodingException {
+		String reqText 
+			= "GET /test?p1=Hello&p2=" + URLEncoder.encode("World!", "utf-8")
+			+ "&difficult=" + URLEncoder.encode("äöü", "utf-8")
+			+ "&difficult=" + URLEncoder.encode("ÄÖÜ", "utf-8")
+			+ " HTTP/1.1\r\n"
+			+ "Host: localhost:8888\r\n"
+			+ "\r\n";
+		ByteBuffer buffer = ByteBuffer.wrap(reqText.getBytes("ascii"));
+		HttpRequestDecoder decoder = new HttpRequestDecoder();
+		HttpRequestDecoder.Result result = decoder.decode(buffer, null, false);
+		assertTrue(result.isHeaderCompleted());
+		assertFalse(result.response().isPresent());
+		assertFalse(decoder.header().get().hasPayload());
+		assertEquals("GET", decoder.header().get().method());
+		assertEquals("/test",
+		        decoder.header().get().requestUri().getPath());
+		Map<String,List<String>> queryData = decoder.header().get().queryData();
+		assertEquals("Hello", queryData.get("p1").get(0));
+		assertEquals("World!", queryData.get("p2").get(0));
+		assertEquals("äöü", queryData.get("difficult").get(0));
+		assertEquals("ÄÖÜ", queryData.get("difficult").get(1));
+	}
+
 	/**
 	 * Request with header in two parts.
 	 * 

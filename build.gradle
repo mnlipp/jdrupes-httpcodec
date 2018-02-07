@@ -27,7 +27,7 @@ group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
 ext.releaseVersion = "1.0.2"
-ext.isSnapshot = true
+ext.isSnapshot = false
 version = releaseVersion + (isSnapshot ? "-SNAPSHOT" : "")
 
 archivesBaseName = 'httpcodec'

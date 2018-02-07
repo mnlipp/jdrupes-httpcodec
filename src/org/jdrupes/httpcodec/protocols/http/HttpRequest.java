@@ -18,8 +18,18 @@
 
 package org.jdrupes.httpcodec.protocols.http;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.StringTokenizer;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
@@ -36,6 +46,7 @@ public class HttpRequest extends HttpMessageHeader {
 	private String host;
 	private int port;
 	private HttpResponse response;
+	private Map<String,List<String>> decodedQuery = null;
 
 	/**
 	 * Creates a new request with basic data. 
@@ -151,6 +162,53 @@ public class HttpRequest extends HttpMessageHeader {
 	public Optional<HttpResponse> response() {
 		return Optional.ofNullable(response);
 	}
+	
+	/**
+	 * Returns the decoded query data from the request URI. The result
+	 * is a lazily created (and cached) unmodifiable map.
+	 *
+	 * @param charset the charset to use for decoding
+	 * @return the data
+	 * @throws UnsupportedEncodingException the unsupported encoding exception
+	 */
+	public Map<String, List<String>> queryData(Charset charset)
+			throws UnsupportedEncodingException {
+		if (decodedQuery != null) {
+			return decodedQuery;
+		}
+	    if (requestUri.getRawQuery() == null || requestUri.getRawQuery().length() == 0) {
+	    	decodedQuery = Collections.emptyMap();
+	    	return decodedQuery;
+	    }
+		Map<String, List<String>> queryData = new HashMap<>();
+		StringTokenizer pairStrings = new StringTokenizer(requestUri.getRawQuery(), "&");
+		while (pairStrings.hasMoreTokens()) {
+			StringTokenizer pair = new StringTokenizer(pairStrings.nextToken(), "=");
+			String key = URLDecoder.decode(pair.nextToken(), charset.name());
+			String value = pair.hasMoreTokens() 
+					? URLDecoder.decode(pair.nextToken(), charset.name()) : null;
+			queryData.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+		}
+		for (Map.Entry<String, List<String>> entry: queryData.entrySet()) {
+			entry.setValue(Collections.unmodifiableList(entry.getValue()));
+		}
+		decodedQuery = Collections.unmodifiableMap(queryData);
+		return decodedQuery;
+	}
+	
+	/**
+	 * Short for invoking {@link #queryData(Charset)} with UTF-8 as charset.
+	 *
+	 * @return the map
+	 */
+	public Map<String, List<String>> queryData() {
+		try {
+			return queryData(StandardCharsets.UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			// Cannot happen
+			throw new IllegalStateException(e);
+		}
+	}	
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
