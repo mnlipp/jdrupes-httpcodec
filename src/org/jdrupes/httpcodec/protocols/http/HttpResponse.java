@@ -130,8 +130,21 @@ public class HttpResponse extends HttpMessageHeader {
 	}
 	
 	/**
-	 * A convenience method for setting the "Content-Type" header. Also sets 
-	 * the "has payload" flag.
+	 * Convenience method for setting the "Content-Type" header using 
+	 * the given media type. Also sets the "has payload" flag.
+	 * 
+	 * @param mediaType the media type
+	 * @return the response for easy chaining
+	 */
+	public HttpResponse setContentType(MediaType mediaType) {
+		setField(HttpField.CONTENT_TYPE, mediaType);
+		setHasPayload(true);
+		return this;
+	}
+	
+	/**
+	 * Convenience method for setting the "Content-Type" header
+	 * from the given values. Also sets the "has payload" flag.
 	 * 
 	 * @param type the type
 	 * @param subtype the subtype
@@ -140,9 +153,7 @@ public class HttpResponse extends HttpMessageHeader {
 	 */
 	public HttpResponse setContentType(String type, String subtype) 
 			throws ParseException {
-		setField(HttpField.CONTENT_TYPE, new MediaType(type, subtype));
-		setHasPayload(true);
-		return this;
+		return setContentType(new MediaType(type, subtype));
 	}
 
 	/**
@@ -158,11 +169,8 @@ public class HttpResponse extends HttpMessageHeader {
 	 */
 	public HttpResponse setContentType(String type, String subtype,
 			String charset) throws ParseException {
-		setField(HttpField.CONTENT_TYPE,
-				MediaType.builder().setType(type, subtype)
+		return setContentType(MediaType.builder().setType(type, subtype)
 				.setParameter("charset", charset).build());
-		setHasPayload(true);
-		return this;
 	}
 	
 	/**
@@ -174,6 +182,19 @@ public class HttpResponse extends HttpMessageHeader {
 	 * @return the response for easy chaining
 	 */
 	public HttpResponse setContentType(URI requestUri) {
+		MediaType mediaType = contentType(requestUri);
+		setField(HttpField.CONTENT_TYPE, mediaType);
+		setHasPayload(true);
+		return this;
+	}
+	
+	/**
+	 * Derives a media type from the given URI.
+	 * 
+	 * @param requestUri the uri
+	 * @return the media type
+	 */
+	public static MediaType contentType(URI requestUri) {
 		// Get content type
 		String mimeTypeName;
 		try {
@@ -193,16 +214,12 @@ public class HttpResponse extends HttpMessageHeader {
 		} catch (ParseException e) {
 			// Cannot happen
 		}
-		
-		// Send response 
 		if ("text".equals(mediaType.topLevelType())) {
 			mediaType = MediaType.builder().from(mediaType)
 					.setParameter("charset", System.getProperty(
 							"file.encoding", "UTF-8")).build();
 		}
-		setField(HttpField.CONTENT_TYPE, mediaType);
-		setHasPayload(true);
-		return this;
+		return mediaType;
 	}
 	
 	/**
