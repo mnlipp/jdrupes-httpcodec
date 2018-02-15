@@ -19,9 +19,13 @@
 package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
+import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder;
+import org.jdrupes.httpcodec.types.MediaType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -111,5 +115,13 @@ public class BasicProtocolTests {
 		assertEquals(400, result.response().get().statusCode());
 	}
 
-
+	@Test
+	public void testContentType() throws URISyntaxException {
+		MediaType mediaType = HttpResponse.contentType(
+				new URI("file:///test.html"));
+		assertEquals("text/html; charset=UTF-8", mediaType.toString());
+		mediaType = HttpResponse.contentType(
+				new URI("jar:file:/test.jar!/index.html"));
+		assertEquals("text/html; charset=UTF-8", mediaType.toString());
+	}
 }

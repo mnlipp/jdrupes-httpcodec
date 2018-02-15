@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.protocols.http;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -195,20 +196,30 @@ public class HttpResponse extends HttpMessageHeader {
 	 * @return the media type
 	 */
 	public static MediaType contentType(URI requestUri) {
-		// Get content type
-		String mimeTypeName;
+		MediaType mediaType = new MediaType("application", "octet-stream");
+		while (requestUri.isOpaque()) {
+			// Maybe the scheme specific part is a "nested" URI...
+			try {
+				requestUri = new URI(requestUri.getSchemeSpecificPart());
+			} catch (URISyntaxException | NullPointerException e) {
+				return mediaType;
+			}
+		}
+		if (requestUri.getPath() == null) {
+			return mediaType;
+		}
+		String mimeTypeName = null;
 		try {
 			// probeContentType is most advanced, but may fail if it tries
 			// to look at the file's content (which doesn't exist).
 			mimeTypeName = Files.probeContentType(Paths.get(
 					requestUri.getPath()));
 		} catch (IOException e) {
-			mimeTypeName = null;
+			// Fall Through
 		}
 		if (mimeTypeName == null) {
 			mimeTypeName = typesMap.getContentType(requestUri.getPath());
 		}
-		MediaType mediaType = null;
 		try {
 			mediaType = Converters.MEDIA_TYPE.fromFieldValue(mimeTypeName);
 		} catch (ParseException e) {
