@@ -180,13 +180,15 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 */
 	public Encoder.Result encode(Buffer in, ByteBuffer out,
 	        boolean endOfInput) {
-		outStream.assignBuffer(out);
-		Encoder.Result result = resultFactory().newResult(false, false, false);
-		if (out.remaining() == 0) {
+		outStream.assignBuffer(out); // Prepare and copy over what was left.
+		if (out.remaining() == 0) { // If a lot was left.
+			outStream.assignBuffer(null);
 			return resultFactory().newResult(true, false, false);
 		}
+		Encoder.Result result = resultFactory().newResult(false, false, false);
 		while (true) {
 			if (result.isOverflow() || result.isUnderflow()) {
+				outStream.assignBuffer(null);
 				return result;
 			}
 			switch (states.peek()) {
@@ -208,6 +210,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				if (in.remaining() == 0 && !endOfInput) {
 					// Has probably been invoked with a dummy buffer,
 					// cannot be used to create pending body buffer.
+					outStream.assignBuffer(null);
 					return resultFactory().newResult(false, true, false);
 				}
 				collectedBodyData = new ByteBufferOutputStream(
@@ -223,7 +226,9 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 			case STREAM_COLLECTED:
 				// Output collected body
 				if (collectedBodyData.remaining() < 0) {
+					// Copy over.
 					collectedBodyData.assignBuffer(out);
+					collectedBodyData.assignBuffer(null);
 					break;
 				}
 				states.pop();
@@ -243,11 +248,13 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 					continue;
 				}
 				// Buffer written, waiting for space, more data or end of data
+				outStream.assignBuffer(null);
 				return result;
 
 			case FLUSH_ENCODER:
 				CoderResult flushResult = charEncoder.flush(out);
 				if (flushResult.isOverflow()) {
+					outStream.assignBuffer(null);
 					return resultFactory().newResult(true, false, false);
 				}
 				states.pop();
@@ -262,6 +269,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				// Stream, i.e. simply copy from source to destination
 				if (!ByteBufferUtils.putAsMuchAsPossible(out, chunkData)) {
 					// Not enough space in out buffer
+					outStream.assignBuffer(null);
 					return resultFactory().newResult(true, false, false);
 				}
 				// everything from in written
@@ -288,6 +296,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				
 			case DONE:
 				// Everything is written
+				outStream.assignBuffer(null);
 				if (!endOfInput) {
 					if (in.remaining() == 0) {
 						return resultFactory()
@@ -310,8 +319,9 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 				throw new IllegalStateException();
 			}
 			// Using "continue" above avoids this check. Use it only
-			// if the state has changed and no addition output is expected. 
+			// if the state has changed and no additional output is expected. 
 			if (out.remaining() == 0) {
+				outStream.assignBuffer(null);
 				return resultFactory().newResult(true, false, false);
 			}
 		}

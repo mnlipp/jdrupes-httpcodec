@@ -101,6 +101,13 @@ public class ByteBufferOutputStream extends OutputStream {
 	 *            the buffer to use
 	 */
 	public void assignBuffer(ByteBuffer buffer) {
+		if (buffer == null) {
+			if (current == assignedBuffer) {
+				current = null;
+			}
+			assignedBuffer = null;
+			return;
+		}
 		assignedBuffer = buffer;
 		// Move any overflow to the new buffer
 		while (!overflows.isEmpty()) {
