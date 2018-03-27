@@ -26,7 +26,7 @@ apply plugin:'groovy'
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-ext.releaseVersion = "1.0.5"
+ext.releaseVersion = "1.0.6"
 ext.isSnapshot = false
 version = releaseVersion + (isSnapshot ? "-SNAPSHOT" : "")
 

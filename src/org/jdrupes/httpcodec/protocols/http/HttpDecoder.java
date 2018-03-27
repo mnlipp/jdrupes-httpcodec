@@ -338,10 +338,11 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				return resultFactory().newResult(false, false);
 
 			case COPY_SPECIFIED:
-				if (out == null) {
-					return resultFactory().newResult(true, false);
-				}
+				// If we get here, leftToRead is greater zero.
 				int initiallyRemaining = in.remaining();
+				if (out == null) {
+					return resultFactory().newResult(true, initiallyRemaining <= 0);
+				}
 				CoderResult decRes;
 				if (in.remaining() <= leftToRead) {
 					decRes = copyBodyData(out, in, in.remaining(), endOfInput);
