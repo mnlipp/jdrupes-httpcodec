@@ -48,9 +48,3 @@ the library's architecture. In addition, have a look  at the source code in the
 
 Contributions and bug reports are welcome. Please provide them as
 GitHub issues.
-
-
-<!-- Piwik Image Tracker-->
-<img src="https://piwik.mnl.de/piwik.php?idsite=10&rec=1&url=https%3A%2F%2Fgithub.com%2Fmnlipp%2Fjdrupes-httpcodec" style="border:0" alt="" />
-<!-- End Piwik -->
-
