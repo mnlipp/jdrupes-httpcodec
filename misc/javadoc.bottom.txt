@@ -4,7 +4,7 @@
 &mdash; <a href="https://github.com/site/privacy">Privacy</a></p>
     <script type="text/javascript">
     if (location.hostname.indexOf("github") !== -1) {
-        document.getElementById('githubfooter').style.visibility='visible';
+        document.getElementById("githubfooter").style.visibility="visible";
     }
     </script>
     <noscript>
