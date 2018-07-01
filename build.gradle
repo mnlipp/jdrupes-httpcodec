@@ -26,7 +26,7 @@ apply plugin:'groovy'
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-ext.releaseVersion = "1.0.7"
+ext.releaseVersion = "1.0.8"
 ext.isSnapshot = false
 version = releaseVersion + (isSnapshot ? "-SNAPSHOT" : "")
 
@@ -39,10 +39,8 @@ repositories {
 //	maven { url 'https://jitpack.io' }
 }
 
-compileJava {
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
-}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 configurations {
     javadocTaglets
