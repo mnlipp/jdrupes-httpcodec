@@ -39,9 +39,6 @@ repositories {
 //	maven { url 'https://jitpack.io' }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 configurations {
     javadocTaglets
 }
@@ -79,6 +76,13 @@ sourceSets {
         }
     }
 }
+
+tasks.compileJava {
+	if (!JavaVersion.current().isJava8()) {
+		options.compilerArgs.addAll(['--release', '8'])
+	}
+}
+
 
 String bundleVersion = releaseVersion +
 	(isSnapshot ? ".-\${tstamp}-SNAPSHOT" : ".rel")
