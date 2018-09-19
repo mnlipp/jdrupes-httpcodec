@@ -36,11 +36,11 @@ Export-Package: \
 
 -includeresource: resources
 
--plugin.1.Released:  \
+-plugin.1.Released: \
     aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+	    name=Released; \
         releaseUrls=https://repo1.maven.org/maven2/; \
-        query='q=g=%22org.jdrupes.httpcodec%22'; \
-        name=Released;
+        query='q=g=%22org.jdrupes.httpcodec%22&rows=1000'
         
 -baseline: *
 -baselinerepository: Released
