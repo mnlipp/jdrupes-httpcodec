@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.Buffer;
 
+import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
+import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 
 /**
@@ -64,6 +66,22 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 		return resultFactory;
 	}
 
+	/* (non-Javadoc)
+	 * @see HttpEncoder#encode(HttpMessageHeader)
+	 */
+	@Override
+	public void encode(HttpRequest messageHeader) {
+		if (messageHeader.protocol().equals(HttpProtocol.HTTP_1_1)) {
+			// Make sure we have a Host field, RFC 7230 5.4
+			if (!messageHeader.findStringValue(HttpField.HOST).isPresent()) {
+				messageHeader.setField(HttpField.HOST, 
+						messageHeader.requestUri().getHost()
+						+ ":" + messageHeader.requestUri().getPort());
+			}
+		}
+		super.encode(messageHeader);
+	}
+	
 	/* (non-Javadoc)
 	 * @see Encoder#startMessage(MessageHeader, java.io.Writer)
 	 */
