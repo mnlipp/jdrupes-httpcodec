@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 
@@ -30,7 +31,7 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
  * @param <Q> the message header type handled be the encoder (the request)
  * @param <R> the message header type handled by the decoder (the response)
  */
-public abstract class ClientEngine<Q extends MessageHeader, 
+public class ClientEngine<Q extends MessageHeader, 
 	R extends MessageHeader> extends Engine {
 
 	private Encoder<Q> requestEncoder;
@@ -116,6 +117,15 @@ public abstract class ClientEngine<Q extends MessageHeader,
 	        ByteBuffer in, Buffer out, boolean endOfInput)
 	        throws ProtocolException {
 		return responseDecoder.decode(in, out, endOfInput);
+	}
+	
+	/**
+	 * Returns the last encoded request.
+	 * 
+	 * @return the request
+	 */
+	public Optional<Q> currentRequest() {
+		return (Optional<Q>)requestEncoder.header();
 	}
 	
 }

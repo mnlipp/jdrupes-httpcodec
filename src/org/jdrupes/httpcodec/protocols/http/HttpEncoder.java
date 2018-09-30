@@ -327,6 +327,11 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		}
 	}
 
+	@Override
+	public Optional<T> header() {
+		return Optional.ofNullable(messageHeader);
+	}
+
 	/**
 	 * Called during the initial state. Writes the status line, determines the
 	 * body-mode and puts the state machine in output-headers mode, unless the

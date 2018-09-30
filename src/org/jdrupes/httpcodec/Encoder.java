@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 /**
  * The general interface of an encoder.
@@ -77,4 +78,11 @@ public interface Encoder<T extends MessageHeader> extends Codec {
 		return encode(EMPTY_IN, out, true);
 	}
 
+	/**
+	 * Returns the last message (header) encoded. 
+	 * 
+	 * @return the result
+	 */
+	public Optional<T> header();
+	
 }

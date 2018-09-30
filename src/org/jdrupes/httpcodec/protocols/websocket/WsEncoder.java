@@ -25,6 +25,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.util.EmptyStackException;
+import java.util.Optional;
 import java.util.Stack;
 
 import org.jdrupes.httpcodec.Codec;
@@ -328,6 +330,18 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 			out.put((byte) (((ByteBuffer) in)
 			        .get() ^ maskingKey[maskIndex]));
 			maskIndex = (maskIndex + 1) % 4;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Decoder#getHeader()
+	 */
+	@Override
+	public Optional<WsFrameHeader> header() {
+		try {
+			return Optional.of(messageHeaders.peek());
+		} catch (EmptyStackException e) {
+			return Optional.empty();
 		}
 	}
 
