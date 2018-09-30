@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.Decoder;
@@ -187,5 +188,41 @@ public class DecoderContentLengthTests {
 		assertEquals("13BEF4C6DC68E5", field.get().value().valueForName("MUIDB").get());
 	}
 
+	/**
+	 * Response with body determined by length an charset decoding.
+	 * 
+	 * @throws UnsupportedEncodingException
+	 * @throws HttpProtocolException 
+	 */
+	@Test
+	public void testWithBodyLengthAtOnceUtf8()
+	        throws UnsupportedEncodingException, HttpProtocolException {
+		String reqText = "HTTP/1.1 200 OK\r\n"
+				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
+				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
+				+ "Accept-Ranges: bytes\r\n"
+				+ "Content-Length: 12\r\n"
+				+ "Keep-Alive: timeout=5, max=100\r\n"
+				+ "Connection: Keep-Alive\r\n"
+				+ "Content-Type: text/plain; charset=UTF-8\r\n"
+				+ "\r\n"
+				+ "Hello World!";
+		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
+		CharBuffer body = CharBuffer.allocate(1024);
+		Decoder.Result<?> result = decoder.decode(in, body, false);
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(decoder.header().get().hasPayload());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(in.hasRemaining());
+		body.flip();
+		String bodyText = new String(body.array(), body.position(),
+		        body.limit());
+		assertEquals("Hello World!", bodyText);
+	}
 
 }

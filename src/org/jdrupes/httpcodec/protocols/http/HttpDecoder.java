@@ -289,6 +289,10 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			case LENGTH_RECEIVED:
 				// We "drop" to this state after COPY_SPECIFIED
 				// if we had a content length field
+				if (out instanceof CharBuffer && charDecoder != null) {
+					states.push(State.FINISH_CHARDECODER);
+					break;
+				}
 				states.pop();
 				adjustToEndOfMessage();
 				return resultFactory().newResult(false, false);
@@ -301,6 +305,9 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					states.pop();
 					states.push(State.CHUNK_TRAILER_LINE_RECEIVED);
 					states.push(State.RECEIVE_LINE);
+					if (out instanceof CharBuffer && charDecoder != null) {
+						states.push(State.FINISH_CHARDECODER);
+					}
 					break;
 				}
 				leftToRead = chunkSize;
@@ -355,9 +362,6 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					// Everything written (except, maybe, final bytes 
 					// from decoder)
 					states.pop();
-					if (out instanceof CharBuffer && charDecoder != null) {
-						states.push(State.FINISH_CHARDECODER);
-					}
 					break;
 				}
 				return resultFactory().newResult(
@@ -379,6 +383,8 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 				if (charDecoder.flush((CharBuffer)out).isOverflow()) {
 					return resultFactory().newResult(true, false);
 				}
+				// No longer needed (and no longer usable btw) 
+				charDecoder = null;
 				states.pop();
 				break;
 

@@ -20,6 +20,7 @@ package org.jdrupes.httpcodec.test.http;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.ProtocolException;
@@ -124,7 +125,7 @@ public class DecoderChunkedTests {
 	}
 
 	/**
-	 * Response with body determined by length.
+	 * Response with body determined by length, using tiny out buffer.
 	 * 
 	 * @throws UnsupportedEncodingException
 	 * @throws ProtocolException 
@@ -152,6 +153,45 @@ public class DecoderChunkedTests {
 		assertEquals(HttpStatus.OK.statusCode(), 
 				decoder.header().get().statusCode());
 		assertFalse(result.closeConnection());
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(in.hasRemaining());
+		body.flip();
+		String bodyText = new String(body.array(), body.position(),
+		        body.limit());
+		assertEquals("Hello World!", bodyText);
+	}
+
+	/**
+	 * Response with body determined by length, decoding to charset.
+	 * 
+	 * @throws UnsupportedEncodingException
+	 * @throws HttpProtocolException 
+	 */
+	@Test
+	public void testWithBodyLengthAtOnceUtf8()
+	        throws UnsupportedEncodingException, HttpProtocolException {
+		String reqText = "HTTP/1.1 200 OK\r\n"
+				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
+				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
+				+ "Transfer-Encoding: chunked\r\n"
+				+ "Content-Type: text/plain; charset=UTF-8\r\n"
+				+ "\r\n"
+				+ "7\r\n"
+				+ "Hello W\r\n"
+				+ "5\r\n"
+				+ "orld!\r\n"
+				+ "0\r\n"
+				+ "\r\n";
+		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
+		CharBuffer body = CharBuffer.allocate(1024);
+		Decoder.Result<?> result = decoder.decode(in, body, false);
+		assertTrue(result.isHeaderCompleted());
+		assertTrue(decoder.header().get().hasPayload());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
 		assertFalse(in.hasRemaining());
