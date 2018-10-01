@@ -225,4 +225,36 @@ public class DecoderContentLengthTests {
 		assertEquals("Hello World!", bodyText);
 	}
 
+	/**
+	 * Response with body determined by length.
+	 * 
+	 * @throws UnsupportedEncodingException
+	 * @throws HttpProtocolException 
+	 */
+	@Test
+	public void testWithBodyLengthZero()
+	        throws UnsupportedEncodingException, HttpProtocolException {
+		String reqText = "HTTP/1.1 200 OK\r\n"
+				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
+				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
+				+ "Accept-Ranges: bytes\r\n"
+				+ "Content-Length: 0\r\n"
+				+ "Keep-Alive: timeout=5, max=100\r\n"
+				+ "Connection: Keep-Alive\r\n"
+				+ "Content-Type: text/plain\r\n"
+				+ "\r\n";
+		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
+		HttpResponseDecoder decoder = new HttpResponseDecoder();
+		ByteBuffer body = ByteBuffer.allocate(1024);
+		Decoder.Result<?> result = decoder.decode(in, body, false);
+		assertTrue(result.isHeaderCompleted());
+		assertFalse(decoder.header().get().hasPayload());
+		assertFalse(result.closeConnection());
+		assertEquals(HttpStatus.OK.statusCode(),
+		        decoder.header().get().statusCode());
+		assertFalse(result.isOverflow());
+		assertFalse(result.isUnderflow());
+		assertFalse(in.hasRemaining());
+	}
+
 }

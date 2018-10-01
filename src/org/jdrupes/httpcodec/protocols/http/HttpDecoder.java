@@ -273,7 +273,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					adjustToBodyMode(bm);
 					messageHeader = building;
 					building = null;
-					if (bm == BodyMode.NO_BODY) {
+					if (!messageHeader.hasPayload()) {
 						adjustToEndOfMessage();
 						return resultFactory().newResult(false, false);
 					}
@@ -507,15 +507,16 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	}
 
 	private void adjustToBodyMode(BodyMode bm) {
-		building.setHasPayload(bm != BodyMode.NO_BODY);
 		states.pop();
 		switch (bm) {
 		case UNTIL_CLOSE:
 			states.push(State.COPY_UNTIL_CLOSED);
+			building.setHasPayload(true);
 			break;
 		case CHUNKED:
 			states.push(State.CHUNK_START_RECEIVED);
 			states.push(State.RECEIVE_LINE);
+			building.setHasPayload(true);
 			break;
 		case LENGTH:
 			HttpField<Long> clf = building.findField(
@@ -524,10 +525,12 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 			if (leftToRead > 0) {
 				states.push(State.LENGTH_RECEIVED);
 				states.push(State.COPY_SPECIFIED);
+				building.setHasPayload(true);
 				break;
 			}
 			// Length == 0 means no body, fall through
 		case NO_BODY:
+			building.setHasPayload(false);
 			break;
 		}
 	}
