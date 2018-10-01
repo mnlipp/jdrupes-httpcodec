@@ -156,6 +156,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	 * @param messageHeader
 	 *            the response
 	 */
+	@Override
 	public void encode(T messageHeader) {
 		if (states.peek() != State.INITIAL) {
 			throw new IllegalStateException();
@@ -163,6 +164,10 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		this.messageHeader = messageHeader;
 		charEncoder = null;
 		charWriter = null;
+		// Consistency checks
+		if (messageHeader.fields().containsKey(HttpField.CONTENT_TYPE)) {
+			messageHeader.setHasPayload(true);
+		}
 	}
 
 	/**
