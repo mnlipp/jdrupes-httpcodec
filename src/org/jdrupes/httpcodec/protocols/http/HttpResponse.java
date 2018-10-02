@@ -29,7 +29,6 @@ import java.util.Optional;
 import javax.activation.MimetypesFileTypeMap;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.MediaType;

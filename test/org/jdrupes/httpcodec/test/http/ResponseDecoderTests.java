@@ -24,10 +24,10 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
+import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
-import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converters;
@@ -42,12 +42,12 @@ public class ResponseDecoderTests {
 	 * Response with body determined by length.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
 	 * @throws ParseException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testSetCookie() throws UnsupportedEncodingException, 
-		HttpProtocolException, ParseException {
+		ParseException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"

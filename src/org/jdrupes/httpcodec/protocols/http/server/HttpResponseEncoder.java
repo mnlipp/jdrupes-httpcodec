@@ -31,7 +31,7 @@ import java.util.stream.StreamSupport;
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
-import org.jdrupes.httpcodec.plugin.ProtocolProvider;
+import org.jdrupes.httpcodec.plugin.UpgradeProvider;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
@@ -85,7 +85,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 	};
 	
 	private String switchingTo;
-	private ProtocolProvider protocolPlugin;
+	private UpgradeProvider protocolPlugin;
 
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
@@ -205,7 +205,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		// Load every time to support dynamic deployment of additional
 		// services in an OSGi environment.
 		protocolPlugin = StreamSupport.stream(
-				ServiceLoader.load(ProtocolProvider.class)
+				ServiceLoader.load(UpgradeProvider.class)
 				.spliterator(), false)
 				.filter(p -> p.supportsProtocol(protocol.get()))
 				.findFirst().get();

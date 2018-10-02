@@ -27,13 +27,15 @@ import java.util.Optional;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.ProtocolException;
+import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 
 /**
  * The Websocket decoder.
  */
-public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
+public class WsDecoder	
+	implements ResponseDecoder<WsFrameHeader, WsFrameHeader> {
 
 	private static enum State { READING_HEADER, READING_LENGTH,
 		READING_MASK, READING_PAYLOAD, READING_PING_DATA,
@@ -85,6 +87,21 @@ public class WsDecoder	implements Decoder<WsFrameHeader, WsFrameHeader> {
 	@Override
 	public Class<WsFrameHeader> decoding() {
 		return WsFrameHeader.class;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.Decoder#isAwaitingMessage()
+	 */
+	@Override
+	public boolean isAwaitingMessage() {
+		return state == State.READING_HEADER;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.ResponseDecoder#decodeResponseTo
+	 */
+	@Override
+	public void decodeResponseTo(WsFrameHeader request) {
 	}
 
 	private void expectNextFrame() {

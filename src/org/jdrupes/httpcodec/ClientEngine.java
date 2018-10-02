@@ -22,6 +22,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
+import org.jdrupes.httpcodec.Codec.ProtocolSwitchResult;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 
 /**
@@ -34,8 +35,8 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 public class ClientEngine<Q extends MessageHeader, 
 	R extends MessageHeader> extends Engine {
 
-	private Encoder<Q> requestEncoder;
-	private ResponseDecoder<R, Q> responseDecoder;
+	private Encoder<?> requestEncoder;
+	private ResponseDecoder<?, ?> responseDecoder;
 	
 	/**
 	 * Creates a new instance.
@@ -52,15 +53,17 @@ public class ClientEngine<Q extends MessageHeader,
 	/**
 	 * @return the requestEncoder
 	 */
+	@SuppressWarnings("unchecked")
 	public Encoder<Q> requestEncoder() {
-		return requestEncoder;
+		return (Encoder<Q>)requestEncoder;
 	}
 	
 	/**
 	 * @return the responseDecoder
 	 */
-	public Decoder<R,Q> responseDecoder() {
-		return responseDecoder;
+	@SuppressWarnings("unchecked")
+	public ResponseDecoder<R,Q> responseDecoder() {
+		return (ResponseDecoder<R,Q>)responseDecoder;
 	}
 
 	/**
@@ -90,8 +93,9 @@ public class ClientEngine<Q extends MessageHeader,
 	 * 
 	 * @param messageHeader the message header
 	 */
+	@SuppressWarnings("unchecked")
 	public void encode(Q messageHeader) {
-		requestEncoder.encode(messageHeader);
+		((Encoder<Q>)requestEncoder).encode(messageHeader);
 	}
 
 	/**
@@ -99,8 +103,9 @@ public class ClientEngine<Q extends MessageHeader,
 	 * 
 	 * @param request the request
 	 */
+	@SuppressWarnings("unchecked")
 	public void decodeResponseTo(Q request) {
-		responseDecoder.decodeResponseTo(request);
+		((ResponseDecoder<R,Q>)responseDecoder).decodeResponseTo(request);
 	}
 
 	/**
@@ -113,10 +118,24 @@ public class ClientEngine<Q extends MessageHeader,
 	 * @throws ProtocolException if the input violates the protocol
 	 * @see HttpResponseDecoder#decode(java.nio.ByteBuffer, java.nio.Buffer, boolean)
 	 */
+	@SuppressWarnings("unchecked")
 	public Decoder.Result<Q> decode(
 	        ByteBuffer in, Buffer out, boolean endOfInput)
 	        throws ProtocolException {
-		return responseDecoder.decode(in, out, endOfInput);
+		if (responseDecoder.isAwaitingMessage()) {
+			((Encoder<Q>)requestEncoder).header().ifPresent(request ->  
+				((ResponseDecoder<R,Q>)responseDecoder).decodeResponseTo(request));
+		}
+		Decoder.Result<Q> result 
+			= (Decoder.Result<Q>)responseDecoder.decode(in, out, endOfInput);
+		if (result instanceof ProtocolSwitchResult) {
+			ProtocolSwitchResult res = (ProtocolSwitchResult)result;
+			if (res.newProtocol() != null) {
+				responseDecoder = (ResponseDecoder<?,?>)res.newDecoder();
+				requestEncoder = res.newEncoder();
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -124,6 +143,7 @@ public class ClientEngine<Q extends MessageHeader,
 	 * 
 	 * @return the request
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<Q> currentRequest() {
 		return (Optional<Q>)requestEncoder.header();
 	}

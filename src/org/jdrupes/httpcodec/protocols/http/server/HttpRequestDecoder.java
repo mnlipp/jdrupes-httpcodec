@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jdrupes.httpcodec.ProtocolException;
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
@@ -91,6 +92,14 @@ public class HttpRequestDecoder
 		} catch (HttpProtocolException e) {
 			HttpResponse response = new HttpResponse(e.httpVersion(), 
 					e.statusCode(), e.reasonPhrase(), false);
+			response.setField(new HttpField<>(HttpField.CONNECTION,
+					new StringList("close"), Converters.STRING_LIST));
+			return resultFactory().newResult(
+					false, false, false, response, true);
+		} catch (ProtocolException e) {
+			HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1, 
+					HttpStatus.INTERNAL_SERVER_ERROR.statusCode(),
+					e.getMessage(), false);
 			response.setField(new HttpField<>(HttpField.CONNECTION,
 					new StringList("close"), Converters.STRING_LIST));
 			return resultFactory().newResult(false, false, false, response, true);

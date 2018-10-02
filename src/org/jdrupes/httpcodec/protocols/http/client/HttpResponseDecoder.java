@@ -22,14 +22,19 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Encoder;
+import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
+import org.jdrupes.httpcodec.plugin.UpgradeProvider;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
+import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
@@ -76,8 +81,10 @@ public class HttpResponseDecoder
 	                + SP + "(.*)$");
 
 	private final Result.Factory resultFactory	= new Result.Factory(this);
-	private String requestMethod = "";
+	private HttpRequest request = null;
 	private boolean reportHeaderReceived = false;
+	private String switchingTo;
+	private UpgradeProvider protocolPlugin;
 	
 	/* (non-Javadoc)
 	 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder#resultFactory()
@@ -96,7 +103,8 @@ public class HttpResponseDecoder
 	}
 
 	/**
-	 * Starts decoding a new response to a given request.
+	 * Specifies the request that caused the response to be decoded next.
+	 * 
 	 * Specifying the request is necessary because the existence of a body
 	 * cannot be derived by looking at the header only. It depends on the kind
 	 * of request made. Must be called before the response is decoded.
@@ -105,16 +113,53 @@ public class HttpResponseDecoder
 	 *            the request
 	 */
 	public void decodeResponseTo(HttpRequest request) {
-		this.requestMethod = request.method();
+		this.request = request;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.internal.Decoder#decode(java.nio.ByteBuffer, java.nio.ByteBuffer)
+	 * @see org.jdrupes.httpcodec.internal.Decoder#decode
 	 */
 	@Override
 	public Result decode(ByteBuffer in, Buffer out, boolean endOfInput)
-	        throws HttpProtocolException {
-		return (Result)super.decode(in, out, endOfInput);
+	        throws ProtocolException {
+		Result result = (Result)super.decode(in, out, endOfInput);
+		if (result.isHeaderCompleted() && header().get().statusCode()
+				== HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {
+			HttpResponse response = header().get();
+			Optional<String> protocol = response.findField(
+					HttpField.UPGRADE, Converters.STRING_LIST)
+					.map(l -> l.value().get(0));
+			if (!protocol.isPresent()) {
+				throw new ProtocolException(
+						"Upgrade header field missing in response");
+			}
+			switchingTo = protocol.get();
+			// Load every time to support dynamic deployment of additional
+			// services in an OSGi environment.
+			protocolPlugin = StreamSupport.stream(
+					ServiceLoader.load(UpgradeProvider.class)
+					.spliterator(), false)
+					.filter(p -> p.supportsProtocol(protocol.get()))
+					.findFirst().get();
+			if (protocolPlugin == null) {
+				throw new ProtocolException("Upgrade to protocol " 
+						+ protocol.get() + " not supported.");
+			}
+			switchingTo = protocol.get();
+			if (request != null) {
+				protocolPlugin.checkSwitchingResponse(request, response);
+			}
+		}
+		if (switchingTo != null && endOfInput 
+				&& !result.isUnderflow() && !result.isOverflow()) {
+			// Last invocation of decode
+			return resultFactory().newResult(false, false, 
+					result.closeConnection(), result.isHeaderCompleted(),
+					switchingTo, 
+					protocolPlugin.createRequestEncoder(switchingTo), 
+					protocolPlugin.createResponseDecoder(switchingTo));
+		}
+		return result;
 	}
 
 	/**
@@ -181,12 +226,13 @@ public class HttpResponseDecoder
 		}
 		// RFC 7230 3.3.3 (1. & 2.)
 		int statusCode = message.statusCode();
-		if (requestMethod.equalsIgnoreCase("HEAD")
+		if (request != null && request.method().equalsIgnoreCase("HEAD")
 		        || (statusCode % 100) == 1
 		        || statusCode == 204
 		        || statusCode == 304
-		        || (requestMethod.equalsIgnoreCase("CONNECT")
-		                && (statusCode % 100 == 2))) {
+		        || (request != null 
+		        	&& request.method().equalsIgnoreCase("CONNECT")
+		            && (statusCode % 100 == 2))) {
 			return BodyMode.NO_BODY;
 		}
 		Optional<HttpField<StringList>> transEncs = message.findField(
@@ -237,13 +283,13 @@ public class HttpResponseDecoder
 		 *            indicates that the message header has been completed and
 		 *            the message (without body) is available
 		 * @param newProtocol the name of the new protocol if a switch occurred
-		 * @param newDecoder the new decoder if a switch occurred
 		 * @param newEncoder the new decoder if a switch occurred
+		 * @param newDecoder the new decoder if a switch occurred
 		 */
 		protected Result(boolean overflow, boolean underflow,
 		        boolean closeConnection, boolean headerCompleted,
-		        String newProtocol, ResponseDecoder<?, ?> newDecoder, 
-		        Encoder<?> newEncoder) {
+		        String newProtocol, Encoder<?> newEncoder, 
+		        ResponseDecoder<?, ?> newDecoder) {
 			super(overflow, underflow, closeConnection, headerCompleted,
 					null, false);
 			this.newProtocol = newProtocol;
@@ -380,15 +426,26 @@ public class HttpResponseDecoder
 				this.decoder = decoder;
 			}
 
-			/* (non-Javadoc)
-			 * @see HttpDecoder.Result.Factory#newResult(boolean, boolean, boolean)
-			 */
+			public Result newResult(boolean overflow, boolean underflow,
+			        boolean closeConnection, boolean headerCompleted,
+			        String newProtocol, Encoder<?> newEncoder, 
+			        ResponseDecoder<?, ?> newDecoder) {
+				return new Result(overflow, underflow, closeConnection,
+						headerCompleted, newProtocol, newEncoder, newDecoder) {
+				};
+			}
+			
+			/**
+			 * Create a new (preliminary) result. This is invoked by the
+			 * base class. We cannot supply the missing information yet.
+			 * If necessary the result will be modified in 
+			 * {@link HttpResponseDecoder#decode(ByteBuffer, Buffer, boolean)}.
+			 **/
 			@Override
 			protected Result newResult(
 			        boolean overflow, boolean underflow) {
-				Result result = new Result(overflow, underflow, decoder.isClosed(),
-						decoder.reportHeaderReceived, null, null, null) {
-				};
+				Result result = newResult(overflow, underflow, decoder.isClosed(),
+						decoder.reportHeaderReceived, null, null, null);
 				decoder.reportHeaderReceived = false;
 				return result;
 			}

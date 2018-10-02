@@ -25,7 +25,6 @@ import java.nio.CharBuffer;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
-import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.test.Common;
 
@@ -38,11 +37,11 @@ public class DecoderChunkedTests {
 	 * Response with body determined by length.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testWithBodyLengthAtOnce()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -77,11 +76,11 @@ public class DecoderChunkedTests {
 	 * Response with body determined by length (first header then body).
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testWithBodySeparatePhases()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -166,11 +165,11 @@ public class DecoderChunkedTests {
 	 * Response with body determined by length, decoding to charset.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testWithBodyLengthAtOnceUtf8()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"

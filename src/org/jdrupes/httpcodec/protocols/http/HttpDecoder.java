@@ -31,6 +31,7 @@ import java.util.function.BiConsumer;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.MessageHeader;
+import org.jdrupes.httpcodec.ProtocolException;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 
@@ -90,6 +91,11 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		states.push(State.RECEIVE_LINE);
 	}
 
+	public boolean isAwaitingMessage() {
+		return states.size() > 0 
+				&& states.get(0) == State.AWAIT_MESSAGE_START;
+	}
+	
 	/**
 	 * Returns the result factory for this codec.
 	 * 
@@ -171,12 +177,11 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 *            currently in the {@code in} buffer (indicates end of body or
 	 *            no body at all)
 	 * @return the result
-	 * @throws HttpProtocolException
-	 *             if the message violates the HTTP
+	 * @throws ProtocolException
+	 *             if the message violates the Protocol
 	 */
-	public Decoder.Result<R> decode( 
-		ByteBuffer in, Buffer out, boolean endOfInput)
-	        throws HttpProtocolException {
+	public Decoder.Result<R> decode(ByteBuffer in, Buffer out, 
+			boolean endOfInput) throws ProtocolException {
 		try {
 			try {
 				return uncheckedDecode(in, out, endOfInput);

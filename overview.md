@@ -167,9 +167,9 @@ The HTTP encoder therefore takes the following approach. When the header
 to be encoded contains the confirmation of a protocol switch, it
 uses the {@link java.util.ServiceLoader} to find an appropriate
 protocol provider. Protocol providers must be derived from 
-{@link org.jdrupes.httpcodec.plugin.ProtocolProvider}. Whether a 
+{@link org.jdrupes.httpcodec.plugin.UpgradeProvider}. Whether a 
 protocol provider supports a given protocol can be checked with the
-method {@link org.jdrupes.httpcodec.plugin.ProtocolProvider#supportsProtocol}.
+method {@link org.jdrupes.httpcodec.plugin.UpgradeProvider#supportsProtocol}.
 The library contains by default the
 {@link org.jdrupes.httpcodec.protocols.websocket.WsProtocolProvider},
 the probably best known use case for an HTTP protocol upgrade.
@@ -177,7 +177,7 @@ the probably best known use case for an HTTP protocol upgrade.
 If the {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}
 cannot find a suitable protocol provider, it modifies the response 
 to deny the protocol switch. Else, it asks the provider to 
-{@link org.jdrupes.httpcodec.plugin.ProtocolProvider#augmentInitialResponse
+{@link org.jdrupes.httpcodec.plugin.UpgradeProvider#augmentInitialResponse
 apply any require changes} to the confirming response.
 
 The {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}

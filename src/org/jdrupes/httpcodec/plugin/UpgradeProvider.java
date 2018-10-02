@@ -21,14 +21,16 @@ package org.jdrupes.httpcodec.plugin;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.MessageHeader;
+import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
+import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 
 /**
  * The base class for a protocol that the HTTP connection
  * can be upgraded to.
  */
-public abstract class ProtocolProvider {
+public abstract class UpgradeProvider {
 
 	/**
 	 * Checks if the plugin supports the given protocol.
@@ -38,6 +40,26 @@ public abstract class ProtocolProvider {
 	 */
 	public abstract boolean supportsProtocol(String protocol);
 
+	/**
+	 * Add protocol specific information to a request with an `Upgrade`
+	 * header field.
+	 * 
+	 * @param request the request
+	 */
+	public abstract void augmentInitialRequest(HttpRequest request);
+
+	/**
+	 * Check the `101 Switching Protocol` response for any problem
+	 * indicators.
+	 *
+	 * @param request the request
+	 * @param response the response
+	 * @throws ProtocolException the protocol exception
+	 */
+	public abstract void checkSwitchingResponse(
+			HttpRequest request, HttpResponse response)
+		throws ProtocolException;
+	
 	/**
 	 * Add any required information to the "switching protocols" response
 	 * that is sent as the last package of the HTTP and starts the usage

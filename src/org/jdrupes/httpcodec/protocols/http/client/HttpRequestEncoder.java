@@ -20,12 +20,18 @@ package org.jdrupes.httpcodec.protocols.http.client;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
 import java.nio.Buffer;
+import java.util.ServiceLoader;
+import java.util.stream.StreamSupport;
 
+import org.jdrupes.httpcodec.plugin.UpgradeProvider;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
+import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.StringList;
 
 /**
  * An encoder for HTTP requests that accepts a header and optional
@@ -74,12 +80,35 @@ public class HttpRequestEncoder extends HttpEncoder<HttpRequest> {
 		if (messageHeader.protocol().equals(HttpProtocol.HTTP_1_1)) {
 			// Make sure we have a Host field, RFC 7230 5.4
 			if (!messageHeader.findStringValue(HttpField.HOST).isPresent()) {
-				messageHeader.setField(HttpField.HOST, 
-						messageHeader.requestUri().getHost()
-						+ ":" + messageHeader.requestUri().getPort());
+				URI reqUri = messageHeader.requestUri();
+				messageHeader.setField(HttpField.HOST, reqUri.getHost()
+						+ (reqUri.getPort() < 0 ? "" 
+								: (":" + reqUri.getPort())));
 			}
 		}
+		messageHeader.findField(HttpField.UPGRADE, Converters.STRING_LIST)
+			.ifPresent(field -> prepareUpgrade(field, messageHeader));
 		super.encode(messageHeader);
+	}
+
+	private void prepareUpgrade(
+			HttpField<StringList> field, HttpRequest request) {
+		if (field.value().isEmpty()) {
+			throw new IllegalArgumentException(
+					"Upgrade header field must have a value.");
+		}
+		String protocol = field.value().get(0);
+		// Load every time to support dynamic deployment of additional
+		// services in an OSGi environment.
+		UpgradeProvider protocolPlugin = StreamSupport.stream(
+				ServiceLoader.load(UpgradeProvider.class).spliterator(), false)
+				.filter(p -> p.supportsProtocol(protocol))
+				.findFirst().get();
+		if (protocolPlugin == null) {
+			// Not supported, maybe transparent to HTTP 
+			return;
+		}
+		protocolPlugin.augmentInitialRequest(request);
 	}
 	
 	/* (non-Javadoc)

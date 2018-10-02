@@ -23,13 +23,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.Random;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
+import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
-import org.jdrupes.httpcodec.plugin.ProtocolProvider;
+import org.jdrupes.httpcodec.plugin.UpgradeProvider;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
+import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.types.Converters;
 
@@ -58,7 +61,7 @@ import org.jdrupes.httpcodec.types.Converters;
  * @enduml
  * 
  */
-public class WsProtocolProvider extends ProtocolProvider {
+public class WsProtocolProvider extends UpgradeProvider {
 
 	/* (non-Javadoc)
 	 * @see ProtocolProvider#supportsProtocol(java.lang.String)
@@ -66,6 +69,56 @@ public class WsProtocolProvider extends ProtocolProvider {
 	@Override
 	public boolean supportsProtocol(String protocol) {
 		return protocol.equalsIgnoreCase("websocket");
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.plugin.UpgradeProvider#augmentInitialRequest
+	 */
+	@Override
+	public void augmentInitialRequest(HttpRequest request) {
+		Optional<HttpField<Long>> version = request.findField(
+				"Sec-WebSocket-Version", Converters.LONG);
+		if (version.isPresent() && version.get().value() != 13) {
+			// Sombody else's job...
+			return;
+		}
+		request.setField(new HttpField<>(
+				"Sec-WebSocket-Version", 13L, Converters.LONG));
+		if (!request.findField("Sec-WebSocket-Key", Converters.UNQUOTED_STRING)
+				.isPresent()) {
+			byte[] randomBytes = new byte[16];
+			new Random().nextBytes(randomBytes);
+			request.setField(new HttpField<String>("Sec-WebSocket-Key",
+					Base64.getEncoder().encodeToString(randomBytes), 
+					Converters.UNQUOTED_STRING));
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.plugin.UpgradeProvider#checkSwitchingResponse
+	 */
+	@Override
+	public void checkSwitchingResponse(HttpRequest request, 
+			HttpResponse response) throws ProtocolException {
+		Optional<String> accept = response.findStringValue(
+				"Sec-WebSocket-Accept");
+		if (!accept.isPresent()) {
+			throw new ProtocolException(
+					"Header field Sec-WebSocket-Accept is missing.");
+		}
+		String wsKey = request.findStringValue("Sec-WebSocket-Key").get();
+		String magic = wsKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+		try {
+			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+			byte[] sha1 = crypt.digest(magic.getBytes("ascii"));
+			String expected = Base64.getEncoder().encodeToString(sha1);
+			if (!accept.get().equals(expected)) {
+				throw new ProtocolException(
+						"Invalid value in Sec-WebSocket-Accept header field.");
+			}
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			throw new ProtocolException(e);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -111,7 +164,7 @@ public class WsProtocolProvider extends ProtocolProvider {
 	 */
 	@Override
 	public Encoder<?> createRequestEncoder(String protocol) {
-		return null;
+		return new WsEncoder(true);
 	}
 
 	/* (non-Javadoc)
@@ -135,7 +188,7 @@ public class WsProtocolProvider extends ProtocolProvider {
 	 */
 	@Override
 	public ResponseDecoder<?, ?> createResponseDecoder(String protocol) {
-		return null;
+		return new WsDecoder();
 	}
 
 	

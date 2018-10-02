@@ -29,7 +29,6 @@ import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
-import org.jdrupes.httpcodec.protocols.http.HttpProtocolException;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 import org.jdrupes.httpcodec.test.Common;
 
@@ -44,11 +43,11 @@ public class DecoderClosedTests {
 	 * Response with body terminated by close.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testBodyClosedAtOnce()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -78,11 +77,11 @@ public class DecoderClosedTests {
 	 * Response with body terminated by close (delayed close).
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testBodyClosedSeparatePhases()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -156,11 +155,11 @@ public class DecoderClosedTests {
 	 * Response with body terminated by close.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testCharBodyClosedAtOnce()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -188,11 +187,11 @@ public class DecoderClosedTests {
 	 * Response with body terminated by close and small output buffer.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * @throws HttpProtocolException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testCharBodyClosedTinyOut()
-	        throws UnsupportedEncodingException, HttpProtocolException {
+	        throws UnsupportedEncodingException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
@@ -228,12 +227,12 @@ public class DecoderClosedTests {
 	/**
 	 * Response with body terminated by close and small output buffer.
 	 * 
-	 * @throws HttpProtocolException 
 	 * @throws IOException 
+	 * @throws ProtocolException 
 	 */
 	@Test
 	public void testCharBodyClosedTinyIn()
-	        throws HttpProtocolException, IOException {
+	        throws IOException, ProtocolException {
 		String reqText = "HTTP/1.1 200 OK\r\n"
 				+ "Date: Sat, 23 Jul 2016 16:54:54 GMT\r\n"
 				+ "Last-Modified: Fri, 11 Apr 2014 15:15:17 GMT\r\n"
