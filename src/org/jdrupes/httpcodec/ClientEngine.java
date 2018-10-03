@@ -27,7 +27,7 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 
 /**
  * An engine that can be used as a client. It has an associated
- * request encoder and a response decoder. Using a {@link Client}
+ * request encoder and a response decoder. Using a {@link ClientEngine}
  * has two main advantages over using an encoder and decoder
  * directly. It invokes the 
  * {@link ResponseDecoder#decodeResponseTo(MessageHeader)} when
