@@ -69,6 +69,7 @@ public class SwitchTests {
 		byteBody.clear();
 		Decoder.Result<?> clntDec = client.decode(msg, byteBody, false);
 		assertTrue(clntDec.isHeaderCompleted());
+		assertEquals("websocket", client.switchedTo().get());
 		
 		// Now we should be able to send and receive WS messages.
 		CharBuffer charBody = CharBuffer.allocate(1024*1024);
