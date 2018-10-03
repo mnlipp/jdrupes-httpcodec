@@ -153,7 +153,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 * @throws HttpProtocolException if the input violates the HTTP
 	 */
 	protected abstract T newMessage(String startLine)
-	        throws HttpProtocolException;
+	        throws ProtocolException;
 
 	/**
 	 * Informs the derived class that the header has been received completely.
@@ -163,8 +163,18 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	 * @throws HttpProtocolException if the input violates the HTTP
 	 */
 	protected abstract BodyMode headerReceived(T message) 
-			throws HttpProtocolException;
+			throws ProtocolException;
 
+	/**
+	 * Informs the derived class that a complete message has been received
+	 * and the given result will be returned. The derived class may take
+	 * additional actions and even modify the result. The default
+	 * implementation simply returns the given result.
+	 */
+	protected Decoder.Result<R> messageComplete(Decoder.Result<R> result) {
+		return result;
+	}
+	
 	/**
 	 * Decodes the next chunk of data.
 	 * 
@@ -198,7 +208,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 
 	private Decoder.Result<R> uncheckedDecode(
 		ByteBuffer in, Buffer out, boolean endOfInput)
-			throws HttpProtocolException, ParseException {
+			throws ProtocolException, ParseException {
 		while(true) {
 			switch (states.peek()) {
 			// Waiting for CR (start of end of line)
@@ -279,8 +289,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					messageHeader = building;
 					building = null;
 					if (!messageHeader.hasPayload()) {
-						adjustToEndOfMessage();
-						return resultFactory().newResult(false, false);
+						return adjustToEndOfMessage();
 					}
 					if (out == null) {
 						return resultFactory().newResult(true, false);
@@ -299,8 +308,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					break;
 				}
 				states.pop();
-				adjustToEndOfMessage();
-				return resultFactory().newResult(false, false);
+				return adjustToEndOfMessage();
 
 			case CHUNK_START_RECEIVED:
 				// We "drop" to this state when a line has been read
@@ -346,8 +354,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 					break;
 				}
 				// All chunked data received
-				adjustToEndOfMessage();
-				return resultFactory().newResult(false, false);
+				return adjustToEndOfMessage();
 
 			case COPY_SPECIFIED:
 				// If we get here, leftToRead is greater zero.
@@ -565,21 +572,22 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		}
 	}
 
-	private void adjustToEndOfMessage() {
+	private Decoder.Result<R> adjustToEndOfMessage() {
 		// RFC 7230 6.3
 		Optional<HttpField<StringList>> connection = messageHeader
-		        .findField(HttpField.CONNECTION, Converters.STRING_LIST);
+				.findField(HttpField.CONNECTION, Converters.STRING_LIST);
 		if (connection.isPresent() && connection.get().value()
 				.stream().anyMatch(s -> s.equalsIgnoreCase("close"))) {
 			states.push(State.CLOSED);
-			return;
+			return messageComplete(resultFactory().newResult(false, false));
 		}
 		if (messageHeader.protocol().compareTo(HttpProtocol.HTTP_1_1) >= 0) {
 			states.push(State.AWAIT_MESSAGE_START);
 			states.push(State.RECEIVE_LINE);
-			return;
+			return messageComplete(resultFactory().newResult(false, false));
 		}
 		states.push(State.CLOSED);
+		return messageComplete(resultFactory().newResult(false, false));
 	}
 	
 	/**

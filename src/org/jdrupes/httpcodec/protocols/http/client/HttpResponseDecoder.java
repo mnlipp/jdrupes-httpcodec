@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
 import org.jdrupes.httpcodec.Codec;
+import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
@@ -122,44 +123,7 @@ public class HttpResponseDecoder
 	@Override
 	public Result decode(ByteBuffer in, Buffer out, boolean endOfInput)
 	        throws ProtocolException {
-		Result result = (Result)super.decode(in, out, endOfInput);
-		if (result.isHeaderCompleted() && header().get().statusCode()
-				== HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {
-			HttpResponse response = header().get();
-			Optional<String> protocol = response.findField(
-					HttpField.UPGRADE, Converters.STRING_LIST)
-					.map(l -> l.value().get(0));
-			if (!protocol.isPresent()) {
-				throw new ProtocolException(
-						"Upgrade header field missing in response");
-			}
-			switchingTo = protocol.get();
-			// Load every time to support dynamic deployment of additional
-			// services in an OSGi environment.
-			protocolPlugin = StreamSupport.stream(
-					ServiceLoader.load(UpgradeProvider.class)
-					.spliterator(), false)
-					.filter(p -> p.supportsProtocol(protocol.get()))
-					.findFirst().get();
-			if (protocolPlugin == null) {
-				throw new ProtocolException("Upgrade to protocol " 
-						+ protocol.get() + " not supported.");
-			}
-			switchingTo = protocol.get();
-			if (request != null) {
-				protocolPlugin.checkSwitchingResponse(request, response);
-			}
-		}
-		if (switchingTo != null && endOfInput 
-				&& !result.isUnderflow() && !result.isOverflow()) {
-			// Last invocation of decode
-			return resultFactory().newResult(false, false, 
-					result.closeConnection(), result.isHeaderCompleted(),
-					switchingTo, 
-					protocolPlugin.createRequestEncoder(switchingTo), 
-					protocolPlugin.createResponseDecoder(switchingTo));
-		}
-		return result;
+		return (Result)super.decode(in, out, endOfInput);
 	}
 
 	/**
@@ -208,7 +172,7 @@ public class HttpResponseDecoder
 	 */
 	@Override
 	protected BodyMode headerReceived(HttpResponse message)
-	        throws HttpProtocolException {
+	        throws ProtocolException {
 		reportHeaderReceived = true;
 		// Adjust Retry-After
 		HttpField<?> hdr = message.fields().get(HttpField.RETRY_AFTER);
@@ -222,6 +186,33 @@ public class HttpResponseDecoder
 				message.setField(new HttpField<>(HttpField.RETRY_AFTER,
 						base.plusSeconds(Long.parseLong(value)),
 						Converters.DATE_TIME));
+			}
+		}
+		// Prepare protocol switch
+		if (message.statusCode()
+				== HttpStatus.SWITCHING_PROTOCOLS.statusCode()) {
+			Optional<String> protocol = message.findField(
+					HttpField.UPGRADE, Converters.STRING_LIST)
+					.map(l -> l.value().get(0));
+			if (!protocol.isPresent()) {
+				throw new ProtocolException(
+						"Upgrade header field missing in response");
+			}
+			switchingTo = protocol.get();
+			// Load every time to support dynamic deployment of additional
+			// services in an OSGi environment.
+			protocolPlugin = StreamSupport.stream(
+					ServiceLoader.load(UpgradeProvider.class)
+					.spliterator(), false)
+					.filter(p -> p.supportsProtocol(protocol.get()))
+					.findFirst().get();
+			if (protocolPlugin == null) {
+				throw new ProtocolException("Upgrade to protocol " 
+						+ protocol.get() + " not supported.");
+			}
+			switchingTo = protocol.get();
+			if (request != null) {
+				protocolPlugin.checkSwitchingResponse(request, message);
 			}
 		}
 		// RFC 7230 3.3.3 (1. & 2.)
@@ -253,6 +244,22 @@ public class HttpResponseDecoder
 		}
 		// RFC 7230 3.3.3 (7.)
 		return BodyMode.UNTIL_CLOSE;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jdrupes.httpcodec.protocols.http.HttpDecoder#messageComplete
+	 */
+	@Override
+	protected Decoder.Result<HttpRequest> messageComplete(
+			Decoder.Result<HttpRequest> result) {
+		if (switchingTo != null) {
+			return resultFactory().newResult(false, false, 
+					result.closeConnection(), result.isHeaderCompleted(),
+					switchingTo, 
+					protocolPlugin.createRequestEncoder(switchingTo), 
+					protocolPlugin.createResponseDecoder(switchingTo));
+		}
+		return super.messageComplete(result);
 	}
 
 	/**

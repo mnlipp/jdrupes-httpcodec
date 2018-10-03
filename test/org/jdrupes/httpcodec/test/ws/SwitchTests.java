@@ -50,7 +50,7 @@ public class SwitchTests {
 		ServerEngine<HttpRequest, HttpResponse> server = new ServerEngine<>(
 				new HttpRequestDecoder(), new HttpResponseEncoder());
 		ByteBuffer byteBody = ByteBuffer.allocate(1024*1024);
-		Decoder.Result<HttpResponse> srvDec = server.decode(msg, byteBody, true);
+		Decoder.Result<HttpResponse> srvDec = server.decode(msg, byteBody, false);
 		assertTrue(srvDec.isHeaderCompleted());
 		
 		// Encode confirmation
@@ -67,7 +67,7 @@ public class SwitchTests {
 		// Decode confirmation
 		msg.flip();
 		byteBody.clear();
-		Decoder.Result<?> clntDec = client.decode(msg, byteBody, true);
+		Decoder.Result<?> clntDec = client.decode(msg, byteBody, false);
 		assertTrue(clntDec.isHeaderCompleted());
 		
 		// Now we should be able to send and receive WS messages.
