@@ -39,12 +39,18 @@ public interface ResponseDecoder<T extends MessageHeader,
 	 * {@link #decode(ByteBuffer, Buffer, boolean)} as response to the given
 	 * request header. Some protocols need information from the previously 
 	 * sent request in order to interpret the response correctly.
-	 * <P>
+	 * 
 	 * Must be invoked before the first invocation of
 	 * {@link #decode(ByteBuffer, Buffer, boolean)} for a given response.
+	 * 
+	 * Some protocols aren't strictly request/response protocols,
+	 * unsolicited messages may flow from the server to the client. In
+	 * addition, a protocol switch may cause a message from the server
+	 * to be not related with the last request at all. It is up to the
+	 * response decoder to handle these conditions.
 	 * 
 	 * @param request
 	 *            the request header
 	 */
-	public void decodeResponseTo(Q request);
+	public void decodeResponseTo(MessageHeader request);
 }

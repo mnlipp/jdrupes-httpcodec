@@ -26,6 +26,7 @@ import java.nio.charset.CoderResult;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.Decoder;
+import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
@@ -101,7 +102,7 @@ public class WsDecoder
 	 * @see org.jdrupes.httpcodec.ResponseDecoder#decodeResponseTo
 	 */
 	@Override
-	public void decodeResponseTo(WsFrameHeader request) {
+	public void decodeResponseTo(MessageHeader request) {
 	}
 
 	private void expectNextFrame() {

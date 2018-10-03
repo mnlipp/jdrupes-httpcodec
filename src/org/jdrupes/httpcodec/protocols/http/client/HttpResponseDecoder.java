@@ -30,6 +30,7 @@ import java.util.stream.StreamSupport;
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
+import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
 import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.plugin.UpgradeProvider;
@@ -113,8 +114,10 @@ public class HttpResponseDecoder
 	 * @param request
 	 *            the request
 	 */
-	public void decodeResponseTo(HttpRequest request) {
-		this.request = request;
+	public void decodeResponseTo(MessageHeader request) {
+		if (request instanceof HttpRequest) {
+			this.request = (HttpRequest)request;
+		}
 	}
 
 	/* (non-Javadoc)
