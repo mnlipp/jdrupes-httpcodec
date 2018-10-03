@@ -27,7 +27,15 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 
 /**
  * An engine that can be used as a client. It has an associated
- * request encoder and a response decoder.
+ * request encoder and a response decoder. Using a {@link Client}
+ * has two main advantages over using an encoder and decoder
+ * directly. It invokes the 
+ * {@link ResponseDecoder#decodeResponseTo(MessageHeader)} when
+ * appropriate and it replaces the encoder and decoder if the
+ * decoded result indicates a switch. The change takes place upon
+ * the next `encode` or `decode` invocation. The "old" encoders
+ * and decoders are therefore still available when the result of
+ * a decode invocation indicates a switch.
  * 
  * @param <Q> the message header type handled be the encoder (the request)
  * @param <R> the message header type handled by the decoder (the response)
@@ -37,6 +45,8 @@ public class ClientEngine<Q extends MessageHeader,
 
 	private Encoder<?> requestEncoder;
 	private ResponseDecoder<?, ?> responseDecoder;
+	private Encoder<?> newRequestEncoder;
+	private ResponseDecoder<?, ?> newResponseDecoder;
 	
 	/**
 	 * Creates a new instance.
@@ -95,6 +105,10 @@ public class ClientEngine<Q extends MessageHeader,
 	 */
 	@SuppressWarnings("unchecked")
 	public void encode(Q messageHeader) {
+		if (newRequestEncoder != null) {
+			requestEncoder = newRequestEncoder;
+			newRequestEncoder = null;
+		}
 		((Encoder<Q>)requestEncoder).encode(messageHeader);
 	}
 
@@ -122,6 +136,10 @@ public class ClientEngine<Q extends MessageHeader,
 	public Decoder.Result<Q> decode(
 	        ByteBuffer in, Buffer out, boolean endOfInput)
 	        throws ProtocolException {
+		if (newResponseDecoder != null) {
+			responseDecoder = newResponseDecoder;
+			newResponseDecoder = null;
+		}
 		if (responseDecoder.isAwaitingMessage()) {
 			((Encoder<Q>)requestEncoder).header().ifPresent(request ->  
 				((ResponseDecoder<R,Q>)responseDecoder).decodeResponseTo(request));
@@ -131,8 +149,8 @@ public class ClientEngine<Q extends MessageHeader,
 		if (result instanceof ProtocolSwitchResult) {
 			ProtocolSwitchResult res = (ProtocolSwitchResult)result;
 			if (res.newProtocol() != null) {
-				responseDecoder = (ResponseDecoder<?,?>)res.newDecoder();
-				requestEncoder = res.newEncoder();
+				newResponseDecoder = (ResponseDecoder<?,?>)res.newDecoder();
+				newRequestEncoder = res.newEncoder();
 			}
 		}
 		return result;
