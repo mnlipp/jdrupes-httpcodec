@@ -149,7 +149,7 @@ public class ClientEngine<Q extends MessageHeader,
 		if (result instanceof ProtocolSwitchResult) {
 			ProtocolSwitchResult res = (ProtocolSwitchResult)result;
 			if (res.newProtocol() != null) {
-				setUpgradedTo(res.newProtocol());
+				setSwitchedTo(res.newProtocol());
 				newResponseDecoder = (ResponseDecoder<?,?>)res.newDecoder();
 				newRequestEncoder = res.newEncoder();
 			}
