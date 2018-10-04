@@ -39,7 +39,7 @@
 <span class="sourceLineNo">031</span>import org.jdrupes.httpcodec.Codec;<a name="line.31"></a>
 <span class="sourceLineNo">032</span>import org.jdrupes.httpcodec.Decoder;<a name="line.32"></a>
 <span class="sourceLineNo">033</span>import org.jdrupes.httpcodec.Encoder;<a name="line.33"></a>
-<span class="sourceLineNo">034</span>import org.jdrupes.httpcodec.plugin.ProtocolProvider;<a name="line.34"></a>
+<span class="sourceLineNo">034</span>import org.jdrupes.httpcodec.plugin.UpgradeProvider;<a name="line.34"></a>
 <span class="sourceLineNo">035</span><a name="line.35"></a>
 <span class="sourceLineNo">036</span>import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;<a name="line.36"></a>
 <span class="sourceLineNo">037</span><a name="line.37"></a>
@@ -93,7 +93,7 @@
 <span class="sourceLineNo">085</span>        };<a name="line.85"></a>
 <span class="sourceLineNo">086</span>        <a name="line.86"></a>
 <span class="sourceLineNo">087</span>        private String switchingTo;<a name="line.87"></a>
-<span class="sourceLineNo">088</span>        private ProtocolProvider protocolPlugin;<a name="line.88"></a>
+<span class="sourceLineNo">088</span>        private UpgradeProvider protocolPlugin;<a name="line.88"></a>
 <span class="sourceLineNo">089</span><a name="line.89"></a>
 <span class="sourceLineNo">090</span>        /* (non-Javadoc)<a name="line.90"></a>
 <span class="sourceLineNo">091</span>         * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()<a name="line.91"></a>
@@ -213,7 +213,7 @@
 <span class="sourceLineNo">205</span>                // Load every time to support dynamic deployment of additional<a name="line.205"></a>
 <span class="sourceLineNo">206</span>                // services in an OSGi environment.<a name="line.206"></a>
 <span class="sourceLineNo">207</span>                protocolPlugin = StreamSupport.stream(<a name="line.207"></a>
-<span class="sourceLineNo">208</span>                                ServiceLoader.load(ProtocolProvider.class)<a name="line.208"></a>
+<span class="sourceLineNo">208</span>                                ServiceLoader.load(UpgradeProvider.class)<a name="line.208"></a>
 <span class="sourceLineNo">209</span>                                .spliterator(), false)<a name="line.209"></a>
 <span class="sourceLineNo">210</span>                                .filter(p -&gt; p.supportsProtocol(protocol.get()))<a name="line.210"></a>
 <span class="sourceLineNo">211</span>                                .findFirst().get();<a name="line.211"></a>
