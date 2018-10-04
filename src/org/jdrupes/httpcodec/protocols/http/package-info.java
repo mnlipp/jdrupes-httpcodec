@@ -18,5 +18,5 @@
 /**
  * Classes required for handling the HTTP protocol.
  */
-@org.osgi.annotation.versioning.Version("1.3.0.${tstamp}")
+@org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec.protocols.http;
