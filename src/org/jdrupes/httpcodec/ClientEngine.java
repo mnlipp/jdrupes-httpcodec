@@ -47,7 +47,6 @@ public class ClientEngine<Q extends MessageHeader,
 	private ResponseDecoder<?, ?> responseDecoder;
 	private Encoder<?> newRequestEncoder;
 	private ResponseDecoder<?, ?> newResponseDecoder;
-	private String switchedTo = null;
 	
 	/**
 	 * Creates a new instance.
@@ -150,21 +149,12 @@ public class ClientEngine<Q extends MessageHeader,
 		if (result instanceof ProtocolSwitchResult) {
 			ProtocolSwitchResult res = (ProtocolSwitchResult)result;
 			if (res.newProtocol() != null) {
-				switchedTo = res.newProtocol();
+				setSwitchedTo(res.newProtocol());
 				newResponseDecoder = (ResponseDecoder<?,?>)res.newDecoder();
 				newRequestEncoder = res.newEncoder();
 			}
 		}
 		return result;
-	}
-	
-	/**
-	 * Returns the protocol that this engine has been switched to, if any.
-	 *
-	 * @return the protocol
-	 */
-	public Optional<String> switchedTo() {
-		return Optional.ofNullable(switchedTo);
 	}
 	
 	/**

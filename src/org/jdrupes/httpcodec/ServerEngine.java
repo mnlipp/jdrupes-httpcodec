@@ -149,6 +149,7 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 		if (result instanceof ProtocolSwitchResult) {
 			ProtocolSwitchResult res = (ProtocolSwitchResult)result;
 			if (res.newProtocol() != null) {
+				setSwitchedTo(res.newProtocol());
 				requestDecoder = res.newDecoder();
 				responseEncoder = res.newEncoder();
 			}

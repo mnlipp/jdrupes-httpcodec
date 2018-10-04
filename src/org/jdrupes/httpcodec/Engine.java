@@ -18,9 +18,30 @@
 
 package org.jdrupes.httpcodec;
 
+import java.util.Optional;
+
 /**
  * Represents an engine with an associated encoder and decoder.
  */
 public abstract class Engine {
 
+	private String switchedTo = null;
+
+	/**
+	 * Returns the protocol that this engine has been switched to, if any.
+	 *
+	 * @return the protocol
+	 */
+	public Optional<String> switchedTo() {
+		return Optional.ofNullable(switchedTo);
+	}
+	
+	/**
+	 * Noted that the engine has been switched to a new protocol.
+	 *
+	 * @param protocol the new protocol
+	 */
+	protected void setSwitchedTo(String protocol) {
+		switchedTo = protocol;
+	}
 }
