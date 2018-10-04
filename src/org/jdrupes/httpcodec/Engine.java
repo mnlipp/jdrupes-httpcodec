@@ -25,23 +25,23 @@ import java.util.Optional;
  */
 public abstract class Engine {
 
-	private String switchedTo = null;
+	private String upgradedTo = null;
 
 	/**
-	 * Returns the protocol that this engine has been switched to, if any.
+	 * Returns the protocol that this engine has been upgraded to, if any.
 	 *
 	 * @return the protocol
 	 */
-	public Optional<String> switchedTo() {
-		return Optional.ofNullable(switchedTo);
+	public Optional<String> upgradedTo() {
+		return Optional.ofNullable(upgradedTo);
 	}
 	
 	/**
-	 * Noted that the engine has been switched to a new protocol.
+	 * Noted that the engine has been upgraded to a new protocol.
 	 *
 	 * @param protocol the new protocol
 	 */
-	protected void setSwitchedTo(String protocol) {
-		switchedTo = protocol;
+	protected void setUpgradedTo(String protocol) {
+		upgradedTo = protocol;
 	}
 }
