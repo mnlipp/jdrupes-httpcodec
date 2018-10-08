@@ -30,6 +30,7 @@ import java.util.Stack;
 import java.util.function.BiConsumer;
 
 import org.jdrupes.httpcodec.Decoder;
+import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
 
@@ -82,6 +83,7 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 	private T building;
 	private long leftToRead = 0;
 	private OptimizedCharsetDecoder charDecoder = null;
+	protected Encoder<R, T> peerEncoder; 
 
 	/**
 	 * Creates a new decoder.
@@ -91,6 +93,11 @@ public abstract class 	HttpDecoder<T extends HttpMessageHeader,
 		states.push(State.RECEIVE_LINE);
 	}
 
+	public Decoder<T, R> setPeerEncoder(Encoder<R, T> encoder) {
+		peerEncoder = encoder;
+		return this;
+	}
+	
 	public boolean isAwaitingMessage() {
 		return states.size() > 0 
 				&& states.get(0) == State.AWAIT_MESSAGE_START;

@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.Stack;
 
 import org.jdrupes.httpcodec.Codec;
+import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
@@ -48,9 +49,11 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
  * a request and a response encoder.
  * 
  * @param <T> the type of the message header to be encoded
+ * @param <D> the type of the message header decoded by the peer decoder
  */
-public abstract class HttpEncoder<T extends HttpMessageHeader> 
-	extends HttpCodec<T> implements Encoder<T> {
+public abstract class HttpEncoder<T extends HttpMessageHeader,
+	D extends HttpMessageHeader> extends HttpCodec<T>
+	implements Encoder<T, D> {
 
 	private enum State {
 		// Main states
@@ -72,6 +75,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 	private CharsetEncoder charEncoder = null;
 	private Writer charWriter = null;
 	private ByteBuffer chunkData;
+	protected Decoder<D, T> peerDecoder;
 
 	/**
 	 * Creates a new encoder.
@@ -86,6 +90,11 @@ public abstract class HttpEncoder<T extends HttpMessageHeader>
 		states.push(State.INITIAL);
 	}
 
+	public Encoder<T, D> setPeerDecoder(Decoder<D, T> decoder) {
+		peerDecoder = decoder;
+		return this;
+	}
+	
 	/**
 	 * Returns the result factory for this codec.
 	 * 

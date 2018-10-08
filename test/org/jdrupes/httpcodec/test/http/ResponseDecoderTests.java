@@ -24,8 +24,8 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
+import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.ProtocolException;
-import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
@@ -68,7 +68,7 @@ public class ResponseDecoderTests {
 		ByteBuffer in = ByteBuffer.wrap(reqText.getBytes("ascii"));
 		HttpResponseDecoder decoder = new HttpResponseDecoder();
 		ByteBuffer body = ByteBuffer.allocate(1024);
-		ResponseDecoder.Result<?> result = decoder.decode(in, body, false);
+		Decoder.Result<?> result = decoder.decode(in, body, false);
 		assertTrue(result.isHeaderCompleted());
 		assertTrue(decoder.header().get().hasPayload());
 		assertFalse(result.closeConnection());

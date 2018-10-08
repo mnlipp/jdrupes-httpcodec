@@ -29,9 +29,8 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
  * An engine that can be used as a client. It has an associated
  * request encoder and a response decoder. Using a {@link ClientEngine}
  * has two main advantages over using an encoder and decoder
- * directly. It invokes the 
- * {@link ResponseDecoder#decodeResponseTo(MessageHeader)} when
- * appropriate and it replaces the encoder and decoder if the
+ * directly. It links encoder and decoder and it replaces 
+ * the encoder and decoder if the
  * decoded result indicates a switch. The change takes place upon
  * the next `encode` or `decode` invocation. The "old" encoders
  * and decoders are therefore still available when the result of
@@ -43,10 +42,10 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
 public class ClientEngine<Q extends MessageHeader, 
 	R extends MessageHeader> extends Engine {
 
-	private Encoder<?> requestEncoder;
-	private ResponseDecoder<?, ?> responseDecoder;
-	private Encoder<?> newRequestEncoder;
-	private ResponseDecoder<?, ?> newResponseDecoder;
+	private Encoder<?, ?> requestEncoder;
+	private Decoder<?, ?> responseDecoder;
+	private Encoder<?, ?> newRequestEncoder;
+	private Decoder<?, ?> newResponseDecoder;
 	
 	/**
 	 * Creates a new instance.
@@ -54,26 +53,28 @@ public class ClientEngine<Q extends MessageHeader,
 	 * @param requestEncoder the encoder for the request
 	 * @param responseDecoder the decoder for the response
 	 */
-	public ClientEngine(Encoder<Q> requestEncoder, 
-			ResponseDecoder<R, Q> responseDecoder) {
+	public ClientEngine(Encoder<Q, R> requestEncoder,
+			Decoder<R, Q> responseDecoder) {
 		this.requestEncoder = requestEncoder;
 		this.responseDecoder = responseDecoder;
+		requestEncoder.setPeerDecoder(responseDecoder);
+		responseDecoder.setPeerEncoder(requestEncoder);
 	}
 	
 	/**
 	 * @return the requestEncoder
 	 */
 	@SuppressWarnings("unchecked")
-	public Encoder<Q> requestEncoder() {
-		return (Encoder<Q>)requestEncoder;
+	public Encoder<Q, R> requestEncoder() {
+		return (Encoder<Q, R>)requestEncoder;
 	}
 	
 	/**
 	 * @return the responseDecoder
 	 */
 	@SuppressWarnings("unchecked")
-	public ResponseDecoder<R,Q> responseDecoder() {
-		return (ResponseDecoder<R,Q>)responseDecoder;
+	public Decoder<R,Q> responseDecoder() {
+		return (Decoder<R,Q>)responseDecoder;
 	}
 
 	/**
@@ -109,17 +110,7 @@ public class ClientEngine<Q extends MessageHeader,
 			requestEncoder = newRequestEncoder;
 			newRequestEncoder = null;
 		}
-		((Encoder<Q>)requestEncoder).encode(messageHeader);
-	}
-
-	/**
-	 * Convenience method to invoke the decoder's decode method.
-	 * 
-	 * @param request the request
-	 */
-	@SuppressWarnings("unchecked")
-	public void decodeResponseTo(Q request) {
-		((ResponseDecoder<R,Q>)responseDecoder).decodeResponseTo(request);
+		((Encoder<Q, R>)requestEncoder).encode(messageHeader);
 	}
 
 	/**
@@ -140,18 +131,20 @@ public class ClientEngine<Q extends MessageHeader,
 			responseDecoder = newResponseDecoder;
 			newResponseDecoder = null;
 		}
-		if (responseDecoder.isAwaitingMessage()) {
-			((Encoder<Q>)requestEncoder).header().ifPresent(request ->  
-				((ResponseDecoder<R,Q>)responseDecoder).decodeResponseTo(request));
-		}
 		Decoder.Result<Q> result 
 			= (Decoder.Result<Q>)responseDecoder.decode(in, out, endOfInput);
 		if (result instanceof ProtocolSwitchResult) {
 			ProtocolSwitchResult res = (ProtocolSwitchResult)result;
 			if (res.newProtocol() != null) {
 				setSwitchedTo(res.newProtocol());
-				newResponseDecoder = (ResponseDecoder<?,?>)res.newDecoder();
+				newResponseDecoder = res.newDecoder();
 				newRequestEncoder = res.newEncoder();
+				((Decoder<MessageHeader, MessageHeader>)newResponseDecoder)
+					.setPeerEncoder((Encoder<MessageHeader, MessageHeader>)
+							newRequestEncoder);
+				((Encoder<MessageHeader, MessageHeader>)newRequestEncoder)
+						.setPeerDecoder((Decoder<MessageHeader, MessageHeader>)
+								newResponseDecoder);
 			}
 		}
 		return result;

@@ -238,7 +238,7 @@ public class MiscTests {
 		Decoder.Result<?> result = decoder.decode(msg, null, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertTrue(result.closeConnection());
+		assertFalse(result.closeConnection());
 		assertTrue(result.isHeaderCompleted());
 		assertTrue(result.response().isPresent());
 		assertTrue(result.response().get() instanceof WsCloseFrame);
@@ -250,7 +250,7 @@ public class MiscTests {
 		encoder.encode((WsFrameHeader)result.response().get());
 		msg = ByteBuffer.allocate(100);
 		Encoder.Result encRes = encoder.encode(null, msg, true);
-		assertTrue(encRes.closeConnection());
+		assertFalse(encRes.closeConnection());
 		assertTrue(msg.position() > 0);
 	}
 
@@ -280,7 +280,7 @@ public class MiscTests {
 		encoder.encode((WsFrameHeader)result.response().get());
 		msg = ByteBuffer.allocate(100);
 		Encoder.Result encRes = encoder.encode(null, msg, true);
-		assertTrue(encRes.closeConnection());
+		assertFalse(encRes.closeConnection());
 		assertTrue(msg.position() > 0);
 	}
 
@@ -312,7 +312,7 @@ public class MiscTests {
 		encoder.encode((WsFrameHeader)result.response().get());
 		msg = ByteBuffer.allocate(100);
 		Encoder.Result encRes = encoder.encode(null, msg, true);
-		assertTrue(encRes.closeConnection());
+		assertFalse(encRes.closeConnection());
 		assertTrue(msg.position() > 0);		
 	}
 
@@ -332,7 +332,7 @@ public class MiscTests {
 		encoder.encode((WsFrameHeader)decRes.response().get());
 		encoded.clear();
 		encRes = encoder.encode(null, encoded, true);
-		assertTrue(encRes.closeConnection());
+		assertFalse(encRes.closeConnection());
 	}
 
 }

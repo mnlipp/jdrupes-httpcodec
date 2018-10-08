@@ -26,9 +26,13 @@ import java.util.Optional;
  * The general interface of an encoder.
  * 
  * @param <T> the type of the message header to be encoded
+ * @param <D> the type of the message header decoded by the peer decoder
  */
-public interface Encoder<T extends MessageHeader> extends Codec {
+public interface Encoder<T extends MessageHeader, D extends MessageHeader>
+	extends Codec {
 
+	Encoder<T, D> setPeerDecoder(Decoder<D, T> decoder);
+	
 	/**
 	 * Returns the type of the messages encoded by this encoder.
 	 * 

@@ -33,6 +33,14 @@ public interface Decoder<T extends MessageHeader,
 	R extends MessageHeader> extends Codec {
 
 	/**
+	 * Sets the peer encoder.
+	 *
+	 * @param encoder the encoder
+	 * @return the decoder
+	 */
+	Decoder<T, R> setPeerEncoder(Encoder<R, T> encoder);
+	
+	/**
 	 * Returns the type of the messages decoded by this decoder.
 	 * 
 	 * @return the value

@@ -194,15 +194,15 @@ public interface Codec {
 		public String newProtocol();
 		
 		/**
-		 * The response encoder to be used for the next response
+		 * The encoder to be used for the next message
 		 * if a protocol switch occured.
 		 * 
 		 * @return the encoder or {@code null} if no protocol switch occurred
 		 */
-		public Encoder<?> newEncoder();
+		public Encoder<?, ?> newEncoder();
 		
 		/**
-		 * The request decoder to be used for the next request
+		 * The decoder to be used for the next message
 		 * if a protocol switch occured.
 		 * 
 		 * @return the decoder or {@code null} if no protocol switch occurred

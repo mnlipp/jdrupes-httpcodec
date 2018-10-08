@@ -33,12 +33,12 @@ import static org.junit.Assert.assertTrue;
 public class Common {
 
 	public static Encoder.Result tinyEncodeLoop(
-			Encoder<?> encoder, Buffer in, ByteBuffer out) {
+			Encoder<?, ?> encoder, Buffer in, ByteBuffer out) {
 		return tinyEncodeLoop(encoder, in, 1, out, 1, false);
 	}
 	
 	public static Encoder.Result tinyEncodeLoop(
-			Encoder<?> encoder, Buffer in, int inSize,
+			Encoder<?, ?> encoder, Buffer in, int inSize,
 			ByteBuffer out, int outSize, boolean fillInOnStart) {
 		Buffer tinyIn = (in instanceof CharBuffer) 
 				? CharBuffer.allocate(inSize) : ByteBuffer.allocate(inSize);

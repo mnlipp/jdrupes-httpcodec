@@ -26,17 +26,16 @@ import java.nio.charset.CoderResult;
 import java.util.Optional;
 
 import org.jdrupes.httpcodec.Decoder;
-import org.jdrupes.httpcodec.MessageHeader;
+import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.ProtocolException;
-import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;
 import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;
 
 /**
  * The Websocket decoder.
  */
-public class WsDecoder	
-	implements ResponseDecoder<WsFrameHeader, WsFrameHeader> {
+public class WsDecoder	extends WsCodec
+	implements Decoder<WsFrameHeader, WsFrameHeader> {
 
 	private static enum State { READING_HEADER, READING_LENGTH,
 		READING_MASK, READING_PAYLOAD, READING_PING_DATA,
@@ -68,10 +67,17 @@ public class WsDecoder
 	private int maskIndex;
 	private long payloadLength = 0;
 	private OptimizedCharsetDecoder charDecoder = null;
+	private boolean receivedDataIsMasked;
 	private WsFrameHeader receivedHeader = null;
 	private WsFrameHeader reportedHeader = null;
 	private ByteBuffer controlData = null;
 	private CharBuffer controlChars = null;
+	
+	public Decoder<WsFrameHeader, WsFrameHeader> setPeerEncoder(
+			Encoder<WsFrameHeader, WsFrameHeader> encoder) {
+		linkClosingState((WsCodec)encoder);
+		return this;
+	}
 	
 	/**
 	 * Returns the result factory for this codec.
@@ -98,13 +104,6 @@ public class WsDecoder
 		return state == State.READING_HEADER;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.ResponseDecoder#decodeResponseTo
-	 */
-	@Override
-	public void decodeResponseTo(MessageHeader request) {
-	}
-
 	private void expectNextFrame() {
 		state = State.READING_HEADER;
 		bytesExpected = 2;
@@ -124,18 +123,19 @@ public class WsDecoder
 	}
 
 	private Result createResult(boolean overflow, boolean underflow, 
-				WsFrameHeader response, boolean responseOnly) {
+				boolean closeConnection, WsFrameHeader response, 
+				boolean responseOnly) {
 		if (receivedHeader != null && receivedHeader != reportedHeader) {
 			reportedHeader = receivedHeader;
-			return resultFactory().newResult(overflow, underflow, false, true, 
-					response, responseOnly);
+			return resultFactory().newResult(overflow, underflow, 
+					closeConnection, true, response, responseOnly);
 		}
-		return resultFactory().newResult(overflow, underflow, false, false, 
-				response, responseOnly);
+		return resultFactory().newResult(overflow, underflow, 
+				closeConnection, false, response, responseOnly);
 	}
 
 	private Result createResult(boolean overflow, boolean underflow) {
-		return createResult(overflow, underflow, null, false);
+		return createResult(overflow, underflow, false, null, false);
 	}
 
 	
@@ -151,6 +151,8 @@ public class WsDecoder
 			case READING_HEADER:
 				curHeaderHead = (curHeaderHead << 8) | (in.get() & 0xFF);
 				if (--bytesExpected == 0) {
+					// "Header head" is complete, retrieve some information
+					receivedDataIsMasked = (curHeaderHead & 0x80) != 0;
 					payloadLength = curHeaderHead & 0x7f;
 					if (payloadLength == 126) {
 						payloadLength = 0;
@@ -164,7 +166,7 @@ public class WsDecoder
 						state = State.READING_LENGTH;
 						continue; // shortcut, no need to check result
 					}
-					if (isDataMasked()) {
+					if (receivedDataIsMasked) {
 						bytesExpected = 4;
 						state = State.READING_MASK;
 						continue; // shortcut, no need to check result
@@ -179,7 +181,7 @@ public class WsDecoder
 				if (--bytesExpected > 0) {
 					continue; // shortcut, no need to check result
 				}
-				if (isDataMasked()) {
+				if (receivedDataIsMasked) {
 					bytesExpected = 4;
 					state = State.READING_MASK;
 					continue; // shortcut, no need to check result
@@ -229,7 +231,7 @@ public class WsDecoder
 					if (state == State.READING_PING_DATA) {
 						receivedHeader = new WsPingFrame(controlData);
 						result = createResult(false, !dataMessageFinished, 
-							new WsPongFrame(controlData.duplicate()), true);
+							false, new WsPongFrame(controlData.duplicate()), true);
 						expectNextFrame();
 					} else {
 						receivedHeader = new WsPongFrame(controlData);
@@ -243,7 +245,13 @@ public class WsDecoder
 				
 			case READING_CLOSE_DATA:
 				if (controlData.position() < 2) {
-					controlData.put(in.get());
+					if (receivedDataIsMasked) {
+						controlData.put(
+								(byte)(in.get() ^ maskingKey[maskIndex]));
+						maskIndex = (maskIndex + 1) % 4;
+					} else {
+						controlData.put(in.get());
+					}
 					bytesExpected -= 1;
 					if (bytesExpected == 0) {
 						// Close frame with status code only
@@ -302,7 +310,7 @@ public class WsDecoder
 				expectNextFrame();
 				receivedHeader = new WsPingFrame(null);
 				return createResult(false, !dataMessageFinished, 
-						new WsPongFrame(null), true);
+						false, new WsPongFrame(null), true);
 			}
 			controlData = ByteBuffer.allocate((int)bytesExpected);
 			state = State.READING_PING_DATA;
@@ -318,10 +326,8 @@ public class WsDecoder
 			return null;
 		case CON_CLOSE:
 			if (bytesExpected == 0) {
-				receivedHeader = new WsCloseFrame(null, null);
 				expectNextFrame();
-				return resultFactory().newResult(false, false, true, 
-						true, new WsCloseResponse(null), false);
+				return createCloseResult();
 			}
 			controlData = ByteBuffer.allocate(2);
 			// upper limit (reached if each byte becomes a char)
@@ -342,31 +348,53 @@ public class WsDecoder
 	}
 	
 	private Decoder.Result<WsFrameHeader> createCloseResult() {
-		controlData.flip();
-		int status = 0;
-		while (controlData.hasRemaining()) {
-			status = (status << 8) | (controlData.get() & 0xff);
+		Integer status = null;
+		if (controlData != null) {
+			controlData.flip();
+			status = 0;
+			while (controlData.hasRemaining()) {
+				status = (status << 8) | (controlData.get() & 0xff);
+			}
+			controlData = null;
+			controlChars.flip();
+			receivedHeader = new WsCloseFrame(status, controlChars);
+			controlChars = null;
+		} else {
+			receivedHeader = new WsCloseFrame(status, null);
 		}
-		controlData = null;
-		controlChars.flip();
-		receivedHeader = new WsCloseFrame(status, controlChars);
-		controlChars = null;
-		return resultFactory().newResult(false, false, false, 
-				true, new WsCloseResponse(status), false);
+		
+		// Handle close status
+		WsCloseResponse ctrlResponse = null;
+		switch (closingState()) {
+		case OPEN:
+			setClosingState(ClosingState.CLOSE_RECEIVED);
+			// fall through
+		case CLOSE_RECEIVED:
+			// Actually *sending* (i.e. encoding) the response will
+			// advance the state furher.
+			ctrlResponse = new WsCloseResponse(status);
+			break;
+		case CLOSE_SENT:
+			// Was sent, is now received, cycle completed.
+			setClosingState(ClosingState.CLOSED);
+			break;
+		case CLOSED:
+			break;
+		}
+		// If received data is masked, we're on the server side.
+		return createResult(false, false, 
+				receivedDataIsMasked && closingState() == ClosingState.CLOSED, 
+				ctrlResponse, false);
 	}
 
 	private boolean isFinalFrame() {
 		return (curHeaderHead & 0x8000) != 0;
 	}
 	
-	private boolean isDataMasked() {
-		return (curHeaderHead & 0x80) != 0;
-	}
-	
 	private CoderResult copyData(
 			Buffer out, ByteBuffer in, int limit, boolean endOfInput) {
 		if (out instanceof ByteBuffer) {
-			if (!isDataMasked()) {
+			if (!receivedDataIsMasked) {
 				ByteBufferUtils.putAsMuchAsPossible((ByteBuffer) out, in, limit);
 				return null;
 			}
@@ -379,7 +407,7 @@ public class WsDecoder
 			return null;
 		} 
 		if (out instanceof CharBuffer) {
-			if (isDataMasked()) {
+			if (receivedDataIsMasked) {
 				ByteBuffer unmasked = ByteBuffer.allocate(1);
 				CoderResult res = null;
 				while (limit > 0 && in.hasRemaining() && out.hasRemaining()) {

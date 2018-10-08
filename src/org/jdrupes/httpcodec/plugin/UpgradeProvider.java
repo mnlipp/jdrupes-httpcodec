@@ -20,9 +20,7 @@ package org.jdrupes.httpcodec.plugin;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
-import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
-import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 
@@ -75,7 +73,7 @@ public abstract class UpgradeProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the request encoder
 	 */
-	public abstract Encoder<?>	createRequestEncoder(String protocol);
+	public abstract Encoder<?, ?>	createRequestEncoder(String protocol);
 	
 	/**
 	 * Creates a new request decoder for the protocol.
@@ -91,8 +89,7 @@ public abstract class UpgradeProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the response encoder
 	 */
-	public abstract Encoder<? extends MessageHeader>
-		createResponseEncoder(String protocol);
+	public abstract Encoder<?, ?> createResponseEncoder(String protocol);
 	
 	/**
 	 * Creates a new response decoder for the protocol.
@@ -100,8 +97,7 @@ public abstract class UpgradeProvider {
 	 * @param protocol the protocol, which must be supported by this plugin
 	 * @return the response decoder
 	 */
-	public abstract ResponseDecoder<?, ?>
-		createResponseDecoder(String protocol);
+	public abstract Decoder<?, ?> createResponseDecoder(String protocol);
 	
 	
 }

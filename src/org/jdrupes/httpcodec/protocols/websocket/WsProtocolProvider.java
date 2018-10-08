@@ -28,7 +28,6 @@ import java.util.Random;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.ProtocolException;
-import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.plugin.UpgradeProvider;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
@@ -163,7 +162,7 @@ public class WsProtocolProvider extends UpgradeProvider {
 	 * @see ProtocolProvider#createRequestEncoder()
 	 */
 	@Override
-	public Encoder<?> createRequestEncoder(String protocol) {
+	public Encoder<?, ?> createRequestEncoder(String protocol) {
 		return new WsEncoder(true);
 	}
 
@@ -179,7 +178,7 @@ public class WsProtocolProvider extends UpgradeProvider {
 	 * @see ProtocolProvider#createResponseEncoder()
 	 */
 	@Override
-	public Encoder<?> createResponseEncoder(String protocol) {
+	public Encoder<?, ?> createResponseEncoder(String protocol) {
 		return new WsEncoder(false);
 	}
 
@@ -187,10 +186,8 @@ public class WsProtocolProvider extends UpgradeProvider {
 	 * @see ProtocolProvider#createResponseDecoder()
 	 */
 	@Override
-	public ResponseDecoder<?, ?> createResponseDecoder(String protocol) {
+	public Decoder<?, ?> createResponseDecoder(String protocol) {
 		return new WsDecoder();
 	}
 
-	
-	
 }

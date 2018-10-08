@@ -30,9 +30,7 @@ import java.util.stream.StreamSupport;
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
-import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
-import org.jdrupes.httpcodec.ResponseDecoder;
 import org.jdrupes.httpcodec.plugin.UpgradeProvider;
 
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
@@ -75,7 +73,7 @@ import org.jdrupes.httpcodec.types.StringList;
  */
 public class HttpResponseDecoder 
 	extends HttpDecoder<HttpResponse, HttpRequest>
-	implements ResponseDecoder<HttpResponse, HttpRequest> {
+	implements Decoder<HttpResponse, HttpRequest> {
 
 	// RFC 7230 3.1.2
 	private static final Pattern responseLinePatter = Pattern
@@ -83,7 +81,6 @@ public class HttpResponseDecoder
 	                + SP + "(.*)$");
 
 	private final Result.Factory resultFactory	= new Result.Factory(this);
-	private HttpRequest request = null;
 	private boolean reportHeaderReceived = false;
 	private String switchingTo;
 	private UpgradeProvider protocolPlugin;
@@ -102,22 +99,6 @@ public class HttpResponseDecoder
 	@Override
 	public Class<HttpResponse> decoding() {
 		return HttpResponse.class;
-	}
-
-	/**
-	 * Specifies the request that caused the response to be decoded next.
-	 * 
-	 * Specifying the request is necessary because the existence of a body
-	 * cannot be derived by looking at the header only. It depends on the kind
-	 * of request made. Must be called before the response is decoded.
-	 * 
-	 * @param request
-	 *            the request
-	 */
-	public void decodeResponseTo(MessageHeader request) {
-		if (request instanceof HttpRequest) {
-			this.request = (HttpRequest)request;
-		}
 	}
 
 	/* (non-Javadoc)
@@ -214,12 +195,15 @@ public class HttpResponseDecoder
 						+ protocol.get() + " not supported.");
 			}
 			switchingTo = protocol.get();
-			if (request != null) {
-				protocolPlugin.checkSwitchingResponse(request, message);
+			if (peerEncoder != null && peerEncoder.header().isPresent()) {
+				protocolPlugin.checkSwitchingResponse(
+						peerEncoder.header().get(), message);
 			}
 		}
 		// RFC 7230 3.3.3 (1. & 2.)
 		int statusCode = message.statusCode();
+		HttpRequest request = Optional.ofNullable(peerEncoder)
+				.flatMap(Encoder::header).orElse(null);
 		if (request != null && request.method().equalsIgnoreCase("HEAD")
 		        || (statusCode % 100) == 1
 		        || statusCode == 204
@@ -277,8 +261,8 @@ public class HttpResponseDecoder
 		implements Codec.ProtocolSwitchResult {
 
 		private String newProtocol;
-		private ResponseDecoder<?, ?> newDecoder;
-		private Encoder<?> newEncoder;
+		private Decoder<?, ?> newDecoder;
+		private Encoder<?, ?> newEncoder;
 		
 		/**
 		 * Returns a new result.
@@ -298,8 +282,8 @@ public class HttpResponseDecoder
 		 */
 		protected Result(boolean overflow, boolean underflow,
 		        boolean closeConnection, boolean headerCompleted,
-		        String newProtocol, Encoder<?> newEncoder, 
-		        ResponseDecoder<?, ?> newDecoder) {
+		        String newProtocol, Encoder<?, ?> newEncoder, 
+		        Decoder<?, ?> newDecoder) {
 			super(overflow, underflow, closeConnection, headerCompleted,
 					null, false);
 			this.newProtocol = newProtocol;
@@ -313,12 +297,12 @@ public class HttpResponseDecoder
 		}
 		
 		@Override
-		public ResponseDecoder<?, ?> newDecoder() {
+		public Decoder<?, ?> newDecoder() {
 			return newDecoder;
 		}
 		
 		@Override
-		public Encoder<?> newEncoder() {
+		public Encoder<?, ?> newEncoder() {
 			return newEncoder;
 		}
 
@@ -438,8 +422,8 @@ public class HttpResponseDecoder
 
 			public Result newResult(boolean overflow, boolean underflow,
 			        boolean closeConnection, boolean headerCompleted,
-			        String newProtocol, Encoder<?> newEncoder, 
-			        ResponseDecoder<?, ?> newDecoder) {
+			        String newProtocol, Encoder<?, ?> newEncoder, 
+			        Decoder<?, ?> newDecoder) {
 				return new Result(overflow, underflow, closeConnection,
 						headerCompleted, newProtocol, newEncoder, newDecoder) {
 				};

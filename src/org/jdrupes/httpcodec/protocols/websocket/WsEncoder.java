@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Stack;
 
 import org.jdrupes.httpcodec.Codec;
+import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.util.ByteBufferOutputStream;
@@ -38,7 +39,8 @@ import org.jdrupes.httpcodec.util.ByteBufferUtils;
 /**
  * The Websocket encoder.
  */
-public class WsEncoder implements Encoder<WsFrameHeader> {
+public class WsEncoder extends WsCodec 
+	implements Encoder<WsFrameHeader, WsFrameHeader> {
 
 	private static enum State { STARTING_FRAME, WRITING_HEADER,  
 		WRITING_LENGTH, WRITING_MASK, WRITING_PAYLOAD }
@@ -59,7 +61,6 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	private byte[] maskingKey = new byte[4];
 	private int maskIndex;
 	private ByteBufferOutputStream convData = new ByteBufferOutputStream();
-	private boolean closeHasBeenSent = false;
 
 	/**
 	 * Creates new encoder.
@@ -71,6 +72,12 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		this.doMask = mask;
 	}
 
+	public Encoder<WsFrameHeader, WsFrameHeader> setPeerDecoder(
+			Decoder<WsFrameHeader, WsFrameHeader> decoder) {
+		linkClosingState((WsCodec)decoder);
+		return this;
+	}
+	
 	/**
 	 * Returns the result factory for this codec.
 	 * 
@@ -89,9 +96,28 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 	}
 
 	private Result frameFinished(boolean endOfInput) {
-		closeHasBeenSent = (messageHeaders.peek() instanceof WsCloseFrame);
-		// If it is the response to a close from the other endpoint, close now.
-		final boolean close = (messageHeaders.peek() instanceof WsCloseResponse);
+		// If we have encoded a close, adapt
+		boolean close = false;
+		if (messageHeaders.peek() instanceof WsCloseFrame) {
+			switch (closingState()) {
+			case OPEN:
+				setClosingState(ClosingState.CLOSE_SENT);
+				break;
+			case CLOSE_RECEIVED:
+				setClosingState(ClosingState.CLOSED);
+				// fall through
+			case CLOSED:
+				if (!doMask) {
+					// Server side encoder
+					close = true;
+				}
+				break;
+			case CLOSE_SENT:
+				// Shouldn't happen
+				break;
+			}
+		}
+		// Fix statck
 		if (!(messageHeaders.peek() instanceof WsMessageHeader) 
 				|| endOfInput) {
 			messageHeaders.pop();
@@ -140,8 +166,10 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 
 	@Override
 	public Result encode(Buffer in, ByteBuffer out, boolean endOfInput) {
-		if (closeHasBeenSent) {
-			return resultFactory().newResult(false, false, true);
+		if (closingState() == ClosingState.CLOSED) {
+			// Must no longer send anything. 
+			// If server (!doMask) close connection.
+			return resultFactory().newResult(false, false, !doMask);
 		}
 		Result result = null;
 		while (out.remaining() > 0) {
@@ -198,12 +226,22 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		return resultFactory().newResult(true, false, false);
 	}
 
+	/**
+	 * Prepares the start (head) of the header. As a side effect, if
+	 * "in" holds textual data (or if the data is obtained from the
+	 * to be encoded message header (close frame)) it is written into
+	 * convData because this is the only way to "calculate" the payload 
+	 * size. 
+	 * 
+	 * @param in input data
+	 * @param endOfInput set if end of input
+	 */
 	private void prepareHeaderHead(Buffer in, boolean endOfInput) {
 		WsFrameHeader hdr = messageHeaders.peek();
 		if (hdr instanceof WsMessageHeader) {
 			if (continuationFrame) {
 				headerHead = 0;
-			}			
+			}
 			if (endOfInput) {
 				headerHead |= 0x8000;
 			}
@@ -299,17 +337,26 @@ public class WsEncoder implements Encoder<WsFrameHeader> {
 		return null;
 	}
 	
+	/**
+	 * Copy payload to "out". Note that if we have textual data
+	 * or a close frame, data has already been written into
+	 * convData (see {@link #prepareHeaderHead(Buffer, boolean)}.
+	 *
+	 * @param in the input data, unless already wriiten to convData 
+	 * @param out the out
+	 */
 	private void outputPayload(Buffer in, ByteBuffer out) {
 		WsFrameHeader hdr = messageHeaders.peek();
 		if ((hdr instanceof WsMessageHeader) 
 				&& ((WsMessageHeader)hdr).isTextMode()
 				|| (hdr instanceof WsCloseFrame)) {
-			// Data is in convData
+			// Data has been put into convData
 			if (!doMask) {
+				// Moves data from temporary buffers to "out"
 				convData.assignBuffer(out);
 				return;
 			}
-			// Retrieving as much as fit in out buffer for conversion
+			// Retrieving as much as fits in out buffer for masking
 			in = ByteBuffer.allocate(out.remaining());
 			convData.assignBuffer((ByteBuffer)in);
 			in.flip();

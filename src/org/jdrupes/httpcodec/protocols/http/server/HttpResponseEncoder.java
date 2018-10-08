@@ -38,6 +38,7 @@ import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
+import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.Directive;
@@ -79,7 +80,8 @@ import org.jdrupes.httpcodec.types.Directive;
  * 
  * @enduml
  */
-public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
+public class HttpResponseEncoder extends HttpEncoder<HttpResponse, HttpRequest>
+	implements Encoder<HttpResponse, HttpRequest> {
 
 	private static Result.Factory resultFactory = new Result.Factory() {
 	};
@@ -248,7 +250,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 
 		private String newProtocol;
 		private Decoder<?, ?> newDecoder;
-		private Encoder<?> newEncoder;
+		private Encoder<?, ?> newEncoder;
 		
 		/**
 		 * Returns a new result.
@@ -265,7 +267,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		 */
 		protected Result(boolean overflow, boolean underflow,
 		        boolean closeConnection, String newProtocol,
-		        Decoder<?, ?> newDecoder, Encoder<?> newEncoder) {
+		        Decoder<?, ?> newDecoder, Encoder<?, ?> newEncoder) {
 			super(overflow, underflow, closeConnection);
 			this.newProtocol = newProtocol;
 			this.newEncoder = newEncoder;
@@ -278,7 +280,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 		}
 		
 		@Override
-		public Encoder<?> newEncoder() {
+		public Encoder<?, ?> newEncoder() {
 			return newEncoder;
 		}
 		
@@ -394,7 +396,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			 */
 			public Result newResult(boolean overflow, boolean underflow,
 			        boolean closeConnection, String newProtocol,
-			        Decoder<?, ?> newDecoder, Encoder<?> newEncoder) {
+			        Decoder<?, ?> newDecoder, Encoder<?, ?> newEncoder) {
 				return new Result(overflow, underflow, closeConnection,
 						newProtocol, newDecoder, newEncoder) {
 				};
@@ -415,8 +417,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse> {
 			 * @return the result
 			 */
 			@Override
-			public Result newResult(
-			        boolean overflow, boolean underflow,
+			public Result newResult(boolean overflow, boolean underflow,
 			        boolean closeConnection) {
 				return newResult(overflow, underflow, closeConnection,
 						null, null, null);

@@ -35,7 +35,7 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	extends Engine {
 
 	private Decoder<?, ?> requestDecoder;
-	private Encoder<?> responseEncoder;
+	private Encoder<?, ?> responseEncoder;
 	
 	/**
 	 * Creates a new instance.
@@ -43,10 +43,12 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 * @param requestDecoder the decoder for the request
 	 * @param responseEncoder the encoder for the response
 	 */
-	public ServerEngine(
-			Decoder<Q, R> requestDecoder, Encoder<R> responseEncoder) {
+	public ServerEngine(Decoder<Q, R> requestDecoder, 
+			Encoder<R, Q> responseEncoder) {
 		this.requestDecoder = requestDecoder;
 		this.responseEncoder = responseEncoder;
+		responseEncoder.setPeerDecoder(requestDecoder);
+		requestDecoder.setPeerEncoder(responseEncoder);
 	}
 
 	/**
@@ -65,8 +67,8 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 * @return the response encoder
 	 */
 	@SuppressWarnings("unchecked")
-	public Encoder<R> responseEncoder() {
-		return (Encoder<R>)responseEncoder;
+	public Encoder<R, Q> responseEncoder() {
+		return (Encoder<R, Q>)responseEncoder;
 	}
 
 	/**
@@ -114,7 +116,7 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 */
 	@SuppressWarnings("unchecked")
 	public void encode(R messageHeader) {
-		((Encoder<R>)responseEncoder).encode(messageHeader);
+		((Encoder<R, Q>)responseEncoder).encode(messageHeader);
 	}
 
 	/**
@@ -127,8 +129,7 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 * @return the result
 	 * @see Encoder#encode(ByteBuffer)
 	 */
-	public Encoder.Result encode(
-	        ByteBuffer out) {
+	public Encoder.Result encode(ByteBuffer out) {
 		return encode(Codec.EMPTY_IN, out, true);
 	}
 
@@ -143,6 +144,7 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 	 * @return the result
 	 * @see Encoder#encode(Buffer, ByteBuffer, boolean)
 	 */
+	@SuppressWarnings("unchecked")
 	public Encoder.Result encode(
 	        Buffer in, ByteBuffer out, boolean endOfInput) {
 		Encoder.Result result = responseEncoder.encode(in, out, endOfInput);
@@ -152,6 +154,12 @@ public class ServerEngine<Q extends MessageHeader, R extends MessageHeader>
 				setSwitchedTo(res.newProtocol());
 				requestDecoder = res.newDecoder();
 				responseEncoder = res.newEncoder();
+				((Decoder<MessageHeader, MessageHeader>)requestDecoder)
+					.setPeerEncoder((Encoder<MessageHeader, MessageHeader>)
+							responseEncoder);
+				((Encoder<MessageHeader, MessageHeader>)responseEncoder)
+					.setPeerDecoder((Decoder<MessageHeader, MessageHeader>)
+							requestDecoder);
 			}
 		}
 		return result;
