@@ -21,9 +21,9 @@ package org.jdrupes.httpcodec.protocols.websocket;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
-import java.util.Random;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
@@ -62,6 +62,8 @@ import org.jdrupes.httpcodec.types.Converters;
  */
 public class WsProtocolProvider extends UpgradeProvider {
 
+	private static SecureRandom random = new SecureRandom();
+	
 	/* (non-Javadoc)
 	 * @see ProtocolProvider#supportsProtocol(java.lang.String)
 	 */
@@ -86,7 +88,7 @@ public class WsProtocolProvider extends UpgradeProvider {
 		if (!request.findField("Sec-WebSocket-Key", Converters.UNQUOTED_STRING)
 				.isPresent()) {
 			byte[] randomBytes = new byte[16];
-			new Random().nextBytes(randomBytes);
+			random.nextBytes(randomBytes);
 			request.setField(new HttpField<String>("Sec-WebSocket-Key",
 					Base64.getEncoder().encodeToString(randomBytes), 
 					Converters.UNQUOTED_STRING));
