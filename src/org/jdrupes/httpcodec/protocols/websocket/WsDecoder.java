@@ -96,14 +96,6 @@ public class WsDecoder	extends WsCodec
 		return WsFrameHeader.class;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.Decoder#isAwaitingMessage()
-	 */
-	@Override
-	public boolean isAwaitingMessage() {
-		return state == State.READING_HEADER;
-	}
-
 	private void expectNextFrame() {
 		state = State.READING_HEADER;
 		bytesExpected = 2;

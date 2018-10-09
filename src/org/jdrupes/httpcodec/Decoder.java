@@ -49,14 +49,6 @@ public interface Decoder<T extends MessageHeader,
 	Class<T> decoding();
 	
 	/**
-	 * Returns `true` if the decoder is awaiting the start of a new
-	 * message.
-	 *
-	 * @return the result.
-	 */
-	public boolean isAwaitingMessage();
-	
-	/**
 	 * Decodes the next chunk of data. This method will never leave
 	 * remaining data in the `in` buffer unless a header has been
 	 * decoded completely and/or the `out` buffer is full. In either case, 
