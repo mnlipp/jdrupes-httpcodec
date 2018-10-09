@@ -134,12 +134,12 @@ messages and HTTP response messages.
 ![HTTP request and response messages](http-messages.svg)
 
 Now we have all the pieces together. In order to write an HTTP server
-you need an `HTTPDecoder` parameterized with `HTTPRequest` as type of the 
-decoded message and `HTTPResponse` as type of any preliminary
+you need an `HttpDecoder` parameterized with `HttpRequest` as type of the 
+decoded message and `HttpResponse` as type of any preliminary
 feedback (optionally provided by the `Decoder.Result`). This is
 what makes up an 
 {@link org.jdrupes.httpcodec.protocols.http.server.HttpRequestDecoder}.
-And you need an `HttpEncoder` parameterized with `HTTPRequest` as type
+And you need an `HttpEncoder` parameterized with `HttpRequest` as type
 of the messages to be encode, in short an
 {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}.
 
