@@ -89,7 +89,7 @@ public class WsCloseFrame extends WsFrameHeader {
 		}
 		if (reason != null) {
 			builder.append("reason=");
-			builder.append(reason.toString());
+			builder.append(reason);
 		}
 		builder.append("]");
 		return builder.toString();
