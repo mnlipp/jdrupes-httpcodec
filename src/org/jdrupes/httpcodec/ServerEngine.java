@@ -26,7 +26,12 @@ import org.jdrupes.httpcodec.Codec.ProtocolSwitchResult;
 
 /**
  * An engine that can be used as a server. It has an associated
- * request decoder and response encoder.
+ * request decoder and response encoder. Using a {@link ServerEngine}
+ * has two main advantages over using an encoder and decoder
+ * directly. It links encoder and decoder (see 
+ * {@link Encoder#setPeerDecoder(Decoder)} and
+ * {@link Decoder#setPeerEncoder(Encoder)}) and it replaces the encoder 
+ * and decoder if the encoded result indicates a switch.
  * 
  * @param <Q> the message header type handled by the decoder (the request)
  * @param <R> the message header type handled be the encoder (the response)

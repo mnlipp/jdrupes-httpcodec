@@ -33,7 +33,8 @@ public interface Decoder<T extends MessageHeader,
 	R extends MessageHeader> extends Codec {
 
 	/**
-	 * Sets the peer encoder.
+	 * Sets the peer encoder. Some decoders need to know the state of 
+	 * the encoder or the last encoded message.
 	 *
 	 * @param encoder the encoder
 	 * @return the decoder

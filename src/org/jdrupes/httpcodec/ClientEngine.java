@@ -29,12 +29,13 @@ import org.jdrupes.httpcodec.protocols.http.client.HttpResponseDecoder;
  * An engine that can be used as a client. It has an associated
  * request encoder and a response decoder. Using a {@link ClientEngine}
  * has two main advantages over using an encoder and decoder
- * directly. It links encoder and decoder and it replaces 
- * the encoder and decoder if the
- * decoded result indicates a switch. The change takes place upon
- * the next `encode` or `decode` invocation. The "old" encoders
- * and decoders are therefore still available when the result of
- * a decode invocation indicates a switch.
+ * directly. It links encoder and decoder (see 
+ * {@link Encoder#setPeerDecoder(Decoder)} and
+ * {@link Decoder#setPeerEncoder(Encoder)}) and it replaces the encoder 
+ * and decoder if the decoded result indicates a switch. The change takes 
+ * place upon the next `encode` or `decode` invocation. The "old" encoders
+ * and decoders are thus still available when the result of
+ * a decode invocation, that indicates a switch, is processed.
  * 
  * @param <Q> the message header type handled be the encoder (the request)
  * @param <R> the message header type handled by the decoder (the response)

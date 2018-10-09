@@ -201,17 +201,15 @@ The codecs provided here are deliberatly restricted to using
 send such buffers, as this would tie this library with stream
 mechanisms beyond the passing of `Buffer`s. It is therefore not 
 possible to provide autonomous engine functionality 
-such as automatically sending a preliminary response (see described above).
+such as automatically sending a preliminary response (as described above).
 
 Nevertheless, the package includes a 
 {@link org.jdrupes.httpcodec.ClientEngine} and a
 {@link org.jdrupes.httpcodec.ServerEngine}. Both simply group
 together a decoder and an encoder as required for client-side
-or server-side operation. To support the implementation of
-a server, the {@link org.jdrupes.httpcodec.ServerEngine}
-automatically adapts the engine to any protocol change, i.e.
-it replaces the engine's codecs if the encoder result includes
-new ones.
+or server-side operation. As support function, they adapt themselves
+to any protocol change, i.e. they replace the engine's codecs if 
+the encoder result includes new ones.
 
 Integration
 -----------

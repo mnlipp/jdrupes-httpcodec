@@ -31,6 +31,13 @@ import java.util.Optional;
 public interface Encoder<T extends MessageHeader, D extends MessageHeader>
 	extends Codec {
 
+	/**
+	 * Sets the peer decoder. Some decoder implementations need to know
+	 * the state of the decoder or the last decoded message.
+	 *
+	 * @param decoder the decoder
+	 * @return the encoder
+	 */
 	Encoder<T, D> setPeerDecoder(Decoder<D, T> decoder);
 	
 	/**
