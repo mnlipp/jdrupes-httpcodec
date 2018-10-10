@@ -202,15 +202,15 @@
 <span class="sourceLineNo">194</span>                public String newProtocol();<a name="line.194"></a>
 <span class="sourceLineNo">195</span>                <a name="line.195"></a>
 <span class="sourceLineNo">196</span>                /**<a name="line.196"></a>
-<span class="sourceLineNo">197</span>                 * The response encoder to be used for the next response<a name="line.197"></a>
+<span class="sourceLineNo">197</span>                 * The encoder to be used for the next message<a name="line.197"></a>
 <span class="sourceLineNo">198</span>                 * if a protocol switch occured.<a name="line.198"></a>
 <span class="sourceLineNo">199</span>                 * <a name="line.199"></a>
 <span class="sourceLineNo">200</span>                 * @return the encoder or {@code null} if no protocol switch occurred<a name="line.200"></a>
 <span class="sourceLineNo">201</span>                 */<a name="line.201"></a>
-<span class="sourceLineNo">202</span>                public Encoder&lt;?&gt; newEncoder();<a name="line.202"></a>
+<span class="sourceLineNo">202</span>                public Encoder&lt;?, ?&gt; newEncoder();<a name="line.202"></a>
 <span class="sourceLineNo">203</span>                <a name="line.203"></a>
 <span class="sourceLineNo">204</span>                /**<a name="line.204"></a>
-<span class="sourceLineNo">205</span>                 * The request decoder to be used for the next request<a name="line.205"></a>
+<span class="sourceLineNo">205</span>                 * The decoder to be used for the next message<a name="line.205"></a>
 <span class="sourceLineNo">206</span>                 * if a protocol switch occured.<a name="line.206"></a>
 <span class="sourceLineNo">207</span>                 * <a name="line.207"></a>
 <span class="sourceLineNo">208</span>                 * @return the decoder or {@code null} if no protocol switch occurred<a name="line.208"></a>

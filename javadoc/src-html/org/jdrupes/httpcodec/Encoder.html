@@ -34,66 +34,77 @@
 <span class="sourceLineNo">026</span> * The general interface of an encoder.<a name="line.26"></a>
 <span class="sourceLineNo">027</span> * <a name="line.27"></a>
 <span class="sourceLineNo">028</span> * @param &lt;T&gt; the type of the message header to be encoded<a name="line.28"></a>
-<span class="sourceLineNo">029</span> */<a name="line.29"></a>
-<span class="sourceLineNo">030</span>public interface Encoder&lt;T extends MessageHeader&gt; extends Codec {<a name="line.30"></a>
-<span class="sourceLineNo">031</span><a name="line.31"></a>
-<span class="sourceLineNo">032</span>        /**<a name="line.32"></a>
-<span class="sourceLineNo">033</span>         * Returns the type of the messages encoded by this encoder.<a name="line.33"></a>
-<span class="sourceLineNo">034</span>         * <a name="line.34"></a>
-<span class="sourceLineNo">035</span>         * @return the value<a name="line.35"></a>
-<span class="sourceLineNo">036</span>         */<a name="line.36"></a>
-<span class="sourceLineNo">037</span>        Class&lt;T&gt; encoding();<a name="line.37"></a>
-<span class="sourceLineNo">038</span>        <a name="line.38"></a>
-<span class="sourceLineNo">039</span>        /**<a name="line.39"></a>
-<span class="sourceLineNo">040</span>         * Set the header of the message that is to be encoded. Must be invoked<a name="line.40"></a>
-<span class="sourceLineNo">041</span>         * before the first invocation to any {@code encode} method for a given<a name="line.41"></a>
-<span class="sourceLineNo">042</span>         * message.<a name="line.42"></a>
-<span class="sourceLineNo">043</span>         * <a name="line.43"></a>
-<span class="sourceLineNo">044</span>         * @param messageHeader<a name="line.44"></a>
-<span class="sourceLineNo">045</span>         *            the message header<a name="line.45"></a>
-<span class="sourceLineNo">046</span>         */<a name="line.46"></a>
-<span class="sourceLineNo">047</span>        public void encode(T messageHeader);<a name="line.47"></a>
-<span class="sourceLineNo">048</span>        <a name="line.48"></a>
-<span class="sourceLineNo">049</span>        /**<a name="line.49"></a>
-<span class="sourceLineNo">050</span>         * Encodes a message. First encodes the message header set by<a name="line.50"></a>
-<span class="sourceLineNo">051</span>         * {@link #encode(MessageHeader)} and then (optionally) adds payload <a name="line.51"></a>
-<span class="sourceLineNo">052</span>         * data from {@code in}.<a name="line.52"></a>
-<span class="sourceLineNo">053</span>         * <a name="line.53"></a>
-<span class="sourceLineNo">054</span>         * @param in<a name="line.54"></a>
-<span class="sourceLineNo">055</span>         *            the body data<a name="line.55"></a>
-<span class="sourceLineNo">056</span>         * @param out<a name="line.56"></a>
-<span class="sourceLineNo">057</span>         *            the buffer to which data is written<a name="line.57"></a>
-<span class="sourceLineNo">058</span>         * @param endOfInput<a name="line.58"></a>
-<span class="sourceLineNo">059</span>         *            {@code true} if there is no input left beyond the data<a name="line.59"></a>
-<span class="sourceLineNo">060</span>         *            currently in the {@code in} buffer (indicates end of body or<a name="line.60"></a>
-<span class="sourceLineNo">061</span>         *            no body at all)<a name="line.61"></a>
-<span class="sourceLineNo">062</span>         * @return the result<a name="line.62"></a>
-<span class="sourceLineNo">063</span>         */<a name="line.63"></a>
-<span class="sourceLineNo">064</span>        public Result encode(Buffer in, ByteBuffer out,<a name="line.64"></a>
-<span class="sourceLineNo">065</span>                boolean endOfInput)     ;<a name="line.65"></a>
-<span class="sourceLineNo">066</span><a name="line.66"></a>
-<span class="sourceLineNo">067</span>        /**<a name="line.67"></a>
-<span class="sourceLineNo">068</span>         * Convenience method for invoking<a name="line.68"></a>
-<span class="sourceLineNo">069</span>         * {@link #encode(Buffer, ByteBuffer, boolean)} with an empty {@code in}<a name="line.69"></a>
-<span class="sourceLineNo">070</span>         * buffer and {@code true}. Can be used to get the result of encoding a <a name="line.70"></a>
-<span class="sourceLineNo">071</span>         * message without body.<a name="line.71"></a>
-<span class="sourceLineNo">072</span>         * <a name="line.72"></a>
-<span class="sourceLineNo">073</span>         * @param out<a name="line.73"></a>
-<span class="sourceLineNo">074</span>         *            the buffer to which data is written<a name="line.74"></a>
-<span class="sourceLineNo">075</span>         * @return the result<a name="line.75"></a>
-<span class="sourceLineNo">076</span>         */<a name="line.76"></a>
-<span class="sourceLineNo">077</span>        public default Result encode(ByteBuffer out) {<a name="line.77"></a>
-<span class="sourceLineNo">078</span>                return encode(EMPTY_IN, out, true);<a name="line.78"></a>
-<span class="sourceLineNo">079</span>        }<a name="line.79"></a>
-<span class="sourceLineNo">080</span><a name="line.80"></a>
-<span class="sourceLineNo">081</span>        /**<a name="line.81"></a>
-<span class="sourceLineNo">082</span>         * Returns the last message (header) encoded. <a name="line.82"></a>
+<span class="sourceLineNo">029</span> * @param &lt;D&gt; the type of the message header decoded by the peer decoder<a name="line.29"></a>
+<span class="sourceLineNo">030</span> */<a name="line.30"></a>
+<span class="sourceLineNo">031</span>public interface Encoder&lt;T extends MessageHeader, D extends MessageHeader&gt;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        extends Codec {<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>        /**<a name="line.34"></a>
+<span class="sourceLineNo">035</span>         * Sets the peer decoder. Some decoder implementations need to know<a name="line.35"></a>
+<span class="sourceLineNo">036</span>         * the state of the decoder or the last decoded message.<a name="line.36"></a>
+<span class="sourceLineNo">037</span>         *<a name="line.37"></a>
+<span class="sourceLineNo">038</span>         * @param decoder the decoder<a name="line.38"></a>
+<span class="sourceLineNo">039</span>         * @return the encoder<a name="line.39"></a>
+<span class="sourceLineNo">040</span>         */<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        Encoder&lt;T, D&gt; setPeerDecoder(Decoder&lt;D, T&gt; decoder);<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        <a name="line.42"></a>
+<span class="sourceLineNo">043</span>        /**<a name="line.43"></a>
+<span class="sourceLineNo">044</span>         * Returns the type of the messages encoded by this encoder.<a name="line.44"></a>
+<span class="sourceLineNo">045</span>         * <a name="line.45"></a>
+<span class="sourceLineNo">046</span>         * @return the value<a name="line.46"></a>
+<span class="sourceLineNo">047</span>         */<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        Class&lt;T&gt; encoding();<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        <a name="line.49"></a>
+<span class="sourceLineNo">050</span>        /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>         * Set the header of the message that is to be encoded. Must be invoked<a name="line.51"></a>
+<span class="sourceLineNo">052</span>         * before the first invocation to any {@code encode} method for a given<a name="line.52"></a>
+<span class="sourceLineNo">053</span>         * message.<a name="line.53"></a>
+<span class="sourceLineNo">054</span>         * <a name="line.54"></a>
+<span class="sourceLineNo">055</span>         * @param messageHeader<a name="line.55"></a>
+<span class="sourceLineNo">056</span>         *            the message header<a name="line.56"></a>
+<span class="sourceLineNo">057</span>         */<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        public void encode(T messageHeader);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        <a name="line.59"></a>
+<span class="sourceLineNo">060</span>        /**<a name="line.60"></a>
+<span class="sourceLineNo">061</span>         * Encodes a message. First encodes the message header set by<a name="line.61"></a>
+<span class="sourceLineNo">062</span>         * {@link #encode(MessageHeader)} and then (optionally) adds payload <a name="line.62"></a>
+<span class="sourceLineNo">063</span>         * data from {@code in}.<a name="line.63"></a>
+<span class="sourceLineNo">064</span>         * <a name="line.64"></a>
+<span class="sourceLineNo">065</span>         * @param in<a name="line.65"></a>
+<span class="sourceLineNo">066</span>         *            the body data<a name="line.66"></a>
+<span class="sourceLineNo">067</span>         * @param out<a name="line.67"></a>
+<span class="sourceLineNo">068</span>         *            the buffer to which data is written<a name="line.68"></a>
+<span class="sourceLineNo">069</span>         * @param endOfInput<a name="line.69"></a>
+<span class="sourceLineNo">070</span>         *            {@code true} if there is no input left beyond the data<a name="line.70"></a>
+<span class="sourceLineNo">071</span>         *            currently in the {@code in} buffer (indicates end of body or<a name="line.71"></a>
+<span class="sourceLineNo">072</span>         *            no body at all)<a name="line.72"></a>
+<span class="sourceLineNo">073</span>         * @return the result<a name="line.73"></a>
+<span class="sourceLineNo">074</span>         */<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        public Result encode(Buffer in, ByteBuffer out,<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                boolean endOfInput)     ;<a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77"></a>
+<span class="sourceLineNo">078</span>        /**<a name="line.78"></a>
+<span class="sourceLineNo">079</span>         * Convenience method for invoking<a name="line.79"></a>
+<span class="sourceLineNo">080</span>         * {@link #encode(Buffer, ByteBuffer, boolean)} with an empty {@code in}<a name="line.80"></a>
+<span class="sourceLineNo">081</span>         * buffer and {@code true}. Can be used to get the result of encoding a <a name="line.81"></a>
+<span class="sourceLineNo">082</span>         * message without body.<a name="line.82"></a>
 <span class="sourceLineNo">083</span>         * <a name="line.83"></a>
-<span class="sourceLineNo">084</span>         * @return the result<a name="line.84"></a>
-<span class="sourceLineNo">085</span>         */<a name="line.85"></a>
-<span class="sourceLineNo">086</span>        public Optional&lt;T&gt; header();<a name="line.86"></a>
-<span class="sourceLineNo">087</span>        <a name="line.87"></a>
-<span class="sourceLineNo">088</span>}<a name="line.88"></a>
+<span class="sourceLineNo">084</span>         * @param out<a name="line.84"></a>
+<span class="sourceLineNo">085</span>         *            the buffer to which data is written<a name="line.85"></a>
+<span class="sourceLineNo">086</span>         * @return the result<a name="line.86"></a>
+<span class="sourceLineNo">087</span>         */<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        public default Result encode(ByteBuffer out) {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                return encode(EMPTY_IN, out, true);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        }<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>        /**<a name="line.92"></a>
+<span class="sourceLineNo">093</span>         * Returns the last message (header) encoded. <a name="line.93"></a>
+<span class="sourceLineNo">094</span>         * <a name="line.94"></a>
+<span class="sourceLineNo">095</span>         * @return the result<a name="line.95"></a>
+<span class="sourceLineNo">096</span>         */<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        public Optional&lt;T&gt; header();<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        <a name="line.98"></a>
+<span class="sourceLineNo">099</span>}<a name="line.99"></a>
 
 
 

@@ -38,607 +38,614 @@
 <span class="sourceLineNo">030</span>import java.util.function.BiConsumer;<a name="line.30"></a>
 <span class="sourceLineNo">031</span><a name="line.31"></a>
 <span class="sourceLineNo">032</span>import org.jdrupes.httpcodec.Decoder;<a name="line.32"></a>
-<span class="sourceLineNo">033</span>import org.jdrupes.httpcodec.MessageHeader;<a name="line.33"></a>
-<span class="sourceLineNo">034</span>import org.jdrupes.httpcodec.ProtocolException;<a name="line.34"></a>
-<span class="sourceLineNo">035</span><a name="line.35"></a>
-<span class="sourceLineNo">036</span>import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;<a name="line.36"></a>
-<span class="sourceLineNo">037</span><a name="line.37"></a>
-<span class="sourceLineNo">038</span>import org.jdrupes.httpcodec.types.Converters;<a name="line.38"></a>
-<span class="sourceLineNo">039</span>import org.jdrupes.httpcodec.types.CookieList;<a name="line.39"></a>
-<span class="sourceLineNo">040</span>import org.jdrupes.httpcodec.types.MultiValueConverter;<a name="line.40"></a>
-<span class="sourceLineNo">041</span>import org.jdrupes.httpcodec.types.StringList;<a name="line.41"></a>
-<span class="sourceLineNo">042</span>import org.jdrupes.httpcodec.util.ByteBufferUtils;<a name="line.42"></a>
-<span class="sourceLineNo">043</span>import org.jdrupes.httpcodec.util.DynamicByteArray;<a name="line.43"></a>
-<span class="sourceLineNo">044</span>import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;<a name="line.44"></a>
-<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">033</span>import org.jdrupes.httpcodec.Encoder;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.jdrupes.httpcodec.MessageHeader;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.jdrupes.httpcodec.ProtocolException;<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.jdrupes.httpcodec.types.Converters;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.jdrupes.httpcodec.types.CookieList;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import org.jdrupes.httpcodec.types.MultiValueConverter;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import org.jdrupes.httpcodec.types.StringList;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import org.jdrupes.httpcodec.util.ByteBufferUtils;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import org.jdrupes.httpcodec.util.DynamicByteArray;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import org.jdrupes.httpcodec.util.OptimizedCharsetDecoder;<a name="line.45"></a>
 <span class="sourceLineNo">046</span><a name="line.46"></a>
-<span class="sourceLineNo">047</span>/**<a name="line.47"></a>
-<span class="sourceLineNo">048</span> * Implements a decoder for HTTP. The class can be used as base class for both<a name="line.48"></a>
-<span class="sourceLineNo">049</span> * a request and a response decoder.<a name="line.49"></a>
-<span class="sourceLineNo">050</span> * <a name="line.50"></a>
-<span class="sourceLineNo">051</span> * @param &lt;T&gt; the type of the message header to be decoded<a name="line.51"></a>
-<span class="sourceLineNo">052</span> * @param &lt;R&gt; the type of the response message header<a name="line.52"></a>
-<span class="sourceLineNo">053</span> */<a name="line.53"></a>
-<span class="sourceLineNo">054</span>public abstract class   HttpDecoder&lt;T extends HttpMessageHeader,<a name="line.54"></a>
-<span class="sourceLineNo">055</span>        R extends HttpMessageHeader&gt; <a name="line.55"></a>
-<span class="sourceLineNo">056</span>        extends HttpCodec&lt;T&gt; implements Decoder&lt;T, R&gt; {<a name="line.56"></a>
-<span class="sourceLineNo">057</span><a name="line.57"></a>
-<span class="sourceLineNo">058</span>        protected static final String SP = "[ \\t]+";<a name="line.58"></a>
-<span class="sourceLineNo">059</span>        protected static final String HTTP_VERSION = "HTTP/\\d+\\.\\d";<a name="line.59"></a>
-<span class="sourceLineNo">060</span><a name="line.60"></a>
-<span class="sourceLineNo">061</span>        private enum State {<a name="line.61"></a>
-<span class="sourceLineNo">062</span>            // Main states<a name="line.62"></a>
-<span class="sourceLineNo">063</span>                AWAIT_MESSAGE_START, HEADER_LINE_RECEIVED, COPY_UNTIL_CLOSED, <a name="line.63"></a>
-<span class="sourceLineNo">064</span>                LENGTH_RECEIVED, CHUNK_START_RECEIVED, CHUNK_END_RECEIVED, <a name="line.64"></a>
-<span class="sourceLineNo">065</span>                CHUNK_TRAILER_LINE_RECEIVED, CLOSED,<a name="line.65"></a>
-<span class="sourceLineNo">066</span>                // Sub states<a name="line.66"></a>
-<span class="sourceLineNo">067</span>                RECEIVE_LINE, AWAIT_LINE_END, COPY_SPECIFIED, FINISH_CHARDECODER, <a name="line.67"></a>
-<span class="sourceLineNo">068</span>                FLUSH_CHARDECODER<a name="line.68"></a>
-<span class="sourceLineNo">069</span>        }<a name="line.69"></a>
-<span class="sourceLineNo">070</span><a name="line.70"></a>
-<span class="sourceLineNo">071</span>        protected enum BodyMode {<a name="line.71"></a>
-<span class="sourceLineNo">072</span>                NO_BODY, CHUNKED, LENGTH, UNTIL_CLOSE<a name="line.72"></a>
-<span class="sourceLineNo">073</span>        }<a name="line.73"></a>
-<span class="sourceLineNo">074</span><a name="line.74"></a>
-<span class="sourceLineNo">075</span>        private long maxHeaderLength = 4194304;<a name="line.75"></a>
-<span class="sourceLineNo">076</span>        private Stack&lt;State&gt; states = new Stack&lt;&gt;();<a name="line.76"></a>
-<span class="sourceLineNo">077</span>        private DynamicByteArray lineBuilder = new DynamicByteArray(8192);<a name="line.77"></a>
-<span class="sourceLineNo">078</span>        private String receivedLine;<a name="line.78"></a>
-<span class="sourceLineNo">079</span>        private String headerLine = null;<a name="line.79"></a>
-<span class="sourceLineNo">080</span>        protected HttpProtocol protocolVersion = HttpProtocol.HTTP_1_0;<a name="line.80"></a>
-<span class="sourceLineNo">081</span>        private long headerLength = 0;<a name="line.81"></a>
-<span class="sourceLineNo">082</span>        private T building;<a name="line.82"></a>
-<span class="sourceLineNo">083</span>        private long leftToRead = 0;<a name="line.83"></a>
-<span class="sourceLineNo">084</span>        private OptimizedCharsetDecoder charDecoder = null;<a name="line.84"></a>
-<span class="sourceLineNo">085</span><a name="line.85"></a>
-<span class="sourceLineNo">086</span>        /**<a name="line.86"></a>
-<span class="sourceLineNo">087</span>         * Creates a new decoder.<a name="line.87"></a>
-<span class="sourceLineNo">088</span>         */<a name="line.88"></a>
-<span class="sourceLineNo">089</span>        public HttpDecoder() {<a name="line.89"></a>
-<span class="sourceLineNo">090</span>                states.push(State.AWAIT_MESSAGE_START);<a name="line.90"></a>
-<span class="sourceLineNo">091</span>                states.push(State.RECEIVE_LINE);<a name="line.91"></a>
-<span class="sourceLineNo">092</span>        }<a name="line.92"></a>
-<span class="sourceLineNo">093</span><a name="line.93"></a>
-<span class="sourceLineNo">094</span>        public boolean isAwaitingMessage() {<a name="line.94"></a>
-<span class="sourceLineNo">095</span>                return states.size() &gt; 0 <a name="line.95"></a>
-<span class="sourceLineNo">096</span>                                &amp;&amp; states.get(0) == State.AWAIT_MESSAGE_START;<a name="line.96"></a>
-<span class="sourceLineNo">097</span>        }<a name="line.97"></a>
-<span class="sourceLineNo">098</span>        <a name="line.98"></a>
-<span class="sourceLineNo">099</span>        /**<a name="line.99"></a>
-<span class="sourceLineNo">100</span>         * Returns the result factory for this codec.<a name="line.100"></a>
-<span class="sourceLineNo">101</span>         * <a name="line.101"></a>
-<span class="sourceLineNo">102</span>         * @return the factory<a name="line.102"></a>
-<span class="sourceLineNo">103</span>         */<a name="line.103"></a>
-<span class="sourceLineNo">104</span>        protected abstract Result.Factory&lt;R&gt; resultFactory();<a name="line.104"></a>
+<span class="sourceLineNo">047</span><a name="line.47"></a>
+<span class="sourceLineNo">048</span>/**<a name="line.48"></a>
+<span class="sourceLineNo">049</span> * Implements a decoder for HTTP. The class can be used as base class for both<a name="line.49"></a>
+<span class="sourceLineNo">050</span> * a request and a response decoder.<a name="line.50"></a>
+<span class="sourceLineNo">051</span> * <a name="line.51"></a>
+<span class="sourceLineNo">052</span> * @param &lt;T&gt; the type of the message header to be decoded<a name="line.52"></a>
+<span class="sourceLineNo">053</span> * @param &lt;R&gt; the type of the response message header<a name="line.53"></a>
+<span class="sourceLineNo">054</span> */<a name="line.54"></a>
+<span class="sourceLineNo">055</span>public abstract class   HttpDecoder&lt;T extends HttpMessageHeader,<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        R extends HttpMessageHeader&gt; <a name="line.56"></a>
+<span class="sourceLineNo">057</span>        extends HttpCodec&lt;T&gt; implements Decoder&lt;T, R&gt; {<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>        protected static final String SP = "[ \\t]+";<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        protected static final String HTTP_VERSION = "HTTP/\\d+\\.\\d";<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>        private enum State {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            // Main states<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                AWAIT_MESSAGE_START, HEADER_LINE_RECEIVED, COPY_UNTIL_CLOSED, <a name="line.64"></a>
+<span class="sourceLineNo">065</span>                LENGTH_RECEIVED, CHUNK_START_RECEIVED, CHUNK_END_RECEIVED, <a name="line.65"></a>
+<span class="sourceLineNo">066</span>                CHUNK_TRAILER_LINE_RECEIVED, CLOSED,<a name="line.66"></a>
+<span class="sourceLineNo">067</span>                // Sub states<a name="line.67"></a>
+<span class="sourceLineNo">068</span>                RECEIVE_LINE, AWAIT_LINE_END, COPY_SPECIFIED, FINISH_CHARDECODER, <a name="line.68"></a>
+<span class="sourceLineNo">069</span>                FLUSH_CHARDECODER<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>        protected enum BodyMode {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                NO_BODY, CHUNKED, LENGTH, UNTIL_CLOSE<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        }<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>        private long maxHeaderLength = 4194304;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        private Stack&lt;State&gt; states = new Stack&lt;&gt;();<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        private DynamicByteArray lineBuilder = new DynamicByteArray(8192);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        private String receivedLine;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        private String headerLine = null;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        protected HttpProtocol protocolVersion = HttpProtocol.HTTP_1_0;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        private long headerLength = 0;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        private T building;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        private long leftToRead = 0;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        private OptimizedCharsetDecoder charDecoder = null;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        protected Encoder&lt;R, T&gt; peerEncoder; <a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>        /**<a name="line.88"></a>
+<span class="sourceLineNo">089</span>         * Creates a new decoder.<a name="line.89"></a>
+<span class="sourceLineNo">090</span>         */<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        public HttpDecoder() {<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                states.push(State.AWAIT_MESSAGE_START);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                states.push(State.RECEIVE_LINE);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        }<a name="line.94"></a>
+<span class="sourceLineNo">095</span><a name="line.95"></a>
+<span class="sourceLineNo">096</span>        public Decoder&lt;T, R&gt; setPeerEncoder(Encoder&lt;R, T&gt; encoder) {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                peerEncoder = encoder;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                return this;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        }<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        <a name="line.100"></a>
+<span class="sourceLineNo">101</span>        public boolean isAwaitingMessage() {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                return states.size() &gt; 0 <a name="line.102"></a>
+<span class="sourceLineNo">103</span>                                &amp;&amp; states.get(0) == State.AWAIT_MESSAGE_START;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        }<a name="line.104"></a>
 <span class="sourceLineNo">105</span>        <a name="line.105"></a>
 <span class="sourceLineNo">106</span>        /**<a name="line.106"></a>
-<span class="sourceLineNo">107</span>         * Sets the maximum size for the complete header. If the size is exceeded, a<a name="line.107"></a>
-<span class="sourceLineNo">108</span>         * {@link HttpProtocolException} will be thrown. The default size is 4MB<a name="line.108"></a>
-<span class="sourceLineNo">109</span>         * (4194304 Byte).<a name="line.109"></a>
-<span class="sourceLineNo">110</span>         * <a name="line.110"></a>
-<span class="sourceLineNo">111</span>         * @param maxHeaderLength<a name="line.111"></a>
-<span class="sourceLineNo">112</span>         *            the maxHeaderLength to set<a name="line.112"></a>
-<span class="sourceLineNo">113</span>         */<a name="line.113"></a>
-<span class="sourceLineNo">114</span>        public void setMaxHeaderLength(long maxHeaderLength) {<a name="line.114"></a>
-<span class="sourceLineNo">115</span>                this.maxHeaderLength = maxHeaderLength;<a name="line.115"></a>
-<span class="sourceLineNo">116</span>        }<a name="line.116"></a>
-<span class="sourceLineNo">117</span><a name="line.117"></a>
-<span class="sourceLineNo">118</span>        /**<a name="line.118"></a>
-<span class="sourceLineNo">119</span>         * Returns the maximum header length.<a name="line.119"></a>
-<span class="sourceLineNo">120</span>         * <a name="line.120"></a>
-<span class="sourceLineNo">121</span>         * @return the maxHeaderLength<a name="line.121"></a>
-<span class="sourceLineNo">122</span>         */<a name="line.122"></a>
-<span class="sourceLineNo">123</span>        public long maxHeaderLength() {<a name="line.123"></a>
-<span class="sourceLineNo">124</span>                return maxHeaderLength;<a name="line.124"></a>
-<span class="sourceLineNo">125</span>        }<a name="line.125"></a>
-<span class="sourceLineNo">126</span><a name="line.126"></a>
-<span class="sourceLineNo">127</span>        /**<a name="line.127"></a>
-<span class="sourceLineNo">128</span>         * Returns the message (header) if one exists.<a name="line.128"></a>
-<span class="sourceLineNo">129</span>         * <a name="line.129"></a>
-<span class="sourceLineNo">130</span>         * @return the result<a name="line.130"></a>
-<span class="sourceLineNo">131</span>         */<a name="line.131"></a>
-<span class="sourceLineNo">132</span>        public Optional&lt;T&gt; header() {<a name="line.132"></a>
-<span class="sourceLineNo">133</span>                return Optional.ofNullable(messageHeader);<a name="line.133"></a>
-<span class="sourceLineNo">134</span>        }<a name="line.134"></a>
-<span class="sourceLineNo">135</span><a name="line.135"></a>
-<span class="sourceLineNo">136</span>        /**<a name="line.136"></a>
-<span class="sourceLineNo">137</span>         * Returns {@code true} if the decoder does not accept further input because<a name="line.137"></a>
-<span class="sourceLineNo">138</span>         * the processed data indicated that the connection has been or is to be<a name="line.138"></a>
-<span class="sourceLineNo">139</span>         * closed.<a name="line.139"></a>
-<span class="sourceLineNo">140</span>         * <a name="line.140"></a>
-<span class="sourceLineNo">141</span>         * @return the result<a name="line.141"></a>
-<span class="sourceLineNo">142</span>         */<a name="line.142"></a>
-<span class="sourceLineNo">143</span>        public boolean isClosed() {<a name="line.143"></a>
-<span class="sourceLineNo">144</span>                return states.peek() == State.CLOSED;<a name="line.144"></a>
-<span class="sourceLineNo">145</span>        }<a name="line.145"></a>
-<span class="sourceLineNo">146</span><a name="line.146"></a>
-<span class="sourceLineNo">147</span>        /**<a name="line.147"></a>
-<span class="sourceLineNo">148</span>         * Informs the derived class about the start of a new message.<a name="line.148"></a>
-<span class="sourceLineNo">149</span>         * <a name="line.149"></a>
-<span class="sourceLineNo">150</span>         * @param startLine<a name="line.150"></a>
-<span class="sourceLineNo">151</span>         *            the start line (first line) of the message<a name="line.151"></a>
-<span class="sourceLineNo">152</span>         * @return the new HttpMessage object that is to hold the decoded data<a name="line.152"></a>
-<span class="sourceLineNo">153</span>         * @throws HttpProtocolException if the input violates the HTTP<a name="line.153"></a>
-<span class="sourceLineNo">154</span>         */<a name="line.154"></a>
-<span class="sourceLineNo">155</span>        protected abstract T newMessage(String startLine)<a name="line.155"></a>
-<span class="sourceLineNo">156</span>                throws ProtocolException;<a name="line.156"></a>
-<span class="sourceLineNo">157</span><a name="line.157"></a>
-<span class="sourceLineNo">158</span>        /**<a name="line.158"></a>
-<span class="sourceLineNo">159</span>         * Informs the derived class that the header has been received completely.<a name="line.159"></a>
-<span class="sourceLineNo">160</span>         * <a name="line.160"></a>
-<span class="sourceLineNo">161</span>         * @param message the message<a name="line.161"></a>
-<span class="sourceLineNo">162</span>         * @return indication how the body will be transferred<a name="line.162"></a>
-<span class="sourceLineNo">163</span>         * @throws HttpProtocolException if the input violates the HTTP<a name="line.163"></a>
-<span class="sourceLineNo">164</span>         */<a name="line.164"></a>
-<span class="sourceLineNo">165</span>        protected abstract BodyMode headerReceived(T message) <a name="line.165"></a>
-<span class="sourceLineNo">166</span>                        throws ProtocolException;<a name="line.166"></a>
-<span class="sourceLineNo">167</span><a name="line.167"></a>
-<span class="sourceLineNo">168</span>        /**<a name="line.168"></a>
-<span class="sourceLineNo">169</span>         * Informs the derived class that a complete message has been received<a name="line.169"></a>
-<span class="sourceLineNo">170</span>         * and the given result will be returned. The derived class may take<a name="line.170"></a>
-<span class="sourceLineNo">171</span>         * additional actions and even modify the result. The default<a name="line.171"></a>
-<span class="sourceLineNo">172</span>         * implementation simply returns the given result.<a name="line.172"></a>
-<span class="sourceLineNo">173</span>         */<a name="line.173"></a>
-<span class="sourceLineNo">174</span>        protected Decoder.Result&lt;R&gt; messageComplete(Decoder.Result&lt;R&gt; result) {<a name="line.174"></a>
-<span class="sourceLineNo">175</span>                return result;<a name="line.175"></a>
-<span class="sourceLineNo">176</span>        }<a name="line.176"></a>
-<span class="sourceLineNo">177</span>        <a name="line.177"></a>
-<span class="sourceLineNo">178</span>        /**<a name="line.178"></a>
-<span class="sourceLineNo">179</span>         * Decodes the next chunk of data.<a name="line.179"></a>
-<span class="sourceLineNo">180</span>         * <a name="line.180"></a>
-<span class="sourceLineNo">181</span>         * @param in<a name="line.181"></a>
-<span class="sourceLineNo">182</span>         *            holds the data to be decoded<a name="line.182"></a>
-<span class="sourceLineNo">183</span>         * @param out<a name="line.183"></a>
-<span class="sourceLineNo">184</span>         *            gets the body data (if any) written to it<a name="line.184"></a>
-<span class="sourceLineNo">185</span>         * @param endOfInput<a name="line.185"></a>
-<span class="sourceLineNo">186</span>         *            {@code true} if there is no input left beyond the data<a name="line.186"></a>
-<span class="sourceLineNo">187</span>         *            currently in the {@code in} buffer (indicates end of body or<a name="line.187"></a>
-<span class="sourceLineNo">188</span>         *            no body at all)<a name="line.188"></a>
-<span class="sourceLineNo">189</span>         * @return the result<a name="line.189"></a>
-<span class="sourceLineNo">190</span>         * @throws ProtocolException<a name="line.190"></a>
-<span class="sourceLineNo">191</span>         *             if the message violates the Protocol<a name="line.191"></a>
-<span class="sourceLineNo">192</span>         */<a name="line.192"></a>
-<span class="sourceLineNo">193</span>        public Decoder.Result&lt;R&gt; decode(ByteBuffer in, Buffer out, <a name="line.193"></a>
-<span class="sourceLineNo">194</span>                        boolean endOfInput) throws ProtocolException {<a name="line.194"></a>
-<span class="sourceLineNo">195</span>                try {<a name="line.195"></a>
-<span class="sourceLineNo">196</span>                        try {<a name="line.196"></a>
-<span class="sourceLineNo">197</span>                                return uncheckedDecode(in, out, endOfInput);<a name="line.197"></a>
-<span class="sourceLineNo">198</span>                        } catch (ParseException | NumberFormatException e) {<a name="line.198"></a>
-<span class="sourceLineNo">199</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.199"></a>
-<span class="sourceLineNo">200</span>                                        HttpStatus.BAD_REQUEST.statusCode(), e.getMessage());<a name="line.200"></a>
-<span class="sourceLineNo">201</span>                        }<a name="line.201"></a>
-<span class="sourceLineNo">202</span>                } catch (HttpProtocolException e) {<a name="line.202"></a>
-<span class="sourceLineNo">203</span>                        states.clear();<a name="line.203"></a>
-<span class="sourceLineNo">204</span>                        states.push(State.CLOSED);<a name="line.204"></a>
-<span class="sourceLineNo">205</span>                        throw e;<a name="line.205"></a>
-<span class="sourceLineNo">206</span>                }<a name="line.206"></a>
-<span class="sourceLineNo">207</span>        }<a name="line.207"></a>
-<span class="sourceLineNo">208</span><a name="line.208"></a>
-<span class="sourceLineNo">209</span>        private Decoder.Result&lt;R&gt; uncheckedDecode(<a name="line.209"></a>
-<span class="sourceLineNo">210</span>                ByteBuffer in, Buffer out, boolean endOfInput)<a name="line.210"></a>
-<span class="sourceLineNo">211</span>                        throws ProtocolException, ParseException {<a name="line.211"></a>
-<span class="sourceLineNo">212</span>                while(true) {<a name="line.212"></a>
-<span class="sourceLineNo">213</span>                        switch (states.peek()) {<a name="line.213"></a>
-<span class="sourceLineNo">214</span>                        // Waiting for CR (start of end of line)<a name="line.214"></a>
-<span class="sourceLineNo">215</span>                        case RECEIVE_LINE: {<a name="line.215"></a>
-<span class="sourceLineNo">216</span>                                if (!in.hasRemaining()) {<a name="line.216"></a>
-<span class="sourceLineNo">217</span>                                        return resultFactory().newResult(false, true);<a name="line.217"></a>
-<span class="sourceLineNo">218</span>                                }<a name="line.218"></a>
-<span class="sourceLineNo">219</span>                                byte ch = in.get();<a name="line.219"></a>
-<span class="sourceLineNo">220</span>                                if (ch == '\r') {<a name="line.220"></a>
-<span class="sourceLineNo">221</span>                                        states.pop();<a name="line.221"></a>
-<span class="sourceLineNo">222</span>                                        states.push(State.AWAIT_LINE_END);<a name="line.222"></a>
-<span class="sourceLineNo">223</span>                                        break;<a name="line.223"></a>
-<span class="sourceLineNo">224</span>                                }<a name="line.224"></a>
-<span class="sourceLineNo">225</span>                                lineBuilder.append(ch);<a name="line.225"></a>
-<span class="sourceLineNo">226</span>                                // RFC 7230 3.2.5<a name="line.226"></a>
-<span class="sourceLineNo">227</span>                                if (headerLength + lineBuilder.position() &gt; maxHeaderLength) {<a name="line.227"></a>
-<span class="sourceLineNo">228</span>                                        throw new HttpProtocolException(protocolVersion,<a name="line.228"></a>
-<span class="sourceLineNo">229</span>                                                HttpStatus.BAD_REQUEST.statusCode(),<a name="line.229"></a>
-<span class="sourceLineNo">230</span>                                                "Maximum header size exceeded");<a name="line.230"></a>
+<span class="sourceLineNo">107</span>         * Returns the result factory for this codec.<a name="line.107"></a>
+<span class="sourceLineNo">108</span>         * <a name="line.108"></a>
+<span class="sourceLineNo">109</span>         * @return the factory<a name="line.109"></a>
+<span class="sourceLineNo">110</span>         */<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        protected abstract Result.Factory&lt;R&gt; resultFactory();<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        <a name="line.112"></a>
+<span class="sourceLineNo">113</span>        /**<a name="line.113"></a>
+<span class="sourceLineNo">114</span>         * Sets the maximum size for the complete header. If the size is exceeded, a<a name="line.114"></a>
+<span class="sourceLineNo">115</span>         * {@link HttpProtocolException} will be thrown. The default size is 4MB<a name="line.115"></a>
+<span class="sourceLineNo">116</span>         * (4194304 Byte).<a name="line.116"></a>
+<span class="sourceLineNo">117</span>         * <a name="line.117"></a>
+<span class="sourceLineNo">118</span>         * @param maxHeaderLength<a name="line.118"></a>
+<span class="sourceLineNo">119</span>         *            the maxHeaderLength to set<a name="line.119"></a>
+<span class="sourceLineNo">120</span>         */<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        public void setMaxHeaderLength(long maxHeaderLength) {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                this.maxHeaderLength = maxHeaderLength;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        }<a name="line.123"></a>
+<span class="sourceLineNo">124</span><a name="line.124"></a>
+<span class="sourceLineNo">125</span>        /**<a name="line.125"></a>
+<span class="sourceLineNo">126</span>         * Returns the maximum header length.<a name="line.126"></a>
+<span class="sourceLineNo">127</span>         * <a name="line.127"></a>
+<span class="sourceLineNo">128</span>         * @return the maxHeaderLength<a name="line.128"></a>
+<span class="sourceLineNo">129</span>         */<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        public long maxHeaderLength() {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                return maxHeaderLength;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        }<a name="line.132"></a>
+<span class="sourceLineNo">133</span><a name="line.133"></a>
+<span class="sourceLineNo">134</span>        /**<a name="line.134"></a>
+<span class="sourceLineNo">135</span>         * Returns the message (header) if one exists.<a name="line.135"></a>
+<span class="sourceLineNo">136</span>         * <a name="line.136"></a>
+<span class="sourceLineNo">137</span>         * @return the result<a name="line.137"></a>
+<span class="sourceLineNo">138</span>         */<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        public Optional&lt;T&gt; header() {<a name="line.139"></a>
+<span class="sourceLineNo">140</span>                return Optional.ofNullable(messageHeader);<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        }<a name="line.141"></a>
+<span class="sourceLineNo">142</span><a name="line.142"></a>
+<span class="sourceLineNo">143</span>        /**<a name="line.143"></a>
+<span class="sourceLineNo">144</span>         * Returns {@code true} if the decoder does not accept further input because<a name="line.144"></a>
+<span class="sourceLineNo">145</span>         * the processed data indicated that the connection has been or is to be<a name="line.145"></a>
+<span class="sourceLineNo">146</span>         * closed.<a name="line.146"></a>
+<span class="sourceLineNo">147</span>         * <a name="line.147"></a>
+<span class="sourceLineNo">148</span>         * @return the result<a name="line.148"></a>
+<span class="sourceLineNo">149</span>         */<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        public boolean isClosed() {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>                return states.peek() == State.CLOSED;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        }<a name="line.152"></a>
+<span class="sourceLineNo">153</span><a name="line.153"></a>
+<span class="sourceLineNo">154</span>        /**<a name="line.154"></a>
+<span class="sourceLineNo">155</span>         * Informs the derived class about the start of a new message.<a name="line.155"></a>
+<span class="sourceLineNo">156</span>         * <a name="line.156"></a>
+<span class="sourceLineNo">157</span>         * @param startLine<a name="line.157"></a>
+<span class="sourceLineNo">158</span>         *            the start line (first line) of the message<a name="line.158"></a>
+<span class="sourceLineNo">159</span>         * @return the new HttpMessage object that is to hold the decoded data<a name="line.159"></a>
+<span class="sourceLineNo">160</span>         * @throws HttpProtocolException if the input violates the HTTP<a name="line.160"></a>
+<span class="sourceLineNo">161</span>         */<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        protected abstract T newMessage(String startLine)<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                throws ProtocolException;<a name="line.163"></a>
+<span class="sourceLineNo">164</span><a name="line.164"></a>
+<span class="sourceLineNo">165</span>        /**<a name="line.165"></a>
+<span class="sourceLineNo">166</span>         * Informs the derived class that the header has been received completely.<a name="line.166"></a>
+<span class="sourceLineNo">167</span>         * <a name="line.167"></a>
+<span class="sourceLineNo">168</span>         * @param message the message<a name="line.168"></a>
+<span class="sourceLineNo">169</span>         * @return indication how the body will be transferred<a name="line.169"></a>
+<span class="sourceLineNo">170</span>         * @throws HttpProtocolException if the input violates the HTTP<a name="line.170"></a>
+<span class="sourceLineNo">171</span>         */<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        protected abstract BodyMode headerReceived(T message) <a name="line.172"></a>
+<span class="sourceLineNo">173</span>                        throws ProtocolException;<a name="line.173"></a>
+<span class="sourceLineNo">174</span><a name="line.174"></a>
+<span class="sourceLineNo">175</span>        /**<a name="line.175"></a>
+<span class="sourceLineNo">176</span>         * Informs the derived class that a complete message has been received<a name="line.176"></a>
+<span class="sourceLineNo">177</span>         * and the given result will be returned. The derived class may take<a name="line.177"></a>
+<span class="sourceLineNo">178</span>         * additional actions and even modify the result. The default<a name="line.178"></a>
+<span class="sourceLineNo">179</span>         * implementation simply returns the given result.<a name="line.179"></a>
+<span class="sourceLineNo">180</span>         */<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        protected Decoder.Result&lt;R&gt; messageComplete(Decoder.Result&lt;R&gt; result) {<a name="line.181"></a>
+<span class="sourceLineNo">182</span>                return result;<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        }<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        <a name="line.184"></a>
+<span class="sourceLineNo">185</span>        /**<a name="line.185"></a>
+<span class="sourceLineNo">186</span>         * Decodes the next chunk of data.<a name="line.186"></a>
+<span class="sourceLineNo">187</span>         * <a name="line.187"></a>
+<span class="sourceLineNo">188</span>         * @param in<a name="line.188"></a>
+<span class="sourceLineNo">189</span>         *            holds the data to be decoded<a name="line.189"></a>
+<span class="sourceLineNo">190</span>         * @param out<a name="line.190"></a>
+<span class="sourceLineNo">191</span>         *            gets the body data (if any) written to it<a name="line.191"></a>
+<span class="sourceLineNo">192</span>         * @param endOfInput<a name="line.192"></a>
+<span class="sourceLineNo">193</span>         *            {@code true} if there is no input left beyond the data<a name="line.193"></a>
+<span class="sourceLineNo">194</span>         *            currently in the {@code in} buffer (indicates end of body or<a name="line.194"></a>
+<span class="sourceLineNo">195</span>         *            no body at all)<a name="line.195"></a>
+<span class="sourceLineNo">196</span>         * @return the result<a name="line.196"></a>
+<span class="sourceLineNo">197</span>         * @throws ProtocolException<a name="line.197"></a>
+<span class="sourceLineNo">198</span>         *             if the message violates the Protocol<a name="line.198"></a>
+<span class="sourceLineNo">199</span>         */<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        public Decoder.Result&lt;R&gt; decode(ByteBuffer in, Buffer out, <a name="line.200"></a>
+<span class="sourceLineNo">201</span>                        boolean endOfInput) throws ProtocolException {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>                try {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                        try {<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                                return uncheckedDecode(in, out, endOfInput);<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                        } catch (ParseException | NumberFormatException e) {<a name="line.205"></a>
+<span class="sourceLineNo">206</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                                        HttpStatus.BAD_REQUEST.statusCode(), e.getMessage());<a name="line.207"></a>
+<span class="sourceLineNo">208</span>                        }<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                } catch (HttpProtocolException e) {<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                        states.clear();<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                        states.push(State.CLOSED);<a name="line.211"></a>
+<span class="sourceLineNo">212</span>                        throw e;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                }<a name="line.213"></a>
+<span class="sourceLineNo">214</span>        }<a name="line.214"></a>
+<span class="sourceLineNo">215</span><a name="line.215"></a>
+<span class="sourceLineNo">216</span>        private Decoder.Result&lt;R&gt; uncheckedDecode(<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                ByteBuffer in, Buffer out, boolean endOfInput)<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                        throws ProtocolException, ParseException {<a name="line.218"></a>
+<span class="sourceLineNo">219</span>                while(true) {<a name="line.219"></a>
+<span class="sourceLineNo">220</span>                        switch (states.peek()) {<a name="line.220"></a>
+<span class="sourceLineNo">221</span>                        // Waiting for CR (start of end of line)<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                        case RECEIVE_LINE: {<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                                if (!in.hasRemaining()) {<a name="line.223"></a>
+<span class="sourceLineNo">224</span>                                        return resultFactory().newResult(false, true);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>                                }<a name="line.225"></a>
+<span class="sourceLineNo">226</span>                                byte ch = in.get();<a name="line.226"></a>
+<span class="sourceLineNo">227</span>                                if (ch == '\r') {<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                                        states.pop();<a name="line.228"></a>
+<span class="sourceLineNo">229</span>                                        states.push(State.AWAIT_LINE_END);<a name="line.229"></a>
+<span class="sourceLineNo">230</span>                                        break;<a name="line.230"></a>
 <span class="sourceLineNo">231</span>                                }<a name="line.231"></a>
-<span class="sourceLineNo">232</span>                                break;<a name="line.232"></a>
-<span class="sourceLineNo">233</span>                        }<a name="line.233"></a>
-<span class="sourceLineNo">234</span>                        // Waiting for LF (confirmation of end of line)<a name="line.234"></a>
-<span class="sourceLineNo">235</span>                        case AWAIT_LINE_END: {<a name="line.235"></a>
-<span class="sourceLineNo">236</span>                                if (!in.hasRemaining()) {<a name="line.236"></a>
-<span class="sourceLineNo">237</span>                                        return resultFactory().newResult(false, true);<a name="line.237"></a>
+<span class="sourceLineNo">232</span>                                lineBuilder.append(ch);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                                // RFC 7230 3.2.5<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                                if (headerLength + lineBuilder.position() &gt; maxHeaderLength) {<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                                        throw new HttpProtocolException(protocolVersion,<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                                                HttpStatus.BAD_REQUEST.statusCode(),<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                                                "Maximum header size exceeded");<a name="line.237"></a>
 <span class="sourceLineNo">238</span>                                }<a name="line.238"></a>
-<span class="sourceLineNo">239</span>                                char ch = (char) in.get();<a name="line.239"></a>
-<span class="sourceLineNo">240</span>                                if (ch == '\n') {<a name="line.240"></a>
-<span class="sourceLineNo">241</span>                                        try {<a name="line.241"></a>
-<span class="sourceLineNo">242</span>                                                // RFC 7230 3.2.4<a name="line.242"></a>
-<span class="sourceLineNo">243</span>                                                receivedLine = new String(lineBuilder.array(), 0,<a name="line.243"></a>
-<span class="sourceLineNo">244</span>                                                        lineBuilder.position(), "iso-8859-1");<a name="line.244"></a>
-<span class="sourceLineNo">245</span>                                        } catch (UnsupportedEncodingException e) {<a name="line.245"></a>
-<span class="sourceLineNo">246</span>                                                // iso-8859-1 is guaranteed to be supported<a name="line.246"></a>
-<span class="sourceLineNo">247</span>                                        }<a name="line.247"></a>
-<span class="sourceLineNo">248</span>                                        lineBuilder.clear();<a name="line.248"></a>
-<span class="sourceLineNo">249</span>                                        states.pop();<a name="line.249"></a>
-<span class="sourceLineNo">250</span>                                        break;<a name="line.250"></a>
-<span class="sourceLineNo">251</span>                                }<a name="line.251"></a>
-<span class="sourceLineNo">252</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.252"></a>
-<span class="sourceLineNo">253</span>                                        HttpStatus.BAD_REQUEST.statusCode(),<a name="line.253"></a>
-<span class="sourceLineNo">254</span>                                        "CR not followed by LF");<a name="line.254"></a>
-<span class="sourceLineNo">255</span>                        }<a name="line.255"></a>
-<span class="sourceLineNo">256</span>                        // Waiting for the initial request line<a name="line.256"></a>
-<span class="sourceLineNo">257</span>                        case AWAIT_MESSAGE_START:<a name="line.257"></a>
-<span class="sourceLineNo">258</span>                                if (receivedLine.isEmpty()) {<a name="line.258"></a>
-<span class="sourceLineNo">259</span>                                        // Ignore as recommended by RFC2616/RFC7230<a name="line.259"></a>
-<span class="sourceLineNo">260</span>                                        states.push(State.RECEIVE_LINE);<a name="line.260"></a>
-<span class="sourceLineNo">261</span>                                        break;<a name="line.261"></a>
-<span class="sourceLineNo">262</span>                                }<a name="line.262"></a>
-<span class="sourceLineNo">263</span>                                building = newMessage(receivedLine);<a name="line.263"></a>
-<span class="sourceLineNo">264</span>                                messageHeader = null;<a name="line.264"></a>
-<span class="sourceLineNo">265</span>                                charDecoder = null;<a name="line.265"></a>
-<span class="sourceLineNo">266</span>                                states.pop();<a name="line.266"></a>
-<span class="sourceLineNo">267</span>                                headerLine = null;<a name="line.267"></a>
-<span class="sourceLineNo">268</span>                                states.push(State.HEADER_LINE_RECEIVED);<a name="line.268"></a>
-<span class="sourceLineNo">269</span>                                states.push(State.RECEIVE_LINE);<a name="line.269"></a>
-<span class="sourceLineNo">270</span>                                break;<a name="line.270"></a>
-<span class="sourceLineNo">271</span><a name="line.271"></a>
-<span class="sourceLineNo">272</span>                        case HEADER_LINE_RECEIVED:<a name="line.272"></a>
-<span class="sourceLineNo">273</span>                                if (headerLine != null) {<a name="line.273"></a>
-<span class="sourceLineNo">274</span>                                        // RFC 7230 3.2.4<a name="line.274"></a>
-<span class="sourceLineNo">275</span>                                        if (!receivedLine.isEmpty()<a name="line.275"></a>
-<span class="sourceLineNo">276</span>                                                &amp;&amp; (receivedLine.charAt(0) == ' '<a name="line.276"></a>
-<span class="sourceLineNo">277</span>                                                        || receivedLine.charAt(0) == '\t')) {<a name="line.277"></a>
-<span class="sourceLineNo">278</span>                                                headerLine += (" " + receivedLine.substring(1));<a name="line.278"></a>
-<span class="sourceLineNo">279</span>                                                states.push(State.RECEIVE_LINE);<a name="line.279"></a>
-<span class="sourceLineNo">280</span>                                                break;<a name="line.280"></a>
-<span class="sourceLineNo">281</span>                                        }<a name="line.281"></a>
-<span class="sourceLineNo">282</span>                                        // Header line complete, evaluate<a name="line.282"></a>
-<span class="sourceLineNo">283</span>                                        newHeaderLine();<a name="line.283"></a>
-<span class="sourceLineNo">284</span>                                }<a name="line.284"></a>
-<span class="sourceLineNo">285</span>                                if (receivedLine.isEmpty()) {<a name="line.285"></a>
-<span class="sourceLineNo">286</span>                                        // Body starts<a name="line.286"></a>
-<span class="sourceLineNo">287</span>                                        BodyMode bm = headerReceived(building);<a name="line.287"></a>
-<span class="sourceLineNo">288</span>                                        adjustToBodyMode(bm);<a name="line.288"></a>
-<span class="sourceLineNo">289</span>                                        messageHeader = building;<a name="line.289"></a>
-<span class="sourceLineNo">290</span>                                        building = null;<a name="line.290"></a>
-<span class="sourceLineNo">291</span>                                        if (!messageHeader.hasPayload()) {<a name="line.291"></a>
-<span class="sourceLineNo">292</span>                                                return adjustToEndOfMessage();<a name="line.292"></a>
-<span class="sourceLineNo">293</span>                                        }<a name="line.293"></a>
-<span class="sourceLineNo">294</span>                                        if (out == null) {<a name="line.294"></a>
-<span class="sourceLineNo">295</span>                                                return resultFactory().newResult(true, false);<a name="line.295"></a>
-<span class="sourceLineNo">296</span>                                        }<a name="line.296"></a>
-<span class="sourceLineNo">297</span>                                        break;<a name="line.297"></a>
-<span class="sourceLineNo">298</span>                                }<a name="line.298"></a>
-<span class="sourceLineNo">299</span>                                headerLine = receivedLine;<a name="line.299"></a>
-<span class="sourceLineNo">300</span>                                states.push(State.RECEIVE_LINE);<a name="line.300"></a>
-<span class="sourceLineNo">301</span>                                break;<a name="line.301"></a>
-<span class="sourceLineNo">302</span><a name="line.302"></a>
-<span class="sourceLineNo">303</span>                        case LENGTH_RECEIVED:<a name="line.303"></a>
-<span class="sourceLineNo">304</span>                                // We "drop" to this state after COPY_SPECIFIED<a name="line.304"></a>
-<span class="sourceLineNo">305</span>                                // if we had a content length field<a name="line.305"></a>
-<span class="sourceLineNo">306</span>                                if (out instanceof CharBuffer &amp;&amp; charDecoder != null) {<a name="line.306"></a>
-<span class="sourceLineNo">307</span>                                        states.push(State.FINISH_CHARDECODER);<a name="line.307"></a>
-<span class="sourceLineNo">308</span>                                        break;<a name="line.308"></a>
-<span class="sourceLineNo">309</span>                                }<a name="line.309"></a>
-<span class="sourceLineNo">310</span>                                states.pop();<a name="line.310"></a>
-<span class="sourceLineNo">311</span>                                return adjustToEndOfMessage();<a name="line.311"></a>
-<span class="sourceLineNo">312</span><a name="line.312"></a>
-<span class="sourceLineNo">313</span>                        case CHUNK_START_RECEIVED:<a name="line.313"></a>
-<span class="sourceLineNo">314</span>                                // We "drop" to this state when a line has been read<a name="line.314"></a>
-<span class="sourceLineNo">315</span>                                String sizeText = receivedLine.split(";")[0];<a name="line.315"></a>
-<span class="sourceLineNo">316</span>                                long chunkSize = Long.parseLong(sizeText, 16);<a name="line.316"></a>
-<span class="sourceLineNo">317</span>                                if (chunkSize == 0) {<a name="line.317"></a>
-<span class="sourceLineNo">318</span>                                        states.pop();<a name="line.318"></a>
-<span class="sourceLineNo">319</span>                                        states.push(State.CHUNK_TRAILER_LINE_RECEIVED);<a name="line.319"></a>
-<span class="sourceLineNo">320</span>                                        states.push(State.RECEIVE_LINE);<a name="line.320"></a>
-<span class="sourceLineNo">321</span>                                        if (out instanceof CharBuffer &amp;&amp; charDecoder != null) {<a name="line.321"></a>
-<span class="sourceLineNo">322</span>                                                states.push(State.FINISH_CHARDECODER);<a name="line.322"></a>
-<span class="sourceLineNo">323</span>                                        }<a name="line.323"></a>
-<span class="sourceLineNo">324</span>                                        break;<a name="line.324"></a>
-<span class="sourceLineNo">325</span>                                }<a name="line.325"></a>
-<span class="sourceLineNo">326</span>                                leftToRead = chunkSize;<a name="line.326"></a>
-<span class="sourceLineNo">327</span>                                // We expect the chunk data and the trailing CRLF (empty line)<a name="line.327"></a>
-<span class="sourceLineNo">328</span>                                // (which must be skipped). In reverse order:<a name="line.328"></a>
-<span class="sourceLineNo">329</span>                                states.push(State.CHUNK_END_RECEIVED);<a name="line.329"></a>
-<span class="sourceLineNo">330</span>                                states.push(State.RECEIVE_LINE);<a name="line.330"></a>
-<span class="sourceLineNo">331</span>                                states.push(State.COPY_SPECIFIED);<a name="line.331"></a>
-<span class="sourceLineNo">332</span>                                break;<a name="line.332"></a>
-<span class="sourceLineNo">333</span><a name="line.333"></a>
-<span class="sourceLineNo">334</span>                        case CHUNK_END_RECEIVED:<a name="line.334"></a>
-<span class="sourceLineNo">335</span>                                // We "drop" to this state when the CR/LF after chunk data<a name="line.335"></a>
-<span class="sourceLineNo">336</span>                                // has been read. There's nothing to do except to wait for<a name="line.336"></a>
-<span class="sourceLineNo">337</span>                                // next chunk<a name="line.337"></a>
-<span class="sourceLineNo">338</span>                                if (receivedLine.length() != 0) {<a name="line.338"></a>
-<span class="sourceLineNo">339</span>                                        throw new HttpProtocolException(protocolVersion,<a name="line.339"></a>
-<span class="sourceLineNo">340</span>                                                HttpStatus.BAD_REQUEST.statusCode(),<a name="line.340"></a>
-<span class="sourceLineNo">341</span>                                                "No CRLF after chunk data.");<a name="line.341"></a>
-<span class="sourceLineNo">342</span>                                }<a name="line.342"></a>
-<span class="sourceLineNo">343</span>                                states.pop();<a name="line.343"></a>
-<span class="sourceLineNo">344</span>                                states.push(State.CHUNK_START_RECEIVED);<a name="line.344"></a>
-<span class="sourceLineNo">345</span>                                states.push(State.RECEIVE_LINE);<a name="line.345"></a>
-<span class="sourceLineNo">346</span>                                break;<a name="line.346"></a>
-<span class="sourceLineNo">347</span><a name="line.347"></a>
-<span class="sourceLineNo">348</span>                        case CHUNK_TRAILER_LINE_RECEIVED:<a name="line.348"></a>
-<span class="sourceLineNo">349</span>                                // We "drop" to this state when a line has been read<a name="line.349"></a>
-<span class="sourceLineNo">350</span>                                if (!receivedLine.isEmpty()) {<a name="line.350"></a>
-<span class="sourceLineNo">351</span>                                        headerLine = receivedLine;<a name="line.351"></a>
-<span class="sourceLineNo">352</span>                                        newTrailerLine();<a name="line.352"></a>
-<span class="sourceLineNo">353</span>                                        states.push(State.RECEIVE_LINE);<a name="line.353"></a>
-<span class="sourceLineNo">354</span>                                        break;<a name="line.354"></a>
-<span class="sourceLineNo">355</span>                                }<a name="line.355"></a>
-<span class="sourceLineNo">356</span>                                // All chunked data received<a name="line.356"></a>
-<span class="sourceLineNo">357</span>                                return adjustToEndOfMessage();<a name="line.357"></a>
-<span class="sourceLineNo">358</span><a name="line.358"></a>
-<span class="sourceLineNo">359</span>                        case COPY_SPECIFIED:<a name="line.359"></a>
-<span class="sourceLineNo">360</span>                                // If we get here, leftToRead is greater zero.<a name="line.360"></a>
-<span class="sourceLineNo">361</span>                                int initiallyRemaining = in.remaining();<a name="line.361"></a>
-<span class="sourceLineNo">362</span>                                if (out == null) {<a name="line.362"></a>
-<span class="sourceLineNo">363</span>                                        return resultFactory().newResult(true, initiallyRemaining &lt;= 0);<a name="line.363"></a>
-<span class="sourceLineNo">364</span>                                }<a name="line.364"></a>
-<span class="sourceLineNo">365</span>                                CoderResult decRes;<a name="line.365"></a>
-<span class="sourceLineNo">366</span>                                if (in.remaining() &lt;= leftToRead) {<a name="line.366"></a>
-<span class="sourceLineNo">367</span>                                        decRes = copyBodyData(out, in, in.remaining(), endOfInput);<a name="line.367"></a>
-<span class="sourceLineNo">368</span>                                } else {<a name="line.368"></a>
-<span class="sourceLineNo">369</span>                                        decRes = copyBodyData(<a name="line.369"></a>
-<span class="sourceLineNo">370</span>                                                        out, in, (int) leftToRead, endOfInput);<a name="line.370"></a>
+<span class="sourceLineNo">239</span>                                break;<a name="line.239"></a>
+<span class="sourceLineNo">240</span>                        }<a name="line.240"></a>
+<span class="sourceLineNo">241</span>                        // Waiting for LF (confirmation of end of line)<a name="line.241"></a>
+<span class="sourceLineNo">242</span>                        case AWAIT_LINE_END: {<a name="line.242"></a>
+<span class="sourceLineNo">243</span>                                if (!in.hasRemaining()) {<a name="line.243"></a>
+<span class="sourceLineNo">244</span>                                        return resultFactory().newResult(false, true);<a name="line.244"></a>
+<span class="sourceLineNo">245</span>                                }<a name="line.245"></a>
+<span class="sourceLineNo">246</span>                                char ch = (char) in.get();<a name="line.246"></a>
+<span class="sourceLineNo">247</span>                                if (ch == '\n') {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>                                        try {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>                                                // RFC 7230 3.2.4<a name="line.249"></a>
+<span class="sourceLineNo">250</span>                                                receivedLine = new String(lineBuilder.array(), 0,<a name="line.250"></a>
+<span class="sourceLineNo">251</span>                                                        lineBuilder.position(), "iso-8859-1");<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                                        } catch (UnsupportedEncodingException e) {<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                                                // iso-8859-1 is guaranteed to be supported<a name="line.253"></a>
+<span class="sourceLineNo">254</span>                                        }<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                                        lineBuilder.clear();<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                                        states.pop();<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                                        break;<a name="line.257"></a>
+<span class="sourceLineNo">258</span>                                }<a name="line.258"></a>
+<span class="sourceLineNo">259</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.259"></a>
+<span class="sourceLineNo">260</span>                                        HttpStatus.BAD_REQUEST.statusCode(),<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                                        "CR not followed by LF");<a name="line.261"></a>
+<span class="sourceLineNo">262</span>                        }<a name="line.262"></a>
+<span class="sourceLineNo">263</span>                        // Waiting for the initial request line<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                        case AWAIT_MESSAGE_START:<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                                if (receivedLine.isEmpty()) {<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                                        // Ignore as recommended by RFC2616/RFC7230<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                                        states.push(State.RECEIVE_LINE);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>                                        break;<a name="line.268"></a>
+<span class="sourceLineNo">269</span>                                }<a name="line.269"></a>
+<span class="sourceLineNo">270</span>                                building = newMessage(receivedLine);<a name="line.270"></a>
+<span class="sourceLineNo">271</span>                                messageHeader = null;<a name="line.271"></a>
+<span class="sourceLineNo">272</span>                                charDecoder = null;<a name="line.272"></a>
+<span class="sourceLineNo">273</span>                                states.pop();<a name="line.273"></a>
+<span class="sourceLineNo">274</span>                                headerLine = null;<a name="line.274"></a>
+<span class="sourceLineNo">275</span>                                states.push(State.HEADER_LINE_RECEIVED);<a name="line.275"></a>
+<span class="sourceLineNo">276</span>                                states.push(State.RECEIVE_LINE);<a name="line.276"></a>
+<span class="sourceLineNo">277</span>                                break;<a name="line.277"></a>
+<span class="sourceLineNo">278</span><a name="line.278"></a>
+<span class="sourceLineNo">279</span>                        case HEADER_LINE_RECEIVED:<a name="line.279"></a>
+<span class="sourceLineNo">280</span>                                if (headerLine != null) {<a name="line.280"></a>
+<span class="sourceLineNo">281</span>                                        // RFC 7230 3.2.4<a name="line.281"></a>
+<span class="sourceLineNo">282</span>                                        if (!receivedLine.isEmpty()<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                                                &amp;&amp; (receivedLine.charAt(0) == ' '<a name="line.283"></a>
+<span class="sourceLineNo">284</span>                                                        || receivedLine.charAt(0) == '\t')) {<a name="line.284"></a>
+<span class="sourceLineNo">285</span>                                                headerLine += (" " + receivedLine.substring(1));<a name="line.285"></a>
+<span class="sourceLineNo">286</span>                                                states.push(State.RECEIVE_LINE);<a name="line.286"></a>
+<span class="sourceLineNo">287</span>                                                break;<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                                        }<a name="line.288"></a>
+<span class="sourceLineNo">289</span>                                        // Header line complete, evaluate<a name="line.289"></a>
+<span class="sourceLineNo">290</span>                                        newHeaderLine();<a name="line.290"></a>
+<span class="sourceLineNo">291</span>                                }<a name="line.291"></a>
+<span class="sourceLineNo">292</span>                                if (receivedLine.isEmpty()) {<a name="line.292"></a>
+<span class="sourceLineNo">293</span>                                        // Body starts<a name="line.293"></a>
+<span class="sourceLineNo">294</span>                                        BodyMode bm = headerReceived(building);<a name="line.294"></a>
+<span class="sourceLineNo">295</span>                                        adjustToBodyMode(bm);<a name="line.295"></a>
+<span class="sourceLineNo">296</span>                                        messageHeader = building;<a name="line.296"></a>
+<span class="sourceLineNo">297</span>                                        building = null;<a name="line.297"></a>
+<span class="sourceLineNo">298</span>                                        if (!messageHeader.hasPayload()) {<a name="line.298"></a>
+<span class="sourceLineNo">299</span>                                                return adjustToEndOfMessage();<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                                        }<a name="line.300"></a>
+<span class="sourceLineNo">301</span>                                        if (out == null) {<a name="line.301"></a>
+<span class="sourceLineNo">302</span>                                                return resultFactory().newResult(true, false);<a name="line.302"></a>
+<span class="sourceLineNo">303</span>                                        }<a name="line.303"></a>
+<span class="sourceLineNo">304</span>                                        break;<a name="line.304"></a>
+<span class="sourceLineNo">305</span>                                }<a name="line.305"></a>
+<span class="sourceLineNo">306</span>                                headerLine = receivedLine;<a name="line.306"></a>
+<span class="sourceLineNo">307</span>                                states.push(State.RECEIVE_LINE);<a name="line.307"></a>
+<span class="sourceLineNo">308</span>                                break;<a name="line.308"></a>
+<span class="sourceLineNo">309</span><a name="line.309"></a>
+<span class="sourceLineNo">310</span>                        case LENGTH_RECEIVED:<a name="line.310"></a>
+<span class="sourceLineNo">311</span>                                // We "drop" to this state after COPY_SPECIFIED<a name="line.311"></a>
+<span class="sourceLineNo">312</span>                                // if we had a content length field<a name="line.312"></a>
+<span class="sourceLineNo">313</span>                                if (out instanceof CharBuffer &amp;&amp; charDecoder != null) {<a name="line.313"></a>
+<span class="sourceLineNo">314</span>                                        states.push(State.FINISH_CHARDECODER);<a name="line.314"></a>
+<span class="sourceLineNo">315</span>                                        break;<a name="line.315"></a>
+<span class="sourceLineNo">316</span>                                }<a name="line.316"></a>
+<span class="sourceLineNo">317</span>                                states.pop();<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                                return adjustToEndOfMessage();<a name="line.318"></a>
+<span class="sourceLineNo">319</span><a name="line.319"></a>
+<span class="sourceLineNo">320</span>                        case CHUNK_START_RECEIVED:<a name="line.320"></a>
+<span class="sourceLineNo">321</span>                                // We "drop" to this state when a line has been read<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                                String sizeText = receivedLine.split(";")[0];<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                                long chunkSize = Long.parseLong(sizeText, 16);<a name="line.323"></a>
+<span class="sourceLineNo">324</span>                                if (chunkSize == 0) {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                                        states.pop();<a name="line.325"></a>
+<span class="sourceLineNo">326</span>                                        states.push(State.CHUNK_TRAILER_LINE_RECEIVED);<a name="line.326"></a>
+<span class="sourceLineNo">327</span>                                        states.push(State.RECEIVE_LINE);<a name="line.327"></a>
+<span class="sourceLineNo">328</span>                                        if (out instanceof CharBuffer &amp;&amp; charDecoder != null) {<a name="line.328"></a>
+<span class="sourceLineNo">329</span>                                                states.push(State.FINISH_CHARDECODER);<a name="line.329"></a>
+<span class="sourceLineNo">330</span>                                        }<a name="line.330"></a>
+<span class="sourceLineNo">331</span>                                        break;<a name="line.331"></a>
+<span class="sourceLineNo">332</span>                                }<a name="line.332"></a>
+<span class="sourceLineNo">333</span>                                leftToRead = chunkSize;<a name="line.333"></a>
+<span class="sourceLineNo">334</span>                                // We expect the chunk data and the trailing CRLF (empty line)<a name="line.334"></a>
+<span class="sourceLineNo">335</span>                                // (which must be skipped). In reverse order:<a name="line.335"></a>
+<span class="sourceLineNo">336</span>                                states.push(State.CHUNK_END_RECEIVED);<a name="line.336"></a>
+<span class="sourceLineNo">337</span>                                states.push(State.RECEIVE_LINE);<a name="line.337"></a>
+<span class="sourceLineNo">338</span>                                states.push(State.COPY_SPECIFIED);<a name="line.338"></a>
+<span class="sourceLineNo">339</span>                                break;<a name="line.339"></a>
+<span class="sourceLineNo">340</span><a name="line.340"></a>
+<span class="sourceLineNo">341</span>                        case CHUNK_END_RECEIVED:<a name="line.341"></a>
+<span class="sourceLineNo">342</span>                                // We "drop" to this state when the CR/LF after chunk data<a name="line.342"></a>
+<span class="sourceLineNo">343</span>                                // has been read. There's nothing to do except to wait for<a name="line.343"></a>
+<span class="sourceLineNo">344</span>                                // next chunk<a name="line.344"></a>
+<span class="sourceLineNo">345</span>                                if (receivedLine.length() != 0) {<a name="line.345"></a>
+<span class="sourceLineNo">346</span>                                        throw new HttpProtocolException(protocolVersion,<a name="line.346"></a>
+<span class="sourceLineNo">347</span>                                                HttpStatus.BAD_REQUEST.statusCode(),<a name="line.347"></a>
+<span class="sourceLineNo">348</span>                                                "No CRLF after chunk data.");<a name="line.348"></a>
+<span class="sourceLineNo">349</span>                                }<a name="line.349"></a>
+<span class="sourceLineNo">350</span>                                states.pop();<a name="line.350"></a>
+<span class="sourceLineNo">351</span>                                states.push(State.CHUNK_START_RECEIVED);<a name="line.351"></a>
+<span class="sourceLineNo">352</span>                                states.push(State.RECEIVE_LINE);<a name="line.352"></a>
+<span class="sourceLineNo">353</span>                                break;<a name="line.353"></a>
+<span class="sourceLineNo">354</span><a name="line.354"></a>
+<span class="sourceLineNo">355</span>                        case CHUNK_TRAILER_LINE_RECEIVED:<a name="line.355"></a>
+<span class="sourceLineNo">356</span>                                // We "drop" to this state when a line has been read<a name="line.356"></a>
+<span class="sourceLineNo">357</span>                                if (!receivedLine.isEmpty()) {<a name="line.357"></a>
+<span class="sourceLineNo">358</span>                                        headerLine = receivedLine;<a name="line.358"></a>
+<span class="sourceLineNo">359</span>                                        newTrailerLine();<a name="line.359"></a>
+<span class="sourceLineNo">360</span>                                        states.push(State.RECEIVE_LINE);<a name="line.360"></a>
+<span class="sourceLineNo">361</span>                                        break;<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                                }<a name="line.362"></a>
+<span class="sourceLineNo">363</span>                                // All chunked data received<a name="line.363"></a>
+<span class="sourceLineNo">364</span>                                return adjustToEndOfMessage();<a name="line.364"></a>
+<span class="sourceLineNo">365</span><a name="line.365"></a>
+<span class="sourceLineNo">366</span>                        case COPY_SPECIFIED:<a name="line.366"></a>
+<span class="sourceLineNo">367</span>                                // If we get here, leftToRead is greater zero.<a name="line.367"></a>
+<span class="sourceLineNo">368</span>                                int initiallyRemaining = in.remaining();<a name="line.368"></a>
+<span class="sourceLineNo">369</span>                                if (out == null) {<a name="line.369"></a>
+<span class="sourceLineNo">370</span>                                        return resultFactory().newResult(true, initiallyRemaining &lt;= 0);<a name="line.370"></a>
 <span class="sourceLineNo">371</span>                                }<a name="line.371"></a>
-<span class="sourceLineNo">372</span>                                leftToRead -= (initiallyRemaining - in.remaining());<a name="line.372"></a>
-<span class="sourceLineNo">373</span>                                if (leftToRead == 0) {<a name="line.373"></a>
-<span class="sourceLineNo">374</span>                                        // Everything written (except, maybe, final bytes <a name="line.374"></a>
-<span class="sourceLineNo">375</span>                                        // from decoder)<a name="line.375"></a>
-<span class="sourceLineNo">376</span>                                        states.pop();<a name="line.376"></a>
-<span class="sourceLineNo">377</span>                                        break;<a name="line.377"></a>
+<span class="sourceLineNo">372</span>                                CoderResult decRes;<a name="line.372"></a>
+<span class="sourceLineNo">373</span>                                if (in.remaining() &lt;= leftToRead) {<a name="line.373"></a>
+<span class="sourceLineNo">374</span>                                        decRes = copyBodyData(out, in, in.remaining(), endOfInput);<a name="line.374"></a>
+<span class="sourceLineNo">375</span>                                } else {<a name="line.375"></a>
+<span class="sourceLineNo">376</span>                                        decRes = copyBodyData(<a name="line.376"></a>
+<span class="sourceLineNo">377</span>                                                        out, in, (int) leftToRead, endOfInput);<a name="line.377"></a>
 <span class="sourceLineNo">378</span>                                }<a name="line.378"></a>
-<span class="sourceLineNo">379</span>                                return resultFactory().newResult(<a name="line.379"></a>
-<span class="sourceLineNo">380</span>                                                (!out.hasRemaining() &amp;&amp; in.hasRemaining())<a name="line.380"></a>
-<span class="sourceLineNo">381</span>                                                || (decRes != null &amp;&amp; decRes.isOverflow()),<a name="line.381"></a>
-<span class="sourceLineNo">382</span>                                        !in.hasRemaining() <a name="line.382"></a>
-<span class="sourceLineNo">383</span>                                        || (decRes != null &amp;&amp; decRes.isUnderflow()));<a name="line.383"></a>
-<span class="sourceLineNo">384</span><a name="line.384"></a>
-<span class="sourceLineNo">385</span>                        case FINISH_CHARDECODER:<a name="line.385"></a>
-<span class="sourceLineNo">386</span>                                if (charDecoder.decode(EMPTY_IN, (CharBuffer) out, true)<a name="line.386"></a>
-<span class="sourceLineNo">387</span>                                        .isOverflow()) {<a name="line.387"></a>
-<span class="sourceLineNo">388</span>                                        return resultFactory().newResult(true, false);<a name="line.388"></a>
-<span class="sourceLineNo">389</span>                                }<a name="line.389"></a>
-<span class="sourceLineNo">390</span>                                states.pop();<a name="line.390"></a>
-<span class="sourceLineNo">391</span>                                states.push(State.FLUSH_CHARDECODER);<a name="line.391"></a>
-<span class="sourceLineNo">392</span>                                break;<a name="line.392"></a>
-<span class="sourceLineNo">393</span>                                <a name="line.393"></a>
-<span class="sourceLineNo">394</span>                        case FLUSH_CHARDECODER:<a name="line.394"></a>
-<span class="sourceLineNo">395</span>                                if (charDecoder.flush((CharBuffer)out).isOverflow()) {<a name="line.395"></a>
-<span class="sourceLineNo">396</span>                                        return resultFactory().newResult(true, false);<a name="line.396"></a>
-<span class="sourceLineNo">397</span>                                }<a name="line.397"></a>
-<span class="sourceLineNo">398</span>                                // No longer needed (and no longer usable btw) <a name="line.398"></a>
-<span class="sourceLineNo">399</span>                                charDecoder = null;<a name="line.399"></a>
-<span class="sourceLineNo">400</span>                                states.pop();<a name="line.400"></a>
-<span class="sourceLineNo">401</span>                                break;<a name="line.401"></a>
-<span class="sourceLineNo">402</span><a name="line.402"></a>
-<span class="sourceLineNo">403</span>                        case COPY_UNTIL_CLOSED:<a name="line.403"></a>
-<span class="sourceLineNo">404</span>                                if (out == null) {<a name="line.404"></a>
-<span class="sourceLineNo">405</span>                                        return resultFactory().newResult(true, false);<a name="line.405"></a>
-<span class="sourceLineNo">406</span>                                }<a name="line.406"></a>
-<span class="sourceLineNo">407</span>                                decRes = copyBodyData(out, in, in.remaining(), endOfInput);<a name="line.407"></a>
-<span class="sourceLineNo">408</span>                                boolean overflow = (!out.hasRemaining() &amp;&amp; in.hasRemaining())<a name="line.408"></a>
-<span class="sourceLineNo">409</span>                                                || (decRes != null &amp;&amp; decRes.isOverflow());<a name="line.409"></a>
-<span class="sourceLineNo">410</span>                                if (overflow) {<a name="line.410"></a>
-<span class="sourceLineNo">411</span>                                        return resultFactory().newResult(true, false);<a name="line.411"></a>
-<span class="sourceLineNo">412</span>                                }<a name="line.412"></a>
-<span class="sourceLineNo">413</span>                                if (!endOfInput) {<a name="line.413"></a>
-<span class="sourceLineNo">414</span>                                        return resultFactory().newResult(false, true);<a name="line.414"></a>
-<span class="sourceLineNo">415</span>                                }<a name="line.415"></a>
-<span class="sourceLineNo">416</span>                                // Final input successfully processed.<a name="line.416"></a>
-<span class="sourceLineNo">417</span>                                states.pop();<a name="line.417"></a>
-<span class="sourceLineNo">418</span>                                states.push(State.CLOSED);<a name="line.418"></a>
-<span class="sourceLineNo">419</span>                                if (out instanceof CharBuffer &amp;&amp; charDecoder != null) {<a name="line.419"></a>
-<span class="sourceLineNo">420</span>                                        // Final flush needed<a name="line.420"></a>
-<span class="sourceLineNo">421</span>                                        states.push(State.FINISH_CHARDECODER);<a name="line.421"></a>
+<span class="sourceLineNo">379</span>                                leftToRead -= (initiallyRemaining - in.remaining());<a name="line.379"></a>
+<span class="sourceLineNo">380</span>                                if (leftToRead == 0) {<a name="line.380"></a>
+<span class="sourceLineNo">381</span>                                        // Everything written (except, maybe, final bytes <a name="line.381"></a>
+<span class="sourceLineNo">382</span>                                        // from decoder)<a name="line.382"></a>
+<span class="sourceLineNo">383</span>                                        states.pop();<a name="line.383"></a>
+<span class="sourceLineNo">384</span>                                        break;<a name="line.384"></a>
+<span class="sourceLineNo">385</span>                                }<a name="line.385"></a>
+<span class="sourceLineNo">386</span>                                return resultFactory().newResult(<a name="line.386"></a>
+<span class="sourceLineNo">387</span>                                                (!out.hasRemaining() &amp;&amp; in.hasRemaining())<a name="line.387"></a>
+<span class="sourceLineNo">388</span>                                                || (decRes != null &amp;&amp; decRes.isOverflow()),<a name="line.388"></a>
+<span class="sourceLineNo">389</span>                                        !in.hasRemaining() <a name="line.389"></a>
+<span class="sourceLineNo">390</span>                                        || (decRes != null &amp;&amp; decRes.isUnderflow()));<a name="line.390"></a>
+<span class="sourceLineNo">391</span><a name="line.391"></a>
+<span class="sourceLineNo">392</span>                        case FINISH_CHARDECODER:<a name="line.392"></a>
+<span class="sourceLineNo">393</span>                                if (charDecoder.decode(EMPTY_IN, (CharBuffer) out, true)<a name="line.393"></a>
+<span class="sourceLineNo">394</span>                                        .isOverflow()) {<a name="line.394"></a>
+<span class="sourceLineNo">395</span>                                        return resultFactory().newResult(true, false);<a name="line.395"></a>
+<span class="sourceLineNo">396</span>                                }<a name="line.396"></a>
+<span class="sourceLineNo">397</span>                                states.pop();<a name="line.397"></a>
+<span class="sourceLineNo">398</span>                                states.push(State.FLUSH_CHARDECODER);<a name="line.398"></a>
+<span class="sourceLineNo">399</span>                                break;<a name="line.399"></a>
+<span class="sourceLineNo">400</span>                                <a name="line.400"></a>
+<span class="sourceLineNo">401</span>                        case FLUSH_CHARDECODER:<a name="line.401"></a>
+<span class="sourceLineNo">402</span>                                if (charDecoder.flush((CharBuffer)out).isOverflow()) {<a name="line.402"></a>
+<span class="sourceLineNo">403</span>                                        return resultFactory().newResult(true, false);<a name="line.403"></a>
+<span class="sourceLineNo">404</span>                                }<a name="line.404"></a>
+<span class="sourceLineNo">405</span>                                // No longer needed (and no longer usable btw) <a name="line.405"></a>
+<span class="sourceLineNo">406</span>                                charDecoder = null;<a name="line.406"></a>
+<span class="sourceLineNo">407</span>                                states.pop();<a name="line.407"></a>
+<span class="sourceLineNo">408</span>                                break;<a name="line.408"></a>
+<span class="sourceLineNo">409</span><a name="line.409"></a>
+<span class="sourceLineNo">410</span>                        case COPY_UNTIL_CLOSED:<a name="line.410"></a>
+<span class="sourceLineNo">411</span>                                if (out == null) {<a name="line.411"></a>
+<span class="sourceLineNo">412</span>                                        return resultFactory().newResult(true, false);<a name="line.412"></a>
+<span class="sourceLineNo">413</span>                                }<a name="line.413"></a>
+<span class="sourceLineNo">414</span>                                decRes = copyBodyData(out, in, in.remaining(), endOfInput);<a name="line.414"></a>
+<span class="sourceLineNo">415</span>                                boolean overflow = (!out.hasRemaining() &amp;&amp; in.hasRemaining())<a name="line.415"></a>
+<span class="sourceLineNo">416</span>                                                || (decRes != null &amp;&amp; decRes.isOverflow());<a name="line.416"></a>
+<span class="sourceLineNo">417</span>                                if (overflow) {<a name="line.417"></a>
+<span class="sourceLineNo">418</span>                                        return resultFactory().newResult(true, false);<a name="line.418"></a>
+<span class="sourceLineNo">419</span>                                }<a name="line.419"></a>
+<span class="sourceLineNo">420</span>                                if (!endOfInput) {<a name="line.420"></a>
+<span class="sourceLineNo">421</span>                                        return resultFactory().newResult(false, true);<a name="line.421"></a>
 <span class="sourceLineNo">422</span>                                }<a name="line.422"></a>
-<span class="sourceLineNo">423</span>                                break;<a name="line.423"></a>
-<span class="sourceLineNo">424</span><a name="line.424"></a>
-<span class="sourceLineNo">425</span>                        case CLOSED:<a name="line.425"></a>
-<span class="sourceLineNo">426</span>                                in.position(in.limit());<a name="line.426"></a>
-<span class="sourceLineNo">427</span>                                return resultFactory().newResult(false, false);<a name="line.427"></a>
-<span class="sourceLineNo">428</span>                        }<a name="line.428"></a>
-<span class="sourceLineNo">429</span>                }<a name="line.429"></a>
-<span class="sourceLineNo">430</span>        }<a name="line.430"></a>
+<span class="sourceLineNo">423</span>                                // Final input successfully processed.<a name="line.423"></a>
+<span class="sourceLineNo">424</span>                                states.pop();<a name="line.424"></a>
+<span class="sourceLineNo">425</span>                                states.push(State.CLOSED);<a name="line.425"></a>
+<span class="sourceLineNo">426</span>                                if (out instanceof CharBuffer &amp;&amp; charDecoder != null) {<a name="line.426"></a>
+<span class="sourceLineNo">427</span>                                        // Final flush needed<a name="line.427"></a>
+<span class="sourceLineNo">428</span>                                        states.push(State.FINISH_CHARDECODER);<a name="line.428"></a>
+<span class="sourceLineNo">429</span>                                }<a name="line.429"></a>
+<span class="sourceLineNo">430</span>                                break;<a name="line.430"></a>
 <span class="sourceLineNo">431</span><a name="line.431"></a>
-<span class="sourceLineNo">432</span>        private void newHeaderLine() throws HttpProtocolException, ParseException {<a name="line.432"></a>
-<span class="sourceLineNo">433</span>                headerLength += headerLine.length() + 2;<a name="line.433"></a>
-<span class="sourceLineNo">434</span>                // RFC 7230 3.2<a name="line.434"></a>
-<span class="sourceLineNo">435</span>                HttpField&lt;?&gt; field;<a name="line.435"></a>
-<span class="sourceLineNo">436</span>                try {<a name="line.436"></a>
-<span class="sourceLineNo">437</span>                        field = new HttpField&lt;&gt;(headerLine, Converters.STRING);<a name="line.437"></a>
-<span class="sourceLineNo">438</span>                } catch (ParseException e) {<a name="line.438"></a>
-<span class="sourceLineNo">439</span>                        throw new HttpProtocolException(protocolVersion,<a name="line.439"></a>
-<span class="sourceLineNo">440</span>                                HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");<a name="line.440"></a>
-<span class="sourceLineNo">441</span>                }<a name="line.441"></a>
-<span class="sourceLineNo">442</span>                if (field.name().equalsIgnoreCase(HttpField.SET_COOKIE)) {<a name="line.442"></a>
-<span class="sourceLineNo">443</span>                        field = new HttpField&lt;CookieList&gt;(headerLine, Converters.SET_COOKIE);<a name="line.443"></a>
-<span class="sourceLineNo">444</span>                }<a name="line.444"></a>
-<span class="sourceLineNo">445</span>                switch (field.name()) {<a name="line.445"></a>
-<span class="sourceLineNo">446</span>                case HttpField.CONTENT_LENGTH:<a name="line.446"></a>
-<span class="sourceLineNo">447</span>                        // RFC 7230 3.3.3 (3.)<a name="line.447"></a>
-<span class="sourceLineNo">448</span>                        if (building.fields()<a name="line.448"></a>
-<span class="sourceLineNo">449</span>                                .containsKey(HttpField.TRANSFER_ENCODING)) {<a name="line.449"></a>
-<span class="sourceLineNo">450</span>                                field = null;<a name="line.450"></a>
-<span class="sourceLineNo">451</span>                                break;<a name="line.451"></a>
-<span class="sourceLineNo">452</span>                        }<a name="line.452"></a>
-<span class="sourceLineNo">453</span>                        // RFC 7230 3.3.3 (4.)<a name="line.453"></a>
-<span class="sourceLineNo">454</span>                        Optional&lt;HttpField&lt;Long&gt;&gt; existing = building.findField(<a name="line.454"></a>
-<span class="sourceLineNo">455</span>                                HttpField.CONTENT_LENGTH, Converters.LONG);<a name="line.455"></a>
-<span class="sourceLineNo">456</span>                        if (existing.isPresent()) {<a name="line.456"></a>
-<span class="sourceLineNo">457</span>                                @SuppressWarnings("unchecked")<a name="line.457"></a>
-<span class="sourceLineNo">458</span>                                HttpField&lt;Long&gt; newLength = (HttpField&lt;Long&gt;)field;<a name="line.458"></a>
-<span class="sourceLineNo">459</span>                                if (!existing.get().value().equals(newLength.value())) {<a name="line.459"></a>
-<span class="sourceLineNo">460</span>                                        throw new HttpProtocolException(protocolVersion,<a name="line.460"></a>
-<span class="sourceLineNo">461</span>                                                        HttpStatus.BAD_REQUEST);<a name="line.461"></a>
-<span class="sourceLineNo">462</span>                                }<a name="line.462"></a>
-<span class="sourceLineNo">463</span>                        }<a name="line.463"></a>
-<span class="sourceLineNo">464</span>                        break;<a name="line.464"></a>
-<span class="sourceLineNo">465</span>                case HttpField.TRANSFER_ENCODING:<a name="line.465"></a>
-<span class="sourceLineNo">466</span>                        // RFC 7230 3.3.3 (3.)<a name="line.466"></a>
-<span class="sourceLineNo">467</span>                        building.removeField(HttpField.CONTENT_LENGTH);<a name="line.467"></a>
-<span class="sourceLineNo">468</span>                        break;<a name="line.468"></a>
-<span class="sourceLineNo">469</span>                }<a name="line.469"></a>
-<span class="sourceLineNo">470</span>                if (field == null) {<a name="line.470"></a>
-<span class="sourceLineNo">471</span>                        return;<a name="line.471"></a>
-<span class="sourceLineNo">472</span>                }<a name="line.472"></a>
-<span class="sourceLineNo">473</span>                addHeaderField(building, field);<a name="line.473"></a>
-<span class="sourceLineNo">474</span>        }<a name="line.474"></a>
-<span class="sourceLineNo">475</span><a name="line.475"></a>
-<span class="sourceLineNo">476</span>        private void newTrailerLine() throws HttpProtocolException, ParseException {<a name="line.476"></a>
-<span class="sourceLineNo">477</span>                headerLength += headerLine.length() + 2;<a name="line.477"></a>
-<span class="sourceLineNo">478</span>                // RFC 7230 3.2<a name="line.478"></a>
-<span class="sourceLineNo">479</span>                HttpField&lt;?&gt; field;<a name="line.479"></a>
-<span class="sourceLineNo">480</span>                try {<a name="line.480"></a>
-<span class="sourceLineNo">481</span>                        field = new HttpField&lt;&gt;(headerLine, Converters.STRING);<a name="line.481"></a>
-<span class="sourceLineNo">482</span>                } catch (ParseException e) {<a name="line.482"></a>
-<span class="sourceLineNo">483</span>                        throw new HttpProtocolException(protocolVersion,<a name="line.483"></a>
-<span class="sourceLineNo">484</span>                                HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");<a name="line.484"></a>
-<span class="sourceLineNo">485</span>                }<a name="line.485"></a>
-<span class="sourceLineNo">486</span>                // RFC 7230 4.4<a name="line.486"></a>
-<span class="sourceLineNo">487</span>                HttpField&lt;StringList&gt; trailerField = messageHeader<a name="line.487"></a>
-<span class="sourceLineNo">488</span>                        .computeIfAbsent(HttpField.TRAILER, Converters.STRING_LIST,<a name="line.488"></a>
-<span class="sourceLineNo">489</span>                                        StringList::new);<a name="line.489"></a>
-<span class="sourceLineNo">490</span>                if (!trailerField.value().containsIgnoreCase(field.name())) {<a name="line.490"></a>
-<span class="sourceLineNo">491</span>                        trailerField.value().add(field.name());<a name="line.491"></a>
+<span class="sourceLineNo">432</span>                        case CLOSED:<a name="line.432"></a>
+<span class="sourceLineNo">433</span>                                in.position(in.limit());<a name="line.433"></a>
+<span class="sourceLineNo">434</span>                                return resultFactory().newResult(false, false);<a name="line.434"></a>
+<span class="sourceLineNo">435</span>                        }<a name="line.435"></a>
+<span class="sourceLineNo">436</span>                }<a name="line.436"></a>
+<span class="sourceLineNo">437</span>        }<a name="line.437"></a>
+<span class="sourceLineNo">438</span><a name="line.438"></a>
+<span class="sourceLineNo">439</span>        private void newHeaderLine() throws HttpProtocolException, ParseException {<a name="line.439"></a>
+<span class="sourceLineNo">440</span>                headerLength += headerLine.length() + 2;<a name="line.440"></a>
+<span class="sourceLineNo">441</span>                // RFC 7230 3.2<a name="line.441"></a>
+<span class="sourceLineNo">442</span>                HttpField&lt;?&gt; field;<a name="line.442"></a>
+<span class="sourceLineNo">443</span>                try {<a name="line.443"></a>
+<span class="sourceLineNo">444</span>                        field = new HttpField&lt;&gt;(headerLine, Converters.STRING);<a name="line.444"></a>
+<span class="sourceLineNo">445</span>                } catch (ParseException e) {<a name="line.445"></a>
+<span class="sourceLineNo">446</span>                        throw new HttpProtocolException(protocolVersion,<a name="line.446"></a>
+<span class="sourceLineNo">447</span>                                HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");<a name="line.447"></a>
+<span class="sourceLineNo">448</span>                }<a name="line.448"></a>
+<span class="sourceLineNo">449</span>                if (field.name().equalsIgnoreCase(HttpField.SET_COOKIE)) {<a name="line.449"></a>
+<span class="sourceLineNo">450</span>                        field = new HttpField&lt;CookieList&gt;(headerLine, Converters.SET_COOKIE);<a name="line.450"></a>
+<span class="sourceLineNo">451</span>                }<a name="line.451"></a>
+<span class="sourceLineNo">452</span>                switch (field.name()) {<a name="line.452"></a>
+<span class="sourceLineNo">453</span>                case HttpField.CONTENT_LENGTH:<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                        // RFC 7230 3.3.3 (3.)<a name="line.454"></a>
+<span class="sourceLineNo">455</span>                        if (building.fields()<a name="line.455"></a>
+<span class="sourceLineNo">456</span>                                .containsKey(HttpField.TRANSFER_ENCODING)) {<a name="line.456"></a>
+<span class="sourceLineNo">457</span>                                field = null;<a name="line.457"></a>
+<span class="sourceLineNo">458</span>                                break;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>                        }<a name="line.459"></a>
+<span class="sourceLineNo">460</span>                        // RFC 7230 3.3.3 (4.)<a name="line.460"></a>
+<span class="sourceLineNo">461</span>                        Optional&lt;HttpField&lt;Long&gt;&gt; existing = building.findField(<a name="line.461"></a>
+<span class="sourceLineNo">462</span>                                HttpField.CONTENT_LENGTH, Converters.LONG);<a name="line.462"></a>
+<span class="sourceLineNo">463</span>                        if (existing.isPresent()) {<a name="line.463"></a>
+<span class="sourceLineNo">464</span>                                @SuppressWarnings("unchecked")<a name="line.464"></a>
+<span class="sourceLineNo">465</span>                                HttpField&lt;Long&gt; newLength = (HttpField&lt;Long&gt;)field;<a name="line.465"></a>
+<span class="sourceLineNo">466</span>                                if (!existing.get().value().equals(newLength.value())) {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>                                        throw new HttpProtocolException(protocolVersion,<a name="line.467"></a>
+<span class="sourceLineNo">468</span>                                                        HttpStatus.BAD_REQUEST);<a name="line.468"></a>
+<span class="sourceLineNo">469</span>                                }<a name="line.469"></a>
+<span class="sourceLineNo">470</span>                        }<a name="line.470"></a>
+<span class="sourceLineNo">471</span>                        break;<a name="line.471"></a>
+<span class="sourceLineNo">472</span>                case HttpField.TRANSFER_ENCODING:<a name="line.472"></a>
+<span class="sourceLineNo">473</span>                        // RFC 7230 3.3.3 (3.)<a name="line.473"></a>
+<span class="sourceLineNo">474</span>                        building.removeField(HttpField.CONTENT_LENGTH);<a name="line.474"></a>
+<span class="sourceLineNo">475</span>                        break;<a name="line.475"></a>
+<span class="sourceLineNo">476</span>                }<a name="line.476"></a>
+<span class="sourceLineNo">477</span>                if (field == null) {<a name="line.477"></a>
+<span class="sourceLineNo">478</span>                        return;<a name="line.478"></a>
+<span class="sourceLineNo">479</span>                }<a name="line.479"></a>
+<span class="sourceLineNo">480</span>                addHeaderField(building, field);<a name="line.480"></a>
+<span class="sourceLineNo">481</span>        }<a name="line.481"></a>
+<span class="sourceLineNo">482</span><a name="line.482"></a>
+<span class="sourceLineNo">483</span>        private void newTrailerLine() throws HttpProtocolException, ParseException {<a name="line.483"></a>
+<span class="sourceLineNo">484</span>                headerLength += headerLine.length() + 2;<a name="line.484"></a>
+<span class="sourceLineNo">485</span>                // RFC 7230 3.2<a name="line.485"></a>
+<span class="sourceLineNo">486</span>                HttpField&lt;?&gt; field;<a name="line.486"></a>
+<span class="sourceLineNo">487</span>                try {<a name="line.487"></a>
+<span class="sourceLineNo">488</span>                        field = new HttpField&lt;&gt;(headerLine, Converters.STRING);<a name="line.488"></a>
+<span class="sourceLineNo">489</span>                } catch (ParseException e) {<a name="line.489"></a>
+<span class="sourceLineNo">490</span>                        throw new HttpProtocolException(protocolVersion,<a name="line.490"></a>
+<span class="sourceLineNo">491</span>                                HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");<a name="line.491"></a>
 <span class="sourceLineNo">492</span>                }<a name="line.492"></a>
-<span class="sourceLineNo">493</span>                addHeaderField(messageHeader, field);<a name="line.493"></a>
-<span class="sourceLineNo">494</span>        }<a name="line.494"></a>
-<span class="sourceLineNo">495</span><a name="line.495"></a>
-<span class="sourceLineNo">496</span>        private void addHeaderField(T header, HttpField&lt;?&gt; field)<a name="line.496"></a>
-<span class="sourceLineNo">497</span>                throws HttpProtocolException, ParseException {<a name="line.497"></a>
-<span class="sourceLineNo">498</span>                // RFC 7230 3.2.2<a name="line.498"></a>
-<span class="sourceLineNo">499</span>                HttpField&lt;?&gt; existing = header.fields().get(field.name());<a name="line.499"></a>
-<span class="sourceLineNo">500</span>                if (existing != null) {<a name="line.500"></a>
-<span class="sourceLineNo">501</span>                        if (!(existing.converter() instanceof MultiValueConverter)<a name="line.501"></a>
-<span class="sourceLineNo">502</span>                                        || !existing.converter().equals(field.converter())) {<a name="line.502"></a>
-<span class="sourceLineNo">503</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.503"></a>
-<span class="sourceLineNo">504</span>                                        HttpStatus.BAD_REQUEST.statusCode(),<a name="line.504"></a>
-<span class="sourceLineNo">505</span>                                        "Multiple occurences of field " + field.name());<a name="line.505"></a>
-<span class="sourceLineNo">506</span>                        }<a name="line.506"></a>
-<span class="sourceLineNo">507</span>                        @SuppressWarnings("unchecked")<a name="line.507"></a>
-<span class="sourceLineNo">508</span>                        BiConsumer&lt;Iterable&lt;Object&gt;, Object&gt; adder <a name="line.508"></a>
-<span class="sourceLineNo">509</span>                                = ((MultiValueConverter&lt;Iterable&lt;Object&gt;, Object&gt;)<a name="line.509"></a>
-<span class="sourceLineNo">510</span>                                                existing.converter()).valueAdder();<a name="line.510"></a>
-<span class="sourceLineNo">511</span>                        @SuppressWarnings("unchecked")<a name="line.511"></a>
-<span class="sourceLineNo">512</span>                        Iterable&lt;Object&gt; source = (Iterable&lt;Object&gt;)field.value();<a name="line.512"></a>
-<span class="sourceLineNo">513</span>                        @SuppressWarnings("unchecked")<a name="line.513"></a>
-<span class="sourceLineNo">514</span>                        Iterable&lt;Object&gt; target = (Iterable&lt;Object&gt;)existing.value();<a name="line.514"></a>
-<span class="sourceLineNo">515</span>                        source.forEach(item -&gt; adder.accept(target, item));<a name="line.515"></a>
-<span class="sourceLineNo">516</span>                } else {<a name="line.516"></a>
-<span class="sourceLineNo">517</span>                        header.setField(field);<a name="line.517"></a>
-<span class="sourceLineNo">518</span>                }<a name="line.518"></a>
-<span class="sourceLineNo">519</span>        }<a name="line.519"></a>
-<span class="sourceLineNo">520</span><a name="line.520"></a>
-<span class="sourceLineNo">521</span>        private void adjustToBodyMode(BodyMode bm) {<a name="line.521"></a>
-<span class="sourceLineNo">522</span>                states.pop();<a name="line.522"></a>
-<span class="sourceLineNo">523</span>                switch (bm) {<a name="line.523"></a>
-<span class="sourceLineNo">524</span>                case UNTIL_CLOSE:<a name="line.524"></a>
-<span class="sourceLineNo">525</span>                        states.push(State.COPY_UNTIL_CLOSED);<a name="line.525"></a>
-<span class="sourceLineNo">526</span>                        building.setHasPayload(true);<a name="line.526"></a>
-<span class="sourceLineNo">527</span>                        break;<a name="line.527"></a>
-<span class="sourceLineNo">528</span>                case CHUNKED:<a name="line.528"></a>
-<span class="sourceLineNo">529</span>                        states.push(State.CHUNK_START_RECEIVED);<a name="line.529"></a>
-<span class="sourceLineNo">530</span>                        states.push(State.RECEIVE_LINE);<a name="line.530"></a>
-<span class="sourceLineNo">531</span>                        building.setHasPayload(true);<a name="line.531"></a>
-<span class="sourceLineNo">532</span>                        break;<a name="line.532"></a>
-<span class="sourceLineNo">533</span>                case LENGTH:<a name="line.533"></a>
-<span class="sourceLineNo">534</span>                        HttpField&lt;Long&gt; clf = building.findField(<a name="line.534"></a>
-<span class="sourceLineNo">535</span>                                HttpField.CONTENT_LENGTH, Converters.LONG).get();<a name="line.535"></a>
-<span class="sourceLineNo">536</span>                        leftToRead = clf.value();<a name="line.536"></a>
-<span class="sourceLineNo">537</span>                        if (leftToRead &gt; 0) {<a name="line.537"></a>
-<span class="sourceLineNo">538</span>                                states.push(State.LENGTH_RECEIVED);<a name="line.538"></a>
-<span class="sourceLineNo">539</span>                                states.push(State.COPY_SPECIFIED);<a name="line.539"></a>
-<span class="sourceLineNo">540</span>                                building.setHasPayload(true);<a name="line.540"></a>
-<span class="sourceLineNo">541</span>                                break;<a name="line.541"></a>
-<span class="sourceLineNo">542</span>                        }<a name="line.542"></a>
-<span class="sourceLineNo">543</span>                        // Length == 0 means no body, fall through<a name="line.543"></a>
-<span class="sourceLineNo">544</span>                case NO_BODY:<a name="line.544"></a>
-<span class="sourceLineNo">545</span>                        building.setHasPayload(false);<a name="line.545"></a>
-<span class="sourceLineNo">546</span>                        break;<a name="line.546"></a>
-<span class="sourceLineNo">547</span>                }<a name="line.547"></a>
-<span class="sourceLineNo">548</span>        }<a name="line.548"></a>
-<span class="sourceLineNo">549</span><a name="line.549"></a>
-<span class="sourceLineNo">550</span>        private CoderResult copyBodyData(<a name="line.550"></a>
-<span class="sourceLineNo">551</span>                        Buffer out, ByteBuffer in, int limit, boolean endOfInput) {<a name="line.551"></a>
-<span class="sourceLineNo">552</span>                if (out instanceof ByteBuffer) {<a name="line.552"></a>
-<span class="sourceLineNo">553</span>                        ByteBufferUtils.putAsMuchAsPossible((ByteBuffer) out, in, limit);<a name="line.553"></a>
-<span class="sourceLineNo">554</span>                        return null;<a name="line.554"></a>
-<span class="sourceLineNo">555</span>                } else if (out instanceof CharBuffer) {<a name="line.555"></a>
-<span class="sourceLineNo">556</span>                        if (charDecoder == null) {<a name="line.556"></a>
-<span class="sourceLineNo">557</span>                                charDecoder = new OptimizedCharsetDecoder(<a name="line.557"></a>
-<span class="sourceLineNo">558</span>                                        Charset.forName(bodyCharset()).newDecoder());<a name="line.558"></a>
-<span class="sourceLineNo">559</span>                        }<a name="line.559"></a>
-<span class="sourceLineNo">560</span>                        int oldLimit = in.limit();<a name="line.560"></a>
-<span class="sourceLineNo">561</span>                        try {<a name="line.561"></a>
-<span class="sourceLineNo">562</span>                                if (in.remaining() &gt; limit) {<a name="line.562"></a>
-<span class="sourceLineNo">563</span>                                        in.limit(in.position() + limit);<a name="line.563"></a>
-<span class="sourceLineNo">564</span>                                }<a name="line.564"></a>
-<span class="sourceLineNo">565</span>                                return charDecoder.decode(in, (CharBuffer)out, endOfInput);<a name="line.565"></a>
-<span class="sourceLineNo">566</span>                        } finally {<a name="line.566"></a>
-<span class="sourceLineNo">567</span>                                in.limit(oldLimit);<a name="line.567"></a>
-<span class="sourceLineNo">568</span>                        }<a name="line.568"></a>
-<span class="sourceLineNo">569</span>                } else {<a name="line.569"></a>
-<span class="sourceLineNo">570</span>                        throw new IllegalArgumentException(<a name="line.570"></a>
-<span class="sourceLineNo">571</span>                                "Only Byte- or CharBuffer are allowed.");<a name="line.571"></a>
-<span class="sourceLineNo">572</span>                }<a name="line.572"></a>
-<span class="sourceLineNo">573</span>        }<a name="line.573"></a>
-<span class="sourceLineNo">574</span><a name="line.574"></a>
-<span class="sourceLineNo">575</span>        private Decoder.Result&lt;R&gt; adjustToEndOfMessage() {<a name="line.575"></a>
-<span class="sourceLineNo">576</span>                // RFC 7230 6.3<a name="line.576"></a>
-<span class="sourceLineNo">577</span>                Optional&lt;HttpField&lt;StringList&gt;&gt; connection = messageHeader<a name="line.577"></a>
-<span class="sourceLineNo">578</span>                                .findField(HttpField.CONNECTION, Converters.STRING_LIST);<a name="line.578"></a>
-<span class="sourceLineNo">579</span>                if (connection.isPresent() &amp;&amp; connection.get().value()<a name="line.579"></a>
-<span class="sourceLineNo">580</span>                                .stream().anyMatch(s -&gt; s.equalsIgnoreCase("close"))) {<a name="line.580"></a>
-<span class="sourceLineNo">581</span>                        states.push(State.CLOSED);<a name="line.581"></a>
-<span class="sourceLineNo">582</span>                        return messageComplete(resultFactory().newResult(false, false));<a name="line.582"></a>
-<span class="sourceLineNo">583</span>                }<a name="line.583"></a>
-<span class="sourceLineNo">584</span>                if (messageHeader.protocol().compareTo(HttpProtocol.HTTP_1_1) &gt;= 0) {<a name="line.584"></a>
-<span class="sourceLineNo">585</span>                        states.push(State.AWAIT_MESSAGE_START);<a name="line.585"></a>
-<span class="sourceLineNo">586</span>                        states.push(State.RECEIVE_LINE);<a name="line.586"></a>
-<span class="sourceLineNo">587</span>                        return messageComplete(resultFactory().newResult(false, false));<a name="line.587"></a>
-<span class="sourceLineNo">588</span>                }<a name="line.588"></a>
-<span class="sourceLineNo">589</span>                states.push(State.CLOSED);<a name="line.589"></a>
-<span class="sourceLineNo">590</span>                return messageComplete(resultFactory().newResult(false, false));<a name="line.590"></a>
-<span class="sourceLineNo">591</span>        }<a name="line.591"></a>
-<span class="sourceLineNo">592</span>        <a name="line.592"></a>
-<span class="sourceLineNo">593</span>        /**<a name="line.593"></a>
-<span class="sourceLineNo">594</span>         * Results from {@link HttpDecoder} add no additional<a name="line.594"></a>
-<span class="sourceLineNo">595</span>         * information to {@link org.jdrupes.httpcodec.Decoder.Result}. This<a name="line.595"></a>
-<span class="sourceLineNo">596</span>         * class provides only a factory for creating <a name="line.596"></a>
-<span class="sourceLineNo">597</span>         * the results as required by {@link HttpDecoder}.<a name="line.597"></a>
-<span class="sourceLineNo">598</span>         * <a name="line.598"></a>
-<span class="sourceLineNo">599</span>         * @param &lt;R&gt; the type of the response message header<a name="line.599"></a>
-<span class="sourceLineNo">600</span>         */<a name="line.600"></a>
-<span class="sourceLineNo">601</span>        public static class Result&lt;R extends MessageHeader&gt;<a name="line.601"></a>
-<span class="sourceLineNo">602</span>                extends Decoder.Result&lt;R&gt; {<a name="line.602"></a>
-<span class="sourceLineNo">603</span><a name="line.603"></a>
-<span class="sourceLineNo">604</span>                public Result(boolean overflow, boolean underflow,<a name="line.604"></a>
-<span class="sourceLineNo">605</span>                        boolean closeConnection, boolean headerCompleted, R response,<a name="line.605"></a>
-<span class="sourceLineNo">606</span>                        boolean responseOnly) {<a name="line.606"></a>
-<span class="sourceLineNo">607</span>                        super(overflow, underflow, closeConnection, headerCompleted, response,<a name="line.607"></a>
-<span class="sourceLineNo">608</span>                                responseOnly);<a name="line.608"></a>
-<span class="sourceLineNo">609</span>                }<a name="line.609"></a>
+<span class="sourceLineNo">493</span>                // RFC 7230 4.4<a name="line.493"></a>
+<span class="sourceLineNo">494</span>                HttpField&lt;StringList&gt; trailerField = messageHeader<a name="line.494"></a>
+<span class="sourceLineNo">495</span>                        .computeIfAbsent(HttpField.TRAILER, Converters.STRING_LIST,<a name="line.495"></a>
+<span class="sourceLineNo">496</span>                                        StringList::new);<a name="line.496"></a>
+<span class="sourceLineNo">497</span>                if (!trailerField.value().containsIgnoreCase(field.name())) {<a name="line.497"></a>
+<span class="sourceLineNo">498</span>                        trailerField.value().add(field.name());<a name="line.498"></a>
+<span class="sourceLineNo">499</span>                }<a name="line.499"></a>
+<span class="sourceLineNo">500</span>                addHeaderField(messageHeader, field);<a name="line.500"></a>
+<span class="sourceLineNo">501</span>        }<a name="line.501"></a>
+<span class="sourceLineNo">502</span><a name="line.502"></a>
+<span class="sourceLineNo">503</span>        private void addHeaderField(T header, HttpField&lt;?&gt; field)<a name="line.503"></a>
+<span class="sourceLineNo">504</span>                throws HttpProtocolException, ParseException {<a name="line.504"></a>
+<span class="sourceLineNo">505</span>                // RFC 7230 3.2.2<a name="line.505"></a>
+<span class="sourceLineNo">506</span>                HttpField&lt;?&gt; existing = header.fields().get(field.name());<a name="line.506"></a>
+<span class="sourceLineNo">507</span>                if (existing != null) {<a name="line.507"></a>
+<span class="sourceLineNo">508</span>                        if (!(existing.converter() instanceof MultiValueConverter)<a name="line.508"></a>
+<span class="sourceLineNo">509</span>                                        || !existing.converter().equals(field.converter())) {<a name="line.509"></a>
+<span class="sourceLineNo">510</span>                                throw new HttpProtocolException(protocolVersion,<a name="line.510"></a>
+<span class="sourceLineNo">511</span>                                        HttpStatus.BAD_REQUEST.statusCode(),<a name="line.511"></a>
+<span class="sourceLineNo">512</span>                                        "Multiple occurences of field " + field.name());<a name="line.512"></a>
+<span class="sourceLineNo">513</span>                        }<a name="line.513"></a>
+<span class="sourceLineNo">514</span>                        @SuppressWarnings("unchecked")<a name="line.514"></a>
+<span class="sourceLineNo">515</span>                        BiConsumer&lt;Iterable&lt;Object&gt;, Object&gt; adder <a name="line.515"></a>
+<span class="sourceLineNo">516</span>                                = ((MultiValueConverter&lt;Iterable&lt;Object&gt;, Object&gt;)<a name="line.516"></a>
+<span class="sourceLineNo">517</span>                                                existing.converter()).valueAdder();<a name="line.517"></a>
+<span class="sourceLineNo">518</span>                        @SuppressWarnings("unchecked")<a name="line.518"></a>
+<span class="sourceLineNo">519</span>                        Iterable&lt;Object&gt; source = (Iterable&lt;Object&gt;)field.value();<a name="line.519"></a>
+<span class="sourceLineNo">520</span>                        @SuppressWarnings("unchecked")<a name="line.520"></a>
+<span class="sourceLineNo">521</span>                        Iterable&lt;Object&gt; target = (Iterable&lt;Object&gt;)existing.value();<a name="line.521"></a>
+<span class="sourceLineNo">522</span>                        source.forEach(item -&gt; adder.accept(target, item));<a name="line.522"></a>
+<span class="sourceLineNo">523</span>                } else {<a name="line.523"></a>
+<span class="sourceLineNo">524</span>                        header.setField(field);<a name="line.524"></a>
+<span class="sourceLineNo">525</span>                }<a name="line.525"></a>
+<span class="sourceLineNo">526</span>        }<a name="line.526"></a>
+<span class="sourceLineNo">527</span><a name="line.527"></a>
+<span class="sourceLineNo">528</span>        private void adjustToBodyMode(BodyMode bm) {<a name="line.528"></a>
+<span class="sourceLineNo">529</span>                states.pop();<a name="line.529"></a>
+<span class="sourceLineNo">530</span>                switch (bm) {<a name="line.530"></a>
+<span class="sourceLineNo">531</span>                case UNTIL_CLOSE:<a name="line.531"></a>
+<span class="sourceLineNo">532</span>                        states.push(State.COPY_UNTIL_CLOSED);<a name="line.532"></a>
+<span class="sourceLineNo">533</span>                        building.setHasPayload(true);<a name="line.533"></a>
+<span class="sourceLineNo">534</span>                        break;<a name="line.534"></a>
+<span class="sourceLineNo">535</span>                case CHUNKED:<a name="line.535"></a>
+<span class="sourceLineNo">536</span>                        states.push(State.CHUNK_START_RECEIVED);<a name="line.536"></a>
+<span class="sourceLineNo">537</span>                        states.push(State.RECEIVE_LINE);<a name="line.537"></a>
+<span class="sourceLineNo">538</span>                        building.setHasPayload(true);<a name="line.538"></a>
+<span class="sourceLineNo">539</span>                        break;<a name="line.539"></a>
+<span class="sourceLineNo">540</span>                case LENGTH:<a name="line.540"></a>
+<span class="sourceLineNo">541</span>                        HttpField&lt;Long&gt; clf = building.findField(<a name="line.541"></a>
+<span class="sourceLineNo">542</span>                                HttpField.CONTENT_LENGTH, Converters.LONG).get();<a name="line.542"></a>
+<span class="sourceLineNo">543</span>                        leftToRead = clf.value();<a name="line.543"></a>
+<span class="sourceLineNo">544</span>                        if (leftToRead &gt; 0) {<a name="line.544"></a>
+<span class="sourceLineNo">545</span>                                states.push(State.LENGTH_RECEIVED);<a name="line.545"></a>
+<span class="sourceLineNo">546</span>                                states.push(State.COPY_SPECIFIED);<a name="line.546"></a>
+<span class="sourceLineNo">547</span>                                building.setHasPayload(true);<a name="line.547"></a>
+<span class="sourceLineNo">548</span>                                break;<a name="line.548"></a>
+<span class="sourceLineNo">549</span>                        }<a name="line.549"></a>
+<span class="sourceLineNo">550</span>                        // Length == 0 means no body, fall through<a name="line.550"></a>
+<span class="sourceLineNo">551</span>                case NO_BODY:<a name="line.551"></a>
+<span class="sourceLineNo">552</span>                        building.setHasPayload(false);<a name="line.552"></a>
+<span class="sourceLineNo">553</span>                        break;<a name="line.553"></a>
+<span class="sourceLineNo">554</span>                }<a name="line.554"></a>
+<span class="sourceLineNo">555</span>        }<a name="line.555"></a>
+<span class="sourceLineNo">556</span><a name="line.556"></a>
+<span class="sourceLineNo">557</span>        private CoderResult copyBodyData(<a name="line.557"></a>
+<span class="sourceLineNo">558</span>                        Buffer out, ByteBuffer in, int limit, boolean endOfInput) {<a name="line.558"></a>
+<span class="sourceLineNo">559</span>                if (out instanceof ByteBuffer) {<a name="line.559"></a>
+<span class="sourceLineNo">560</span>                        ByteBufferUtils.putAsMuchAsPossible((ByteBuffer) out, in, limit);<a name="line.560"></a>
+<span class="sourceLineNo">561</span>                        return null;<a name="line.561"></a>
+<span class="sourceLineNo">562</span>                } else if (out instanceof CharBuffer) {<a name="line.562"></a>
+<span class="sourceLineNo">563</span>                        if (charDecoder == null) {<a name="line.563"></a>
+<span class="sourceLineNo">564</span>                                charDecoder = new OptimizedCharsetDecoder(<a name="line.564"></a>
+<span class="sourceLineNo">565</span>                                        Charset.forName(bodyCharset()).newDecoder());<a name="line.565"></a>
+<span class="sourceLineNo">566</span>                        }<a name="line.566"></a>
+<span class="sourceLineNo">567</span>                        int oldLimit = in.limit();<a name="line.567"></a>
+<span class="sourceLineNo">568</span>                        try {<a name="line.568"></a>
+<span class="sourceLineNo">569</span>                                if (in.remaining() &gt; limit) {<a name="line.569"></a>
+<span class="sourceLineNo">570</span>                                        in.limit(in.position() + limit);<a name="line.570"></a>
+<span class="sourceLineNo">571</span>                                }<a name="line.571"></a>
+<span class="sourceLineNo">572</span>                                return charDecoder.decode(in, (CharBuffer)out, endOfInput);<a name="line.572"></a>
+<span class="sourceLineNo">573</span>                        } finally {<a name="line.573"></a>
+<span class="sourceLineNo">574</span>                                in.limit(oldLimit);<a name="line.574"></a>
+<span class="sourceLineNo">575</span>                        }<a name="line.575"></a>
+<span class="sourceLineNo">576</span>                } else {<a name="line.576"></a>
+<span class="sourceLineNo">577</span>                        throw new IllegalArgumentException(<a name="line.577"></a>
+<span class="sourceLineNo">578</span>                                "Only Byte- or CharBuffer are allowed.");<a name="line.578"></a>
+<span class="sourceLineNo">579</span>                }<a name="line.579"></a>
+<span class="sourceLineNo">580</span>        }<a name="line.580"></a>
+<span class="sourceLineNo">581</span><a name="line.581"></a>
+<span class="sourceLineNo">582</span>        private Decoder.Result&lt;R&gt; adjustToEndOfMessage() {<a name="line.582"></a>
+<span class="sourceLineNo">583</span>                // RFC 7230 6.3<a name="line.583"></a>
+<span class="sourceLineNo">584</span>                Optional&lt;HttpField&lt;StringList&gt;&gt; connection = messageHeader<a name="line.584"></a>
+<span class="sourceLineNo">585</span>                                .findField(HttpField.CONNECTION, Converters.STRING_LIST);<a name="line.585"></a>
+<span class="sourceLineNo">586</span>                if (connection.isPresent() &amp;&amp; connection.get().value()<a name="line.586"></a>
+<span class="sourceLineNo">587</span>                                .stream().anyMatch(s -&gt; s.equalsIgnoreCase("close"))) {<a name="line.587"></a>
+<span class="sourceLineNo">588</span>                        states.push(State.CLOSED);<a name="line.588"></a>
+<span class="sourceLineNo">589</span>                        return messageComplete(resultFactory().newResult(false, false));<a name="line.589"></a>
+<span class="sourceLineNo">590</span>                }<a name="line.590"></a>
+<span class="sourceLineNo">591</span>                if (messageHeader.protocol().compareTo(HttpProtocol.HTTP_1_1) &gt;= 0) {<a name="line.591"></a>
+<span class="sourceLineNo">592</span>                        states.push(State.AWAIT_MESSAGE_START);<a name="line.592"></a>
+<span class="sourceLineNo">593</span>                        states.push(State.RECEIVE_LINE);<a name="line.593"></a>
+<span class="sourceLineNo">594</span>                        return messageComplete(resultFactory().newResult(false, false));<a name="line.594"></a>
+<span class="sourceLineNo">595</span>                }<a name="line.595"></a>
+<span class="sourceLineNo">596</span>                states.push(State.CLOSED);<a name="line.596"></a>
+<span class="sourceLineNo">597</span>                return messageComplete(resultFactory().newResult(false, false));<a name="line.597"></a>
+<span class="sourceLineNo">598</span>        }<a name="line.598"></a>
+<span class="sourceLineNo">599</span>        <a name="line.599"></a>
+<span class="sourceLineNo">600</span>        /**<a name="line.600"></a>
+<span class="sourceLineNo">601</span>         * Results from {@link HttpDecoder} add no additional<a name="line.601"></a>
+<span class="sourceLineNo">602</span>         * information to {@link org.jdrupes.httpcodec.Decoder.Result}. This<a name="line.602"></a>
+<span class="sourceLineNo">603</span>         * class provides only a factory for creating <a name="line.603"></a>
+<span class="sourceLineNo">604</span>         * the results as required by {@link HttpDecoder}.<a name="line.604"></a>
+<span class="sourceLineNo">605</span>         * <a name="line.605"></a>
+<span class="sourceLineNo">606</span>         * @param &lt;R&gt; the type of the response message header<a name="line.606"></a>
+<span class="sourceLineNo">607</span>         */<a name="line.607"></a>
+<span class="sourceLineNo">608</span>        public static class Result&lt;R extends MessageHeader&gt;<a name="line.608"></a>
+<span class="sourceLineNo">609</span>                extends Decoder.Result&lt;R&gt; {<a name="line.609"></a>
 <span class="sourceLineNo">610</span><a name="line.610"></a>
-<span class="sourceLineNo">611</span>                /**<a name="line.611"></a>
-<span class="sourceLineNo">612</span>                 * A factory for creating new Results.<a name="line.612"></a>
-<span class="sourceLineNo">613</span>                 */<a name="line.613"></a>
-<span class="sourceLineNo">614</span>                protected abstract static class Factory&lt;R extends MessageHeader&gt; <a name="line.614"></a>
-<span class="sourceLineNo">615</span>                        extends Decoder.Result.Factory&lt;R&gt; {<a name="line.615"></a>
-<span class="sourceLineNo">616</span>                        <a name="line.616"></a>
-<span class="sourceLineNo">617</span>                        /**<a name="line.617"></a>
-<span class="sourceLineNo">618</span>                         * Create a new result. Implementing classes can<a name="line.618"></a>
-<span class="sourceLineNo">619</span>                         * obtain the value for <a name="line.619"></a>
-<span class="sourceLineNo">620</span>                         * {@link org.jdrupes.httpcodec.Codec.Result#closeConnection()}<a name="line.620"></a>
-<span class="sourceLineNo">621</span>                         * from {@link HttpDecoder#isClosed()}.<a name="line.621"></a>
-<span class="sourceLineNo">622</span>                         * <a name="line.622"></a>
-<span class="sourceLineNo">623</span>                         * @param overflow<a name="line.623"></a>
-<span class="sourceLineNo">624</span>                         *            {@code true} if the data didn't fit in the out buffer<a name="line.624"></a>
-<span class="sourceLineNo">625</span>                         * @param underflow<a name="line.625"></a>
-<span class="sourceLineNo">626</span>                         *            {@code true} if more data is expected<a name="line.626"></a>
-<span class="sourceLineNo">627</span>                         * @return the result<a name="line.627"></a>
-<span class="sourceLineNo">628</span>                         */<a name="line.628"></a>
-<span class="sourceLineNo">629</span>                        protected abstract Result&lt;R&gt; newResult(<a name="line.629"></a>
-<span class="sourceLineNo">630</span>                                boolean overflow, boolean underflow);<a name="line.630"></a>
-<span class="sourceLineNo">631</span>                }               <a name="line.631"></a>
-<span class="sourceLineNo">632</span>        }<a name="line.632"></a>
-<span class="sourceLineNo">633</span>}<a name="line.633"></a>
+<span class="sourceLineNo">611</span>                public Result(boolean overflow, boolean underflow,<a name="line.611"></a>
+<span class="sourceLineNo">612</span>                        boolean closeConnection, boolean headerCompleted, R response,<a name="line.612"></a>
+<span class="sourceLineNo">613</span>                        boolean responseOnly) {<a name="line.613"></a>
+<span class="sourceLineNo">614</span>                        super(overflow, underflow, closeConnection, headerCompleted, response,<a name="line.614"></a>
+<span class="sourceLineNo">615</span>                                responseOnly);<a name="line.615"></a>
+<span class="sourceLineNo">616</span>                }<a name="line.616"></a>
+<span class="sourceLineNo">617</span><a name="line.617"></a>
+<span class="sourceLineNo">618</span>                /**<a name="line.618"></a>
+<span class="sourceLineNo">619</span>                 * A factory for creating new Results.<a name="line.619"></a>
+<span class="sourceLineNo">620</span>                 */<a name="line.620"></a>
+<span class="sourceLineNo">621</span>                protected abstract static class Factory&lt;R extends MessageHeader&gt; <a name="line.621"></a>
+<span class="sourceLineNo">622</span>                        extends Decoder.Result.Factory&lt;R&gt; {<a name="line.622"></a>
+<span class="sourceLineNo">623</span>                        <a name="line.623"></a>
+<span class="sourceLineNo">624</span>                        /**<a name="line.624"></a>
+<span class="sourceLineNo">625</span>                         * Create a new result. Implementing classes can<a name="line.625"></a>
+<span class="sourceLineNo">626</span>                         * obtain the value for <a name="line.626"></a>
+<span class="sourceLineNo">627</span>                         * {@link org.jdrupes.httpcodec.Codec.Result#closeConnection()}<a name="line.627"></a>
+<span class="sourceLineNo">628</span>                         * from {@link HttpDecoder#isClosed()}.<a name="line.628"></a>
+<span class="sourceLineNo">629</span>                         * <a name="line.629"></a>
+<span class="sourceLineNo">630</span>                         * @param overflow<a name="line.630"></a>
+<span class="sourceLineNo">631</span>                         *            {@code true} if the data didn't fit in the out buffer<a name="line.631"></a>
+<span class="sourceLineNo">632</span>                         * @param underflow<a name="line.632"></a>
+<span class="sourceLineNo">633</span>                         *            {@code true} if more data is expected<a name="line.633"></a>
+<span class="sourceLineNo">634</span>                         * @return the result<a name="line.634"></a>
+<span class="sourceLineNo">635</span>                         */<a name="line.635"></a>
+<span class="sourceLineNo">636</span>                        protected abstract Result&lt;R&gt; newResult(<a name="line.636"></a>
+<span class="sourceLineNo">637</span>                                boolean overflow, boolean underflow);<a name="line.637"></a>
+<span class="sourceLineNo">638</span>                }               <a name="line.638"></a>
+<span class="sourceLineNo">639</span>        }<a name="line.639"></a>
+<span class="sourceLineNo">640</span>}<a name="line.640"></a>
 
 
 
