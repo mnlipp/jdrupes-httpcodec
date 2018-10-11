@@ -189,11 +189,9 @@ public class HttpResponseDecoder
 					ServiceLoader.load(UpgradeProvider.class)
 					.spliterator(), false)
 					.filter(p -> p.supportsProtocol(protocol.get()))
-					.findFirst().get();
-			if (protocolPlugin == null) {
-				throw new ProtocolException("Upgrade to protocol " 
-						+ protocol.get() + " not supported.");
-			}
+					.findFirst().orElseThrow(() -> new ProtocolException(
+							"Upgrade to protocol " + protocol.get() 
+							+ " not supported."));
 			switchingTo = protocol.get();
 			if (peerEncoder != null && peerEncoder.header().isPresent()) {
 				protocolPlugin.checkSwitchingResponse(

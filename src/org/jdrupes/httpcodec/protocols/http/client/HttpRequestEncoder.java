@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.Buffer;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
 
@@ -102,15 +103,15 @@ public class HttpRequestEncoder
 		String protocol = field.value().get(0);
 		// Load every time to support dynamic deployment of additional
 		// services in an OSGi environment.
-		UpgradeProvider protocolPlugin = StreamSupport.stream(
+		Optional<UpgradeProvider> protocolPlugin = StreamSupport.stream(
 				ServiceLoader.load(UpgradeProvider.class).spliterator(), false)
 				.filter(p -> p.supportsProtocol(protocol))
-				.findFirst().get();
-		if (protocolPlugin == null) {
+				.findFirst();
+		if (!protocolPlugin.isPresent()) {
 			// Not supported, maybe transparent to HTTP 
 			return;
 		}
-		protocolPlugin.augmentInitialRequest(request);
+		protocolPlugin.get().augmentInitialRequest(request);
 	}
 	
 	/* (non-Javadoc)

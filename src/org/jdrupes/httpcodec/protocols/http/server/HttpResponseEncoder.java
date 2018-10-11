@@ -210,7 +210,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse, HttpRequest>
 				ServiceLoader.load(UpgradeProvider.class)
 				.spliterator(), false)
 				.filter(p -> p.supportsProtocol(protocol.get()))
-				.findFirst().get();
+				.findFirst().orElse(null);
 		if (protocolPlugin == null) {
 			response.setStatus(HttpStatus.BAD_REQUEST)
 				.setHasPayload(false).clearHeaders();
