@@ -248,7 +248,7 @@ public class WsEncoder extends WsCodec
 			// Prepare payload
 			if (in instanceof CharBuffer) {
 				convData.clear();
-				convTextData(in);
+				payloadSize = convTextData(in);
 			} else {
 				payloadSize = in.remaining();
 			}
@@ -269,7 +269,7 @@ public class WsEncoder extends WsCodec
 					}
 				});
 				((WsCloseFrame)hdr).reason().ifPresent(reason -> {
-						convTextData(CharBuffer.wrap(reason));
+					payloadSize = convTextData(CharBuffer.wrap(reason));
 				});
 			} else if (hdr instanceof WsDefaultControlFrame) {
 				payloadSize = ((WsDefaultControlFrame)hdr)
@@ -296,7 +296,7 @@ public class WsEncoder extends WsCodec
 		}
 	}
 
-	private void convTextData(Buffer in) {
+	private long convTextData(Buffer in) {
 		convData.setOverflowBufferSize(
 				(int) (in.remaining() * bytesPerCharUtf8));
 		try {
@@ -310,11 +310,13 @@ public class WsEncoder extends WsCodec
 			} else {
 				charWriter.append((CharBuffer) in);
 			}
-			in.position(in.limit());
+			// "in" is consumed, but don't move the position
+			// until all data has been processed (from convData).
 			charWriter.flush();
-			payloadSize = convData.bytesWritten();
+			return convData.bytesWritten();
 		} catch (IOException e) {
 			// Formally thrown, cannot happen
+			return 0;
 		}
 	}
 	
@@ -346,35 +348,44 @@ public class WsEncoder extends WsCodec
 	 * @param out the out
 	 */
 	private void outputPayload(Buffer in, ByteBuffer out) {
+		Buffer src = in;
 		WsFrameHeader hdr = messageHeaders.peek();
-		if ((hdr instanceof WsMessageHeader) 
-				&& ((WsMessageHeader)hdr).isTextMode()
-				|| (hdr instanceof WsCloseFrame)) {
+		boolean textPayload = (hdr instanceof WsMessageHeader) 
+				&& ((WsMessageHeader)hdr).isTextMode();
+		if (textPayload || (hdr instanceof WsCloseFrame)) {
 			// Data has been put into convData
 			if (!doMask) {
 				// Moves data from temporary buffers to "out"
 				convData.assignBuffer(out);
+			} else {
+				// Retrieve into src as much as fits in 
+				// out buffer for masking.
+				src = ByteBuffer.allocate(out.remaining());
+				convData.assignBuffer((ByteBuffer)src);
+				src.flip();
+			}
+			if (convData.remaining() >= 0 && textPayload) {
+				// Make full consumption visible "outside".
+				in.position(in.limit());
+			}
+			if (!doMask) {
 				return;
 			}
-			// Retrieving as much as fits in out buffer for masking
-			in = ByteBuffer.allocate(out.remaining());
-			convData.assignBuffer((ByteBuffer)in);
-			in.flip();
 		} else {
 			// Take data from in
 			if (hdr instanceof WsDefaultControlFrame) {
-				in = ((WsDefaultControlFrame)hdr)
+				src = ((WsDefaultControlFrame)hdr)
 						.applicationData().orElse(Codec.EMPTY_IN);
 			}
 			if (!doMask) {
-				ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) in);
+				ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) src);
 				return;
 			}
 		}
 		// Mask while writing
 		while (bytesToSend > 0
-		        && in.hasRemaining() && out.hasRemaining()) {
-			out.put((byte) (((ByteBuffer) in)
+		        && src.hasRemaining() && out.hasRemaining()) {
+			out.put((byte) (((ByteBuffer) src)
 			        .get() ^ maskingKey[maskIndex]));
 			maskIndex = (maskIndex + 1) % 4;
 		}
