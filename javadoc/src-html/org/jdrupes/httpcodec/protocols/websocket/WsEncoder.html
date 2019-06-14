@@ -256,7 +256,7 @@
 <span class="sourceLineNo">248</span>                        // Prepare payload<a name="line.248"></a>
 <span class="sourceLineNo">249</span>                        if (in instanceof CharBuffer) {<a name="line.249"></a>
 <span class="sourceLineNo">250</span>                                convData.clear();<a name="line.250"></a>
-<span class="sourceLineNo">251</span>                                convTextData(in);<a name="line.251"></a>
+<span class="sourceLineNo">251</span>                                payloadSize = convTextData(in);<a name="line.251"></a>
 <span class="sourceLineNo">252</span>                        } else {<a name="line.252"></a>
 <span class="sourceLineNo">253</span>                                payloadSize = in.remaining();<a name="line.253"></a>
 <span class="sourceLineNo">254</span>                        }<a name="line.254"></a>
@@ -277,7 +277,7 @@
 <span class="sourceLineNo">269</span>                                        }<a name="line.269"></a>
 <span class="sourceLineNo">270</span>                                });<a name="line.270"></a>
 <span class="sourceLineNo">271</span>                                ((WsCloseFrame)hdr).reason().ifPresent(reason -&gt; {<a name="line.271"></a>
-<span class="sourceLineNo">272</span>                                                convTextData(CharBuffer.wrap(reason));<a name="line.272"></a>
+<span class="sourceLineNo">272</span>                                        payloadSize = convTextData(CharBuffer.wrap(reason));<a name="line.272"></a>
 <span class="sourceLineNo">273</span>                                });<a name="line.273"></a>
 <span class="sourceLineNo">274</span>                        } else if (hdr instanceof WsDefaultControlFrame) {<a name="line.274"></a>
 <span class="sourceLineNo">275</span>                                payloadSize = ((WsDefaultControlFrame)hdr)<a name="line.275"></a>
@@ -304,7 +304,7 @@
 <span class="sourceLineNo">296</span>                }<a name="line.296"></a>
 <span class="sourceLineNo">297</span>        }<a name="line.297"></a>
 <span class="sourceLineNo">298</span><a name="line.298"></a>
-<span class="sourceLineNo">299</span>        private void convTextData(Buffer in) {<a name="line.299"></a>
+<span class="sourceLineNo">299</span>        private long convTextData(Buffer in) {<a name="line.299"></a>
 <span class="sourceLineNo">300</span>                convData.setOverflowBufferSize(<a name="line.300"></a>
 <span class="sourceLineNo">301</span>                                (int) (in.remaining() * bytesPerCharUtf8));<a name="line.301"></a>
 <span class="sourceLineNo">302</span>                try {<a name="line.302"></a>
@@ -318,124 +318,137 @@
 <span class="sourceLineNo">310</span>                        } else {<a name="line.310"></a>
 <span class="sourceLineNo">311</span>                                charWriter.append((CharBuffer) in);<a name="line.311"></a>
 <span class="sourceLineNo">312</span>                        }<a name="line.312"></a>
-<span class="sourceLineNo">313</span>                        in.position(in.limit());<a name="line.313"></a>
-<span class="sourceLineNo">314</span>                        charWriter.flush();<a name="line.314"></a>
-<span class="sourceLineNo">315</span>                        payloadSize = convData.bytesWritten();<a name="line.315"></a>
-<span class="sourceLineNo">316</span>                } catch (IOException e) {<a name="line.316"></a>
-<span class="sourceLineNo">317</span>                        // Formally thrown, cannot happen<a name="line.317"></a>
-<span class="sourceLineNo">318</span>                }<a name="line.318"></a>
-<span class="sourceLineNo">319</span>        }<a name="line.319"></a>
-<span class="sourceLineNo">320</span>        <a name="line.320"></a>
-<span class="sourceLineNo">321</span>        private Result nextAfterLength(boolean endOfInput) {<a name="line.321"></a>
-<span class="sourceLineNo">322</span>                if (doMask) {<a name="line.322"></a>
-<span class="sourceLineNo">323</span>                        bytesToSend = 4;<a name="line.323"></a>
-<span class="sourceLineNo">324</span>                        state = State.WRITING_MASK;<a name="line.324"></a>
-<span class="sourceLineNo">325</span>                        return null;<a name="line.325"></a>
-<span class="sourceLineNo">326</span>                }<a name="line.326"></a>
-<span class="sourceLineNo">327</span>                return nextAfterMask(endOfInput);<a name="line.327"></a>
-<span class="sourceLineNo">328</span>        }<a name="line.328"></a>
-<span class="sourceLineNo">329</span>        <a name="line.329"></a>
-<span class="sourceLineNo">330</span>        private Result nextAfterMask(boolean endOfInput) {<a name="line.330"></a>
-<span class="sourceLineNo">331</span>                if (payloadSize == 0) {<a name="line.331"></a>
-<span class="sourceLineNo">332</span>                        return frameFinished(endOfInput);<a name="line.332"></a>
-<span class="sourceLineNo">333</span>                }<a name="line.333"></a>
-<span class="sourceLineNo">334</span>                maskIndex = 0;<a name="line.334"></a>
-<span class="sourceLineNo">335</span>                bytesToSend = payloadSize;<a name="line.335"></a>
-<span class="sourceLineNo">336</span>                state = State.WRITING_PAYLOAD;<a name="line.336"></a>
-<span class="sourceLineNo">337</span>                return null;<a name="line.337"></a>
-<span class="sourceLineNo">338</span>        }<a name="line.338"></a>
-<span class="sourceLineNo">339</span>        <a name="line.339"></a>
-<span class="sourceLineNo">340</span>        /**<a name="line.340"></a>
-<span class="sourceLineNo">341</span>         * Copy payload to "out". Note that if we have textual data<a name="line.341"></a>
-<span class="sourceLineNo">342</span>         * or a close frame, data has already been written into<a name="line.342"></a>
-<span class="sourceLineNo">343</span>         * convData (see {@link #prepareHeaderHead(Buffer, boolean)}.<a name="line.343"></a>
-<span class="sourceLineNo">344</span>         *<a name="line.344"></a>
-<span class="sourceLineNo">345</span>         * @param in the input data, unless already wriiten to convData <a name="line.345"></a>
-<span class="sourceLineNo">346</span>         * @param out the out<a name="line.346"></a>
-<span class="sourceLineNo">347</span>         */<a name="line.347"></a>
-<span class="sourceLineNo">348</span>        private void outputPayload(Buffer in, ByteBuffer out) {<a name="line.348"></a>
-<span class="sourceLineNo">349</span>                WsFrameHeader hdr = messageHeaders.peek();<a name="line.349"></a>
-<span class="sourceLineNo">350</span>                if ((hdr instanceof WsMessageHeader) <a name="line.350"></a>
-<span class="sourceLineNo">351</span>                                &amp;&amp; ((WsMessageHeader)hdr).isTextMode()<a name="line.351"></a>
-<span class="sourceLineNo">352</span>                                || (hdr instanceof WsCloseFrame)) {<a name="line.352"></a>
-<span class="sourceLineNo">353</span>                        // Data has been put into convData<a name="line.353"></a>
-<span class="sourceLineNo">354</span>                        if (!doMask) {<a name="line.354"></a>
-<span class="sourceLineNo">355</span>                                // Moves data from temporary buffers to "out"<a name="line.355"></a>
-<span class="sourceLineNo">356</span>                                convData.assignBuffer(out);<a name="line.356"></a>
-<span class="sourceLineNo">357</span>                                return;<a name="line.357"></a>
-<span class="sourceLineNo">358</span>                        }<a name="line.358"></a>
-<span class="sourceLineNo">359</span>                        // Retrieving as much as fits in out buffer for masking<a name="line.359"></a>
-<span class="sourceLineNo">360</span>                        in = ByteBuffer.allocate(out.remaining());<a name="line.360"></a>
-<span class="sourceLineNo">361</span>                        convData.assignBuffer((ByteBuffer)in);<a name="line.361"></a>
-<span class="sourceLineNo">362</span>                        in.flip();<a name="line.362"></a>
-<span class="sourceLineNo">363</span>                } else {<a name="line.363"></a>
-<span class="sourceLineNo">364</span>                        // Take data from in<a name="line.364"></a>
-<span class="sourceLineNo">365</span>                        if (hdr instanceof WsDefaultControlFrame) {<a name="line.365"></a>
-<span class="sourceLineNo">366</span>                                in = ((WsDefaultControlFrame)hdr)<a name="line.366"></a>
-<span class="sourceLineNo">367</span>                                                .applicationData().orElse(Codec.EMPTY_IN);<a name="line.367"></a>
-<span class="sourceLineNo">368</span>                        }<a name="line.368"></a>
-<span class="sourceLineNo">369</span>                        if (!doMask) {<a name="line.369"></a>
-<span class="sourceLineNo">370</span>                                ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) in);<a name="line.370"></a>
-<span class="sourceLineNo">371</span>                                return;<a name="line.371"></a>
+<span class="sourceLineNo">313</span>                        // "in" is consumed, but don't move the position<a name="line.313"></a>
+<span class="sourceLineNo">314</span>                        // until all data has been processed (from convData).<a name="line.314"></a>
+<span class="sourceLineNo">315</span>                        charWriter.flush();<a name="line.315"></a>
+<span class="sourceLineNo">316</span>                        return convData.bytesWritten();<a name="line.316"></a>
+<span class="sourceLineNo">317</span>                } catch (IOException e) {<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                        // Formally thrown, cannot happen<a name="line.318"></a>
+<span class="sourceLineNo">319</span>                        return 0;<a name="line.319"></a>
+<span class="sourceLineNo">320</span>                }<a name="line.320"></a>
+<span class="sourceLineNo">321</span>        }<a name="line.321"></a>
+<span class="sourceLineNo">322</span>        <a name="line.322"></a>
+<span class="sourceLineNo">323</span>        private Result nextAfterLength(boolean endOfInput) {<a name="line.323"></a>
+<span class="sourceLineNo">324</span>                if (doMask) {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                        bytesToSend = 4;<a name="line.325"></a>
+<span class="sourceLineNo">326</span>                        state = State.WRITING_MASK;<a name="line.326"></a>
+<span class="sourceLineNo">327</span>                        return null;<a name="line.327"></a>
+<span class="sourceLineNo">328</span>                }<a name="line.328"></a>
+<span class="sourceLineNo">329</span>                return nextAfterMask(endOfInput);<a name="line.329"></a>
+<span class="sourceLineNo">330</span>        }<a name="line.330"></a>
+<span class="sourceLineNo">331</span>        <a name="line.331"></a>
+<span class="sourceLineNo">332</span>        private Result nextAfterMask(boolean endOfInput) {<a name="line.332"></a>
+<span class="sourceLineNo">333</span>                if (payloadSize == 0) {<a name="line.333"></a>
+<span class="sourceLineNo">334</span>                        return frameFinished(endOfInput);<a name="line.334"></a>
+<span class="sourceLineNo">335</span>                }<a name="line.335"></a>
+<span class="sourceLineNo">336</span>                maskIndex = 0;<a name="line.336"></a>
+<span class="sourceLineNo">337</span>                bytesToSend = payloadSize;<a name="line.337"></a>
+<span class="sourceLineNo">338</span>                state = State.WRITING_PAYLOAD;<a name="line.338"></a>
+<span class="sourceLineNo">339</span>                return null;<a name="line.339"></a>
+<span class="sourceLineNo">340</span>        }<a name="line.340"></a>
+<span class="sourceLineNo">341</span>        <a name="line.341"></a>
+<span class="sourceLineNo">342</span>        /**<a name="line.342"></a>
+<span class="sourceLineNo">343</span>         * Copy payload to "out". Note that if we have textual data<a name="line.343"></a>
+<span class="sourceLineNo">344</span>         * or a close frame, data has already been written into<a name="line.344"></a>
+<span class="sourceLineNo">345</span>         * convData (see {@link #prepareHeaderHead(Buffer, boolean)}.<a name="line.345"></a>
+<span class="sourceLineNo">346</span>         *<a name="line.346"></a>
+<span class="sourceLineNo">347</span>         * @param in the input data, unless already wriiten to convData <a name="line.347"></a>
+<span class="sourceLineNo">348</span>         * @param out the out<a name="line.348"></a>
+<span class="sourceLineNo">349</span>         */<a name="line.349"></a>
+<span class="sourceLineNo">350</span>        private void outputPayload(Buffer in, ByteBuffer out) {<a name="line.350"></a>
+<span class="sourceLineNo">351</span>                // Default is to use data directly from in buffer.<a name="line.351"></a>
+<span class="sourceLineNo">352</span>                Buffer src = in;<a name="line.352"></a>
+<span class="sourceLineNo">353</span>                WsFrameHeader hdr = messageHeaders.peek();<a name="line.353"></a>
+<span class="sourceLineNo">354</span>                boolean textPayload = (hdr instanceof WsMessageHeader) <a name="line.354"></a>
+<span class="sourceLineNo">355</span>                                &amp;&amp; ((WsMessageHeader)hdr).isTextMode();<a name="line.355"></a>
+<span class="sourceLineNo">356</span>                if (textPayload || (hdr instanceof WsCloseFrame)) {<a name="line.356"></a>
+<span class="sourceLineNo">357</span>                        // Data has been put into convData<a name="line.357"></a>
+<span class="sourceLineNo">358</span>                        if (!doMask) {<a name="line.358"></a>
+<span class="sourceLineNo">359</span>                                // Moves data from temporary buffers to "out"<a name="line.359"></a>
+<span class="sourceLineNo">360</span>                                convData.assignBuffer(out);<a name="line.360"></a>
+<span class="sourceLineNo">361</span>                        } else {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                                // Retrieve into src as much as fits in <a name="line.362"></a>
+<span class="sourceLineNo">363</span>                                // out buffer for masking.<a name="line.363"></a>
+<span class="sourceLineNo">364</span>                                src = ByteBuffer.allocate(out.remaining());<a name="line.364"></a>
+<span class="sourceLineNo">365</span>                                convData.assignBuffer((ByteBuffer)src);<a name="line.365"></a>
+<span class="sourceLineNo">366</span>                                src.flip();<a name="line.366"></a>
+<span class="sourceLineNo">367</span>                        }<a name="line.367"></a>
+<span class="sourceLineNo">368</span>                        if (convData.remaining() &gt;= 0 &amp;&amp; textPayload) {<a name="line.368"></a>
+<span class="sourceLineNo">369</span>                                // Make full consumption visible "outside",<a name="line.369"></a>
+<span class="sourceLineNo">370</span>                                // see convTextData.<a name="line.370"></a>
+<span class="sourceLineNo">371</span>                                in.position(in.limit());<a name="line.371"></a>
 <span class="sourceLineNo">372</span>                        }<a name="line.372"></a>
-<span class="sourceLineNo">373</span>                }<a name="line.373"></a>
-<span class="sourceLineNo">374</span>                // Mask while writing<a name="line.374"></a>
-<span class="sourceLineNo">375</span>                while (bytesToSend &gt; 0<a name="line.375"></a>
-<span class="sourceLineNo">376</span>                        &amp;&amp; in.hasRemaining() &amp;&amp; out.hasRemaining()) {<a name="line.376"></a>
-<span class="sourceLineNo">377</span>                        out.put((byte) (((ByteBuffer) in)<a name="line.377"></a>
-<span class="sourceLineNo">378</span>                                .get() ^ maskingKey[maskIndex]));<a name="line.378"></a>
-<span class="sourceLineNo">379</span>                        maskIndex = (maskIndex + 1) % 4;<a name="line.379"></a>
-<span class="sourceLineNo">380</span>                }<a name="line.380"></a>
-<span class="sourceLineNo">381</span>        }<a name="line.381"></a>
-<span class="sourceLineNo">382</span><a name="line.382"></a>
-<span class="sourceLineNo">383</span>        /* (non-Javadoc)<a name="line.383"></a>
-<span class="sourceLineNo">384</span>         * @see org.jdrupes.httpcodec.Decoder#getHeader()<a name="line.384"></a>
-<span class="sourceLineNo">385</span>         */<a name="line.385"></a>
-<span class="sourceLineNo">386</span>        @Override<a name="line.386"></a>
-<span class="sourceLineNo">387</span>        public Optional&lt;WsFrameHeader&gt; header() {<a name="line.387"></a>
-<span class="sourceLineNo">388</span>                try {<a name="line.388"></a>
-<span class="sourceLineNo">389</span>                        return Optional.of(messageHeaders.peek());<a name="line.389"></a>
-<span class="sourceLineNo">390</span>                } catch (EmptyStackException e) {<a name="line.390"></a>
-<span class="sourceLineNo">391</span>                        return Optional.empty();<a name="line.391"></a>
-<span class="sourceLineNo">392</span>                }<a name="line.392"></a>
-<span class="sourceLineNo">393</span>        }<a name="line.393"></a>
-<span class="sourceLineNo">394</span><a name="line.394"></a>
-<span class="sourceLineNo">395</span>        /**<a name="line.395"></a>
-<span class="sourceLineNo">396</span>         * Results from {@link HttpEncoder} provide no additional<a name="line.396"></a>
-<span class="sourceLineNo">397</span>         * information compared to {@link org.jdrupes.httpcodec.Codec.Result}. This<a name="line.397"></a>
-<span class="sourceLineNo">398</span>         * class only provides a factory for creating concrete results.<a name="line.398"></a>
-<span class="sourceLineNo">399</span>         */<a name="line.399"></a>
-<span class="sourceLineNo">400</span>        public static class Result extends Codec.Result {<a name="line.400"></a>
-<span class="sourceLineNo">401</span>        <a name="line.401"></a>
-<span class="sourceLineNo">402</span>                protected Result(boolean overflow, boolean underflow,<a name="line.402"></a>
-<span class="sourceLineNo">403</span>                        boolean closeConnection) {<a name="line.403"></a>
-<span class="sourceLineNo">404</span>                        super(overflow, underflow, closeConnection);<a name="line.404"></a>
+<span class="sourceLineNo">373</span>                        if (!doMask) {<a name="line.373"></a>
+<span class="sourceLineNo">374</span>                                return;<a name="line.374"></a>
+<span class="sourceLineNo">375</span>                        }<a name="line.375"></a>
+<span class="sourceLineNo">376</span>                } else {<a name="line.376"></a>
+<span class="sourceLineNo">377</span>                        if (hdr instanceof WsDefaultControlFrame) {<a name="line.377"></a>
+<span class="sourceLineNo">378</span>                                // Data is taken from control frame.<a name="line.378"></a>
+<span class="sourceLineNo">379</span>                                src = ((WsDefaultControlFrame)hdr)<a name="line.379"></a>
+<span class="sourceLineNo">380</span>                                                .applicationData().orElse(Codec.EMPTY_IN);<a name="line.380"></a>
+<span class="sourceLineNo">381</span>                        }<a name="line.381"></a>
+<span class="sourceLineNo">382</span>                        if (!doMask) {<a name="line.382"></a>
+<span class="sourceLineNo">383</span>                                ByteBufferUtils.putAsMuchAsPossible(out, (ByteBuffer) src);<a name="line.383"></a>
+<span class="sourceLineNo">384</span>                                return;<a name="line.384"></a>
+<span class="sourceLineNo">385</span>                        }<a name="line.385"></a>
+<span class="sourceLineNo">386</span>                }<a name="line.386"></a>
+<span class="sourceLineNo">387</span>                // Mask while writing<a name="line.387"></a>
+<span class="sourceLineNo">388</span>                while (bytesToSend &gt; 0<a name="line.388"></a>
+<span class="sourceLineNo">389</span>                        &amp;&amp; src.hasRemaining() &amp;&amp; out.hasRemaining()) {<a name="line.389"></a>
+<span class="sourceLineNo">390</span>                        out.put((byte) (((ByteBuffer) src)<a name="line.390"></a>
+<span class="sourceLineNo">391</span>                                .get() ^ maskingKey[maskIndex]));<a name="line.391"></a>
+<span class="sourceLineNo">392</span>                        maskIndex = (maskIndex + 1) % 4;<a name="line.392"></a>
+<span class="sourceLineNo">393</span>                }<a name="line.393"></a>
+<span class="sourceLineNo">394</span>        }<a name="line.394"></a>
+<span class="sourceLineNo">395</span><a name="line.395"></a>
+<span class="sourceLineNo">396</span>        /* (non-Javadoc)<a name="line.396"></a>
+<span class="sourceLineNo">397</span>         * @see org.jdrupes.httpcodec.Decoder#getHeader()<a name="line.397"></a>
+<span class="sourceLineNo">398</span>         */<a name="line.398"></a>
+<span class="sourceLineNo">399</span>        @Override<a name="line.399"></a>
+<span class="sourceLineNo">400</span>        public Optional&lt;WsFrameHeader&gt; header() {<a name="line.400"></a>
+<span class="sourceLineNo">401</span>                try {<a name="line.401"></a>
+<span class="sourceLineNo">402</span>                        return Optional.of(messageHeaders.peek());<a name="line.402"></a>
+<span class="sourceLineNo">403</span>                } catch (EmptyStackException e) {<a name="line.403"></a>
+<span class="sourceLineNo">404</span>                        return Optional.empty();<a name="line.404"></a>
 <span class="sourceLineNo">405</span>                }<a name="line.405"></a>
-<span class="sourceLineNo">406</span><a name="line.406"></a>
-<span class="sourceLineNo">407</span>                /**<a name="line.407"></a>
-<span class="sourceLineNo">408</span>                 * A factory for creating new Results.<a name="line.408"></a>
-<span class="sourceLineNo">409</span>                 */<a name="line.409"></a>
-<span class="sourceLineNo">410</span>                protected static class Factory extends Codec.Result.Factory {<a name="line.410"></a>
-<span class="sourceLineNo">411</span><a name="line.411"></a>
-<span class="sourceLineNo">412</span>                        /**<a name="line.412"></a>
-<span class="sourceLineNo">413</span>                         * Create new result.<a name="line.413"></a>
-<span class="sourceLineNo">414</span>                         * <a name="line.414"></a>
-<span class="sourceLineNo">415</span>                         * @param overflow<a name="line.415"></a>
-<span class="sourceLineNo">416</span>                         *            {@code true} if the data didn't fit in the out buffer<a name="line.416"></a>
-<span class="sourceLineNo">417</span>                         * @param underflow<a name="line.417"></a>
-<span class="sourceLineNo">418</span>                         *            {@code true} if more data is expected<a name="line.418"></a>
-<span class="sourceLineNo">419</span>                         * @param closeConnection<a name="line.419"></a>
-<span class="sourceLineNo">420</span>                         *            {@code true} if the connection should be closed<a name="line.420"></a>
-<span class="sourceLineNo">421</span>                         * @return the result<a name="line.421"></a>
-<span class="sourceLineNo">422</span>                         */<a name="line.422"></a>
-<span class="sourceLineNo">423</span>                        public Result newResult(boolean overflow, boolean underflow,<a name="line.423"></a>
-<span class="sourceLineNo">424</span>                                boolean closeConnection) {<a name="line.424"></a>
-<span class="sourceLineNo">425</span>                                return new Result(overflow, underflow, closeConnection) {<a name="line.425"></a>
-<span class="sourceLineNo">426</span>                                };<a name="line.426"></a>
-<span class="sourceLineNo">427</span>                        }<a name="line.427"></a>
-<span class="sourceLineNo">428</span>                }<a name="line.428"></a>
-<span class="sourceLineNo">429</span>        }<a name="line.429"></a>
-<span class="sourceLineNo">430</span>}<a name="line.430"></a>
+<span class="sourceLineNo">406</span>        }<a name="line.406"></a>
+<span class="sourceLineNo">407</span><a name="line.407"></a>
+<span class="sourceLineNo">408</span>        /**<a name="line.408"></a>
+<span class="sourceLineNo">409</span>         * Results from {@link HttpEncoder} provide no additional<a name="line.409"></a>
+<span class="sourceLineNo">410</span>         * information compared to {@link org.jdrupes.httpcodec.Codec.Result}. This<a name="line.410"></a>
+<span class="sourceLineNo">411</span>         * class only provides a factory for creating concrete results.<a name="line.411"></a>
+<span class="sourceLineNo">412</span>         */<a name="line.412"></a>
+<span class="sourceLineNo">413</span>        public static class Result extends Codec.Result {<a name="line.413"></a>
+<span class="sourceLineNo">414</span>        <a name="line.414"></a>
+<span class="sourceLineNo">415</span>                protected Result(boolean overflow, boolean underflow,<a name="line.415"></a>
+<span class="sourceLineNo">416</span>                        boolean closeConnection) {<a name="line.416"></a>
+<span class="sourceLineNo">417</span>                        super(overflow, underflow, closeConnection);<a name="line.417"></a>
+<span class="sourceLineNo">418</span>                }<a name="line.418"></a>
+<span class="sourceLineNo">419</span><a name="line.419"></a>
+<span class="sourceLineNo">420</span>                /**<a name="line.420"></a>
+<span class="sourceLineNo">421</span>                 * A factory for creating new Results.<a name="line.421"></a>
+<span class="sourceLineNo">422</span>                 */<a name="line.422"></a>
+<span class="sourceLineNo">423</span>                protected static class Factory extends Codec.Result.Factory {<a name="line.423"></a>
+<span class="sourceLineNo">424</span><a name="line.424"></a>
+<span class="sourceLineNo">425</span>                        /**<a name="line.425"></a>
+<span class="sourceLineNo">426</span>                         * Create new result.<a name="line.426"></a>
+<span class="sourceLineNo">427</span>                         * <a name="line.427"></a>
+<span class="sourceLineNo">428</span>                         * @param overflow<a name="line.428"></a>
+<span class="sourceLineNo">429</span>                         *            {@code true} if the data didn't fit in the out buffer<a name="line.429"></a>
+<span class="sourceLineNo">430</span>                         * @param underflow<a name="line.430"></a>
+<span class="sourceLineNo">431</span>                         *            {@code true} if more data is expected<a name="line.431"></a>
+<span class="sourceLineNo">432</span>                         * @param closeConnection<a name="line.432"></a>
+<span class="sourceLineNo">433</span>                         *            {@code true} if the connection should be closed<a name="line.433"></a>
+<span class="sourceLineNo">434</span>                         * @return the result<a name="line.434"></a>
+<span class="sourceLineNo">435</span>                         */<a name="line.435"></a>
+<span class="sourceLineNo">436</span>                        public Result newResult(boolean overflow, boolean underflow,<a name="line.436"></a>
+<span class="sourceLineNo">437</span>                                boolean closeConnection) {<a name="line.437"></a>
+<span class="sourceLineNo">438</span>                                return new Result(overflow, underflow, closeConnection) {<a name="line.438"></a>
+<span class="sourceLineNo">439</span>                                };<a name="line.439"></a>
+<span class="sourceLineNo">440</span>                        }<a name="line.440"></a>
+<span class="sourceLineNo">441</span>                }<a name="line.441"></a>
+<span class="sourceLineNo">442</span>        }<a name="line.442"></a>
+<span class="sourceLineNo">443</span>}<a name="line.443"></a>
 
 
 
