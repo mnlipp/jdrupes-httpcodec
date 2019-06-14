@@ -348,6 +348,7 @@ public class WsEncoder extends WsCodec
 	 * @param out the out
 	 */
 	private void outputPayload(Buffer in, ByteBuffer out) {
+		// Default is to use data directly from in buffer.
 		Buffer src = in;
 		WsFrameHeader hdr = messageHeaders.peek();
 		boolean textPayload = (hdr instanceof WsMessageHeader) 
@@ -365,15 +366,16 @@ public class WsEncoder extends WsCodec
 				src.flip();
 			}
 			if (convData.remaining() >= 0 && textPayload) {
-				// Make full consumption visible "outside".
+				// Make full consumption visible "outside",
+				// see convTextData.
 				in.position(in.limit());
 			}
 			if (!doMask) {
 				return;
 			}
 		} else {
-			// Take data from in
 			if (hdr instanceof WsDefaultControlFrame) {
+				// Data is taken from control frame.
 				src = ((WsDefaultControlFrame)hdr)
 						.applicationData().orElse(Codec.EMPTY_IN);
 			}
