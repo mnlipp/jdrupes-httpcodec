@@ -39,6 +39,11 @@ repositories {
 //	maven { url 'https://jitpack.io' }
 }
 
+ext {
+    isCiBuild = System.getenv().get("CI") == 'true'
+    isJitPackBuild = System.getenv().get("JITPACK") == 'true'
+}
+
 configurations {
     javadocTaglets
 }
@@ -112,6 +117,9 @@ dependencies {
 }
 
 javadoc {
+    // Does not work on JitPack, no /usr/bin/dot
+    enabled = JavaVersion.current().isJava8() && !isJitPackBuild    
+
     options.tagletPath = configurations.javadocTaglets.files as List
     options.taglets = ["org.jdrupes.taglets.plantUml.Taglet"]
 
