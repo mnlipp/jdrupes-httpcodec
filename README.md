@@ -1,7 +1,7 @@
 JDrupes non-blocking HTTP Codec
 ===============================
 
-[![Build Status](https://travis-ci.org/mnlipp/jdrupes-httpcodec.svg?branch=master)](https://travis-ci.org/mnlipp/jdrupes-httpcodec) 
+[![Build Status](https://github.com/mnlipp/jdrupes-httpcodec/actions/workflows/main.yml/badge.svg)](https://github.com/mnlipp/jdrupes-httpcodec/actions) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d9e648d1d904ec6a1f0ca713ca30c5c)](https://www.codacy.com/app/mnlipp/jdrupes-httpcodec?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mnlipp/jdrupes-httpcodec&amp;utm_campaign=Badge_Grade)
 [![Code Climate](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec/badges/gpa.svg)](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec)
 [![Release](https://jitpack.io/v/mnlipp/jdrupes-httpcodec.svg)](https://jitpack.io/#mnlipp/jdrupes-httpcodec)
