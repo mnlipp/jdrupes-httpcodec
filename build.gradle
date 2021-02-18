@@ -78,9 +78,13 @@ sourceSets {
 }
 
 tasks.compileJava {
-	if (!JavaVersion.current().isJava8()) {
-		options.compilerArgs.addAll(['--release', '8'])
-	}
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+tasks.compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 
