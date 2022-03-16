@@ -64,22 +64,13 @@ sourceSets {
         java {
             srcDir 'test'
         }
-        resources {
-            srcDir 'resources'
-        }
     }
 }
 
-tasks.compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
-
-tasks.compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-
 
 String bundleVersion = releaseVersion +
 	(isSnapshot ? ".-\${tstamp}-SNAPSHOT" : ".rel")

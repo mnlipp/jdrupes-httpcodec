@@ -2,5 +2,7 @@
 /build/
 /.gradle/
 /generated/
+.classpath
+.project
 **/org.eclipse.jdt.core.prefs
 
