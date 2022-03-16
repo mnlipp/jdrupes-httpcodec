@@ -34,6 +34,23 @@ import org.junit.Test;
  */
 public class ResponseEncoderTests {
 
+    @Test
+    public void testSimple10Response() {
+        HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
+                HttpStatus.OK, false);
+        HttpResponseEncoder encoder = new HttpResponseEncoder();
+        encoder.encode(response);
+        ByteBuffer out = ByteBuffer.allocate(1024*1024);
+        Encoder.Result result = encoder.encode(out);
+        assertFalse(result.isOverflow());
+        assertFalse(result.isUnderflow());
+        assertTrue(result.closeConnection());
+        String encoded = new String(out.array(), 0, out.position());
+        assertTrue(encoded.contains("HTTP/1.0 200 OK\r\n"));
+        assertTrue(encoded.contains("Content-Length: 0\r\n"));
+        assertTrue(encoded.endsWith("\r\n\r\n"));
+    }
+
 	@Test
 	public void testSimpleResponse() {
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_1,

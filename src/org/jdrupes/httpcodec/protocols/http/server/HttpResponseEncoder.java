@@ -239,6 +239,12 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse, HttpRequest>
 		writer.write("\r\n");
 	}
 
+    @Override
+    protected boolean forceCloseAfterBody() {
+        return messageHeader.protocol()
+                .compareTo(HttpProtocol.HTTP_1_0) <= 0;
+    }
+    
 	/**
 	 * The result from encoding a response. In addition to the usual
 	 * codec result, a response encoder may signal to the invoker that the

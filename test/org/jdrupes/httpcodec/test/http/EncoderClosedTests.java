@@ -57,7 +57,7 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.closeConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -93,7 +93,7 @@ public class EncoderClosedTests {
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.closeConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -238,7 +238,7 @@ public class EncoderClosedTests {
 		Encoder.Result result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.closeConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),
@@ -274,7 +274,7 @@ public class EncoderClosedTests {
 		result = encoder.encode(in, out, true);
 		assertFalse(result.isOverflow());
 		assertFalse(result.isUnderflow());
-		assertFalse(result.closeConnection());
+		assertTrue(result.closeConnection());
 		// Check result
 		out.flip();
 		String encoded = new String(out.array(), out.arrayOffset(),

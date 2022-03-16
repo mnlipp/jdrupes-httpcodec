@@ -159,6 +159,16 @@ public abstract class HttpEncoder<T extends HttpMessageHeader,
 	protected abstract void startMessage(T messageHeader, Writer writer) 
 			throws IOException;
 
+    /**
+     * Force close after body. Used to override the header driven
+     * behavior for HTTP/1.0 responses.
+     *
+     * @return true, if forced
+     */
+    protected boolean forceCloseAfterBody() {
+        return false;
+    }
+    
 	/**
 	 * Set a new HTTP message that is to be encoded.
 	 * 
@@ -378,7 +388,7 @@ public abstract class HttpEncoder<T extends HttpMessageHeader,
 		// We'll eventually fall back to this state
 		states.push(State.DONE);
 		// Get a default for closeAfterBody from the header fields
-		closeAfterBody = messageHeader
+		closeAfterBody = forceCloseAfterBody() || messageHeader
 		        .findField(HttpField.CONNECTION, Converters.STRING_LIST)
 		        .map(h -> h.value()).map(f -> f.containsIgnoreCase("close"))
 		        .orElse(false);
