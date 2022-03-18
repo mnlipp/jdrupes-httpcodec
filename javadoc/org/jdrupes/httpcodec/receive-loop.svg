@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="379px" preserveAspectRatio="none" style="width:281px;height:379px;background:#FFFFFF;" version="1.1" viewBox="0 0 281 379" width="281px" zoomAndPan="magnify"><defs><filter height="300%" id="f1ptwz3jq131ua" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><text fill="#000000" font-family="sans-serif" font-size="18" lengthAdjust="spacing" textLength="120" x="79.5" y="26.708">Receive Loop</text><ellipse cx="140" cy="40.9531" fill="#000000" filter="url(#f1ptwz3jq131ua)" rx="10" ry="10" style="stroke:none;stroke-width:1.0;"/><rect fill="#FEFECE" filter="url(#f1ptwz3jq131ua)" height="33.9688" rx="12.5" ry="12.5" style="stroke:#A80036;stroke-width:1.5;" width="101" x="89.5" y="118.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="81" x="99.5" y="140.0918">Receive data</text><rect fill="#FEFECE" filter="url(#f1ptwz3jq131ua)" height="33.9688" rx="12.5" ry="12.5" style="stroke:#A80036;stroke-width:1.5;" width="111" x="84.5" y="220.9219"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="91" x="94.5" y="242.0605">Invoke decode</text><rect fill="#FEFECE" filter="url(#f1ptwz3jq131ua)" height="33.9688" rx="12.5" ry="12.5" style="stroke:#A80036;stroke-width:1.5;" width="160" x="60" y="289.8906"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacing" textLength="140" x="70" y="311.0293">Handle decoder result</text><polygon fill="#FEFECE" filter="url(#f1ptwz3jq131ua)" points="140,172.9219,152,184.9219,140,196.9219,128,184.9219,140,172.9219" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="123" x="146" y="207.1323">[data in receive buffer</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="119" x="149" y="219.937">&amp;&amp; connection open]</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="32" x="96" y="182.3276">[else]</text><polygon fill="#FEFECE" filter="url(#f1ptwz3jq131ua)" points="140,70.9531,152,82.9531,140,94.9531,128,82.9531,140,70.9531" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="100" x="146" y="105.1636">[connection open]</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="32" x="96" y="80.3589">[else]</text><ellipse cx="24" cy="128.9531" fill="#FFFFFF" filter="url(#f1ptwz3jq131ua)" rx="10" ry="10" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:2.5;" x1="17.8128" x2="30.1872" y1="122.7659" y2="135.1403"/><line style="stroke:#000000;stroke-width:2.5;" x1="30.1872" x2="17.8128" y1="122.7659" y2="135.1403"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="140" y1="254.8906" y2="289.8906"/><polygon fill="#A80036" points="136,279.8906,140,289.8906,144,279.8906,140,283.8906" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="140" y1="196.9219" y2="220.9219"/><polygon fill="#A80036" points="136,210.9219,140,220.9219,144,210.9219,140,214.9219" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="140" y1="323.8594" y2="333.8594"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="232" y1="333.8594" y2="333.8594"/><polygon fill="#A80036" points="228,270.3906,232,260.3906,236,270.3906,232,266.3906" style="stroke:#A80036;stroke-width:1.5;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="232" x2="232" y1="184.9219" y2="333.8594"/><line style="stroke:#A80036;stroke-width:1.5;" x1="232" x2="152" y1="184.9219" y2="184.9219"/><polygon fill="#A80036" points="162,180.9219,152,184.9219,162,188.9219,158,184.9219" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="128" x2="48" y1="184.9219" y2="184.9219"/><polygon fill="#A80036" points="44,256.3906,48,266.3906,52,256.3906,48,260.3906" style="stroke:#A80036;stroke-width:1.5;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="48" x2="48" y1="184.9219" y2="345.8594"/><line style="stroke:#A80036;stroke-width:1.5;" x1="48" x2="244" y1="345.8594" y2="345.8594"/><line style="stroke:#A80036;stroke-width:1.5;" x1="244" x2="244" y1="82.9531" y2="345.8594"/><line style="stroke:#A80036;stroke-width:1.5;" x1="244" x2="152" y1="82.9531" y2="82.9531"/><polygon fill="#A80036" points="162,78.9531,152,82.9531,162,86.9531,158,82.9531" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="140" y1="152.9219" y2="172.9219"/><polygon fill="#A80036" points="136,162.9219,140,172.9219,144,162.9219,140,166.9219" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="140" y1="94.9531" y2="118.9531"/><polygon fill="#A80036" points="136,108.9531,140,118.9531,144,108.9531,140,112.9531" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="128" x2="24" y1="82.9531" y2="82.9531"/><line style="stroke:#A80036;stroke-width:1.5;" x1="24" x2="24" y1="82.9531" y2="118.9531"/><polygon fill="#A80036" points="20,108.9531,24,118.9531,28,108.9531,24,112.9531" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.5;" x1="140" x2="140" y1="50.9531" y2="70.9531"/><polygon fill="#A80036" points="136,60.9531,140,70.9531,144,60.9531,140,64.9531" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[b175997f88d97585b0f664453ae94252]
+@startuml
+' ========== Receive loop =========
+ skinparam conditionStyle diamond
+ title Receive Loop
+ start
+ while ( ) is ([connection open])
+   :Receive data;
+   while ( ) is ([data in receive buffer\n && connection open])
+     :Invoke decode;
+     :Handle decoder result;
+   endwhile ([else])
+ endwhile ([else])
+ end
+@enduml
+
+@startuml
+ skinparam conditionStyle diamond
+ title Receive Loop
+ start
+ while ( ) is ([connection open])
+   :Receive data;
+   while ( ) is ([data in receive buffer\n && connection open])
+     :Invoke decode;
+     :Handle decoder result;
+   endwhile ([else])
+ endwhile ([else])
+ end
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 19:19:58 CET 2022)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: de
+Country: DE
+--></g></svg>

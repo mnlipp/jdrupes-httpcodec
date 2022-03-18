@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="361px" preserveAspectRatio="none" style="width:437px;height:361px;background:#FFFFFF;" version="1.1" viewBox="0 0 437 361" width="437px" zoomAndPan="magnify"><defs><filter height="300%" id="f1w6qqtodcv2b1" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[19bab21d94a99911073f24de8dec88db]
+class Codec--><rect codeLine="2" fill="#FEFECE" filter="url(#f1w6qqtodcv2b1)" height="48" id="Codec" style="stroke:#A80036;stroke-width:1.5;" width="69" x="180.5" y="7"/><ellipse cx="195.5" cy="23" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M191.4219,18.7656 L191.4219,16.6094 L198.8125,16.6094 L198.8125,18.7656 L196.3438,18.7656 L196.3438,26.8438 L198.8125,26.8438 L198.8125,29 L191.4219,29 L191.4219,26.8438 L193.8906,26.8438 L193.8906,18.7656 L191.4219,18.7656 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="37" x="209.5" y="27.1543">Codec</text><line style="stroke:#A80036;stroke-width:1.5;" x1="181.5" x2="248.5" y1="39" y2="39"/><line style="stroke:#A80036;stroke-width:1.5;" x1="181.5" x2="248.5" y1="47" y2="47"/><!--MD5=[72942ab806530e19acf83f3d00872943]
+class HttpCodec--><rect codeLine="5" fill="#FEFECE" filter="url(#f1w6qqtodcv2b1)" height="48" id="HttpCodec" style="stroke:#A80036;stroke-width:1.5;" width="96" x="105" y="115"/><ellipse cx="120" cy="131" fill="#A9DCDF" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M120.1094,126.3438 L118.9531,131.4219 L121.2813,131.4219 L120.1094,126.3438 Z M118.625,124.1094 L121.6094,124.1094 L124.9688,136.5 L122.5156,136.5 L121.75,133.4375 L118.4688,133.4375 L117.7188,136.5 L115.2813,136.5 L118.625,124.1094 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="64" x="134" y="135.1543">HttpCodec</text><line style="stroke:#A80036;stroke-width:1.5;" x1="106" x2="200" y1="147" y2="147"/><line style="stroke:#A80036;stroke-width:1.5;" x1="106" x2="200" y1="155" y2="155"/><!--MD5=[a6c6c764ef525f81bbc9f42f79e225a1]
+class Encoder--><rect codeLine="8" fill="#FEFECE" filter="url(#f1w6qqtodcv2b1)" height="48" id="Encoder" style="stroke:#A80036;stroke-width:1.5;" width="81" x="236.5" y="115"/><ellipse cx="251.5" cy="131" fill="#B4A7E5" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M247.4219,126.7656 L247.4219,124.6094 L254.8125,124.6094 L254.8125,126.7656 L252.3438,126.7656 L252.3438,134.8438 L254.8125,134.8438 L254.8125,137 L247.4219,137 L247.4219,134.8438 L249.8906,134.8438 L249.8906,126.7656 L247.4219,126.7656 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="49" x="265.5" y="135.1543">Encoder</text><line style="stroke:#A80036;stroke-width:1.5;" x1="237.5" x2="316.5" y1="147" y2="147"/><line style="stroke:#A80036;stroke-width:1.5;" x1="237.5" x2="316.5" y1="155" y2="155"/><!--MD5=[ec76d1500d17f2dfacb7d5cee4503f52]
+class HttpEncoder--><rect codeLine="11" fill="#FEFECE" filter="url(#f1w6qqtodcv2b1)" height="124.8281" id="HttpEncoder" style="stroke:#A80036;stroke-width:1.5;" width="416" x="7" y="223"/><ellipse cx="172.75" cy="239" fill="#A9DCDF" rx="11" ry="11" style="stroke:#A80036;stroke-width:1.0;"/><path d="M172.8594,234.3438 L171.7031,239.4219 L174.0313,239.4219 L172.8594,234.3438 Z M171.375,232.1094 L174.3594,232.1094 L177.7188,244.5 L175.2656,244.5 L174.5,241.4375 L171.2188,241.4375 L170.4688,244.5 L168.0313,244.5 L171.375,232.1094 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="76" x="193.25" y="243.1543">HttpEncoder</text><line style="stroke:#A80036;stroke-width:1.5;" x1="8" x2="422" y1="255" y2="255"/><line style="stroke:#A80036;stroke-width:1.5;" x1="8" x2="422" y1="263" y2="263"/><ellipse cx="18" cy="274" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="77" x="27" y="277.2104">HttpEncoder()</text><ellipse cx="18" cy="286.8047" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="179" x="27" y="290.0151">void encode(T messageHeader)</text><ellipse cx="18" cy="299.6094" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="390" x="27" y="302.8198">Encoder.Result encode(Buffer in, ByteBuffer out, boolean endOfInput)</text><ellipse cx="18" cy="312.4141" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="97" x="27" y="315.6245">int pendingLimit()</text><ellipse cx="18" cy="325.2188" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="213" x="27" y="328.4292">void setPendingLimit(int pendingLimit)</text><ellipse cx="18" cy="338.0234" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacing" textLength="105" x="27" y="341.2339">boolean isClosed()</text><!--MD5=[31697f0949d333c77320f29355cacaf7]
+reverse link Codec to HttpCodec--><path codeLine="20" d="M191.25,72.61 C182.92,86.85 173.85,102.35 166.64,114.68 " fill="none" id="Codec-backto-HttpCodec" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="185.41,68.73,201.55,55,197.49,75.8,185.41,68.73" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[3a8b3b4b86f9c006e2d3353d08398fba]
+reverse link Codec to Encoder--><path codeLine="22" d="M238.75,72.61 C247.08,86.85 256.15,102.35 263.36,114.68 " fill="none" id="Codec-backto-Encoder" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="232.51,75.8,228.45,55,244.59,68.73,232.51,75.8" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[1d2bf0b0412bc0673ff8a1070cce99b1]
+reverse link HttpCodec to HttpEncoder--><path codeLine="24" d="M170.94,181.82 C176.46,194.68 182.65,209.1 188.61,222.99 " fill="none" id="HttpCodec-backto-HttpEncoder" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="164.41,184.36,162.96,163.22,177.28,178.84,164.41,184.36" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[f9661d30755cfacc825e69655f3764d4]
+reverse link Encoder to HttpEncoder--><path codeLine="26" d="M259.06,181.82 C253.54,194.68 247.35,209.1 241.39,222.99 " fill="none" id="Encoder-backto-HttpEncoder" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="252.72,178.84,267.04,163.22,265.59,184.36,252.72,178.84" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[4e2c7a19facf89c4b8609537d821abdc]
+@startuml
+' ========== HTTP encoder =========
+ interface Codec {
+ }
+ 
+ abstract class HttpCodec {
+ }
+ 
+ interface Encoder {
+ }
+ 
+ abstract class HttpEncoder {
+     +HttpEncoder()
+     +void encode(T messageHeader)
+     +Encoder.Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
+     +int pendingLimit()
+     +void setPendingLimit(int pendingLimit)
+     +boolean isClosed()
+ }
+ 
+ Codec <|.. HttpCodec
+ 
+ Codec <|- - Encoder
+ 
+ HttpCodec <|- - HttpEncoder
+ 
+ Encoder <|.. HttpEncoder
+@enduml
+
+@startuml
+ interface Codec {
+ }
+ 
+ abstract class HttpCodec {
+ }
+ 
+ interface Encoder {
+ }
+ 
+ abstract class HttpEncoder {
+     +HttpEncoder()
+     +void encode(T messageHeader)
+     +Encoder.Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
+     +int pendingLimit()
+     +void setPendingLimit(int pendingLimit)
+     +boolean isClosed()
+ }
+ 
+ Codec <|.. HttpCodec
+ 
+ Codec <|- - Encoder
+ 
+ HttpCodec <|- - HttpEncoder
+ 
+ Encoder <|.. HttpEncoder
+@enduml
+
+PlantUML version 1.2022.1(Tue Feb 01 19:19:58 CET 2022)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: de
+Country: DE
+--></g></svg>
