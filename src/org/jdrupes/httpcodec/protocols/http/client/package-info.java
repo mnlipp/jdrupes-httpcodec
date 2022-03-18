@@ -18,5 +18,4 @@
 /**
  * HTTP codecs required on the client side.  
  */
-@org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec.protocols.http.client;

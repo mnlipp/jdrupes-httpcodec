@@ -25,14 +25,14 @@ Provide-Capability: osgi.serviceloader; \
     osgi.serviceloader=org.jdrupes.httpcodec.plugin.UpgradeProvider
 
 Export-Package: \
-	org.jdrupes.httpcodec,\
-	org.jdrupes.httpcodec.plugin,\
-	org.jdrupes.httpcodec.protocols.http,\
-	org.jdrupes.httpcodec.protocols.http.client,\
-	org.jdrupes.httpcodec.protocols.http.server,\
-	org.jdrupes.httpcodec.protocols.websocket,\
-	org.jdrupes.httpcodec.types,\
-	org.jdrupes.httpcodec.util
+	org.jdrupes.httpcodec;version="${api_version}",\
+	org.jdrupes.httpcodec.plugin;version="${api_version}",\
+	org.jdrupes.httpcodec.protocols.http;version="${api_version}",\
+	org.jdrupes.httpcodec.protocols.http.client;version="${api_version}",\
+	org.jdrupes.httpcodec.protocols.http.server;version="${api_version}",\
+	org.jdrupes.httpcodec.protocols.websocket;version="${api_version}",\
+	org.jdrupes.httpcodec.types;version="${api_version}",\
+	org.jdrupes.httpcodec.util;version="${api_version}"
 
 -includeresource: resources
 

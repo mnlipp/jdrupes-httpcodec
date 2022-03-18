@@ -216,5 +216,4 @@
  * 
  * @enduml
  */
-@org.osgi.annotation.versioning.Version("${api_version}")
 package org.jdrupes.httpcodec;
