@@ -36,6 +36,9 @@ import org.jdrupes.httpcodec.types.StringList;
 /**
  * Represents an HTTP message header (either request or response).
  * 
+ * The main addition to the base classe {@link MessageHeader} is
+ * the handling of header fields.
+ * 
  * ![Classes](header.svg)
  * 
  * @startuml header.svg
@@ -63,7 +66,7 @@ import org.jdrupes.httpcodec.types.StringList;
  * 	+T value()
  * }
  * 
- * class HttpMessageHeader *-right- HttpField
+ * HttpMessageHeader *-right- HttpField
  * 
  * @enduml
  */

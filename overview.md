@@ -1,8 +1,5 @@
 HTTP codecs for non-blocking I/O.
 
-JDrupes HTTP Codecs
-===================
-
 [TOC formatted]
 
 The HTTP codecs are modeled after the Java 
@@ -24,7 +21,7 @@ Decoders
 
 Decoders realize the {@link org.jdrupes.httpcodec.Decoder} interface.
 
-![Decoder diagram](decoder.svg)
+![Decoder diagram](org/jdrupes/httpcodec/decoder.svg)
 
 Binary data received from the network stream is passed to the  
 {@link org.jdrupes.httpcodec.Decoder#decode} method in 
@@ -32,9 +29,9 @@ a {@link java.nio.ByteBuffer}. The method consumes as much data
 as possible from the buffer and returns the result of the decoding 
 process.
 
-![Decoder result](decoder-result.svg)
+![Decoder result](org/jdrupes/httpcodec/decoder-result.svg)
 
-<img align="right" src="handle-decode-result.svg">
+<img align="right" src="org/jdrupes/httpcodec/handle-decode-result.svg" />
 
 The basic information provided by the decoding process (defined in 
 {@link org.jdrupes.httpcodec.Codec.Result}) is
@@ -68,7 +65,7 @@ Encoders
 
 Encoders realize the {@link org.jdrupes.httpcodec.Encoder} interface.
 
-![Decoder diagram](encoder.svg)
+![Decoder diagram](org/jdrupes/httpcodec/encoder.svg)
 
 Encoding is started with a call to 
 {@link org.jdrupes.httpcodec.Encoder#encode(MessageHeader)}. Subsequent
@@ -111,7 +108,7 @@ the result of the `decode` method  includes a response,
 it's also of type {@link org.jdrupes.httpcodec.protocols.http.HttpMessageHeader}
 (type parameter `R`).  
 
-![HTTP Decoder](http-decoder.svg)
+![HTTP Decoder](org/jdrupes/httpcodec/http-decoder.svg)
 
 In addition, it is possible to specify a maximum header length to
 prevent a malicious request from filling all your memory. And you can
@@ -122,7 +119,7 @@ will be closed at the other end after sending a final response.
 
 The HTTP encoder is derived in a similar way.
 
-![HTTP Decoder](http-encoder.svg)
+![HTTP Decoder](org/jdrupes/httpcodec/http-encoder.svg)
 
 See the {@linkplain org.jdrupes.httpcodec.protocols.http.HttpEncoder#pendingLimit 
 method description} for the meaning of "pending limit". 
@@ -131,7 +128,7 @@ As you can see, we still haven't reached the goal yet to get concrete
 HTTP codecs. This is because there is a difference between HTTP request
 messages and HTTP response messages.
 
-![HTTP request and response messages](http-messages.svg)
+![HTTP request and response messages](org/jdrupes/httpcodec/http-messages.svg)
 
 Now we have all the pieces together. In order to write an HTTP server
 you need an `HttpDecoder` parameterized with `HttpRequest` as type of the 
@@ -184,7 +181,7 @@ The {@link org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder}
 returns an extended result type that implements the
 {@link org.jdrupes.httpcodec.Codec.ProtocolSwitchResult} interface.
 
-![ProtocolSwitchResult](responseencoderresult.svg)
+![ProtocolSwitchResult](org/jdrupes/httpcodec/responseencoderresult.svg)
 
 When the encoder finishes the encoding of an upgrade confirmation,
 {@link org.jdrupes.httpcodec.Codec.ProtocolSwitchResult#newProtocol}
@@ -222,200 +219,3 @@ an idea how to integrate the HTTP codecs in your streaming environment.
 An example of integrating this library in an event driven framework
 can be found in the [JGrapes project](http://mnlipp.github.io/jgrapes/).
 
-
-@startuml decoder.svg
-' ========== Decoder Hierarchy =========
-interface Decoder<T extends MessageHeader, R extends MessageHeader> {
-    Result<R> decode(ByteBuffer in, Buffer out, boolean endOfInput)
-    Optional<T> header()
-}
-interface Codec {
-}
-Codec <|-- Decoder
-@enduml
-
-@startuml decoder-result.svg
-' ========== Result Hierarchy =========
-class Codec::Result {
-    +isOverflow(): boolean
-    +isUnderflow(): boolean
-    +closeConnection(): boolean
-}
-
-class Decoder::Result<R extends MessageHeader> {
-    +isHeaderCompleted() : boolean
-    +response() : Optional<R>
-    +boolean isResponseOnly()
-}
-
-Codec::Result <|-- Decoder::Result
-@enduml
-
-@startuml encoder.svg
-' ========== Encoder Hierarchy =========
-interface Encoder {
-    void encode(T messageHeader)
-    Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
-    Result encode(ByteBuffer out)
-}
-interface Codec {
-}
-Codec <|-- Encoder
-@enduml
-
-@startuml receive-loop.svg
-' ========== Receive loop =========
-skinparam conditionStyle diamond
-title Receive Loop
-start
-while ( ) is ([connection open])
-  :Receive data;
-  while ( ) is ([data in receive buffer\n && connection open])
-    :Invoke decode;
-    :Handle decoder result;
-  endwhile ([else])
-endwhile ([else])
-end
-@enduml
-
-@startuml handle-decode-result.svg
-' ========== Receive loop =========
-skinparam conditionStyle diamond
-title Handle Decoder Result
-
-start
-if () then ([result has message])
-  :Send protocol level
-  response contained 
-  in result;
-else ([else])
-endif
-if () then ([close connection])
-  :Close connection;
-else ([else])
-endif
-if () then ([!response only
-&& header complete])
-  :Handle message;
-  note
-  Includes decoding 
-  any body data
-  remaining in 
-  received chunk
-  end note
-  :Send response 
-  created while 
-  handling message;
-  end
-else ([else])
-  end
-endif
-
-@enduml
-
-
-@startuml http-decoder.svg
-' ========== HTTP decoder =========
-interface Codec {
-}
-
-abstract class HttpCodec<T> {
-}
-
-interface Decoder<T, R> {
-}
-
-abstract class HttpDecoder<T extends HttpMessageHeader, R extends HttpMessageHeader> {
-    +HttpDecoder()
-    +Decoder.Result<R> decode(ByteBuffer in, Buffer out, boolean endOfInput)
-    +Optional<T> header()
-    +void setMaxHeaderLength(long maxHeaderLength)
-    +long maxHeaderLength()
-    +boolean isClosed()
-}
-
-Codec <|.. HttpCodec
-
-Codec <|-- Decoder
-
-HttpCodec <|-- HttpDecoder
-
-Decoder <|.. HttpDecoder
-@enduml
-
-
-@startuml http-encoder.svg
-' ========== HTTP encoder =========
-interface Codec {
-}
-
-abstract class HttpCodec<T> {
-}
-
-interface Encoder<T> {
-}
-
-abstract class HttpEncoder<T extends HttpMessageHeader> {
-    +HttpEncoder()
-    +void encode(T messageHeader)
-    +Encoder.Result encode(Buffer in, ByteBuffer out, boolean endOfInput)
-    +int pendingLimit()
-    +void setPendingLimit(int pendingLimit)
-    +boolean isClosed()
-}
-
-Codec <|.. HttpCodec
-
-Codec <|-- Encoder
-
-HttpCodec <|-- HttpEncoder
-
-Encoder <|.. HttpEncoder
-@enduml
-
-
-@startuml http-messages.svg
-' ========== HTTP messages =========
-
-abstract class HttpMessageHeader {
-}
-
-interface MessageHeader {
-}
-
-class HttpRequest {
-}
-
-class HttpResponse {
-}
-
-class HttpField {
-}
-
-HttpMessageHeader <|-- HttpResponse
-
-HttpMessageHeader <|-- HttpRequest
-
-HttpMessageHeader *-right- "*" HttpField 
-
-MessageHeader <|.. HttpMessageHeader
-
-@enduml
-
-@startuml responseencoderresult.svg
-
-class HttpResponseEncoder::Result
-
-class HttpEncoder::Result
-
-interface Codec::ProtocolSwitchResult {
-    newProtocol() : String
-    newEncoder() : Encoder<?>        
-    newDecoder() : Decoder<?, ?>
-}
-
-HttpEncoder::Result <|-- HttpResponseEncoder::Result
-
-Codec::ProtocolSwitchResult <|.. HttpResponseEncoder::Result
-
-@enduml

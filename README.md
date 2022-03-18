@@ -24,7 +24,7 @@ An implementation that comes very close to what I needed is
 [HTTP Kit](https://github.com/http-kit/http-kit), which has, however,
 dependencies on Clojure, which prohibit its usage for my purpose.
 
-This library requires Java 8 SE and has also been tested with Java 9 SE.
+This library requires Java 11 SE and has also been tested with Java 17 SE.
 Binaries are currently made available at maven central.
 
 ```gradle

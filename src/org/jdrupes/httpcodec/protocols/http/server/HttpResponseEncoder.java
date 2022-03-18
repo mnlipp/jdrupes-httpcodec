@@ -40,7 +40,7 @@ import org.jdrupes.httpcodec.types.CacheControlDirectives;
 import org.jdrupes.httpcodec.types.Converters;
 
 /**
- * An encoder for HTTP responses that accepts a header and optional
+ * An encoder for HTTP responses. It accepts a header and optional
  * payload data end encodes it into a sequence of
  * {@link Buffer}s.
  * 

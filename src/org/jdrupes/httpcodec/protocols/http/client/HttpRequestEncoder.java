@@ -36,9 +36,8 @@ import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.StringList;
 
 /**
- * An encoder for HTTP requests that accepts a header and optional
- * payload data end encodes it into a sequence of
- * {@link Buffer}s.
+ * An encoder for HTTP requests. It accepts a header and optional
+ * payload data and encodes it into a sequence of {@link Buffer}s.
  * 
  * ![HttpRequestEncoder](httprequestencoder.svg)
  * 

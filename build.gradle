@@ -5,7 +5,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:6.1.0'
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:6.2.0'
     }
 }
 
@@ -68,8 +68,8 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 String bundleVersion = releaseVersion +
@@ -87,14 +87,59 @@ if (project.hasProperty('ignoreBaselineFailures')) {
 	}
 }
 
+configurations {
+    markdownDoclet
+    javadocTaglets
+}
+ 
 dependencies {
-	javadocTaglets "org.jdrupes.taglets:plantuml-taglet:1.0.3"
-	// javadocTaglets 'com.github.mnlipp:jdrupes-taglets:1.0.2'
+    markdownDoclet "org.jdrupes.mdoclet:doclet:2.1.0"
+    javadocTaglets "org.jdrupes.taglets:plantuml-taglet:2.0.1"
+}
+
+task java11doc(type: JavaExec) {
+    enabled = JavaVersion.current() == JavaVersion.VERSION_15 && !isJitPackBuild
+    
+    dependsOn classes
+    inputs.file "overview.md"
+    inputs.dir "src"
+
+    jvmArgs = ['--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED']
+    classpath sourceSets.main.compileClasspath
+    classpath files(tasks.jar)
+    
+    var destinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
+    outputs.dir(destinationDir)
+    
+    main = 'jdk.javadoc.internal.tool.Main'
+    args = ['-doctitle', "JDrupes HTTP Codecs ${project.version}",
+        '-use',
+        '-linksource',
+        '-link', 'https://docs.oracle.com/en/java/javase/11/docs/api/',
+        '--add-exports', 'jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED',
+        '-doclet', 'org.jdrupes.mdoclet.MDoclet',
+        '-docletpath', configurations.markdownDoclet.files.asType(List).join(":"),
+        '--disable-auto-highlight',
+        '-tagletpath', configurations.javadocTaglets.files.asType(List).join(":"),
+        '-taglet', 'org.jdrupes.taglets.plantUml.PlantUml',
+        '-taglet', 'org.jdrupes.taglets.plantUml.StartUml',
+        '-taglet', 'org.jdrupes.taglets.plantUml.EndUml',
+        '-overview', 'overview.md',
+        '-d', destinationDir,
+        '-sourcepath', 'src/',
+        '-subpackages', 'org.jdrupes.httpcodec',
+        '-bottom', file("misc/javadoc.bottom.txt").text,
+        '--allow-script-in-comments',
+        '-Xdoclint:-html',
+        '--add-exports=jdk.javadoc/jdk.javadoc.internal.doclets.formats.html=ALL-UNNAMED'
+        ]
+    
+    ignoreExitValue true
 }
 
 javadoc {
     // Does not work on JitPack, no /usr/bin/dot
-    enabled = JavaVersion.current().isJava8() && !isJitPackBuild    
+    enabled = JavaVersion.current() == JavaVersion.VERSION_15 && !isJitPackBuild    
 
     options.tagletPath = configurations.javadocTaglets.files as List
     options.taglets = ["org.jdrupes.taglets.plantUml.Taglet"]

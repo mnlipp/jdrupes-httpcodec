@@ -38,9 +38,9 @@ import org.jdrupes.httpcodec.types.Converters;
 /**
  * A protocol provider for the WebSocket protocol.
  * 
+ * The web socket protocol is an upgrade from the HTTP protocol.
+ * 
  * ![WsProtocolProvider](WsProtocolProvider.svg)
- * 
- * 
  * 
  * @startuml WsProtocolProvider.svg
  * 

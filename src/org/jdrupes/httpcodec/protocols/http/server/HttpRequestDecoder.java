@@ -38,7 +38,7 @@ import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.StringList;
 
 /**
- * A decoder for HTTP requests that accepts data from a sequence of
+ * A decoder for HTTP requests. It accepts data from a sequence of
  * {@link ByteBuffer}s and decodes them into {@link HttpRequest}s
  * and their (optional) payload.
  * 
