@@ -97,6 +97,8 @@ dependencies {
     javadocTaglets "org.jdrupes.taglets:plantuml-taglet:2.0.1"
 }
 
+ext.javadocDestinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
+
 task java11doc(type: JavaExec) {
     enabled = JavaVersion.current() == JavaVersion.VERSION_15 && !isJitPackBuild
     
@@ -108,8 +110,7 @@ task java11doc(type: JavaExec) {
     classpath sourceSets.main.compileClasspath
     classpath files(tasks.jar)
     
-    var destinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
-    outputs.dir(destinationDir)
+    outputs.dir(javadocDestinationDir)
     
     main = 'jdk.javadoc.internal.tool.Main'
     args = ['-doctitle', "JDrupes HTTP Codecs ${project.version}",
@@ -125,7 +126,7 @@ task java11doc(type: JavaExec) {
         '-taglet', 'org.jdrupes.taglets.plantUml.StartUml',
         '-taglet', 'org.jdrupes.taglets.plantUml.EndUml',
         '-overview', 'overview.md',
-        '-d', destinationDir,
+        '-d', javadocDestinationDir,
         '-sourcepath', 'src/',
         '-subpackages', 'org.jdrupes.httpcodec',
         '-bottom', file("misc/javadoc.bottom.txt").text,
@@ -137,32 +138,14 @@ task java11doc(type: JavaExec) {
     ignoreExitValue true
 }
 
-javadoc {
-    // Does not work on JitPack, no /usr/bin/dot
-    enabled = JavaVersion.current() == JavaVersion.VERSION_15 && !isJitPackBuild    
-
-    options.tagletPath = configurations.javadocTaglets.files as List
-    options.taglets = ["org.jdrupes.taglets.plantUml.Taglet"]
-
-    classpath = project.sourceSets.main.compileClasspath
-    source = sourceSets.main.allJava
-	options.addStringOption("overview", "overview.md")
-	inputs.file "overview.md"
-	options.addBooleanOption("linksource", true)
-	options.stylesheetFile(file("stylesheet.css"))
-    options.addStringOption("bottom", file("misc/javadoc.bottom.txt").text)
-    options.addStringOption("link", "http://docs.oracle.com/javase/8/docs/api/")
-    destinationDir = file("../org.jdrupes.httpcodec.gh-pages/javadoc")
-}
-
 task sourcesJar(type: Jar) {
 	from sourceSets.main.allJava
 	classifier "sources"
 }
 
 task javadocJar(type: Jar) {
-	dependsOn "javadoc"
-	from javadoc.destinationDir
+	dependsOn "java11doc"
+	from project.javadocDestinationDir
 	classifier "javadoc"
 }
 
