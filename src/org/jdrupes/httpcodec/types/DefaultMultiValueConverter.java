@@ -21,7 +21,6 @@ package org.jdrupes.httpcodec.types;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -75,7 +74,8 @@ public class DefaultMultiValueConverter<T extends Iterable<V>, V>
 	 * @param valueConverter the converter for the items
 	 * @param delimiters the delimiters
 	 */
-	public DefaultMultiValueConverter(Supplier<T> containerSupplier, 
+	@SuppressWarnings("unchecked")
+    public DefaultMultiValueConverter(Supplier<T> containerSupplier, 
 			Converter<V> valueConverter, String delimiters) {
 		this(containerSupplier, 
 				(left, right) -> { ((Collection<V>)left).add(right); },
@@ -90,9 +90,10 @@ public class DefaultMultiValueConverter<T extends Iterable<V>, V>
 	 * @param itemConverter the converter for the items
 	 * @see "[ABNF List Extension](https://tools.ietf.org/html/rfc7230#section-7)"
 	 */
-	public DefaultMultiValueConverter(
+	@SuppressWarnings("unchecked")
+    public DefaultMultiValueConverter(
 			Supplier<T> containerSupplier, Converter<V> itemConverter) {
-		this(containerSupplier, (left, right) -> { ((List<V>)left).add(right); },
+		this(containerSupplier, (left, right) -> { ((Collection<V>)left).add(right); },
 				itemConverter, ",", false);
 	}
 

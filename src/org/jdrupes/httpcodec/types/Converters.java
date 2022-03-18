@@ -321,9 +321,8 @@ public final class Converters {
 	 */
 	public static final MultiValueConverter<CacheControlDirectives, Directive>
 		CACHE_CONTROL_LIST = new DefaultMultiValueConverter
-			<CacheControlDirectives, Directive>(
-					CacheControlDirectives::new, DIRECTIVE);
-	
+			<CacheControlDirectives, Directive>(CacheControlDirectives::new,
+			    (left, right) -> { left.add(right); }, DIRECTIVE, ",", false);
 	/**
 	 * A converter for a URI.
 	 */

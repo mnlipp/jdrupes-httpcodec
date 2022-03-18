@@ -29,15 +29,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpMessageHeader;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
+import org.jdrupes.httpcodec.types.CacheControlDirectives;
 import org.jdrupes.httpcodec.types.CommentedValue;
 import org.jdrupes.httpcodec.types.Converter;
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.Directive;
 import org.jdrupes.httpcodec.types.Etag;
 import org.jdrupes.httpcodec.types.MediaType;
 import org.jdrupes.httpcodec.types.MultiValueConverter;
@@ -269,16 +268,17 @@ public class FieldParsingTests {
 	public void testCacheControl() throws ParseException, URISyntaxException {
 		HttpMessageHeader hdr = new HttpRequest("GET", new URI("/"),
 		        HttpProtocol.HTTP_1_1, false);
-		hdr.setField(new HttpField<List<Directive>>(
+		hdr.setField(new HttpField<CacheControlDirectives>(
 				"Cache-Control: private, community=\"UCI\"", 
-				Converters.DIRECTIVE_LIST));
-		HttpField<List<Directive>> field = hdr.findField(
-				HttpField.CACHE_CONTROL, Converters.DIRECTIVE_LIST).get();
-		assertEquals("private", field.value().get(0).name());
-		assertFalse(field.value().get(0).value().isPresent());
-		assertEquals("community", field.value().get(1).name());
-		assertTrue(field.value().get(1).value().isPresent());
-		assertEquals("UCI", field.value().get(1).value().get());
+				Converters.CACHE_CONTROL_LIST));
+		HttpField<CacheControlDirectives> field = hdr.findField(
+				HttpField.CACHE_CONTROL, Converters.CACHE_CONTROL_LIST).get();
+		assertEquals(2, field.value().size());
+		assertTrue(field.value().stream()
+		    .anyMatch(d -> "private".equals(d.name())));
+        assertTrue(field.value().stream()
+            .anyMatch(d -> "community".equals(d.name())));
+        assertEquals("UCI", field.value().valueForName("community").get());
 		
 		assertEquals("Cache-Control: private, community=UCI", 
 				field.asHeaderField());

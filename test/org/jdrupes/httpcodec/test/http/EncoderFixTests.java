@@ -21,18 +21,15 @@ package org.jdrupes.httpcodec.test.http;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpStatus;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
 import org.jdrupes.httpcodec.protocols.http.server.HttpResponseEncoder;
+import org.jdrupes.httpcodec.types.CacheControlDirectives;
 import org.jdrupes.httpcodec.types.Converters;
 import org.jdrupes.httpcodec.types.Directive;
-
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -48,7 +45,7 @@ public class EncoderFixTests {
 		// Prepare response
 		HttpResponse response = new HttpResponse(HttpProtocol.HTTP_1_0,
 		        HttpStatus.OK, false);
-		List<Directive> directives = new ArrayList<>();
+		CacheControlDirectives directives = new CacheControlDirectives();
 		directives.add(new Directive("max-age", 100));
 		response.setField(HttpField.CACHE_CONTROL, directives);
 		

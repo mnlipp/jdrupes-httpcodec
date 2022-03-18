@@ -23,25 +23,21 @@ import java.io.Writer;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
-
 import org.jdrupes.httpcodec.Codec;
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.plugin.UpgradeProvider;
-
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-
 import org.jdrupes.httpcodec.protocols.http.HttpConstants.HttpProtocol;
 import org.jdrupes.httpcodec.protocols.http.HttpEncoder;
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.protocols.http.HttpRequest;
 import org.jdrupes.httpcodec.protocols.http.HttpResponse;
+import org.jdrupes.httpcodec.types.CacheControlDirectives;
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.Directive;
 
 /**
  * An encoder for HTTP responses that accepts a header and optional
@@ -121,8 +117,9 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse, HttpRequest>
 		// ensure backward compatibility
 		if (messageHeader.protocol().compareTo(HttpProtocol.HTTP_1_1) < 0) {
 			// Create Expires
-			Optional<HttpField<List<Directive>>> cacheCtrl = messageHeader
-					.findField(HttpField.CACHE_CONTROL, Converters.DIRECTIVE_LIST);
+			Optional<HttpField<CacheControlDirectives>> cacheCtrl 
+			    = messageHeader.findField(HttpField.CACHE_CONTROL, 
+					    Converters.CACHE_CONTROL_LIST);
 			if (cacheCtrl.isPresent() 
 					&& !messageHeader.fields().containsKey(HttpField.EXPIRES)) {
 				Optional<Long> maxAge = cacheCtrl.get().value().stream()
