@@ -21,7 +21,9 @@ package org.jdrupes.httpcodec.protocols.http.client;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.Buffer;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
@@ -52,98 +54,129 @@ import org.jdrupes.httpcodec.types.StringList;
  * HttpEncoder <|-- HttpRequestEncoder : <<bind>> <T -> HttpRequest>
  *
  */
-public class HttpRequestEncoder 
-	extends HttpEncoder<HttpRequest, HttpResponse> {
+public class HttpRequestEncoder
+        extends HttpEncoder<HttpRequest, HttpResponse> {
 
-	private static Result.Factory resultFactory = new Result.Factory() {
-	};
-	
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.Encoder#encoding()
-	 */
-	@Override
-	public Class<HttpRequest> encoding() {
-		return HttpRequest.class;
-	}
+    private static Result.Factory resultFactory = new Result.Factory() {
+    };
 
-	/* (non-Javadoc)
-	 * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
-	 */
-	@Override
-	protected Result.Factory resultFactory() {
-		return resultFactory;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jdrupes.httpcodec.Encoder#encoding()
+     */
+    @Override
+    public Class<HttpRequest> encoding() {
+        return HttpRequest.class;
+    }
 
-	/* (non-Javadoc)
-	 * @see HttpEncoder#encode(HttpMessageHeader)
-	 */
-	@Override
-	public void encode(HttpRequest messageHeader) {
-		if (messageHeader.protocol().equals(HttpProtocol.HTTP_1_1)) {
-			// Make sure we have a Host field, RFC 7230 5.4
-			if (!messageHeader.findStringValue(HttpField.HOST).isPresent()) {
-				URI reqUri = messageHeader.requestUri();
-				messageHeader.setField(HttpField.HOST, reqUri.getHost()
-						+ (reqUri.getPort() < 0 ? "" 
-								: (":" + reqUri.getPort())));
-			}
-		}
-		messageHeader.findField(HttpField.UPGRADE, Converters.STRING_LIST)
-			.ifPresent(field -> prepareUpgrade(field, messageHeader));
-		super.encode(messageHeader);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jdrupes.httpcodec.protocols.http.HttpEncoder#resultFactory()
+     */
+    @Override
+    protected Result.Factory resultFactory() {
+        return resultFactory;
+    }
 
-	private void prepareUpgrade(
-			HttpField<StringList> field, HttpRequest request) {
-		if (field.value().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Upgrade header field must have a value.");
-		}
-		String protocol = field.value().get(0);
-		// Load every time to support dynamic deployment of additional
-		// services in an OSGi environment.
-		Optional<UpgradeProvider> protocolPlugin = StreamSupport.stream(
-				ServiceLoader.load(UpgradeProvider.class).spliterator(), false)
-				.filter(p -> p.supportsProtocol(protocol))
-				.findFirst();
-		if (!protocolPlugin.isPresent()) {
-			// Not supported, maybe transparent to HTTP 
-			return;
-		}
-		protocolPlugin.get().augmentInitialRequest(request);
-	}
-	
-	/* (non-Javadoc)
-	 * @see Encoder#startMessage(MessageHeader, java.io.Writer)
-	 */
-	@Override
-	protected void startMessage(HttpRequest messageHeader, Writer writer)
-	        throws IOException {
-		writer.write(messageHeader.method());
-		writer.write(" ");
-		writer.write(messageHeader.requestUri().toString());
-		writer.write(" ");
-		writer.write(messageHeader.protocol().toString());
-		writer.write("\r\n");
-	}
-	
-	/**
-	 * Results from {@link HttpRequestEncoder} add no additional
-	 * information to 
-	 * {@link org.jdrupes.httpcodec.protocols.http.HttpEncoder.Result}. This
-	 * class just provides a factory for creating concrete results.
-	 */
-	public static class Result extends HttpEncoder.Result {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see HttpEncoder#encode(HttpMessageHeader)
+     */
+    @Override
+    public void encode(HttpRequest messageHeader) {
+        if (messageHeader.protocol().equals(HttpProtocol.HTTP_1_1)) {
+            // Make sure we have a Host field, RFC 7230 5.4
+            if (!messageHeader.findStringValue(HttpField.HOST).isPresent()) {
+                messageHeader.setField(HttpField.HOST, messageHeader.host()
+                    + (messageHeader.port() < 0 ? ""
+                        : (":" + messageHeader.port())));
+            }
+        }
+        messageHeader.findField(HttpField.UPGRADE, Converters.STRING_LIST)
+            .ifPresent(field -> prepareUpgrade(field, messageHeader));
+        super.encode(messageHeader);
+    }
 
-		protected Result(boolean overflow, boolean underflow,
-		        boolean closeConnection) {
-			super(overflow, underflow, closeConnection);
-		}
-	
-		/**
-		 * A concrete factory for creating new Results.
-		 */
-		protected static class Factory extends HttpEncoder.Result.Factory {
-		}		
-	}
+    private void prepareUpgrade(
+            HttpField<StringList> field, HttpRequest request) {
+        if (field.value().isEmpty()) {
+            throw new IllegalArgumentException(
+                "Upgrade header field must have a value.");
+        }
+        String protocol = field.value().get(0);
+        // Load every time to support dynamic deployment of additional
+        // services in an OSGi environment.
+        Optional<UpgradeProvider> protocolPlugin = StreamSupport.stream(
+            ServiceLoader.load(UpgradeProvider.class).spliterator(), false)
+            .filter(p -> p.supportsProtocol(protocol))
+            .findFirst();
+        if (!protocolPlugin.isPresent()) {
+            // Not supported, maybe transparent to HTTP
+            return;
+        }
+        protocolPlugin.get().augmentInitialRequest(request);
+    }
+
+    /**
+     * Writes the 
+     * [request line](https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.1).
+     */
+    @Override
+    protected void startMessage(HttpRequest messageHeader, Writer writer)
+            throws IOException {
+        writer.write(messageHeader.method());
+        writer.write(" ");
+        URI req = messageHeader.requestUri();
+        Optional<String> hostHdr
+            = messageHeader.findStringValue(HttpField.HOST);
+        // https://datatracker.ietf.org/doc/html/rfc7230#section-5.3.1
+        if (hostHdr.isPresent() && Objects.equals(hostHdr.get(),
+            Optional.ofNullable(req.getHost()).orElse("")
+                + ((req.getPort() < 0) ? "" : (":" + req.getPort())))
+            && req.getUserInfo() == null) {
+            try {
+                req = new URI(null, null, null, -1,
+                    req.getPath().isEmpty() ? "/" : req.getPath(),
+                    req.getQuery(), null);
+            } catch (URISyntaxException e) {
+                // Shouldn't happen, well in case it does, use original.
+            }
+        } else if (req.getFragment() != null) {
+            // https://datatracker.ietf.org/doc/html/rfc7230#section-5.1
+            try {
+                req = new URI(req.getScheme(), req.getUserInfo(),
+                    req.getHost(), req.getPort(), req.getPath(),
+                    req.getQuery(), null);
+            } catch (URISyntaxException e) {
+                // Shouldn't happen, well in case it does, use original.
+            }
+        }
+        writer.write(req.toString());
+        writer.write(" ");
+        writer.write(messageHeader.protocol().toString());
+        writer.write("\r\n");
+    }
+
+    /**
+     * Results from {@link HttpRequestEncoder} add no additional
+     * information to 
+     * {@link org.jdrupes.httpcodec.protocols.http.HttpEncoder.Result}. This
+     * class just provides a factory for creating concrete results.
+     */
+    public static class Result extends HttpEncoder.Result {
+
+        protected Result(boolean overflow, boolean underflow,
+                boolean closeConnection) {
+            super(overflow, underflow, closeConnection);
+        }
+
+        /**
+         * A concrete factory for creating new Results.
+         */
+        protected static class Factory extends HttpEncoder.Result.Factory {
+        }
+    }
 }
