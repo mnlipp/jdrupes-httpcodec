@@ -37,7 +37,7 @@ import org.jdrupes.httpcodec.types.MultiValueConverter;
  * 
  * @param <T> the type of the header field's value 
  * 
- * @see "[MessageHeaders](https://www.iana.org/assignments/message-headers/message-headers.xhtml)"
+ * @see "[Message Headers](https://www.iana.org/assignments/message-headers/message-headers.xhtml)"
  */
 public class HttpField<T> {
 
