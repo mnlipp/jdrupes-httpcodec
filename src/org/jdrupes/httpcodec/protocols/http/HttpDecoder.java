@@ -27,7 +27,6 @@ import java.nio.charset.CoderResult;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.function.BiConsumer;
 
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
@@ -504,20 +503,31 @@ public abstract class HttpDecoder<T extends HttpMessageHeader,
     private void addHeaderField(T header, HttpField<?> field)
             throws HttpProtocolException, ParseException {
         // RFC 7230 3.2.2
-        HttpField<?> existing = header.fields().get(field.name());
-        if (existing != null) {
-            if (!(existing.converter() instanceof MultiValueConverter)
-                || !existing.converter().equals(field.converter())) {
+        var exists = header.findField(field.name(),
+            HttpField.lookupConverter(field.name()));
+        if (exists.isPresent()) {
+            var existing = exists.get();
+            // Duplicate field name is only allowed for value lists
+            if (!(existing.converter() instanceof MultiValueConverter)) {
                 throw new HttpProtocolException(protocolVersion,
                     HttpStatus.BAD_REQUEST.statusCode(),
-                    "Multiple occurences of field " + field.name());
+                    "Multiple occurences of single value field "
+                        + field.name());
             }
             @SuppressWarnings("unchecked")
-            BiConsumer<Iterable<Object>, Object> adder
-                = ((MultiValueConverter<Iterable<Object>, Object>) existing
-                    .converter()).valueAdder();
+            var converter = (MultiValueConverter<Iterable<Object>,
+                    Object>) existing.converter();
+            HttpField<?> srcField = field;
+            if (field.converter().equals(Converters.STRING)) {
+                // Still default (String), use real converter (same as existing)
+                var converted = new HttpField<>(field.name(),
+                    converter.fromFieldValue((String) field.asFieldValue()),
+                    converter);
+                srcField = converted;
+            }
+            var adder = converter.valueAdder();
             @SuppressWarnings("unchecked")
-            Iterable<Object> source = (Iterable<Object>) field.value();
+            Iterable<Object> source = (Iterable<Object>) srcField.value();
             @SuppressWarnings("unchecked")
             Iterable<Object> target = (Iterable<Object>) existing.value();
             source.forEach(item -> adder.accept(target, item));
