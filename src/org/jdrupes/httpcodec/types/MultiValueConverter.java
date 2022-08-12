@@ -54,8 +54,19 @@ public interface MultiValueConverter<T extends Iterable<V>, V>
      * Returns the value converter.
      * 
      * @return the value converter
+     * @deprecated Use {@link #valueConverter(Iterable)} instead. 
      */
+    @Deprecated
     Converter<V> valueConverter();
+
+    /**
+     * Returns the value converter. In most cases, the result will be
+     * independent of the container type or instance. However, passing
+     * it makes the selection more flexible.
+     * 
+     * @return the value converter
+     */
+    Converter<V> valueConverter(T value);
 
     /**
      * Return whether values should be converted to separate
@@ -82,8 +93,9 @@ public interface MultiValueConverter<T extends Iterable<V>, V>
             return fieldName + ": " + asFieldValue(value);
         }
         // Convert list of items to separate fields
+        var valueConverter = valueConverter(value);
         return StreamSupport.stream(value.spliterator(), false).map(
-            item -> fieldName + ": " + valueConverter().asFieldValue(item))
+            item -> fieldName + ": " + valueConverter.asFieldValue(item))
             .collect(Collectors.joining("\r\n"));
 
     }

@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
@@ -234,15 +232,9 @@ public final class Converters {
             }
 
             @Override
-            public String asHeaderField(String fieldName, CookieList value) {
-                SetCookieStringConverter cookieConverter
-                    = Converters.SET_COOKIE_STRING
-                        .get(value.sameSiteAttribute());
-                // Convert list of items to separate fields
-                return StreamSupport.stream(value.spliterator(), false).map(
-                    item -> fieldName + ": "
-                        + cookieConverter.asFieldValue(item))
-                    .collect(Collectors.joining("\r\n"));
+            public Converter<HttpCookie> valueConverter(CookieList value) {
+                return Converters.SET_COOKIE_STRING
+                    .get(value.sameSiteAttribute());
             }
         };
 

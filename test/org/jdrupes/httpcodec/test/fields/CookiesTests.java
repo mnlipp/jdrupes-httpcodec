@@ -23,6 +23,7 @@ import java.text.ParseException;
 
 import org.jdrupes.httpcodec.protocols.http.HttpField;
 import org.jdrupes.httpcodec.types.Converters;
+import org.jdrupes.httpcodec.types.Converters.SameSiteAttribute;
 import org.jdrupes.httpcodec.types.CookieList;
 
 import static org.junit.Assert.*;
@@ -121,11 +122,32 @@ public class CookiesTests {
     @Test
     public void testSameSite() {
         HttpCookie cookie = new HttpCookie("Test", "it");
-        var cookies
-            = new CookieList(Converters.SameSiteAttribute.LAX).add(cookie);
+
+        // Test not used
+        var cookies = new CookieList().add(cookie);
         var setField = new HttpField<>(HttpField.SET_COOKIE, cookies,
             Converters.SET_COOKIE);
+        assertEquals("Set-Cookie: Test=it", setField.asHeaderField());
+
+        // Test None
+        cookies = new CookieList(SameSiteAttribute.NONE).add(cookie);
+        setField = new HttpField<>(HttpField.SET_COOKIE, cookies,
+            Converters.SET_COOKIE);
+        assertEquals("Set-Cookie: Test=it; SameSite=None",
+            setField.asHeaderField());
+
+        // Test Lax
+        cookies = new CookieList(SameSiteAttribute.LAX).add(cookie);
+        setField = new HttpField<>(HttpField.SET_COOKIE, cookies,
+            Converters.SET_COOKIE);
         assertEquals("Set-Cookie: Test=it; SameSite=Lax",
+            setField.asHeaderField());
+
+        // Test Strict
+        cookies = new CookieList(SameSiteAttribute.STRICT).add(cookie);
+        setField = new HttpField<>(HttpField.SET_COOKIE, cookies,
+            Converters.SET_COOKIE);
+        assertEquals("Set-Cookie: Test=it; SameSite=Strict",
             setField.asHeaderField());
     }
 }

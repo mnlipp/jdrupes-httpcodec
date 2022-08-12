@@ -199,7 +199,7 @@ public class FieldParsingTests {
         Converter<ParameterizedValue<Locale>> itemConverter
             = ((MultiValueConverter<List<ParameterizedValue<Locale>>,
                     ParameterizedValue<Locale>>) field.converter())
-                        .valueConverter();
+                        .valueConverter(field.value());
         Iterator<ParameterizedValue<Locale>> itr = field.value().iterator();
         assertEquals("da", itemConverter.asFieldValue(itr.next()));
         assertEquals("en-GB; q=0.8",
