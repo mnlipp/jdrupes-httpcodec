@@ -43,763 +43,797 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  */
 public final class Converters {
 
-	/*
-	 * Note that the initialization sequence is important.
-	 * Converters used by others must be defined first.
-	 */
+    /*
+     * Note that the initialization sequence is important.
+     * Converters used by others must be defined first.
+     */
 
-	/**
-	 * A noop converter, except that text is trimmed when converted to
-	 * a value.
-	 */
-	public static final Converter<String> UNQUOTED_STRING 
-		= new Converter<String>() {
-	
-		@Override
-		public String asFieldValue(String value) {
-			return value;
-		}
-	
-		@Override
-		public String fromFieldValue(String text) throws ParseException {
-			return text.trim();
-		}
-	};
-	
-	/**
-	 * A noop converter, except that text is trimmed and unquoted
-	 * when converted to a value.
-	 */
-	public static final Converter<String> UNQUOTE_ONLY 
-		= new Converter<String>() {
-	
-		@Override
-		public String asFieldValue(String value) {
-			return value;
-		}
-	
-		@Override
-		public String fromFieldValue(String text) throws ParseException {
-			return unquoteString(text.trim());
-		}
-	};
-	
-	/**
-	 * A converter that quotes and unquoted strings as necessary.
-	 */
-	public static final Converter<String> STRING 
-		= new Converter<String>() {
-	
-		@Override
-		public String asFieldValue(String value) {
-			return quoteIfNecessary(value);
-		}
-	
-		@Override
-		public String fromFieldValue(String text) throws ParseException {
-			return unquoteString(text.trim());
-		}
-	};
-	
-	public static final Converter<StringList> STRING_LIST 
-		= new DefaultMultiValueConverter<>(StringList::new, STRING);
+    /**
+     * A noop converter, except that text is trimmed when converted to
+     * a value.
+     */
+    public static final Converter<
+            String> UNQUOTED_STRING = new Converter<String>() {
 
-	/**
-	 * A converter that quotes strings.
-	 */
-	public static final Converter<String> QUOTED_STRING 
-		= new Converter<String>() {
-	
-		@Override
-		public String asFieldValue(String value) {
-			return quoteString(value);
-		}
-	
-		@Override
-		public String fromFieldValue(String text) throws ParseException {
-			return unquoteString(text.trim());
-		}
-	};
-	
-	public static final Converter<StringList> QUOTED_STRING_LIST 
-		= new DefaultMultiValueConverter<>(StringList::new, QUOTED_STRING);
+                @Override
+                public String asFieldValue(String value) {
+                    return value;
+                }
 
-	/**
-	 * An integer converter.
-	 */
-	public static final Converter<Long> LONG = new Converter<Long>() {
+                @Override
+                public String fromFieldValue(String text)
+                        throws ParseException {
+                    return text.trim();
+                }
+            };
 
-		@Override
-		public String asFieldValue(Long value) {
-			return value.toString();
-		}
+    /**
+     * A noop converter, except that text is trimmed and unquoted
+     * when converted to a value.
+     */
+    public static final Converter<String> UNQUOTE_ONLY
+        = new Converter<String>() {
 
-		@Override
-		public Long fromFieldValue(String text) throws ParseException {
-			try {
-				return Long.parseLong(unquoteString(text));
-			} catch (NumberFormatException e) {
-				throw new ParseException(text, 0);
-			}
-		}
-	};
+            @Override
+            public String asFieldValue(String value) {
+                return value;
+            }
 
-	/**
-	 * An integer list converter.
-	 */
-	public static final MultiValueConverter<List<Long>, Long> LONG_LIST 
-		= new DefaultMultiValueConverter<>(ArrayList<Long>::new, LONG);
+            @Override
+            public String fromFieldValue(String text) throws ParseException {
+                return unquoteString(text.trim());
+            }
+        };
 
-	/**
-	 * A date/time converter.
-	 */
-	public static final Converter<Instant> DATE_TIME 
-		= new InstantConverter();
+    /**
+     * A converter that quotes and unquoted strings as necessary.
+     */
+    public static final Converter<String> STRING = new Converter<String>() {
 
-	/**
-	 * A converter for set cookies.
-	 */
-	public static final Converter<CookieList> SET_COOKIE 
-		= new DefaultMultiValueConverter<CookieList, HttpCookie>(
-				CookieList::new, CookieList::add, new Converter<HttpCookie>() {
-					
-					@Override
-					public String asFieldValue(HttpCookie value) {
-						StringBuilder result = new StringBuilder();
-						result.append(value.toString());
-						if (value.getMaxAge() > 0) {
-							result.append("; Max-Age=");
-							result.append(Long.toString(value.getMaxAge()));
-						}
-						if (value.getDomain() != null) {
-							result.append("; Domain=");
-							result.append(value.getDomain());
-						}
-						if (value.getPath() != null) {
-							result.append("; Path=");
-							result.append(value.getPath());
-						}
-						if (value.getSecure()) {
-							result.append("; Secure");
-						}
-						if (value.isHttpOnly()) {
-							result.append("; HttpOnly");
-						}
-						return result.toString();
-					}
+        @Override
+        public String asFieldValue(String value) {
+            return quoteIfNecessary(value);
+        }
 
-					@Override
-					public HttpCookie fromFieldValue(String text)
-							throws ParseException {
-						throw new UnsupportedOperationException();
-					}
-				}, ",", true) {
+        @Override
+        public String fromFieldValue(String text) throws ParseException {
+            return unquoteString(text.trim());
+        }
+    };
 
-		@Override
-		public CookieList fromFieldValue(String text)
-				throws ParseException {
-			try {
-				return new CookieList(HttpCookie.parse(text));
-			} catch (IllegalArgumentException e) {
-				throw new ParseException(text, 0);
-			}
-		}
+    public static final Converter<StringList> STRING_LIST
+        = new DefaultMultiValueConverter<>(StringList::new, STRING);
 
-		@Override
-		public String asFieldValue(CookieList value) {
-			throw new UnsupportedOperationException();
-		}
-	};
+    /**
+     * A converter that quotes strings.
+     */
+    public static final Converter<String> QUOTED_STRING
+        = new Converter<String>() {
 
-	/**
-	 * A converter for a list of cookies.
-	 */
-	public static final MultiValueConverter<CookieList, HttpCookie> COOKIE_LIST 
-		= new DefaultMultiValueConverter<CookieList, HttpCookie>(CookieList::new,
-				CookieList::add, new Converter<HttpCookie>() {
-	
-			@Override
-			public String asFieldValue(HttpCookie value) {
-				return value.toString();
-			}
+            @Override
+            public String asFieldValue(String value) {
+                return quoteString(value);
+            }
 
-			@Override
-			public HttpCookie fromFieldValue(String text)
-					throws ParseException {
-				try {
-					return HttpCookie.parse(text).get(0);
-				} catch (IllegalArgumentException e) {
-					throw new ParseException(text, 0);
-				}
-			}
-		}, ";", false);
+            @Override
+            public String fromFieldValue(String text) throws ParseException {
+                return unquoteString(text.trim());
+            }
+        };
 
-	/**
-	 * A converter for a language or language range. 
-	 * Language range "`*`" is converted to a Locale with an empty language.
-	 */
-	public static final Converter<Locale> LANGUAGE 
-		= new Converter<Locale>() {
-		
-		@Override
-		public String asFieldValue(Locale value) {
-			return value.getCountry().length() == 0
-					? value.getLanguage()
-					: (value.getLanguage() + "-" + value.getCountry());
-		}
-	
-		@Override
-		public Locale fromFieldValue(String text) throws ParseException {
-			return Locale.forLanguageTag(text);
-		}
-	};
-	
-	/**
-	 * A converter for a weighted list of languages.
-	 */
-	public static final MultiValueConverter<List<ParameterizedValue<Locale>>,
-		ParameterizedValue<Locale>> LANGUAGE_LIST 
-			= new DefaultMultiValueConverter<List<ParameterizedValue<Locale>>,
-					ParameterizedValue<Locale>>(ArrayList::new,
-							new ParamValueConverterBase
-								<ParameterizedValue<Locale>, Locale>(
-										LANGUAGE, ParameterizedValue<Locale>::new) {
-					});
+    public static final Converter<StringList> QUOTED_STRING_LIST
+        = new DefaultMultiValueConverter<>(StringList::new, QUOTED_STRING);
 
-	/**
-	 * A converter for a weighted list of strings.
-	 */
-	public static final MultiValueConverter<List<ParameterizedValue<String>>,
-		ParameterizedValue<String>> WEIGHTED_STRINGS 
-			= new DefaultMultiValueConverter<List<ParameterizedValue<String>>,
-					ParameterizedValue<String>>(ArrayList::new,
-							new ParamValueConverterBase
-								<ParameterizedValue<String>, String>(
-										STRING, ParameterizedValue<String>::new) {
-					});
+    /**
+     * An integer converter.
+     */
+    public static final Converter<Long> LONG = new Converter<Long>() {
 
-	/**
-	 * A converter for the media "topLevelType/Subtype" pair.
-	 */
-	public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR
-		= new MediaTypePairConverter();
+        @Override
+        public String asFieldValue(Long value) {
+            return value.toString();
+        }
 
-	/**
-	 * A converter for a media type pair with parameters.
-	 */
-	public static final Converter<MediaRange> MEDIA_RANGE 
-		= new MediaRangeConverter();
+        @Override
+        public Long fromFieldValue(String text) throws ParseException {
+            try {
+                return Long.parseLong(unquoteString(text));
+            } catch (NumberFormatException e) {
+                throw new ParseException(text, 0);
+            }
+        }
+    };
 
-	/**
-	 * A converter for a list of media ranges.
-	 */
-	public static final MultiValueConverter<List<MediaRange>, MediaRange> MEDIA_RANGE_LIST 
-			= new DefaultMultiValueConverter<List<MediaRange>,
-				MediaRange>(ArrayList::new, MEDIA_RANGE);
+    /**
+     * An integer list converter.
+     */
+    public static final MultiValueConverter<List<Long>, Long> LONG_LIST
+        = new DefaultMultiValueConverter<>(ArrayList<Long>::new, LONG);
 
-	/**
-	 * A converter for a media type pair with parameters.
-	 */
-	public static final Converter<MediaType> MEDIA_TYPE 
-		= new MediaTypeConverter();
+    /**
+     * A date/time converter.
+     */
+    public static final Converter<Instant> DATE_TIME
+        = new InstantConverter();
 
-	/**
-	 * A converter for a directive.
-	 */
-	public static final DirectiveConverter DIRECTIVE
-		= new DirectiveConverter();
+    /**
+     * Converts a {@link HttpCookie} to the representation used in
+     * a "Set-Cookie" header.
+     * 
+     * @see "[Set-Cookie](https://www.rfc-editor.org/rfc/rfc6265#section-4.1)"
+     */
+    public static final Converter<HttpCookie> SET_COOKIE_STRING
+        = new Converter<HttpCookie>() {
 
-	/**
-	 * A converter for a list of directives.
-	 */
-	public static final MultiValueConverter<List<Directive>, Directive>
-		DIRECTIVE_LIST = new DefaultMultiValueConverter<List<Directive>, Directive>(
-				ArrayList::new, DIRECTIVE);
-	
-	/**
-	 * A converter for cache control directives.
-	 */
-	public static final MultiValueConverter<CacheControlDirectives, Directive>
-		CACHE_CONTROL_LIST = new DefaultMultiValueConverter
-			<CacheControlDirectives, Directive>(CacheControlDirectives::new,
-			    (left, right) -> { left.add(right); }, DIRECTIVE, ",", false);
-	/**
-	 * A converter for a URI.
-	 */
-	public static final Converter<URI> URI_CONV 
-		= new Converter<URI>() {
-		
-		@Override
-		public String asFieldValue(URI value) {
-			return value.toString();
-		}
-	
-		@Override
-		public URI fromFieldValue(String text) throws ParseException {
-			try {
-				return URI.create(text);
-			} catch (IllegalArgumentException e) {
-				throw new ParseException(e.getMessage(), 0);
-			}
-		}
-	};
+            @Override
+            public String asFieldValue(HttpCookie cookie) {
+                StringBuilder result = new StringBuilder();
+                result.append(cookie.getName()).append('=');
+                if (cookie.getValue() != null) {
+                    result.append(cookie.getValue());
+                }
+                if (cookie.getMaxAge() > -1) {
+                    result.append("; Max-Age=");
+                    result.append(Long.toString(cookie.getMaxAge()));
+                }
+                if (cookie.getDomain() != null) {
+                    result.append("; Domain=");
+                    result.append(cookie.getDomain());
+                }
+                if (cookie.getPath() != null) {
+                    result.append("; Path=");
+                    result.append(cookie.getPath());
+                }
+                if (cookie.getSecure()) {
+                    result.append("; Secure");
+                }
+                if (cookie.isHttpOnly()) {
+                    result.append("; HttpOnly");
+                }
+                return result.toString();
+            }
 
-	/**
-	 * A converter for product descriptions as used in the `User-Agent`
-	 * and `Server` header fields.
-	 */
-	public static final ProductDescriptionConverter PRODUCT_DESCRIPTIONS 
-		= new ProductDescriptionConverter(); 
-		
-	/**
-	 * Used by the {@link EtagConverter} to unambiguously denote
-	 * a decoded wildcard. If the result of `fromFieldValue` == 
-	 * `WILDCARD`, the field value was an unquoted asterisk.
-	 * If the result `equals("*")`, it may also have been
-	 * a quoted asterisk.
-	 */
-	public static final String WILDCARD = "*";
-	
-	/**
-	 * A converter for an ETag header.
-	 */
-	public static final EtagConverter ETAG = new EtagConverter();
-	
-	public static final Converter<List<Etag>> ETAG_LIST 
-		= new DefaultMultiValueConverter<>(ArrayList::new, ETAG);
+            @Override
+            public HttpCookie fromFieldValue(String text)
+                    throws ParseException {
+                throw new UnsupportedOperationException();
+            }
+        };
 
-	/**
-	 * A converter for a list of challenges.
-	 */
-	public static final Converter<List<ParameterizedValue<String>>>
-		CHALLENGE_LIST	= new AuthInfoConverter();
+    /**
+     * A converter for set cookies.
+     */
+    public static final Converter<CookieList> SET_COOKIE
+        = new DefaultMultiValueConverter<CookieList, HttpCookie>(
+            CookieList::new, CookieList::add, SET_COOKIE_STRING, ",",
+            true) {
 
-	public static final Converter<ParameterizedValue<String>>
-		CREDENTIALS = new Converter<ParameterizedValue<String>>() {
+            @Override
+            public CookieList fromFieldValue(String text)
+                    throws ParseException {
+                try {
+                    return new CookieList(HttpCookie.parse(text));
+                } catch (IllegalArgumentException e) {
+                    throw new ParseException(text, 0);
+                }
+            }
 
-			@Override
-			public String asFieldValue(ParameterizedValue<String> value) {
-				List<ParameterizedValue<String>> tmp = new ArrayList<>();
-				tmp.add(value);
-				return CHALLENGE_LIST.asFieldValue(tmp);
-			}
+            /**
+             * Not supported because {@link #separateValues()} is `true`.
+             */
+            @Override
+            public String asFieldValue(CookieList value) {
+                throw new UnsupportedOperationException();
+            }
+        };
 
-			@Override
-			public ParameterizedValue<String> fromFieldValue(String text)
-			        throws ParseException {
-				return CHALLENGE_LIST.fromFieldValue(text).get(0);
-			}
-		
-	};
-	
-	private Converters() {
-	}
+    /**
+     * A converter for a list of cookies. Supports the format used in
+     * the "Cookie" header.
+     * 
+     * @see "[Cookie](https://www.rfc-editor.org/rfc/rfc6265#section-4.2)"
+     */
+    public static final MultiValueConverter<CookieList,
+            HttpCookie> COOKIE_LIST
+                = new DefaultMultiValueConverter<CookieList, HttpCookie>(
+                    CookieList::new, CookieList::add,
+                    new Converter<HttpCookie>() {
 
-	/**
-	 * If the string contains a char with a backslash before it,
-	 * remove the backslash.
-	 * 
-	 * @param value the value to unquote
-	 * @return the unquoted value
-	 * @throws ParseException if the input violates the field format
-	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static String unquote(String value) {
-		StringBuilder result = new StringBuilder();
-		boolean pendingBackslash = false;
-		for(char ch: value.toCharArray()) {
-			switch (ch) {
-			case '\\':
-				if (pendingBackslash) {
-					result.append(ch);
-				} else {
-					pendingBackslash = true;
-					continue;
-				}
-			break;
-			
-			default:
-				result.append(ch);
-				break;
-			}
-			pendingBackslash = false;
-		}
-		return result.toString();
-	}
+                        @Override
+                        public String asFieldValue(HttpCookie value) {
+                            return value.toString();
+                        }
 
-	/**
-	 * If the value is double quoted, remove the quotes and escape
-	 * characters.
-	 * 
-	 * @param value the value to unquote
-	 * @return the unquoted value
-	 * @throws ParseException if the input violates the field format
-	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static String unquoteString(String value) throws ParseException {
-		if (value.length() == 0 || value.charAt(0) != '\"') {
-			return value;
-		}
-		String unquoted = unquote(value);
-		if (!unquoted.endsWith("\"")) {
-			throw new ParseException(value, value.length() - 1);
-		}
-		return unquoted.substring(1, unquoted.length() - 1);
-	}
+                        @Override
+                        public HttpCookie fromFieldValue(String text)
+                                throws ParseException {
+                            try {
+                                return HttpCookie.parse(text).get(0);
+                            } catch (IllegalArgumentException e) {
+                                throw new ParseException(text, 0);
+                            }
+                        }
+                    }, ";", false);
 
-	/**
-	 * Returns the given string as double quoted string if necessary.
-	 * 
-	 * @param value the value to quote if necessary
-	 * @return the result
-	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static String quoteIfNecessary(String value) {
-		StringBuilder result = new StringBuilder();
-		boolean needsQuoting = false;
-		result.append('"');
-		for (char ch: value.toCharArray()) {
-			if (!needsQuoting && HttpConstants.TOKEN_CHARS.indexOf(ch) < 0) {
-				needsQuoting = true;
-			}
-			switch(ch) {
-			case '"':
-				// fall through
-			case '\\':
-				result.append('\\');
-				// fall through
-			default:
-				result.append(ch);
-				break;
-			}
-		}
-		result.append('\"');
-		if (needsQuoting) {
-			return result.toString();
-		}
-		return value;
-	}
-	
-	/**
-	 * Returns the given string as double quoted string.
-	 * 
-	 * @param value the value to quote
-	 * @return the result
-	 */
-	public static String quoteString(String value) {
-		StringBuilder result = new StringBuilder();
-		result.append('"');
-		for (char ch: value.toCharArray()) {
-			switch(ch) {
-			case '"':
-				// fall through
-			case '\\':
-				result.append('\\');
-				// fall through
-			default:
-				result.append(ch);
-				break;
-			}
-		}
-		result.append('\"');
-		return result.toString();
-	}
-	
-	/**
-	 * Return a new string in which all characters from `toBeQuoted`
-	 * are prefixed with a backslash. 
-	 * 
-	 * @param value the string
-	 * @param toBeQuoted the characters to be quoted
-	 * @return the result
-	 * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static String quote(String value, String toBeQuoted) {
-		StringBuilder result = new StringBuilder();
-		for (char ch: value.toCharArray()) {
-			if (toBeQuoted.indexOf(ch) >= 0) {
-				result.append('\\');
-			}
-			result.append(ch);
-		}
-		return result.toString();
-	}
-	
-	/**
-	 * Determines the length of a token in a header field
-	 * 
-	 * @param text the text to parse
-	 * @param startPos the start position
-	 * @return the length of the token
-	 * @see "[RFC 7230, Section 3.2.6](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static int tokenLength(String text, int startPos) {
-		int pos = startPos;
-		while (pos < text.length()
-				&& HttpConstants.TOKEN_CHARS.indexOf(text.charAt(pos)) >= 0) {
-			pos += 1;
-		}
-		return pos - startPos;
-	}
+    /**
+     * A converter for a language or language range. 
+     * Language range "`*`" is converted to a Locale with an empty language.
+     */
+    public static final Converter<Locale> LANGUAGE = new Converter<Locale>() {
 
-	/**
-	 * Determines the length of a token68 in a header field
-	 * 
-	 * @param text the text to parse
-	 * @param startPos the start position
-	 * @return the length of the token
-	 * @see "[RFC 7235, Section 2.1](https://tools.ietf.org/html/rfc7235#section-2.1)"
-	 */
-	public static int token68Length(String text, int startPos) {
-		int pos = startPos;
-		while (pos < text.length()
-				&& HttpConstants.TOKEN68_CHARS.indexOf(text.charAt(pos)) >= 0) {
-			pos += 1;
-		}
-		return pos - startPos;
-	}
+        @Override
+        public String asFieldValue(Locale value) {
+            return value.getCountry().length() == 0 ? value.getLanguage()
+                : (value.getLanguage() + "-" + value.getCountry());
+        }
 
-	/**
-	 * Determines the length of a white space sequence in a header field. 
-	 * 
-	 * @param text the test to parse 
-	 * @param startPos the start position
-	 * @return the length of the white space sequence
-	 * @see "[RFC 7230, Section 3.2.3](https://tools.ietf.org/html/rfc7230#section-3.2.3)"
-	 */
-	public static int whiteSpaceLength(String text, int startPos) {
-		int pos = startPos;
-		while (pos < text.length()) {
-			switch (text.charAt(pos)) {
-			case ' ':
-				// fall through
-			case '\t':
-				pos += 1;
-				continue;
-				
-			default:
-				break;
-			}
-			break;
-		}
-		return pos - startPos;
-	}
+        @Override
+        public Locale fromFieldValue(String text) throws ParseException {
+            return Locale.forLanguageTag(text);
+        }
+    };
 
-	/**
-	 * Determines the length of a comment in a header field.
-	 * 
-	 * @param text the text to parse
-	 * @param startPos the starting position (must be the position of the
-	 * opening brace)
-	 * @return the length of the comment
-	 * @see "[RFC 7230, Section 3.2.6](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
-	 */
-	public static int commentLength(String text, int startPos) {
-		int pos = startPos + 1;
-		while (pos < text.length()) {
-			switch(text.charAt(pos)) {
-			case ')':
-				return pos - startPos + 1;
-				
-			case '(':
-				pos += commentLength(text, pos);
-				break;
-				
-			case '\\':
-				pos = Math.min(pos + 2, text.length());
-				break;
-				
-			default:
-				pos += 1;
-				break;
-			}
-		}
-		return pos - startPos;
-	}
+    /**
+     * A converter for a weighted list of languages.
+     */
+    public static final MultiValueConverter<List<ParameterizedValue<Locale>>,
+            ParameterizedValue<Locale>> LANGUAGE_LIST
+                = new DefaultMultiValueConverter<
+                        List<ParameterizedValue<Locale>>,
+                        ParameterizedValue<Locale>>(
+                            ArrayList::new,
+                            new ParamValueConverterBase<
+                                    ParameterizedValue<Locale>, Locale>(
+                                        LANGUAGE,
+                                        ParameterizedValue<Locale>::new) {
+                            });
 
-	/**
-	 * Returns the length up to one of the match chars or end of string.
-	 * 
-	 * @param text the text
-	 * @param startPos the start position
-	 * @param matches the chars to match
-	 * @return the length
-	 */
-	public int unmatchedLength(String text, int startPos, String matches) {
-		int pos = startPos;
-		while (pos < text.length()) {
-			if (matches.indexOf(text.charAt(pos)) >= 0) {
-				return pos - startPos;
-			}
-			pos += 1;
-		}
-		return pos - startPos;
-	}
-	
-	private static class ProductDescriptionConverter 
-		extends DefaultMultiValueConverter<List<CommentedValue<String>>, CommentedValue<String>> {
-	
-		public ProductDescriptionConverter() {
-			super(ArrayList<CommentedValue<String>>::new,
-			        new CommentedValueConverter<>(Converters.STRING));
-		}
+    /**
+     * A converter for a weighted list of strings.
+     */
+    public static final MultiValueConverter<List<ParameterizedValue<String>>,
+            ParameterizedValue<String>> WEIGHTED_STRINGS
+                = new DefaultMultiValueConverter<
+                        List<ParameterizedValue<String>>,
+                        ParameterizedValue<String>>(
+                            ArrayList::new,
+                            new ParamValueConverterBase<
+                                    ParameterizedValue<String>, String>(STRING,
+                                        ParameterizedValue<String>::new) {
+                            });
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see Converter#fromFieldValue(java.lang.String)
-		 */
-		@Override
-		public List<CommentedValue<String>> fromFieldValue(String text)
-		        throws ParseException {
-			List<CommentedValue<String>> result = new ArrayList<>();
-			int pos = 0;
-			while (pos < text.length()) {
-				int length = Converters.tokenLength(text, pos);
-				if (length == 0) {
-					throw new ParseException(
-					        "Must start with token: " + text, pos);
-				}
-				String product = text.substring(pos, pos + length);
-				pos += length;
-				if (pos < text.length() && text.charAt(pos) == '/') {
-					pos += 1;
-					length = Converters.tokenLength(text, pos);
-					if (length == 0) {
-						throw new ParseException(
-						        "Token expected: " + text, pos);
-					}
-					product = product + text.substring(pos - 1, pos + length);
-					pos += length;
-				}
-				List<String> comments = new ArrayList<>();
-				while (pos < text.length()) {
-					length = Converters.whiteSpaceLength(text, pos);
-					if (length == 0) {
-						throw new ParseException(
-						        "Whitespace expected: " + text, pos);
-					}
-					pos += length;
-					if (text.charAt(pos) != '(') {
-						break;
-					}
-					length = Converters.commentLength(text, pos);
-					if (text.charAt(pos + length - 1) != ')') {
-						throw new ParseException(
-						        "Comment end expected: " + text,
-						        pos + length - 1);
-					}
-					comments.add(text.substring(pos + 1, pos + length - 1));
-					pos += length;
-				}
-				result.add(new CommentedValue<String>(product,
-				        comments.size() == 0 ? null
-				                : comments
-				                        .toArray(new String[comments.size()])));
-			}
-			return result;
-		}
+    /**
+     * A converter for the media "topLevelType/Subtype" pair.
+     */
+    public static final Converter<MediaTypePair> MEDIA_TYPE_PAIR
+        = new MediaTypePairConverter();
 
-	}
+    /**
+     * A converter for a media type pair with parameters.
+     */
+    public static final Converter<MediaRange> MEDIA_RANGE
+        = new MediaRangeConverter();
 
-	private static class AuthInfoConverter extends
-	        DefaultMultiValueConverter<List<ParameterizedValue<String>>, 
-	        ParameterizedValue<String>> {
+    /**
+     * A converter for a list of media ranges.
+     */
+    public static final MultiValueConverter<List<MediaRange>,
+            MediaRange> MEDIA_RANGE_LIST
+                = new DefaultMultiValueConverter<List<MediaRange>,
+                        MediaRange>(ArrayList::new, MEDIA_RANGE);
 
-		public AuthInfoConverter() {
-			super(ArrayList<ParameterizedValue<String>>::new, 
-				new Converter<ParameterizedValue<String>>() {
+    /**
+     * A converter for a media type pair with parameters.
+     */
+    public static final Converter<MediaType> MEDIA_TYPE
+        = new MediaTypeConverter();
 
-				@Override
-				public String asFieldValue(ParameterizedValue<String> value) {
-					StringBuilder result = new StringBuilder();
-					result.append(value.value());
-					boolean first = true;
-					for (Map.Entry<String, String> e: value.parameters().entrySet()) {
-						if (first) {
-							first = false;
-						} else {
-							result.append(',');
-						}
-						result.append(' ');
-						if (e.getKey() == null) {
-							result.append(e.getValue());
-						} else {
-							result.append(e.getKey());
-							result.append("=");
-							result.append(quoteIfNecessary(e.getValue()));
-						}
-					}
-					return result.toString();
-				}
+    /**
+     * A converter for a directive.
+     */
+    public static final DirectiveConverter DIRECTIVE
+        = new DirectiveConverter();
 
-				@Override
-				public ParameterizedValue<String> fromFieldValue(
-						String text) throws ParseException {
-					throw new UnsupportedOperationException();
-				}
-			}, ",");
-		}
+    /**
+     * A converter for a list of directives.
+     */
+    public static final MultiValueConverter<List<Directive>,
+            Directive> DIRECTIVE_LIST
+                = new DefaultMultiValueConverter<List<Directive>, Directive>(
+                    ArrayList::new, DIRECTIVE);
 
-		@Override
-		public List<ParameterizedValue<String>> fromFieldValue(String text)
-		        throws ParseException {
-			List<ParameterizedValue<String>> result = new ArrayList<>();
-			ListItemizer itemizer = new ListItemizer(text, ",");
-			ParameterizedValue.Builder<ParameterizedValue<String>, String>
-				builder = null;
-			String itemRepr = null;
-			while (true) {
-				// New auth scheme may have left over the parameter part as itemRepr
-				if (itemRepr == null) {
-					if (!itemizer.hasNext()) {
-						if (builder != null) {
-							result.add(builder.build());
-						}
-						break;
-					} 
-					itemRepr = itemizer.next();
-				}
-				if (builder != null) {
-					// itemRepr may be new auth scheme or parameter
-					ListItemizer paramItemizer = new ListItemizer(itemRepr, "=");
-					String name = paramItemizer.next();
-					if (paramItemizer.hasNext() && name.indexOf(" ") < 0) {
-						// Really parameter
-						builder.setParameter(name, unquoteString(
-								paramItemizer.next()));
-						itemRepr = null;
-						continue;
-					}
-					// new challenge or credentials
-					result.add(builder.build());
-					builder = null;
-					// fall through
-				}
-				// New challenge or credentials, space used as separator
-				ListItemizer schemeItemizer = new ListItemizer(itemRepr, " ");
-				String authScheme = schemeItemizer.next();
-				if (authScheme == null) {
-					throw new ParseException(itemRepr, 0);
-				}
-				builder = ParameterizedValue.builder();
-				builder.setValue(authScheme);
-				itemRepr = schemeItemizer.next();
-				if (itemRepr == null
-				        || (token68Length(itemRepr, 0) == itemRepr.length())) {
-					if (itemRepr != null) {
-						builder.setParameter(null, itemRepr);
-					}
-					result.add(builder.build());
-					builder = null;
-					// Fully processed
-					itemRepr = null;
-					continue;
-				}
-			}
-			return result;
-		}
+    /**
+     * A converter for cache control directives.
+     */
+    public static final MultiValueConverter<CacheControlDirectives,
+            Directive> CACHE_CONTROL_LIST
+                = new DefaultMultiValueConverter<CacheControlDirectives,
+                        Directive>(CacheControlDirectives::new,
+                            (left, right) -> {
+                                left.add(right);
+                            }, DIRECTIVE, ",", false);
+    /**
+     * A converter for a URI.
+     */
+    public static final Converter<URI> URI_CONV = new Converter<URI>() {
 
-	}
+        @Override
+        public String asFieldValue(URI value) {
+            return value.toString();
+        }
+
+        @Override
+        public URI fromFieldValue(String text) throws ParseException {
+            try {
+                return URI.create(text);
+            } catch (IllegalArgumentException e) {
+                throw new ParseException(e.getMessage(), 0);
+            }
+        }
+    };
+
+    /**
+     * A converter for product descriptions as used in the `User-Agent`
+     * and `Server` header fields.
+     */
+    public static final ProductDescriptionConverter PRODUCT_DESCRIPTIONS
+        = new ProductDescriptionConverter();
+
+    /**
+     * Used by the {@link EtagConverter} to unambiguously denote
+     * a decoded wildcard. If the result of `fromFieldValue` == 
+     * `WILDCARD`, the field value was an unquoted asterisk.
+     * If the result `equals("*")`, it may also have been
+     * a quoted asterisk.
+     */
+    public static final String WILDCARD = "*";
+
+    /**
+     * A converter for an ETag header.
+     */
+    public static final EtagConverter ETAG = new EtagConverter();
+
+    public static final Converter<List<Etag>> ETAG_LIST
+        = new DefaultMultiValueConverter<>(ArrayList::new, ETAG);
+
+    /**
+     * A converter for a list of challenges.
+     */
+    public static final Converter<
+            List<ParameterizedValue<String>>> CHALLENGE_LIST
+                = new AuthInfoConverter();
+
+    public static final Converter<ParameterizedValue<
+            String>> CREDENTIALS = new Converter<ParameterizedValue<String>>() {
+
+                @Override
+                public String asFieldValue(ParameterizedValue<String> value) {
+                    List<ParameterizedValue<String>> tmp = new ArrayList<>();
+                    tmp.add(value);
+                    return CHALLENGE_LIST.asFieldValue(tmp);
+                }
+
+                @Override
+                public ParameterizedValue<String> fromFieldValue(String text)
+                        throws ParseException {
+                    return CHALLENGE_LIST.fromFieldValue(text).get(0);
+                }
+
+            };
+
+    private Converters() {
+    }
+
+    /**
+     * If the string contains a char with a backslash before it,
+     * remove the backslash.
+     * 
+     * @param value the value to unquote
+     * @return the unquoted value
+     * @throws ParseException if the input violates the field format
+     * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+     */
+    public static String unquote(String value) {
+        StringBuilder result = new StringBuilder();
+        boolean pendingBackslash = false;
+        for (char ch : value.toCharArray()) {
+            switch (ch) {
+            case '\\':
+                if (pendingBackslash) {
+                    result.append(ch);
+                } else {
+                    pendingBackslash = true;
+                    continue;
+                }
+                break;
+
+            default:
+                result.append(ch);
+                break;
+            }
+            pendingBackslash = false;
+        }
+        return result.toString();
+    }
+
+    /**
+     * If the value is double quoted, remove the quotes and escape
+     * characters.
+     * 
+     * @param value the value to unquote
+     * @return the unquoted value
+     * @throws ParseException if the input violates the field format
+     * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+     */
+    public static String unquoteString(String value) throws ParseException {
+        if (value.length() == 0 || value.charAt(0) != '\"') {
+            return value;
+        }
+        String unquoted = unquote(value);
+        if (!unquoted.endsWith("\"")) {
+            throw new ParseException(value, value.length() - 1);
+        }
+        return unquoted.substring(1, unquoted.length() - 1);
+    }
+
+    /**
+     * Returns the given string as double quoted string if necessary.
+     * 
+     * @param value the value to quote if necessary
+     * @return the result
+     * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+     */
+    public static String quoteIfNecessary(String value) {
+        StringBuilder result = new StringBuilder();
+        boolean needsQuoting = false;
+        result.append('"');
+        for (char ch : value.toCharArray()) {
+            if (!needsQuoting && HttpConstants.TOKEN_CHARS.indexOf(ch) < 0) {
+                needsQuoting = true;
+            }
+            switch (ch) {
+            case '"':
+                // fall through
+            case '\\':
+                result.append('\\');
+                // fall through
+            default:
+                result.append(ch);
+                break;
+            }
+        }
+        result.append('\"');
+        if (needsQuoting) {
+            return result.toString();
+        }
+        return value;
+    }
+
+    /**
+     * Returns the given string as double quoted string.
+     * 
+     * @param value the value to quote
+     * @return the result
+     */
+    public static String quoteString(String value) {
+        StringBuilder result = new StringBuilder();
+        result.append('"');
+        for (char ch : value.toCharArray()) {
+            switch (ch) {
+            case '"':
+                // fall through
+            case '\\':
+                result.append('\\');
+                // fall through
+            default:
+                result.append(ch);
+                break;
+            }
+        }
+        result.append('\"');
+        return result.toString();
+    }
+
+    /**
+     * Return a new string in which all characters from `toBeQuoted`
+     * are prefixed with a backslash. 
+     * 
+     * @param value the string
+     * @param toBeQuoted the characters to be quoted
+     * @return the result
+     * @see "[Field value components](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+     */
+    public static String quote(String value, String toBeQuoted) {
+        StringBuilder result = new StringBuilder();
+        for (char ch : value.toCharArray()) {
+            if (toBeQuoted.indexOf(ch) >= 0) {
+                result.append('\\');
+            }
+            result.append(ch);
+        }
+        return result.toString();
+    }
+
+    /**
+     * Determines the length of a token in a header field
+     * 
+     * @param text the text to parse
+     * @param startPos the start position
+     * @return the length of the token
+     * @see "[RFC 7230, Section 3.2.6](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+     */
+    public static int tokenLength(String text, int startPos) {
+        int pos = startPos;
+        while (pos < text.length()
+            && HttpConstants.TOKEN_CHARS.indexOf(text.charAt(pos)) >= 0) {
+            pos += 1;
+        }
+        return pos - startPos;
+    }
+
+    /**
+     * Determines the length of a token68 in a header field
+     * 
+     * @param text the text to parse
+     * @param startPos the start position
+     * @return the length of the token
+     * @see "[RFC 7235, Section 2.1](https://tools.ietf.org/html/rfc7235#section-2.1)"
+     */
+    public static int token68Length(String text, int startPos) {
+        int pos = startPos;
+        while (pos < text.length()
+            && HttpConstants.TOKEN68_CHARS.indexOf(text.charAt(pos)) >= 0) {
+            pos += 1;
+        }
+        return pos - startPos;
+    }
+
+    /**
+     * Determines the length of a white space sequence in a header field. 
+     * 
+     * @param text the test to parse 
+     * @param startPos the start position
+     * @return the length of the white space sequence
+     * @see "[RFC 7230, Section 3.2.3](https://tools.ietf.org/html/rfc7230#section-3.2.3)"
+     */
+    public static int whiteSpaceLength(String text, int startPos) {
+        int pos = startPos;
+        while (pos < text.length()) {
+            switch (text.charAt(pos)) {
+            case ' ':
+                // fall through
+            case '\t':
+                pos += 1;
+                continue;
+
+            default:
+                break;
+            }
+            break;
+        }
+        return pos - startPos;
+    }
+
+    /**
+     * Determines the length of a comment in a header field.
+     * 
+     * @param text the text to parse
+     * @param startPos the starting position (must be the position of the
+     * opening brace)
+     * @return the length of the comment
+     * @see "[RFC 7230, Section 3.2.6](https://tools.ietf.org/html/rfc7230#section-3.2.6)"
+     */
+    public static int commentLength(String text, int startPos) {
+        int pos = startPos + 1;
+        while (pos < text.length()) {
+            switch (text.charAt(pos)) {
+            case ')':
+                return pos - startPos + 1;
+
+            case '(':
+                pos += commentLength(text, pos);
+                break;
+
+            case '\\':
+                pos = Math.min(pos + 2, text.length());
+                break;
+
+            default:
+                pos += 1;
+                break;
+            }
+        }
+        return pos - startPos;
+    }
+
+    /**
+     * Returns the length up to one of the match chars or end of string.
+     * 
+     * @param text the text
+     * @param startPos the start position
+     * @param matches the chars to match
+     * @return the length
+     */
+    public int unmatchedLength(String text, int startPos, String matches) {
+        int pos = startPos;
+        while (pos < text.length()) {
+            if (matches.indexOf(text.charAt(pos)) >= 0) {
+                return pos - startPos;
+            }
+            pos += 1;
+        }
+        return pos - startPos;
+    }
+
+    private static class ProductDescriptionConverter
+            extends DefaultMultiValueConverter<List<CommentedValue<String>>,
+                    CommentedValue<String>> {
+
+        public ProductDescriptionConverter() {
+            super(ArrayList<CommentedValue<String>>::new,
+                new CommentedValueConverter<>(Converters.STRING));
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see Converter#fromFieldValue(java.lang.String)
+         */
+        @Override
+        public List<CommentedValue<String>> fromFieldValue(String text)
+                throws ParseException {
+            List<CommentedValue<String>> result = new ArrayList<>();
+            int pos = 0;
+            while (pos < text.length()) {
+                int length = Converters.tokenLength(text, pos);
+                if (length == 0) {
+                    throw new ParseException(
+                        "Must start with token: " + text, pos);
+                }
+                String product = text.substring(pos, pos + length);
+                pos += length;
+                if (pos < text.length() && text.charAt(pos) == '/') {
+                    pos += 1;
+                    length = Converters.tokenLength(text, pos);
+                    if (length == 0) {
+                        throw new ParseException(
+                            "Token expected: " + text, pos);
+                    }
+                    product = product + text.substring(pos - 1, pos + length);
+                    pos += length;
+                }
+                List<String> comments = new ArrayList<>();
+                while (pos < text.length()) {
+                    length = Converters.whiteSpaceLength(text, pos);
+                    if (length == 0) {
+                        throw new ParseException(
+                            "Whitespace expected: " + text, pos);
+                    }
+                    pos += length;
+                    if (text.charAt(pos) != '(') {
+                        break;
+                    }
+                    length = Converters.commentLength(text, pos);
+                    if (text.charAt(pos + length - 1) != ')') {
+                        throw new ParseException(
+                            "Comment end expected: " + text,
+                            pos + length - 1);
+                    }
+                    comments.add(text.substring(pos + 1, pos + length - 1));
+                    pos += length;
+                }
+                result.add(new CommentedValue<String>(product,
+                    comments.size() == 0 ? null
+                        : comments
+                            .toArray(new String[comments.size()])));
+            }
+            return result;
+        }
+
+    }
+
+    private static class AuthInfoConverter extends
+            DefaultMultiValueConverter<List<ParameterizedValue<String>>,
+                    ParameterizedValue<String>> {
+
+        public AuthInfoConverter() {
+            super(ArrayList<ParameterizedValue<String>>::new,
+                new Converter<ParameterizedValue<String>>() {
+
+                    @Override
+                    public String
+                            asFieldValue(ParameterizedValue<String> value) {
+                        StringBuilder result = new StringBuilder();
+                        result.append(value.value());
+                        boolean first = true;
+                        for (Map.Entry<String, String> e : value.parameters()
+                            .entrySet()) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                result.append(',');
+                            }
+                            result.append(' ');
+                            if (e.getKey() == null) {
+                                result.append(e.getValue());
+                            } else {
+                                result.append(e.getKey());
+                                result.append("=");
+                                result.append(quoteIfNecessary(e.getValue()));
+                            }
+                        }
+                        return result.toString();
+                    }
+
+                    @Override
+                    public ParameterizedValue<String> fromFieldValue(
+                            String text) throws ParseException {
+                        throw new UnsupportedOperationException();
+                    }
+                }, ",");
+        }
+
+        @Override
+        public List<ParameterizedValue<String>> fromFieldValue(String text)
+                throws ParseException {
+            List<ParameterizedValue<String>> result = new ArrayList<>();
+            ListItemizer itemizer = new ListItemizer(text, ",");
+            ParameterizedValue.Builder<ParameterizedValue<String>,
+                    String> builder = null;
+            String itemRepr = null;
+            while (true) {
+                // New auth scheme may have left over the parameter part as
+                // itemRepr
+                if (itemRepr == null) {
+                    if (!itemizer.hasNext()) {
+                        if (builder != null) {
+                            result.add(builder.build());
+                        }
+                        break;
+                    }
+                    itemRepr = itemizer.next();
+                }
+                if (builder != null) {
+                    // itemRepr may be new auth scheme or parameter
+                    ListItemizer paramItemizer
+                        = new ListItemizer(itemRepr, "=");
+                    String name = paramItemizer.next();
+                    if (paramItemizer.hasNext() && name.indexOf(" ") < 0) {
+                        // Really parameter
+                        builder.setParameter(name, unquoteString(
+                            paramItemizer.next()));
+                        itemRepr = null;
+                        continue;
+                    }
+                    // new challenge or credentials
+                    result.add(builder.build());
+                    builder = null;
+                    // fall through
+                }
+                // New challenge or credentials, space used as separator
+                ListItemizer schemeItemizer = new ListItemizer(itemRepr, " ");
+                String authScheme = schemeItemizer.next();
+                if (authScheme == null) {
+                    throw new ParseException(itemRepr, 0);
+                }
+                builder = ParameterizedValue.builder();
+                builder.setValue(authScheme);
+                itemRepr = schemeItemizer.next();
+                if (itemRepr == null
+                    || (token68Length(itemRepr, 0) == itemRepr.length())) {
+                    if (itemRepr != null) {
+                        builder.setParameter(null, itemRepr);
+                    }
+                    result.add(builder.build());
+                    builder = null;
+                    // Fully processed
+                    itemRepr = null;
+                    continue;
+                }
+            }
+            return result;
+        }
+
+    }
 
 }
