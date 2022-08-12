@@ -132,6 +132,7 @@ public class DefaultMultiValueConverter<T extends Iterable<V>, V>
      * @see org.jdrupes.httpcodec.types.ListConverter#itemConverter()
      */
     @Override
+    @Deprecated
     public Converter<V> valueConverter() {
         return valueConverter;
     }
