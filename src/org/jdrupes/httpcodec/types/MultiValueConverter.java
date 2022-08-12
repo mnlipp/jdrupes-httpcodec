@@ -20,6 +20,8 @@ package org.jdrupes.httpcodec.types;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Implemented by converters that convert header fields with a list of values.
@@ -32,35 +34,58 @@ import java.util.function.Supplier;
  * @param <V> the type of the values
  */
 public interface MultiValueConverter<T extends Iterable<V>, V>
-	extends Converter<T> {
+        extends Converter<T> {
 
-	/**
-	 * Returns the container supplier
-	 * 
-	 * @return the container supplier
-	 */
-	Supplier<T> containerSupplier();
+    /**
+     * Returns the container supplier
+     * 
+     * @return the container supplier
+     */
+    Supplier<T> containerSupplier();
 
-	/**
-	 * Returns the value adder
-	 * 
-	 * @return the value adder
-	 */
-	BiConsumer<T, V> valueAdder();
+    /**
+     * Returns the value adder
+     * 
+     * @return the value adder
+     */
+    BiConsumer<T, V> valueAdder();
 
-	/**
-	 * Returns the value converter.
-	 * 
-	 * @return the value converter
-	 */
-	Converter<V> valueConverter();
+    /**
+     * Returns the value converter.
+     * 
+     * @return the value converter
+     */
+    Converter<V> valueConverter();
 
-	/**
-	 * Return whether values should be converted to separate
-	 * header fields in {@link Converter#asFieldValue(Object)}.
-	 * 
-	 * @return the value
-	 */
-	boolean separateValues();
+    /**
+     * Return whether values should be converted to separate
+     * header fields in {@link Converter#asFieldValue(Object)}.
+     * 
+     * @return the value
+     */
+    boolean separateValues();
+
+    /**
+     * Returns the string representation of this header field as it 
+     * appears in an HTTP message. Note that the returned string may 
+     * span several lines (may contain CR/LF), if the converter is a
+     * {@link MultiValueConverter} with separate values, but never 
+     * has a trailing CR/LF.
+     *
+     * @param fieldName the field name
+     * @param value the value
+     * @return the field as it occurs in a header
+     */
+    default String asHeaderField(String fieldName, T value) {
+        if (!separateValues()) {
+            // Cannot call super here.
+            return fieldName + ": " + asFieldValue(value);
+        }
+        // Convert list of items to separate fields
+        return StreamSupport.stream(value.spliterator(), false).map(
+            item -> fieldName + ": " + valueConverter().asFieldValue(item))
+            .collect(Collectors.joining("\r\n"));
+
+    }
 
 }

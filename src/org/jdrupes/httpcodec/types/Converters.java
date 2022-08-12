@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
@@ -42,6 +44,42 @@ import org.jdrupes.httpcodec.util.ListItemizer;
  * Utility methods and singletons for converters.
  */
 public final class Converters {
+
+    /**
+     * Used to control the generation of "Set-Cookie" header fields.
+     */
+    public enum SameSiteAttribute {
+
+        /**
+         * Don't set the attribute.
+         */
+        UNSET("Unset"),
+
+        /**
+         * Always sent.
+         */
+        NONE("None"),
+
+        /**
+         * Sent with "same-site" requests, and with "cross-site" top-level navigations
+         */
+        LAX("Lax"),
+
+        /**
+         * Sent along with "same-site" requests
+         */
+        STRICT("Strict");
+
+        private final String value;
+
+        SameSiteAttribute(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
+        }
+    }
 
     /*
      * Note that the initialization sequence is important.
@@ -156,57 +194,26 @@ public final class Converters {
     public static final Converter<Instant> DATE_TIME
         = new InstantConverter();
 
-    /**
-     * Converts a {@link HttpCookie} to the representation used in
-     * a "Set-Cookie" header.
-     * 
-     * @see "[Set-Cookie](https://www.rfc-editor.org/rfc/rfc6265#section-4.1)"
+    /** 
+     * Provide converters for the 
      */
-    public static final Converter<HttpCookie> SET_COOKIE_STRING
-        = new Converter<HttpCookie>() {
-
-            @Override
-            public String asFieldValue(HttpCookie cookie) {
-                StringBuilder result = new StringBuilder();
-                result.append(cookie.getName()).append('=');
-                if (cookie.getValue() != null) {
-                    result.append(cookie.getValue());
-                }
-                if (cookie.getMaxAge() > -1) {
-                    result.append("; Max-Age=");
-                    result.append(Long.toString(cookie.getMaxAge()));
-                }
-                if (cookie.getDomain() != null) {
-                    result.append("; Domain=");
-                    result.append(cookie.getDomain());
-                }
-                if (cookie.getPath() != null) {
-                    result.append("; Path=");
-                    result.append(cookie.getPath());
-                }
-                if (cookie.getSecure()) {
-                    result.append("; Secure");
-                }
-                if (cookie.isHttpOnly()) {
-                    result.append("; HttpOnly");
-                }
-                return result.toString();
-            }
-
-            @Override
-            public HttpCookie fromFieldValue(String text)
-                    throws ParseException {
-                throw new UnsupportedOperationException();
-            }
-        };
+    public static final Map<SameSiteAttribute,
+            SetCookieStringConverter> SET_COOKIE_STRING = Map.of(
+                SameSiteAttribute.UNSET, new SetCookieStringConverter(),
+                SameSiteAttribute.NONE, new SetCookieStringConverter()
+                    .setSameSiteAttribute(SameSiteAttribute.NONE),
+                SameSiteAttribute.LAX, new SetCookieStringConverter()
+                    .setSameSiteAttribute(SameSiteAttribute.LAX),
+                SameSiteAttribute.STRICT, new SetCookieStringConverter()
+                    .setSameSiteAttribute(SameSiteAttribute.STRICT));
 
     /**
      * A converter for set cookies.
      */
     public static final Converter<CookieList> SET_COOKIE
         = new DefaultMultiValueConverter<CookieList, HttpCookie>(
-            CookieList::new, CookieList::add, SET_COOKIE_STRING, ",",
-            true) {
+            CookieList::new, CookieList::add,
+            SET_COOKIE_STRING.get(SameSiteAttribute.UNSET), ",", true) {
 
             @Override
             public CookieList fromFieldValue(String text)
@@ -224,6 +231,18 @@ public final class Converters {
             @Override
             public String asFieldValue(CookieList value) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String asHeaderField(String fieldName, CookieList value) {
+                SetCookieStringConverter cookieConverter
+                    = Converters.SET_COOKIE_STRING
+                        .get(value.sameSiteAttribute());
+                // Convert list of items to separate fields
+                return StreamSupport.stream(value.spliterator(), false).map(
+                    item -> fieldName + ": "
+                        + cookieConverter.asFieldValue(item))
+                    .collect(Collectors.joining("\r\n"));
             }
         };
 

@@ -25,94 +25,118 @@ import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jdrupes.httpcodec.types.Converters.SameSiteAttribute;
+
 /**
- * Represents a list of cookies.
+ * Represents a list of cookies. The additional property "same site attribute"
+ * controls the generation of header fields.
  */
 public class CookieList implements Iterable<HttpCookie> {
 
-	private LinkedHashMap<String, HttpCookie> cookies;
-	
-	/**
-	 * Creates a new empty cookie list.
-	 */
-	public CookieList() {
-		cookies = new LinkedHashMap<>();
-	}
+    private LinkedHashMap<String, HttpCookie> cookies;
+    private final SameSiteAttribute sameSiteAttribute;
 
-	/**
-	 * Creates a new list with items copied from the existing collection.
-	 * 
-	 * @param existing the existing collection
-	 */
-	public CookieList(Collection<HttpCookie> existing) {
-		cookies = new LinkedHashMap<>();
-		for (HttpCookie cookie: existing) {
-			cookies.put(cookie.getName(), cookie);
-		}
-	}
+    /**
+     * Creates a new empty cookie list with the specified same-site
+     * attribute.
+     */
+    public CookieList(SameSiteAttribute sameSiteAttribute) {
+        cookies = new LinkedHashMap<>();
+        this.sameSiteAttribute = sameSiteAttribute;
+    }
 
-	/**
-	 * Returns the value for the cookie with the given name.
-	 * 
-	 * @param name the name
-	 * @return the value if a cookie with the given name exists
-	 */
-	public Optional<String> valueForName(String name) {
-		return Optional.ofNullable(cookies.get(name))
-				.map(HttpCookie::getValue);
-	}
+    /**
+     * Creates a new empty cookie list.
+     */
+    public CookieList() {
+        this(SameSiteAttribute.UNSET);
+    }
 
-	/**
-	 * Adds a cookie to the list. If a cookie with the same name
-	 * already exists, it is replaced.
-	 * 
-	 * @param cookie the cookie
-	 * @return the cookie list for easy chaining
-	 */
-	public CookieList add(HttpCookie cookie) {
-		cookies.remove(cookie.getName());
-		cookies.put(cookie.getName(), cookie);
-		return this;
-	}
+    /**
+     * Creates a new list with items copied from the existing collection.
+     * 
+     * @param existing the existing collection
+     */
+    public CookieList(Collection<HttpCookie> existing) {
+        this();
+        for (HttpCookie cookie : existing) {
+            cookies.put(cookie.getName(), cookie);
+        }
+    }
 
-	/**
-	 * Removes all cookies from the list.
-	 * 
-	 * @return the cookie list for easy chaining
-	 */
-	public CookieList clear() {
-		cookies.clear();
-		return this;
-	}
+    /**
+     * Returns the same site attribute passed to the constructor.
+     *
+     * @return the same site attribute
+     */
+    public SameSiteAttribute sameSiteAttribute() {
+        return sameSiteAttribute;
+    }
 
-	public boolean isEmpty() {
-		return cookies.isEmpty();
-	}
+    /**
+     * Returns the value for the cookie with the given name.
+     * 
+     * @param name the name
+     * @return the value if a cookie with the given name exists
+     */
+    public Optional<String> valueForName(String name) {
+        return Optional.ofNullable(cookies.get(name))
+            .map(HttpCookie::getValue);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.util.List#iterator()
-	 */
-	@Override
-	public Iterator<HttpCookie> iterator() {
-		return cookies.values().iterator();
-	}
+    /**
+     * Adds a cookie to the list. If a cookie with the same name
+     * already exists, it is replaced.
+     * 
+     * @param cookie the cookie
+     * @return the cookie list for easy chaining
+     */
+    public CookieList add(HttpCookie cookie) {
+        cookies.remove(cookie.getName());
+        cookies.put(cookie.getName(), cookie);
+        return this;
+    }
 
-	public Stream<HttpCookie> stream() {
-		return cookies.values().stream();
-	}
-	
-	/**
-	 * Remove the cookie with the given name.
-	 * 
-	 * @param name
-	 * @return the cookie list for easy chaining
-	 */
-	public boolean remove(String name) {
-		return false;
-	}
+    /**
+     * Removes all cookies from the list.
+     * 
+     * @return the cookie list for easy chaining
+     */
+    public CookieList clear() {
+        cookies.clear();
+        return this;
+    }
 
-	public int size() {
-		return cookies.size();
-	}
+    public boolean isEmpty() {
+        return cookies.isEmpty();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.List#iterator()
+     */
+    @Override
+    public Iterator<HttpCookie> iterator() {
+        return cookies.values().iterator();
+    }
+
+    public Stream<HttpCookie> stream() {
+        return cookies.values().stream();
+    }
+
+    /**
+     * Remove the cookie with the given name.
+     * 
+     * @param name
+     * @return the cookie list for easy chaining
+     */
+    public boolean remove(String name) {
+        return false;
+    }
+
+    public int size() {
+        return cookies.size();
+    }
 
 }

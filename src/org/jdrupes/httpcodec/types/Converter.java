@@ -28,20 +28,35 @@ import java.text.ParseException;
  */
 public interface Converter<T> {
 
-	/**
-	 * Returns the representation of this value in a header field.
-	 * 
-	 * @param value the value to be converted
-	 * @return the representation
-	 */
-	String asFieldValue(T value);
-	
-	/**
-	 * Parses the given text and returns the parsed value.
-	 * 
-	 * @param text the value from the header field
-	 * @return the parsed value
-	 * @throws ParseException if the value cannot be parsed
-	 */
-	T fromFieldValue(String text) throws ParseException;
+    /**
+     * Returns the representation of this value in a header field.
+     * 
+     * @param value the value to be converted
+     * @return the representation
+     */
+    String asFieldValue(T value);
+
+    /**
+     * Returns the string representation of this header field as it 
+     * appears in an HTTP message. Note that the returned string may 
+     * span several lines (may contain CR/LF), if the converter is a
+     * {@link MultiValueConverter} with separate values, but never 
+     * has a trailing CR/LF.
+     *
+     * @param fieldName the field name
+     * @param value the value
+     * @return the field as it occurs in a header
+     */
+    default String asHeaderField(String fieldName, T value) {
+        return fieldName + ": " + asFieldValue(value);
+    }
+
+    /**
+     * Parses the given text and returns the parsed value.
+     * 
+     * @param text the value from the header field
+     * @return the parsed value
+     * @throws ParseException if the value cannot be parsed
+     */
+    T fromFieldValue(String text) throws ParseException;
 }
