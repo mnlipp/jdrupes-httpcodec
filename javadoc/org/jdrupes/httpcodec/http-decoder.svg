@@ -6,7 +6,7 @@ class HttpDecoder--><rect codeLine="11" fill="#FEFECE" filter="url(#fm84ptmgfnuy
 reverse link Codec to HttpCodec--><path codeLine="20" d="M224.88,72.13 C215.52,86.5 205.3,102.21 197.18,114.68 " fill="none" id="Codec-backto-HttpCodec" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="219.25,67.94,236.03,55,230.98,75.58,219.25,67.94" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[402a836abcce07a537983540e72f1412]
 reverse link Codec to Decoder--><path codeLine="22" d="M277.12,72.13 C286.48,86.5 296.7,102.21 304.82,114.68 " fill="none" id="Codec-backto-Decoder" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="271.02,75.58,265.97,55,282.75,67.94,271.02,75.58" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[dc3eb69cc2abfe307985e04d0d2bf7f5]
 reverse link HttpCodec to HttpDecoder--><path codeLine="24" d="M201.75,181.36 C207.94,194.33 214.92,208.94 221.63,222.99 " fill="none" id="HttpCodec-backto-HttpDecoder" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="195.39,184.28,193.09,163.22,208.02,178.25,195.39,184.28" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[efe9fb0b8788f1fa9f83db51213b46c7]
-reverse link Decoder to HttpDecoder--><path codeLine="26" d="M300.25,181.36 C294.06,194.33 287.08,208.94 280.37,222.99 " fill="none" id="Decoder-backto-HttpDecoder" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="293.98,178.25,308.91,163.22,306.61,184.28,293.98,178.25" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e4298ceaf45261ec0bb77c733df48925]
+reverse link Decoder to HttpDecoder--><path codeLine="26" d="M300.25,181.36 C294.06,194.33 287.08,208.94 280.37,222.99 " fill="none" id="Decoder-backto-HttpDecoder" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="293.98,178.25,308.91,163.22,306.61,184.28,293.98,178.25" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[f75c3704954ff6bfaffbb62f178c4ae1]
 @startuml
 ' ========== HTTP decoder =========
  interface Codec {
@@ -66,8 +66,8 @@ reverse link Decoder to HttpDecoder--><path codeLine="26" d="M300.25,181.36 C294
 
 PlantUML version 1.2022.1(Tue Feb 01 19:19:58 CET 2022)
 (GPL source distribution)
-Java Runtime: Java(TM) SE Runtime Environment
-JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
 Default Encoding: UTF-8
 Language: de
 Country: DE

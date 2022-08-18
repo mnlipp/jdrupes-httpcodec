@@ -7,7 +7,7 @@ class HttpField--><rect codeLine="15" fill="#FEFECE" filter="url(#ft1byphws9h8m)
 reverse link HttpMessageHeader to HttpResponse--><path codeLine="18" d="M165.93,179.66 C176.32,194.15 187.74,210.07 196.78,222.68 " fill="none" id="HttpMessageHeader-backto-HttpResponse" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="159.96,183.33,153.99,163,171.33,175.18,159.96,183.33" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[6b2d7c4f52667b95936f40d646ee28e7]
 reverse link HttpMessageHeader to HttpRequest--><path codeLine="20" d="M109.44,179.66 C99.19,194.15 87.92,210.07 79,222.68 " fill="none" id="HttpMessageHeader-backto-HttpRequest" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="none" points="103.96,175.28,121.23,163,115.39,183.37,103.96,175.28" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[80bc5140bc8f69ff92b898f9d5d2c3ce]
 reverse link HttpMessageHeader to HttpField--><path codeLine="22" d="M227.39,139 C234.68,139 241.96,139 249.25,139 " fill="none" id="HttpMessageHeader-backto-HttpField" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="214.28,139,220.28,143,226.28,139,220.28,135,214.28,139" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="7" x="234.6398" y="134.8822">*</text><!--MD5=[8ab67a16336f7deae5d17aae60d7df9c]
-reverse link MessageHeader to HttpMessageHeader--><path codeLine="24" d="M137.5,75.02 C137.5,88.58 137.5,103.04 137.5,114.68 " fill="none" id="MessageHeader-backto-HttpMessageHeader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="130.5,75,137.5,55,144.5,75,130.5,75" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[4d05ac6e1010f976e9d66b475dc472dd]
+reverse link MessageHeader to HttpMessageHeader--><path codeLine="24" d="M137.5,75.02 C137.5,88.58 137.5,103.04 137.5,114.68 " fill="none" id="MessageHeader-backto-HttpMessageHeader" style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="130.5,75,137.5,55,144.5,75,130.5,75" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[e8c4cfe1f4c00401057112def1abcf11]
 @startuml
 ' ========== HTTP messages =========
  
@@ -63,8 +63,8 @@ reverse link MessageHeader to HttpMessageHeader--><path codeLine="24" d="M137.5,
 
 PlantUML version 1.2022.1(Tue Feb 01 19:19:58 CET 2022)
 (GPL source distribution)
-Java Runtime: Java(TM) SE Runtime Environment
-JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
 Default Encoding: UTF-8
 Language: de
 Country: DE
