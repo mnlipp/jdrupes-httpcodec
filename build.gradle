@@ -17,7 +17,7 @@ apply plugin: 'maven-publish'
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-ext.releaseVersion = "2.5.0"
+ext.releaseVersion = "3.0.0"
 ext.isSnapshot = false
 version = releaseVersion + (isSnapshot ? "-SNAPSHOT" : "")
 
@@ -37,9 +37,10 @@ configurations {
 }
 
 dependencies {
-	implementation 'com.sun.activation:javax.activation:1.2.0'
-    compileOnly 'org.osgi:org.osgi.annotation:6.0.0'
+    implementation 'jakarta.activation:jakarta.activation-api:[2.1.0,3.0.0)'
+
     testImplementation 'junit:junit:4.12'
+    testRuntimeOnly 'org.eclipse.angus:angus-activation:[1.0.0,2.0.0)'
 
 	// Use gradle mechanims to get the artifact to baseline against.
 	// We baseline against the previous release 
