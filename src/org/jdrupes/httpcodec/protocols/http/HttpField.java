@@ -209,7 +209,13 @@ public class HttpField<T> {
         }
         this.name = fieldNameMap.getOrDefault(hlp.group(1), hlp.group(1));
         // RFC 7230 3.2.4
-        this.value = converter.fromFieldValue(hlp.group(2).trim());
+        try {
+            this.value = converter.fromFieldValue(hlp.group(2).trim());
+        } catch (ParseException e) {
+            // Add info
+            throw new ParseException("Parsing header " + hlp.group(1)
+                + ": " + e.getMessage(), 0);
+        }
     }
 
     /**
