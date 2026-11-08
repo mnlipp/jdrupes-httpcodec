@@ -686,7 +686,7 @@ public final class Converters {
 
         public ProductDescriptionConverter() {
             super(ArrayList<CommentedValue<String>>::new,
-                new CommentedValueConverter<>(Converters.STRING));
+                new CommentedValueConverter<>(Converters.STRING), " ");
         }
 
         /*
@@ -700,6 +700,7 @@ public final class Converters {
             List<CommentedValue<String>> result = new ArrayList<>();
             int pos = 0;
             while (pos < text.length()) {
+                // Parse product: token ["/" token]
                 int length = Converters.tokenLength(text, pos);
                 if (length == 0) {
                     throw new ParseException(
@@ -714,7 +715,7 @@ public final class Converters {
                         throw new ParseException(
                             "Token expected: " + text, pos);
                     }
-                    product = product + text.substring(pos - 1, pos + length);
+                    product = product + "/" + text.substring(pos, pos + length);
                     pos += length;
                 }
                 List<String> comments = new ArrayList<>();
@@ -739,12 +740,10 @@ public final class Converters {
                 }
                 result.add(new CommentedValue<String>(product,
                     comments.size() == 0 ? null
-                        : comments
-                            .toArray(new String[comments.size()])));
+                        : comments.toArray(new String[comments.size()])));
             }
             return result;
         }
-
     }
 
     private static class AuthInfoConverter extends
