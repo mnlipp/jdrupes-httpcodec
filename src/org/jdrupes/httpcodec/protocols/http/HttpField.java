@@ -275,7 +275,7 @@ public class HttpField<T> {
         case PROXY_AUTHORIZATION:
             return Converters.CREDENTIALS;
         case RETRY_AFTER:
-            return Converters.DATE_TIME;
+            return Converters.SECONDS_OR_DATE_TIME;
         case SERVER:
             return Converters.PRODUCT_DESCRIPTIONS;
         case SET_COOKIE:

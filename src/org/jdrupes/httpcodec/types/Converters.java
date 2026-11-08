@@ -192,6 +192,12 @@ public final class Converters {
     public static final Converter<Instant> DATE_TIME
         = new InstantConverter();
 
+    /**
+     * A seconds (relative) or date/time converter.
+     */
+    public static final Converter<Instant> SECONDS_OR_DATE_TIME
+        = new SecondsOrInstantConverter();
+
     /** 
      * Provide converters for the 
      */
@@ -296,8 +302,7 @@ public final class Converters {
                             new ParamValueConverterBase<
                                     ParameterizedValue<Locale>, Locale>(
                                         LANGUAGE,
-                                        ParameterizedValue<Locale>::new) {
-                            });
+                                        ParameterizedValue<Locale>::new) {});
 
     /**
      * A converter for a weighted list of strings.
@@ -310,8 +315,7 @@ public final class Converters {
                             ArrayList::new,
                             new ParamValueConverterBase<
                                     ParameterizedValue<String>, String>(STRING,
-                                        ParameterizedValue<String>::new) {
-                            });
+                                        ParameterizedValue<String>::new) {});
 
     /**
      * A converter for the media "topLevelType/Subtype" pair.

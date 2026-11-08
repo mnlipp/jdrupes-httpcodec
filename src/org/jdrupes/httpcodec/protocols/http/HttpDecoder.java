@@ -440,14 +440,11 @@ public abstract class HttpDecoder<T extends HttpMessageHeader,
         // RFC 7230 3.2
         HttpField<?> field;
         try {
+            // Provisional, get field name
             field = new HttpField<>(headerLine, Converters.STRING);
         } catch (ParseException e) {
             throw new HttpProtocolException(protocolVersion,
                 HttpStatus.BAD_REQUEST.statusCode(), "Invalid header");
-        }
-        if (field.name().equalsIgnoreCase(HttpField.SET_COOKIE)) {
-            field
-                = new HttpField<CookieList>(headerLine, Converters.SET_COOKIE);
         }
         switch (field.name()) {
         case HttpField.CONTENT_LENGTH:
@@ -472,6 +469,11 @@ public abstract class HttpDecoder<T extends HttpMessageHeader,
         case HttpField.TRANSFER_ENCODING:
             // RFC 7230 3.3.3 (3.)
             building.removeField(HttpField.CONTENT_LENGTH);
+            break;
+        default:
+            // Do real conversion
+            field = new HttpField<>(headerLine,
+                HttpField.lookupConverter(field.name()));
             break;
         }
         if (field == null) {
