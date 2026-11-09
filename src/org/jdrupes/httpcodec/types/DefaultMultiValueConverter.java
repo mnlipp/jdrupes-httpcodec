@@ -97,8 +97,7 @@ public class DefaultMultiValueConverter<T extends Iterable<V>, V>
             Supplier<T> containerSupplier, Converter<V> itemConverter) {
         this(containerSupplier, (left, right) -> {
             ((Collection<V>) left).add(right);
-        },
-            itemConverter, ",", false);
+        }, itemConverter, ",", false);
     }
 
     @Override
