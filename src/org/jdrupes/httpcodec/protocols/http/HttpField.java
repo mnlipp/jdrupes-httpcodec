@@ -255,7 +255,7 @@ public class HttpField<T> {
         case CONTENT_TYPE:
             return Converters.MEDIA_TYPE;
         case DATE:
-            return Converters.DATE_TIME;
+            return Converters.LAX_DATE_TIME;
         case EXPIRES:
             return Converters.DATE_TIME;
         case HOST:

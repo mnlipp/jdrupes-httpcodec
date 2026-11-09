@@ -193,6 +193,22 @@ public final class Converters {
         = new InstantConverter();
 
     /**
+     * A header date/time converter.
+     */
+    public static final Converter<Instant> LAX_DATE_TIME
+        = new InstantConverter() {
+            @Override
+            public Instant fromFieldValue(String text) throws ParseException {
+                // https://www.rfc-editor.org/rfc/rfc9110.html#name-date
+                try {
+                    return super.fromFieldValue(text);
+                } catch (ParseException e) {
+                    return Instant.now();
+                }
+            }
+        };
+
+    /**
      * A seconds (relative) or date/time converter.
      */
     public static final Converter<Instant> SECONDS_OR_DATE_TIME
