@@ -732,7 +732,7 @@ public class ConverterTests {
         assertEquals("CERN-LineMode/2.15", parsed.get(0).value());
         assertEquals("libwww/2.17b3", parsed.get(1).value());
         // Output quotes product tokens containing /
-        assertEquals("\"CERN-LineMode/2.15\"  \"libwww/2.17b3\"",
+        assertEquals("CERN-LineMode/2.15 libwww/2.17b3",
             conv.asFieldValue(parsed));
 
         // Simple product token (no slash, no quoting needed)
@@ -1230,7 +1230,7 @@ public class ConverterTests {
         assertEquals("CERN-LineMode/2.15", field.value().get(0).value());
         assertEquals("libwww/2.17b3", field.value().get(1).value());
         // Output quotes product tokens containing /
-        assertEquals("\"CERN-LineMode/2.15\"  \"libwww/2.17b3\"",
+        assertEquals("CERN-LineMode/2.15 libwww/2.17b3",
             field.asFieldValue());
     }
 
@@ -1435,7 +1435,7 @@ public class ConverterTests {
         assertEquals(1, field.value().size());
         assertEquals("Apache/2.4.41", field.value().get(0).value());
         // Output quotes product tokens containing /
-        assertEquals("\"Apache/2.4.41\"", field.asFieldValue());
+        assertEquals("Apache/2.4.41", field.asFieldValue());
     }
 
     /**

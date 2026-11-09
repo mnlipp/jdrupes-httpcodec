@@ -162,7 +162,10 @@ public class DefaultMultiValueConverter<T extends Iterable<V>, V>
             if (first) {
                 first = false;
             } else {
-                result.append(delimiters.charAt(0));
+                var delimiter = delimiters.charAt(0);
+                if (delimiter != ' ') {
+                    result.append(delimiters.charAt(0));
+                }
                 result.append(' ');
             }
             result.append(valueConverter.asFieldValue(element));

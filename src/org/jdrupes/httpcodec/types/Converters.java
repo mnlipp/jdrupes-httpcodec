@@ -702,7 +702,7 @@ public final class Converters {
 
         public ProductDescriptionConverter() {
             super(ArrayList<CommentedValue<String>>::new,
-                new CommentedValueConverter<>(Converters.STRING), " ");
+                new CommentedValueConverter<>(Converters.UNQUOTED_STRING), " ");
         }
 
         /*
