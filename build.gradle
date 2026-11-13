@@ -17,7 +17,7 @@ apply plugin: 'maven-publish'
 group = 'org.jdrupes.httpcodec'
 description = "HTTP coders and decoders for non-blocking I/O"
 
-ext.releaseVersion = "4.0.0"
+ext.releaseVersion = "3.2.0"
 ext.isSnapshot = true
 version = releaseVersion + (isSnapshot ? "-SNAPSHOT" : "")
 

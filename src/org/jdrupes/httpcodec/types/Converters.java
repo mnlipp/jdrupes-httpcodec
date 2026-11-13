@@ -23,10 +23,12 @@ import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.StringTokenizer;
+import org.jdrupes.httpcodec.protocols.http.HttpCodec;
 import org.jdrupes.httpcodec.protocols.http.HttpConstants;
 import org.jdrupes.httpcodec.types.CommentedValue.CommentedValueConverter;
 import org.jdrupes.httpcodec.types.Directive.DirectiveConverter;
@@ -705,13 +707,20 @@ public final class Converters {
                 new CommentedValueConverter<>(Converters.UNQUOTED_STRING), " ");
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see Converter#fromFieldValue(java.lang.String)
-         */
         @Override
         public List<CommentedValue<String>> fromFieldValue(String text)
+                throws ParseException {
+            try {
+                return parseCompliant(text);
+            } catch (ParseException e) {
+                if (!HttpCodec.activeOptions().laxServerHeaderParsing()) {
+                    throw e;
+                }
+                return parseLax(text);
+            }
+        }
+
+        private List<CommentedValue<String>> parseCompliant(String text)
                 throws ParseException {
             List<CommentedValue<String>> result = new ArrayList<>();
             int pos = 0;
@@ -759,6 +768,13 @@ public final class Converters {
                         : comments.toArray(new String[comments.size()])));
             }
             return result;
+        }
+
+        private List<CommentedValue<String>> parseLax(String text)
+                throws ParseException {
+            return Collections.list(new StringTokenizer(text, ",")).stream()
+                .map(s -> new CommentedValue<String>(((String) s).trim()))
+                .toList();
         }
     }
 

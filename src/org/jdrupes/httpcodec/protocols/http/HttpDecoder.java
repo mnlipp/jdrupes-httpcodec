@@ -27,16 +27,12 @@ import java.nio.charset.CoderResult;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.Stack;
-
 import org.jdrupes.httpcodec.Decoder;
 import org.jdrupes.httpcodec.Encoder;
 import org.jdrupes.httpcodec.MessageHeader;
 import org.jdrupes.httpcodec.ProtocolException;
-
 import static org.jdrupes.httpcodec.protocols.http.HttpConstants.*;
-
 import org.jdrupes.httpcodec.types.Converters;
-import org.jdrupes.httpcodec.types.CookieList;
 import org.jdrupes.httpcodec.types.MultiValueConverter;
 import org.jdrupes.httpcodec.types.StringList;
 import org.jdrupes.httpcodec.util.ByteBufferUtils;

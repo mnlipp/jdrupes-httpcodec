@@ -19,6 +19,7 @@
 package org.jdrupes.httpcodec.protocols.http;
 
 import org.jdrupes.httpcodec.Codec;
+import org.jdrupes.httpcodec.Options;
 import org.jdrupes.httpcodec.types.Converters;
 
 /**
@@ -27,14 +28,52 @@ import org.jdrupes.httpcodec.types.Converters;
  * @param <T> the type of the message header processed by the codec
  */
 public abstract class HttpCodec<T extends HttpMessageHeader>
-	implements Codec {
+        implements Codec {
 
-	protected T messageHeader = null;
-	
-	protected String bodyCharset() {
-		return messageHeader
-			.findField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE)
-			.map(f -> f.value().parameter("charset")).orElse("utf-8");
-	}
-	
+    protected static ThreadLocal<HttpOptions> activeOptions
+        = ThreadLocal.withInitial(() -> new HttpOptions());
+
+    protected T messageHeader = null;
+    private HttpOptions options = new HttpOptions();
+
+    /**
+     * Sets the options to be used by this codec.
+     *
+     * @param options the options
+     * @return the http codec
+     */
+    @Override
+    public <O extends Options> HttpCodec<T> options(O options) {
+        if (options instanceof HttpOptions opts) {
+            // If they are not HttpOptions, we are not interested.
+            this.options = opts;
+        }
+        return this;
+    }
+
+    /**
+     * Returns the options used by this codec.
+     *
+     * @return the options
+     */
+    public HttpOptions options() {
+        return options;
+    }
+
+    /**
+     * Return the options to be used in the currently executing invocation
+     * of the codec's operation.
+     *
+     * @return the http options
+     */
+    public static HttpOptions activeOptions() {
+        return activeOptions.get();
+    }
+
+    protected String bodyCharset() {
+        return messageHeader
+            .findField(HttpField.CONTENT_TYPE, Converters.MEDIA_TYPE)
+            .map(f -> f.value().parameter("charset")).orElse("utf-8");
+    }
+
 }

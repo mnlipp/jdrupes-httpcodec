@@ -111,6 +111,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse, HttpRequest>
      */
     @Override
     public void encode(HttpResponse messageHeader) {
+        activeOptions.set(options());
         if (messageHeader.statusCode() == HttpStatus.SWITCHING_PROTOCOLS
             .statusCode()) {
             switchingTo = prepareSwitchProtocol(messageHeader);
@@ -155,6 +156,7 @@ public class HttpResponseEncoder extends HttpEncoder<HttpResponse, HttpRequest>
      */
     @Override
     public Result encode(Buffer in, ByteBuffer out, boolean endOfInput) {
+        activeOptions.set(options());
         Result result = (Result) super.encode(in, out, endOfInput);
         if (switchingTo != null && endOfInput
             && !result.isUnderflow() && !result.isOverflow()) {

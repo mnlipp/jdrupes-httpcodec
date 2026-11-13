@@ -57,8 +57,7 @@ import org.jdrupes.httpcodec.types.StringList;
 public class HttpRequestEncoder
         extends HttpEncoder<HttpRequest, HttpResponse> {
 
-    private static Result.Factory resultFactory = new Result.Factory() {
-    };
+    private static Result.Factory resultFactory = new Result.Factory() {};
 
     /*
      * (non-Javadoc)
@@ -87,6 +86,7 @@ public class HttpRequestEncoder
      */
     @Override
     public void encode(HttpRequest messageHeader) {
+        activeOptions.set(options());
         if (messageHeader.protocol().equals(HttpProtocol.HTTP_1_1)) {
             // Make sure we have a Host field, RFC 7230 5.4
             if (!messageHeader.findStringValue(HttpField.HOST).isPresent()) {

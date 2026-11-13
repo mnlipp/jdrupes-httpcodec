@@ -112,6 +112,7 @@ public class HttpResponseDecoder
     @Override
     public Result decode(ByteBuffer in, Buffer out, boolean endOfInput)
             throws ProtocolException {
+        activeOptions.set(options());
         return (Result) super.decode(in, out, endOfInput);
     }
 
