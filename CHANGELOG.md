@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [3.2.0] - 2026-11-13
 
 ### Added
 
@@ -18,9 +18,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Include header name in parse exception messages for better
     diagnostics
     ([a82ec65](https://github.com/mnlipp/jdrupes-httpcodec/commit/a82ec65))
+  - Tolerate non-compliant Server headers with a codec option
+    ([f193b8a](https://github.com/mnlipp/jdrupes-httpcodec/commit/f193b8a))
 
 ### Fixed
 
+  - Don't overwrite existing Date header in HTTP response
+    ([437ba74](https://github.com/mnlipp/jdrupes-httpcodec/commit/437ba74))
   - Fix product description output quoting and spacing
     ([193f022](https://github.com/mnlipp/jdrupes-httpcodec/commit/193f022))
   - Fix product description delimiter and version token parsing
