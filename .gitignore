@@ -2,7 +2,16 @@
 /build/
 /.gradle/
 /generated/
+.checkstyle
 .classpath
 .project
-**/org.eclipse.jdt.core.prefs
+.settings/
+!_jdbld/.project
+!_jdbld/.classpath
+!_jdbld/.settings/
 
+# Others
+.metadata/
+.recommenders/
+/jdbld.log
+/test-bin/

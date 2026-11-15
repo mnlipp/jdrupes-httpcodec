@@ -14,16 +14,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Install graphviz
-        run: sudo apt-get install graphviz
+      - name: Install required packages
+        run: sudo apt-get update && sudo apt-get install openjdk-25-jdk xmlstarlet graphviz
       - name: Set up JDK ${{ matrix.java-version }}
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java-version }}
-      - name: Build with Gradle
-        run: ./gradlew build
+          distribution: 'adopt'
+      - name: Build with jdbld
+        run: >
+          JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64/
+          ./jdbld build test
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

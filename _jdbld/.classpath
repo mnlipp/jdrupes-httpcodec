@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-24">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/mnl/.m2/repository/org/eclipse/jgit/org.eclipse.jgit/7.7.1.202607240634-r/org.eclipse.jgit-7.7.1.202607240634-r.jar"/>
+	<classpathentry kind="lib" path="lib/jdrupes-builder-last-used.jar"/>
+	<classpathentry kind="lib" path="/home/mnl/.m2/repository/org/jdrupes/jdbld-ext-git/1.0.0/jdbld-ext-git-1.0.0.jar"/>
+	<classpathentry kind="lib" path="/home/mnl/.m2/repository/org/jdrupes/jdbld-ext-bnd/1.0.0/jdbld-ext-bnd-1.0.0.jar"/>
+	<classpathentry kind="lib" path="/home/mnl/.m2/repository/org/jdrupes/gitversioning/api/1.0.0/api-1.0.0.jar" sourcepath="/home/mnl/.m2/repository/org/jdrupes/gitversioning/api/1.0.0/api-1.0.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/mnl/.m2/repository/org/jdrupes/gitversioning/api/1.0.0/api-1.0.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/mnl/.m2/repository/org/jdrupes/gitversioning/core/1.0.0/core-1.0.0.jar" sourcepath="/home/mnl/.m2/repository/org/jdrupes/gitversioning/core/1.0.0/core-1.0.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/mnl/.m2/repository/org/jdrupes/gitversioning/core/1.0.0/core-1.0.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
