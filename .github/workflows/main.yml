@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install required packages
@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java-version }}
-          distribution: 'adopt'
+          distribution: 'temurin'
       - name: Build with jdbld
         run: >
           JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64/
