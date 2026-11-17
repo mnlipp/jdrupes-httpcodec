@@ -354,7 +354,6 @@ public class HttpRequest extends HttpMessageHeader {
      * to encode keys and values.
      *
      * @param data the data
-     * @param charset the charset
      * @return the string
      */
     public static String simpleWwwFormUrlencode(Map<String, String> data) {
@@ -384,7 +383,6 @@ public class HttpRequest extends HttpMessageHeader {
      * to encode keys and values.
      *
      * @param data the data
-     * @param charset the charset
      * @return the string
      */
     public static String wwwFormUrlencode(Map<String, List<String>> data) {
