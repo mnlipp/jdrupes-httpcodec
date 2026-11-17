@@ -1,6 +1,6 @@
 /*
  * JDrupes HTTP Codec
- * Copyright (C) 2016, 2022 Michael N. Lipp
+ * Copyright (C) 2026 Michael N. Lipp
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,6 +19,7 @@
 package jdbld;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -58,10 +59,13 @@ import static org.jdrupes.builder.java.JavaTypes.*;
 import org.jdrupes.builder.java.LibraryBuilder;
 import org.jdrupes.builder.junit.JUnitTestRunner;
 import org.jdrupes.builder.mvnrepo.JavadocJarBuilder;
+import org.jdrupes.builder.mvnrepo.MvnDeployDestination;
 import static org.jdrupes.builder.mvnrepo.MvnRepoTypes.*;
-import static org.jdrupes.builder.mvnrepo.MvnProperties.GroupId;
+import static org.jdrupes.builder.mvnrepo.MvnProperties.*;
 import org.jdrupes.builder.mvnrepo.MvnPublisher;
+import org.jdrupes.builder.mvnrepo.MvnPublishingDestination;
 import org.jdrupes.builder.mvnrepo.MvnRepoLookup;
+import org.jdrupes.builder.mvnrepo.MvnVersionType;
 import org.jdrupes.builder.mvnrepo.PomFileGenerator;
 import org.jdrupes.builder.mvnrepo.SourcesJarBuilder;
 import org.jdrupes.gitversioning.api.VersionEvaluator;
@@ -75,7 +79,7 @@ public class Root extends AbstractRootProject {
     @Override
     public void prepareProject(Project project) throws Exception {
         setupVersion();
-        setupCommonGenerators();
+        setupCommonGenerators(project);
         if (project instanceof JavaProject) {
             setupJavaProjectGenerators(project);
         }
@@ -88,10 +92,19 @@ public class Root extends AbstractRootProject {
     public Root() throws IOException {
         super(name("JDrupes-HttpCodec"));
         set(GroupId, "org.jdrupes.httpcodec");
+        set(PublishingDestinations, new MvnPublishingDestination[] {
+            new MvnDeployDestination(
+                MvnVersionType.SNAPSHOT, MvnVersionType.RELEASE)
+                    .repositoryUri(URI.create(
+                        "https://codeberg.org/api/packages/JDrupes/maven"))
+                    .id("codeberg")
+        });
 
         dependency(Expose, project(HttpCodec.class));
 
         // Commands
+        commandAlias("version").projects("**")
+            .resources(of(ProjectVersionType).using(Supply));
         commandAlias("build").projects("**")
             .resources(of(LibraryJarFileType).using(Supply));
         commandAlias("javadoc").resources(of(JavadocDirectoryType));
@@ -116,12 +129,12 @@ public class Root extends AbstractRootProject {
             .tagFilter(new DefaultTagFilter())
             .tagProcessor(new MavenStyleTagProcessor()
                 .ignoreBranches("testing/.*", "release/.*", "develop/.*"))
-            .subDirectory(directory());
+            .matchingGlob("src/**").matchingGlob("resources/**");
         set(Version, evaluator.version());
     }
 
-    private void setupCommonGenerators() {
-        generator(VersionReporter::new);
+    private void setupCommonGenerators(Project project) {
+        project.generator(VersionReporter::new);
     }
 
     private static void setupJavaProjectGenerators(Project project) {
@@ -183,7 +196,8 @@ public class Root extends AbstractRootProject {
                 project.of(ManifestAttributesType).using(Consume)))
             .addEntries(project.resources(project.of(PomFileType).using(Supply))
                 .map(pomFile -> Map.entry(Path.of("META-INF/maven").resolve(
-                    (String) project.get(GroupId), project.name(), "pom.xml"),
+                    (String) project.get(GroupId),
+                    (String) project.get(ArtifactId), "pom.xml"),
                     pomFile)));
         var git = project.get(GitApi);
         try {
@@ -231,7 +245,8 @@ public class Root extends AbstractRootProject {
 
         // Publish (deploy). Credentials and signing information is
         // obtained through properties.
-        project.generator(MvnPublisher::new);
+        project.generator(MvnPublisher::new)
+            .destinations(project.get(PublishingDestinations));
     }
 
     private static void setupEclipseConfigurator(Project project) {

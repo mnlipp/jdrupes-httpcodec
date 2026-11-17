@@ -5,7 +5,7 @@ JDrupes non-blocking HTTP Codec
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d9e648d1d904ec6a1f0ca713ca30c5c)](https://www.codacy.com/app/mnlipp/jdrupes-httpcodec?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mnlipp/jdrupes-httpcodec&amp;utm_campaign=Badge_Grade)
 [![Code Climate](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec/badges/gpa.svg)](https://lima.codeclimate.com/github/mnlipp/jdrupes-httpcodec)
 [![Release](https://jitpack.io/v/mnlipp/jdrupes-httpcodec.svg)](https://jitpack.io/#mnlipp/jdrupes-httpcodec)
-[![Maven Central](https://img.shields.io/maven-central/v/org.jdrupes.httpcodec/httpcodec.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jdrupes.httpcodec%22)
+[![Maven Repository Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcodeberg.org%2Fapi%2Fpackages%2FJDrupes%2Fmaven%2Forg%2Fjdrupes%2Fhttp-codec%2Fmaven-metadata.xml&strategy=releaseProperty)](https://codeberg.org/JDrupes/-/packages/maven/org.jdrupes.httpcodec:httpcodec/versions)
 [![Javadocs](https://www.javadoc.io/badge/org.jdrupes.httpcodec/httpcodec.svg)](https://www.javadoc.io/doc/org.jdrupes.httpcodec/httpcodec)
 
 The goal of this package is to provide easy to use HTTP 
@@ -25,11 +25,13 @@ An implementation that comes very close to what I needed is
 dependencies on Clojure, which prohibit its usage for my purpose.
 
 This library requires Java 17 SE.
-Binaries are currently made available at maven central.
+Binaries are currently made available at codeberg.org.
 
 ```gradle
 repositories {
-	mavenCentral()
+    maven {
+        url = uri("https://codeberg.org/api/packages/JDrupes/maven")
+    }
 }
 
 dependencies {
